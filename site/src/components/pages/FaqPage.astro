@@ -1,0 +1,64 @@
+---
+import { DEFAULT_LANG, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { availableLangs, getFaqs, getPage, text } from '../../lib/content';
+import { breadcrumbs, faqPage } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const page = getPage('faq');
+const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+
+const faqs = getFaqs().filter((faq) => text(faq.question, lang) && text(faq.answer, lang));
+
+const title = text(page?.title, lang) || t('nav.faq');
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'faq',
+  title,
+  description: text(page?.intro, lang),
+  seo: page ?? undefined,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('faq', lang) },
+];
+
+const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="faq"
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={jsonLd}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
+
+  {faqs.length === 0 && <p>{t('common.empty')}</p>}
+
+  {
+    faqs.map((faq) => (
+      <details>
+        <summary>{text(faq.question, lang)}</summary>
+        <p>{text(faq.answer, lang)}</p>
+      </details>
+    ))
+  }
+
+  <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import type { Lang } from '../config/site';
+import { useTranslations } from '../i18n';
+import type { Crumb } from '../lib/jsonld';
+
+interface Props {
+  lang: Lang;
+  crumbs: Crumb[];
+}
+
+const { lang, crumbs } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  crumbs.length > 1 && (
+    <nav aria-label={t('common.breadcrumb')} class="breadcrumbs">
+      <ol>
+        {crumbs.map((crumb, index) =>
+          index === crumbs.length - 1 ? (
+            <li aria-current="page">{crumb.name}</li>
+          ) : (
+            <li><a href={crumb.href}>{crumb.name}</a></li>
+          ),
+        )}
+      </ol>
+    </nav>
+  )
+}

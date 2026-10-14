@@ -25,11 +25,15 @@ export type RouteKey = keyof typeof ROUTES;
 export const COLLECTION_ROUTES = ['portfolio', 'blog'] as const satisfies readonly RouteKey[];
 
 /**
- * Percorso assoluto interno di una pagina.
- *   path('services', 'it')            → '/servizi'
- *   path('services', 'en')            → '/en/services'
- *   path('portfolio', 'it', 'villa')  → '/portfolio/villa'
- *   path('home', 'en')                → '/en'
+ * Percorso assoluto interno di una pagina, sempre con slash finale.
+ *   path('services', 'it')            → '/servizi/'
+ *   path('services', 'en')            → '/en/services/'
+ *   path('portfolio', 'it', 'villa')  → '/portfolio/villa/'
+ *   path('home', 'it')                → '/'
+ *
+ * Lo slash finale non è un vezzo: il build genera directory con index.html
+ * e Apache serve /servizi/ direttamente. Senza slash farebbe un 301 verso
+ * la versione con slash, cioè un redirect sull'URL canonico.
  */
 export function path(key: RouteKey, lang: Lang, slug?: string): string {
   const segments: string[] = [];
@@ -39,7 +43,7 @@ export function path(key: RouteKey, lang: Lang, slug?: string): string {
   if (base) segments.push(base);
   if (slug) segments.push(slug);
 
-  return '/' + segments.join('/');
+  return '/' + (segments.length > 0 ? segments.join('/') + '/' : '');
 }
 
 /** URL assoluto, sempre costruito su SITE_URL. */

@@ -1,0 +1,28 @@
+---
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { buildMeta } from '../../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'home',
+  title: t('error.404.title'),
+  description: t('error.404.text'),
+  noindex: true,
+});
+---
+
+<BaseLayout lang={lang} routeKey="home" meta={meta}>
+  <h1>{t('error.404.title')}</h1>
+  <p>{t('error.404.text')}</p>
+  <p><a href={path('home', lang)}>{t('cta.home')}</a></p>
+</BaseLayout>

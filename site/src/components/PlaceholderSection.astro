@@ -1,0 +1,42 @@
+---
+import type { Lang } from '../config/site';
+import { useTranslations } from '../i18n';
+
+/**
+ * Sezione segnaposto. Serve solo a rendere visibile la struttura delle
+ * pagine finché non arriva la fase di design: non va abbellita.
+ */
+interface Props {
+  lang: Lang;
+  title?: string;
+  text?: string;
+  /** Etichetta tecnica della sezione, per orientarsi nelle pagine. */
+  id?: string;
+}
+
+const { lang, title, text, id } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section id={id} class="placeholder" data-section={id}>
+  {title && <h2>{title}</h2>}
+  {text && <p>{text}</p>}
+  <slot />
+  <p class="placeholder-note">{t('common.placeholder')}{id && <span> — <code>{id}</code></span>}</p>
+</section>
+
+<style>
+  .placeholder {
+    border: 1px dashed var(--color-beige);
+    padding: 1.5rem;
+    margin-block: 1.5rem;
+  }
+
+  .placeholder-note {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-salvia);
+  }
+</style>

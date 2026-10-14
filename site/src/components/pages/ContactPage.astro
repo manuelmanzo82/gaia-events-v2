@@ -1,0 +1,65 @@
+---
+import { BUSINESS, DEFAULT_LANG, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { availableLangs, getPage, getSettings, text } from '../../lib/content';
+import { breadcrumbs, localBusiness } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import PlaceholderSection from '../PlaceholderSection.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const page = getPage('contact');
+const settings = getSettings();
+const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+
+const title = text(page?.title, lang) || t('nav.contact');
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'contact',
+  title,
+  description: text(page?.intro, lang) || text(settings.contact.text, lang),
+  seo: page ?? undefined,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('contact', lang) },
+];
+
+const jsonLd = [
+  breadcrumbs(crumbs),
+  localBusiness({ lang, description: meta.description, image: meta.ogImage }),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="contact"
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={jsonLd}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  <p>{text(page?.intro, lang) || text(settings.contact.text, lang)}</p>
+
+  <ul>
+    <li><a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a></li>
+    <li><a href={`https://wa.me/${BUSINESS.whatsapp}`} rel="noopener">{t('cta.whatsapp')}</a></li>
+    <li><a href={BUSINESS.instagramUrl} rel="noopener me">@{BUSINESS.instagram}</a></li>
+    <li>{text(settings.contact.address, lang)}</li>
+  </ul>
+
+  <PlaceholderSection lang={lang} id="contact-form">
+    <p>Form contatti: invia a <code>admin/api/contact.php</code>.</p>
+  </PlaceholderSection>
+</BaseLayout>

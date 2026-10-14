@@ -1,0 +1,77 @@
+---
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { availableLangs, getDestinationWedding, text } from '../../lib/content';
+import { breadcrumbs, localBusiness } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const data = getDestinationWedding();
+const langs = availableLangs(data, ['title', 'intro']);
+
+const blocks = [...data.blocks].sort((a, b) => a.order - b.order);
+const title = text(data.title, lang) || t('nav.destinationWedding');
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'destinationWedding',
+  title,
+  description: text(data.intro, lang),
+  seo: data,
+  image: data.hero,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('destinationWedding', lang) },
+];
+
+const jsonLd = [
+  breadcrumbs(crumbs),
+  localBusiness({ lang, description: meta.description, image: meta.ogImage }),
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="destinationWedding"
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={jsonLd}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  <p>{text(data.intro, lang)}</p>
+
+  {
+    blocks.map((block) => (
+      <section data-block={block.kind}>
+        <h2>{text(block.title, lang)}</h2>
+        {text(block.text, lang) && <p>{text(block.text, lang)}</p>}
+        {
+          block.items && block.items.length > 0 && (
+            <ul>
+              {block.items.map((item) => (
+                <li>
+                  <strong>{text(item.title, lang)}</strong>
+                  {text(item.text, lang) && <p>{text(item.text, lang)}</p>}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+    ))
+  }
+
+  <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>
+</BaseLayout>

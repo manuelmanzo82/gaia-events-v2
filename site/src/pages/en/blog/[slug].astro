@@ -1,0 +1,24 @@
+---
+// Lo slug degli articoli è tradotto: /blog/titolo-it ↔ /en/blog/title-en
+import BlogPost from '../../../components/pages/BlogPost.astro';
+import { getPosts, isPublishable, pick } from '../../../lib/content';
+import type { Post } from '../../../lib/types';
+
+export function getStaticPaths() {
+  return getPosts()
+    .filter((post) => isPublishable(post, 'en', ['title', 'slug', 'body']))
+    .map((post) => ({
+      params: { slug: pick(post.slug, 'en')! },
+      props: { post },
+    }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props as Props;
+const slug = Astro.params.slug!;
+---
+
+<BlogPost lang="en" post={post} slug={slug} />

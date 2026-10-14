@@ -1,0 +1,21 @@
+---
+// Una pagina per evento, solo se l'evento è tradotto in questa lingua:
+// se l'EN manca la pagina EN non viene generata.
+import PortfolioDetail from '../../../components/pages/PortfolioDetail.astro';
+import { getEvents, isPublishable } from '../../../lib/content';
+import type { Event } from '../../../lib/types';
+
+export function getStaticPaths() {
+  return getEvents()
+    .filter((event) => isPublishable(event, 'en', ['title', 'excerpt', 'description']))
+    .map((event) => ({ params: { slug: event.slug }, props: { event } }));
+}
+
+interface Props {
+  event: Event;
+}
+
+const { event } = Astro.props as Props;
+---
+
+<PortfolioDetail lang="en" event={event} />

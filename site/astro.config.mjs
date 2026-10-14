@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 import { SITE_URL, LANGS, DEFAULT_LANG } from './src/config/site.ts';
@@ -10,7 +9,9 @@ import { SITE_URL, LANGS, DEFAULT_LANG } from './src/config/site.ts';
 export default defineConfig({
   site: SITE_URL,
   output: 'static',
-  trailingSlash: 'ignore',
+  // Coerente con build.format 'directory' e con i percorsi di i18n/routes.ts:
+  // l'URL canonico è quello che Apache serve, senza redirect.
+  trailingSlash: 'always',
 
   build: {
     inlineStylesheets: 'auto',
@@ -31,17 +32,10 @@ export default defineConfig({
     },
   },
 
-  integrations: [
-    react(),
-    sitemap({
-      i18n: {
-        defaultLocale: DEFAULT_LANG,
-        locales: { it: 'it-IT', en: 'en' },
-      },
-      // Le pagine EN esistono solo se la traduzione c'è: Astro genera
-      // soltanto quelle, quindi la sitemap è già coerente.
-    }),
-  ],
+  // La sitemap è un endpoint nostro (src/pages/sitemap.xml.ts) invece di
+  // @astrojs/sitemap: l'integrazione accoppia le lingue solo a slug identico
+  // e qui gli slug sono tradotti (/servizi ↔ /en/services).
+  integrations: [react()],
 
   vite: {
     plugins: [tailwindcss()],

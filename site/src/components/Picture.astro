@@ -1,0 +1,42 @@
+---
+import type { PictureData } from '../lib/images';
+
+interface Props {
+  data: PictureData | null;
+  /** Rapporto forzato via CSS; il crop usa il punto focale. */
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+}
+
+const {
+  data,
+  class: className,
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  decoding = 'async',
+} = Astro.props;
+---
+
+{
+  data && (
+    <picture>
+      {data.sources.map((source) => (
+        <source type={source.type} srcset={source.srcset} sizes={source.sizes} />
+      ))}
+      <img
+        src={data.src}
+        width={data.width}
+        height={data.height}
+        alt={data.alt}
+        sizes={data.sizes}
+        class={className}
+        loading={loading}
+        fetchpriority={fetchpriority}
+        decoding={decoding}
+        style={data.objectPosition ? `object-position: ${data.objectPosition}` : undefined}
+      />
+    </picture>
+  )
+}

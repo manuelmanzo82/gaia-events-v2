@@ -1,0 +1,39 @@
+---
+import { LANGS, type Lang } from '../config/site';
+import { LANG_NAME, useTranslations } from '../i18n';
+import { path, switchLang, type RouteKey } from '../i18n/routes';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+  slug?: string;
+  /** Lingue in cui la pagina corrente esiste. Le altre non vengono mostrate. */
+  availableLangs?: readonly Lang[];
+}
+
+const { lang, routeKey, slug, availableLangs = LANGS } = Astro.props;
+const t = useTranslations(lang);
+
+const targets = LANGS.filter(
+  (candidate) => candidate !== lang && availableLangs.includes(candidate),
+).map((candidate) => ({
+  lang: candidate,
+  // Se la pagina ha uno slug usa la mappa delle rotte, altrimenti traduce il percorso.
+  href: slug
+    ? path(routeKey, candidate, slug)
+    : (switchLang(Astro.url.pathname, candidate) ?? path(routeKey, candidate)),
+  label: LANG_NAME[candidate],
+}));
+---
+
+{
+  targets.length > 0 && (
+    <nav aria-label={t('lang.switchLabel')} class="lang-switcher">
+      {targets.map((target) => (
+        <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate">
+          {target.label}
+        </a>
+      ))}
+    </nav>
+  )
+}

@@ -1,0 +1,118 @@
+---
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  getFeaturedEvents,
+  getFeaturedReviews,
+  getServices,
+  getSettings,
+  text,
+} from '../../lib/content';
+import { localBusiness, webSite } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import PlaceholderSection from '../PlaceholderSection.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const settings = getSettings();
+const services = getServices();
+const events = getFeaturedEvents(6);
+const reviews = getFeaturedReviews(3);
+
+const meta = buildMeta({ lang, routeKey: 'home', seo: settings, image: settings.hero.image });
+
+const jsonLd = [
+  localBusiness({ lang, description: meta.description, image: meta.ogImage }),
+  webSite(lang, settings.siteName, meta.description),
+];
+
+const section = (key: string) => settings.sections[key];
+---
+
+<BaseLayout lang={lang} routeKey="home" meta={meta} jsonLd={jsonLd}>
+  <PlaceholderSection
+    lang={lang}
+    id="hero"
+    title={text(settings.hero.title, lang)}
+    text={text(settings.hero.subtitle, lang)}
+  >
+    <p>{text(settings.hero.eyebrow, lang)}</p>
+    <p><a href={path('quote', lang)}>{text(settings.hero.ctaLabel, lang) || t('cta.quote')}</a></p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="about"
+    title={text(section('about')?.title, lang)}
+    text={text(section('about')?.text, lang)}
+  >
+    <p><a href={path('about', lang)}>{t('cta.discover')}</a></p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="services"
+    title={text(section('services')?.title, lang)}
+    text={text(section('services')?.text, lang)}
+  >
+    <ul>
+      {services.map((service) => <li>{text(service.title, lang)}</li>)}
+    </ul>
+    <p><a href={path('services', lang)}>{t('cta.discover')}</a></p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="portfolio"
+    title={text(section('portfolio')?.title, lang)}
+    text={text(section('portfolio')?.text, lang)}
+  >
+    <ul>
+      {
+        events.map((event) => (
+          <li>
+            <a href={path('portfolio', lang, event.slug)}>{text(event.title, lang)}</a>
+          </li>
+        ))
+      }
+    </ul>
+    <p><a href={path('portfolio', lang)}>{t('cta.allEvents')}</a></p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="reviews"
+    title={text(section('reviews')?.title, lang)}
+    text={text(section('reviews')?.text, lang)}
+  >
+    <ul>
+      {reviews.map((review) => <li>{review.author} — {text(review.text, lang)}</li>)}
+    </ul>
+    <p><a href={path('reviews', lang)}>{t('cta.discover')}</a></p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="instagram"
+    title={text(section('instagram')?.title, lang)}
+    text={text(section('instagram')?.text, lang)}
+  >
+    <p>Feed Instagram: arriva più avanti via API ufficiale.</p>
+  </PlaceholderSection>
+
+  <PlaceholderSection
+    lang={lang}
+    id="cta"
+    title={text(section('cta')?.title, lang)}
+    text={text(section('cta')?.text, lang)}
+  >
+    <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>
+  </PlaceholderSection>
+</BaseLayout>

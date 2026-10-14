@@ -1,0 +1,70 @@
+---
+import { BUSINESS, type Lang } from '../config/site';
+import { useTranslations } from '../i18n';
+import { path } from '../i18n/routes';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const year = new Date().getFullYear();
+const whatsappHref = `https://wa.me/${BUSINESS.whatsapp}`;
+---
+
+<footer class="site-footer">
+  <div>
+    <p class="brand">Gaia Events</p>
+    <p>{BUSINESS.legalName} — {BUSINESS.city}, Italia</p>
+  </div>
+
+  <div>
+    <p><a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a></p>
+    <p><a href={whatsappHref} rel="noopener">{t('cta.whatsapp')}</a></p>
+    <p>
+      <a href={BUSINESS.instagramUrl} rel="noopener me">@{BUSINESS.instagram}</a>
+    </p>
+  </div>
+
+  <nav aria-label={t('footer.follow')}>
+    <ul>
+      <li><a href={path('destinationWedding', lang)}>{t('nav.destinationWedding')}</a></li>
+      <li><a href={path('privacy', lang)}>{t('footer.privacy')}</a></li>
+      <li><a href={path('cookie', lang)}>{t('footer.cookie')}</a></li>
+    </ul>
+  </nav>
+
+  <p class="copyright">© {year} {BUSINESS.legalName} — {t('footer.rights')}</p>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 2.5rem 1.5rem;
+    margin-top: 3rem;
+    background: var(--color-beige);
+    font-size: 0.875rem;
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .copyright {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+    color: var(--color-antracite);
+    opacity: 0.7;
+  }
+</style>

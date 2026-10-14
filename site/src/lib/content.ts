@@ -1,4 +1,4 @@
-import { DEFAULT_LANG, type Lang } from '../config/site';
+import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type {
   DestinationWedding,
   Event,
@@ -76,13 +76,39 @@ export function text(field: Localized | undefined | null, lang: Lang): string {
  * True se l'entità è tradotta nella lingua richiesta.
  * `required` elenca i campi che devono esistere perché la pagina abbia senso.
  */
-export function hasTranslation<T extends Record<string, unknown>>(
+export function hasTranslation<T extends object>(
   entity: T,
   lang: Lang,
   required: Array<keyof T>,
 ): boolean {
   if (lang === DEFAULT_LANG) return true;
-  return required.every((key) => pick(entity[key] as Localized, lang) !== null);
+  return isPublishable(entity, lang, required);
+}
+
+/**
+ * True se tutti i campi richiesti esistono nella lingua data.
+ * Usala in getStaticPaths: a differenza di `hasTranslation` non dà per
+ * scontato che l'italiano sia completo.
+ */
+export function isPublishable<T extends object>(
+  entity: T,
+  lang: Lang,
+  required: Array<keyof T>,
+): boolean {
+  const fields = entity as Record<keyof T, Localized | undefined>;
+  return required.every((key) => pick(fields[key], lang) !== null);
+}
+
+/**
+ * Lingue in cui l'entità è pubblicabile. Passala a buildMeta e al
+ * selettore di lingua: una pagina EN non tradotta non va né negli
+ * hreflang né in sitemap.
+ */
+export function availableLangs<T extends object>(
+  entity: T,
+  required: Array<keyof T>,
+): Lang[] {
+  return LANGS.filter((lang) => isPublishable(entity, lang, required));
 }
 
 /* ------------------------------------------------------------------ *
