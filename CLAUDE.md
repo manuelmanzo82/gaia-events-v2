@@ -19,13 +19,11 @@ come riferimento**: niente copia-incolla acritico. La recon completa è in
 | WhatsApp | `+39 327 385 5362` |
 | Instagram | `@gaiacrognale_events` |
 | Facebook | `facebook.com/GaiaCrognaleEventi` |
-| Indirizzo | `Viale Vaticano 53 - 00165 Roma` — **da confermare** |
+| Indirizzo | `Viale Vaticano 53 - 00165 Roma` |
 
-> **L'indirizzo non è confermato.** Viene dalle impostazioni di Sanity e non
-> sappiamo se sia uno studio o un domicilio privato. Per questo oggi compare
-> **solo nel JSON-LD** `LocalBusiness` e in nessuna pagina. Prima di metterlo
-> nei contatti o su Google Business serve l'ok di Gaia:
-> vedi [docs/DA-CHIEDERE-A-GAIA.md](docs/DA-CHIEDERE-A-GAIA.md).
+L'indirizzo è confermato da Gaia (14/10/2026) e compare nella pagina contatti e
+nel JSON-LD `LocalBusiness`. È però un «per ora»: se l'attività si sposta va
+cambiato in `site/src/config/site.ts` e nell'impostazione `contact.address`.
 
 ## Decisioni prese (non rimetterle in discussione senza chiedere)
 
@@ -178,15 +176,21 @@ I contenuti reali sono già dentro, in italiano:
 | Codice della v1 | 8 articoli, 12 FAQ, privacy, cookie | `admin/sql/seed-contenuti-v1.sql` |
 | Sanity | 4 servizi, contatti, biografia, citazione, percorso, valori, hero delle pagine | `admin/sql/seed-contenuti-sanity.sql` |
 
-Da Sanity **non** sono stati importati eventi, Instagram e le immagini Adobe
-Stock: erano materiale di prova o con licenza da verificare. Il dataset
-completo è salvato in `E:\CLAUDE CODE\gaia-backup-sanity` — fuori dalla repo,
-e non va mai committato.
+Da Sanity **non** è stato importato nient'altro, e non va recuperato dopo:
 
-Le domande che restano aperte (recensioni vere o no, diritti delle foto, foto
-originali per la gallery, conferma dell'indirizzo) stanno in
-[docs/DA-CHIEDERE-A-GAIA.md](docs/DA-CHIEDERE-A-GAIA.md). **Leggilo prima di
-lavorare su recensioni o gallery.**
+- **eventi e Instagram**: materiale di prova;
+- **recensioni**: Gaia ha confermato che sono tutte demo. Quelle vere arrivano
+  più avanti, con nome, evento, data e consenso scritto della coppia;
+- **immagini**: Gaia ha confermato che sono tutte fake, comprese quelle che
+  sembravano lavori veri. **Nessuna foto di Sanity va sul sito nuovo.** Le foto
+  le fornisce Manuel, che ha già gli originali dei fotografi per la gallery.
+
+Il dataset completo è salvato in `E:\CLAUDE CODE\gaia-backup-sanity` — fuori
+dalla repo, da non committare mai. Serve solo come documentazione del vecchio
+sito: non è una riserva di contenuti da cui pescare.
+
+Le risposte di Gaia e le due domande ancora aperte stanno in
+[docs/DA-CHIEDERE-A-GAIA.md](docs/DA-CHIEDERE-A-GAIA.md).
 
 ## Secrets e variabili su GitHub
 

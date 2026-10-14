@@ -32,10 +32,9 @@ export const BUSINESS = {
   region: 'Lazio',
   country: 'IT',
   /**
-   * Indirizzo recuperato dalle impostazioni di Sanity.
-   * DA CONFERMARE CON GAIA: vedi docs/DA-CHIEDERE-A-GAIA.md.
-   * Finché non è confermato resta fuori dai contenuti pubblici e compare
-   * solo nel JSON-LD, dove serve a qualificare l'attività come locale.
+   * Confermato da Gaia il 14/10/2026, ma come «per ora»: se l'attività si
+   * sposta va cambiato qui e nell'impostazione `contact.address`, che è
+   * quella mostrata nella pagina contatti.
    */
   street: 'Viale Vaticano 53',
   postalCode: '00165',

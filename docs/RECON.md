@@ -48,8 +48,8 @@ Live: `gaia-events-astro.vercel.app` · dominio previsto: `gaiaevents.it`
 - URL incoerenti: layout e destination wedding puntano a `gaia-events-astro.vercel.app`, blog e robots a `gaiaevents.it` → un'unica costante `SITE_URL` da config
 - `og-image.jpg` referenziata ma **non esiste** in `public/`
 - Descrizione di default "Wedding & Event Planner in Toscana", ma il business è a Roma
-- Email incoerenti: `gaiacrognale@gmail.com` nel JSON-LD, `info@gaiaevents.it` in privacy, cookie e llms.txt → da confermare quale usare
-- Bilingue solo su una pagina: decidere se IT/EN su tutto il sito
+- Email incoerenti: `gaiacrognale@gmail.com` nel JSON-LD, `info@gaiaevents.it` in privacy, cookie e llms.txt → **risolto**: vale `gaiacrognale@gmail.com`, già corretta nelle policy importate
+- Bilingue solo su una pagina → **risolto**: IT/EN su tutto il sito, con la regola «niente traduzione, niente pagina»
 - La chiave Web3Forms è nel codice di una repo pubblica (è una chiave pensata per stare nel frontend, ma con il back office nostro i form possono passare dal nostro PHP)
 
 ## Contenuti già importati nella v2 (14/10/2026)
@@ -70,9 +70,43 @@ corretta da `info@gaiaevents.it` a `gaiacrognale@gmail.com`.
 L'inglese di questi contenuti è vuoto: finché resta così, le loro pagine EN non
 vengono generate.
 
-## Non verificato
+## Censimento di Sanity — fatto (14/10/2026)
 
-Su Sanity restano da censire **solo**: eventi, servizi, recensioni, impostazioni
-e Instagram. Quanti ce ne sono davvero, e quante immagini, non è ancora noto:
-l'API non era raggiungibile da questo ambiente. Va controllato dallo studio
-**prima di spegnerlo**, perché è l'unica cosa non più recuperabile dopo.
+Progetto `yfcp9735`, dataset `production`, API pubblica in sola lettura.
+Backup completo in `E:\CLAUDE CODE\gaia-backup-sanity` (fuori dalla repo):
+43 documenti e 25 immagini a dimensioni originali.
+
+| Tipo | Quanti | Esito |
+|---|---|---|
+| `servizio` | 4 | **importati** |
+| `impostazioni` | 1 | **importata** in parte (vedi sotto) |
+| `evento` | 6 | scartati, materiale di prova |
+| `recensione` | 6 | scartate, **demo confermate da Gaia** |
+| `instagramGallery` | 1 (8 foto) | scartata |
+| `sanity.imageAsset` | 25 | **nessuna usata, sono tutte fake** |
+| `articoloBlog` | **0** | il tipo non esisteva: il blog era nel codice |
+
+Dalle impostazioni sono entrati: indirizzo, pagina Facebook, meta description,
+biografia in tre paragrafi, citazione, percorso, valori e i testi hero di home,
+chi sono, servizi, portfolio e contatti. Import in
+`admin/sql/seed-contenuti-sanity.sql`.
+
+Che fosse in gran parte materiale di prova si vedeva: cinque eventi su sei senza
+galleria, l'unico con le foto descritto da «testo prova testo prova», una
+location «Palazzo Brancaccio, Roma PROVA», una recensione «Prova q23, hja,.»,
+didascalie Instagram «jhjgbv» e una tappa di percorso «Prova / Test funzionalità».
+
+**Risposte di Gaia (14/10/2026)**
+
+- recensioni: tutte demo, non si usano. Quelle vere arrivano più avanti.
+- immagini: le foto sono tutte fake, comprese quelle che sembravano lavori veri.
+  Nessuna va sul sito nuovo; le foto le fornisce Manuel. (Favicon e logo in uso
+  nella v2 arrivano dalla cartella `public/` della repo v1, non da Sanity.)
+- gallery: gli originali dei fotografi ci sono già.
+- indirizzo: confermato, `Viale Vaticano 53 - 00165 Roma`.
+
+Quindi il backup è **documentazione del vecchio sito, non una riserva di
+contenuti**: da Sanity non c'è altro da recuperare e il dataset si può spegnere.
+
+Le due domande ancora aperte (pagina Facebook attiva? email sul dominio?) stanno
+in [DA-CHIEDERE-A-GAIA.md](DA-CHIEDERE-A-GAIA.md).

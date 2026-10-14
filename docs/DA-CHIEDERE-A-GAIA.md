@@ -1,111 +1,76 @@
-# Da chiedere a Gaia
+# Domande per Gaia
 
-Domande aperte emerse dal censimento di Sanity del 14 ottobre 2026, prima di
-spegnerlo. Nessuna di queste si può decidere dal codice.
-
-Aggiornare questo file quando arriva una risposta, e segnare cosa è stato fatto
-di conseguenza.
+Domande emerse dal censimento di Sanity del 14 ottobre 2026, con le risposte
+ricevute. Tenere aggiornato: è il registro di cosa è stato deciso e perché.
 
 ---
 
-## 1. Le recensioni sono vere o scritte per la demo?
+## Risolte
 
-**Stato: aperta — bloccante per pubblicarle**
+### 1. Le recensioni di Sanity sono vere o scritte per la demo?
 
-Su Sanity c'erano 6 recensioni. Una è palesemente di prova («Prova q23, hja,.»).
-Le altre 5 sono scritte bene, ma diversi indizi dicono che siano riempitivo:
+**Risposta (14/10/2026): sono tutte demo. Non si usano.**
 
-- i riferimenti non tornano: la coppia «Sara & Marco» è un evento a Villa
-  Cetinale, ma firma una recensione per Palazzo Brancaccio;
-- un nome è «Maria Rossi», che in Italia è il segnaposto per eccellenza;
-- le location citate sono le stesse dei sei eventi, che sono dimostrativi.
+Le recensioni reali arriveranno più avanti. Nessuna delle sei è stata importata
+e nessuna va recuperata dal backup.
 
-**Cosa serve sapere**
-
-- Sono recensioni vere di clienti reali?
-- Se sì: i nomi sono quelli giusti o erano stati cambiati?
-- Abbiamo il **consenso** a pubblicarle con nome, evento e data? Senza consenso
-  scritto non vanno online: sono dati personali di terzi.
-- Se non ce ne sono di vere, meglio non avere affatto la sezione «dicono di me»
-  che averla con testi inventati: le recensioni finte sono una pratica
-  commerciale scorretta, non solo un problema di gusto.
-
-Nel frattempo **nessuna recensione è stata importata**.
+Conseguenza: la sezione «dicono di me» resta con i segnaposto finché non ci
+sono testi veri. Quando arriveranno serviranno comunque nome, evento, data e il
+**consenso scritto** della coppia: sono dati personali di terzi.
 
 ---
 
-## 2. Di chi sono le foto, e possiamo usarle?
+### 2. Di chi sono le foto su Sanity, e possiamo usarle?
 
-**Stato: aperta — bloccante per la gallery**
+**Risposta (14/10/2026): sono tutte fake. Non se ne usa nessuna.**
 
-Nel backup ci sono foto che sembrano lavori veri, riconoscibili dal nome:
+Comprese le serie che sembravano lavori veri (`Camille-e-Phelipe`,
+`Alexa-e-Roberto`, `Corporate-6`, `16vdimagephotography`). Restano nel backup
+solo come documentazione del vecchio sito.
 
-| Serie | Quante | Note |
-|---|---|---|
-| `Camille-e-Phelipe-*` | 8 | tutte 1024×1024 |
-| `Alexa-e-Roberto-*` | 3 | 1024×1024 e 768×768 |
-| `Corporate-6` | 1 | 1024×1024 |
-| `16vdimagephotography_` | 1 | il nome sembra quello del fotografo |
-| `senza-titolo-*` | 3 | nessuna indicazione |
-
-**Cosa serve sapere**
-
-- Sono eventi organizzati davvero da Gaia?
-- **Chi detiene il copyright?** Di norma è il fotografo, non chi ha organizzato
-  l'evento: serve una liberatoria scritta per pubblicarle sul sito.
-- Le persone ritratte hanno dato il consenso a comparire online?
-- Il fotografo va **accreditato**? Molti contratti lo richiedono.
+Le foto nuove le fornisce Manuel. Decade quindi anche la questione dei diritti:
+non c'è niente da liberare, perché non si pubblica niente di quel materiale.
 
 ---
 
-## 3. Le foto originali dei fotografi per la gallery v2
+### 3. Le foto originali dei fotografi per la gallery
 
-**Stato: aperta — serve prima della fase di design**
+**Risposta (14/10/2026): già disponibili.**
 
-Le immagini salvate da Sanity **non bastano** per la gallery nuova: 18 su 25
-sono quadrate a 1024 px, cioè già ritagliate e ridotte per il vecchio sito. Su
-uno schermo grande si vedrebbero sgranate, e il taglio quadrato impedisce
-qualunque impaginazione editoriale.
+Manuel ha gli originali dei fotografi. La gallery della v2 si progetta su quelli,
+non sui file quadrati a 1024 px recuperati da Sanity.
 
-**Cosa serve**
-
-- I file **originali** dei fotografi, a piena risoluzione e **non ritagliati**
-  (il ritaglio lo fa il back office, che tiene anche il punto focale).
-- Un mix di orizzontali e verticali: una gallery fatta solo di quadrati non si
-  può impaginare.
-- Possibilmente raggruppati per evento, così entrano in portfolio con la loro
-  storia invece che come immagini sciolte.
-
-Senza questo materiale la gallery resta un segnaposto.
+Da tenere presente quando arriveranno i file: servono **non ritagliati** (al
+ritaglio pensa il back office, che tiene anche il punto focale) e con un mix di
+orizzontali e verticali, altrimenti l'impaginazione editoriale non sta in piedi.
 
 ---
 
-## 4. Conferma dell'indirizzo
+### 4. Conferma dell'indirizzo
 
-**Stato: aperta — non bloccante**
+**Risposta (14/10/2026): confermato, Viale Vaticano 53 - 00165 Roma.**
 
-Nelle impostazioni di Sanity c'era **Viale Vaticano 53 - 00165 Roma**, un dato
-che non avevamo da nessun'altra parte.
+Vale per ora, quindi è un dato da ricontrollare se l'attività si sposta.
 
-**Cosa serve sapere**
-
-- È l'indirizzo giusto e attuale?
-- È uno **studio che riceve clienti** o un domicilio privato? Cambia tutto:
-  se è privato non va pubblicato sul sito e non va messo su Google Business.
-- Vuole che compaia nei contatti, o preferisce solo «Roma»?
-
-Nel frattempo l'indirizzo è in `site/src/config/site.ts` e finisce **solo nel
-JSON-LD** `LocalBusiness`, dove serve a qualificare l'attività come locale. Non
-compare in nessuna pagina. Se la risposta è «è casa mia», va tolto anche da lì.
+L'indirizzo è in `site/src/config/site.ts` e compare nella pagina contatti e nel
+JSON-LD `LocalBusiness`.
 
 ---
 
-## 5. Altre due cose minori
+## Ancora aperte
 
-- **Pagina Facebook**: in Sanity c'era `facebook.com/GaiaCrognaleEventi`, mai
-  citata prima. È attiva e la vuole nel piè di pagina, o è abbandonata? Per ora
-  è solo nei `sameAs` del JSON-LD.
-- **Email**: la v1 usava `info@gaiaevents.it` nelle policy e
-  `gaiacrognale@gmail.com` nel resto. Abbiamo uniformato su quella Gmail. Se
-  esiste o esisterà una casella sul dominio, meglio passare a quella prima del
-  lancio: su un sito professionale fa una certa differenza.
+Due cose minori, nessuna bloccante.
+
+### 5. La pagina Facebook è attiva?
+
+In Sanity c'era `facebook.com/GaiaCrognaleEventi`, mai citata prima. Per ora sta
+solo nei `sameAs` del JSON-LD. Se è attiva e Gaia la usa, va messa anche nel piè
+di pagina accanto a Instagram; se è abbandonata, meglio toglierla del tutto —
+un profilo morto linkato dal sito fa più danno che altro.
+
+### 6. Un'email sul dominio?
+
+Oggi è `gaiacrognale@gmail.com`. La v1 usava anche `info@gaiaevents.it` nelle
+policy, ma quella casella non risulta esistere. Se prima del lancio si attiva una
+casella sul dominio, conviene passare a quella: su un sito professionale una
+Gmail si nota.
