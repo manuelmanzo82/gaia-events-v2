@@ -1,5 +1,6 @@
 import { BUSINESS, DEFAULT_LANG, SITE_URL, type Lang } from '../config/site';
 import { url } from '../i18n/routes';
+import { EVENT_FIELDS, POST_FIELDS } from './availability';
 import {
   getDestinationWedding,
   getEvents,
@@ -126,7 +127,7 @@ export function llmsFullTxt(): string {
     }
   }
 
-  const events = getEvents().filter((event) => isPublishable(event, lang, ['title', 'description']));
+  const events = getEvents().filter((event) => isPublishable(event, lang, EVENT_FIELDS));
   if (events.length > 0) {
     lines.push('## Eventi realizzati', '');
     for (const event of events) {
@@ -161,7 +162,7 @@ export function llmsFullTxt(): string {
     lines.push('');
   }
 
-  const posts = getPosts().filter((post) => isPublishable(post, lang, ['title', 'slug', 'body']));
+  const posts = getPosts().filter((post) => isPublishable(post, lang, POST_FIELDS));
   if (posts.length > 0) {
     lines.push('## Articoli', '');
     for (const post of posts) {

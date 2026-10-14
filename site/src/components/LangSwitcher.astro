@@ -7,33 +7,49 @@ interface Props {
   lang: Lang;
   routeKey: RouteKey;
   slug?: string;
-  /** Lingue in cui la pagina corrente esiste. Le altre non vengono mostrate. */
+  /** Lingue in cui la pagina corrente esiste. */
   availableLangs?: readonly Lang[];
 }
 
 const { lang, routeKey, slug, availableLangs = LANGS } = Astro.props;
 const t = useTranslations(lang);
 
-const targets = LANGS.filter(
-  (candidate) => candidate !== lang && availableLangs.includes(candidate),
-).map((candidate) => ({
-  lang: candidate,
-  // Se la pagina ha uno slug usa la mappa delle rotte, altrimenti traduce il percorso.
-  href: slug
-    ? path(routeKey, candidate, slug)
-    : (switchLang(Astro.url.pathname, candidate) ?? path(routeKey, candidate)),
-  label: LANG_NAME[candidate],
-}));
+/**
+ * Il selettore resta sempre visibile.
+ *
+ * Se questa pagina non esiste nell'altra lingua, il link porta alla home di
+ * quella lingua invece di sparire: meglio un punto di atterraggio sensato
+ * che un controllo che compare e scompare da una pagina all'altra.
+ *
+ * In quel caso però il link NON è una traduzione, quindi non porta rel
+ * alternate né hreflang: dichiararlo come alternativa linguistica di una
+ * pagina diversa confonderebbe i motori di ricerca.
+ */
+const targets = LANGS.filter((candidate) => candidate !== lang).map((candidate) => {
+  const tradotta = availableLangs.includes(candidate);
+
+  const href = tradotta
+    ? slug
+      ? path(routeKey, candidate, slug)
+      : (switchLang(Astro.url.pathname, candidate) ?? path(routeKey, candidate))
+    : path('home', candidate);
+
+  return { lang: candidate, href, tradotta, label: LANG_NAME[candidate] };
+});
 ---
 
-{
-  targets.length > 0 && (
-    <nav aria-label={t('lang.switchLabel')} class="lang-switcher">
-      {targets.map((target) => (
+<nav aria-label={t('lang.switchLabel')} class="lang-switcher">
+  {
+    targets.map((target) =>
+      target.tradotta ? (
         <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate">
           {target.label}
         </a>
-      ))}
-    </nav>
-  )
-}
+      ) : (
+        <a href={target.href} lang={target.lang}>
+          {target.label}
+        </a>
+      ),
+    )
+  }
+</nav>

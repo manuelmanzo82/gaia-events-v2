@@ -1,0 +1,41 @@
+---
+/**
+ * Indici in inglese: servizi, portfolio, recensioni, blog, FAQ.
+ *
+ * Stanno tutti qui, in una rotta dinamica, perché un file statico verrebbe
+ * generato comunque. Con getStaticPaths invece la pagina nasce solo se
+ * quell'elenco ha almeno un elemento tradotto in inglese: niente pagine
+ * indice vuote, e la pagina ricompare da sola appena arriva la prima
+ * traduzione.
+ *
+ * Le corrispondenti pagine italiane restano file statici: l'italiano è la
+ * lingua sorgente e c'è sempre.
+ */
+import BlogPage from '../../components/pages/BlogPage.astro';
+import FaqPage from '../../components/pages/FaqPage.astro';
+import PortfolioPage from '../../components/pages/PortfolioPage.astro';
+import ReviewsPage from '../../components/pages/ReviewsPage.astro';
+import ServicesPage from '../../components/pages/ServicesPage.astro';
+import { ROUTES } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+
+const INDEXES = ['services', 'portfolio', 'reviews', 'blog', 'faq'] as const;
+
+export function getStaticPaths() {
+  return (['services', 'portfolio', 'reviews', 'blog', 'faq'] as const)
+    .filter((key) => existsIn(key, 'en'))
+    .map((key) => ({ params: { section: ROUTES[key].en }, props: { key } }));
+}
+
+interface Props {
+  key: (typeof INDEXES)[number];
+}
+
+const { key } = Astro.props as Props;
+---
+
+{key === 'services' && <ServicesPage lang="en" />}
+{key === 'portfolio' && <PortfolioPage lang="en" />}
+{key === 'reviews' && <ReviewsPage lang="en" />}
+{key === 'blog' && <BlogPage lang="en" />}
+{key === 'faq' && <FaqPage lang="en" />}

@@ -1,7 +1,8 @@
 ---
 import type { Lang } from '../config/site';
-import { useTranslations } from '../i18n';
+import { useTranslations, type UIKey } from '../i18n';
 import { path, type RouteKey } from '../i18n/routes';
+import { existsIn } from '../lib/availability';
 import LangSwitcher from './LangSwitcher.astro';
 
 interface Props {
@@ -14,25 +15,20 @@ interface Props {
 const { lang, routeKey, slug, availableLangs } = Astro.props;
 const t = useTranslations(lang);
 
-const items: RouteKey[] = [
-  'about',
-  'services',
-  'portfolio',
-  'reviews',
-  'blog',
-  'faq',
-  'contact',
+const VOCI: Array<{ key: RouteKey; label: UIKey }> = [
+  { key: 'about', label: 'nav.about' },
+  { key: 'services', label: 'nav.services' },
+  { key: 'portfolio', label: 'nav.portfolio' },
+  { key: 'reviews', label: 'nav.reviews' },
+  { key: 'blog', label: 'nav.blog' },
+  { key: 'faq', label: 'nav.faq' },
+  { key: 'contact', label: 'nav.contact' },
+  { key: 'quote', label: 'nav.quote' },
 ];
 
-const navKeyToLabel: Record<string, Parameters<typeof t>[0]> = {
-  about: 'nav.about',
-  services: 'nav.services',
-  portfolio: 'nav.portfolio',
-  reviews: 'nav.reviews',
-  blog: 'nav.blog',
-  faq: 'nav.faq',
-  contact: 'nav.contact',
-};
+// Una voce compare solo se quella pagina esiste in questa lingua: senza il
+// filtro, il menu inglese linkerebbe pagine che il build non ha generato.
+const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
 ---
 
 <header class="site-header">
@@ -41,19 +37,17 @@ const navKeyToLabel: Record<string, Parameters<typeof t>[0]> = {
   <nav aria-label={t('nav.menu')}>
     <ul>
       {
-        items.map((key) => (
+        voci.map((voce) => (
           <li>
-            <a href={path(key, lang)} aria-current={routeKey === key ? 'page' : undefined}>
-              {t(navKeyToLabel[key]!)}
+            <a
+              href={path(voce.key, lang)}
+              aria-current={routeKey === voce.key ? 'page' : undefined}
+            >
+              {t(voce.label)}
             </a>
           </li>
         ))
       }
-      <li>
-        <a href={path('quote', lang)} aria-current={routeKey === 'quote' ? 'page' : undefined}>
-          {t('nav.quote')}
-        </a>
-      </li>
     </ul>
   </nav>
 

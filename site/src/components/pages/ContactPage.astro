@@ -1,9 +1,10 @@
 ---
-import { BUSINESS, DEFAULT_LANG, type Lang } from '../../config/site';
+import { BUSINESS, type Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getPage, getSettings, text } from '../../lib/content';
+import { getPage, getSettings, text } from '../../lib/content';
+import { langsFor } from '../../lib/availability';
 import { breadcrumbs, localBusiness } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import PlaceholderSection from '../PlaceholderSection.astro';
@@ -17,7 +18,7 @@ const t = useTranslations(lang);
 
 const page = getPage('contact');
 const settings = getSettings();
-const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+const langs = langsFor('contact');
 
 const title = text(page?.title, lang) || t('nav.contact');
 

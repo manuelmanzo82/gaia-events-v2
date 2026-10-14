@@ -3,11 +3,12 @@
 // se l'EN manca la pagina EN non viene generata.
 import PortfolioDetail from '../../components/pages/PortfolioDetail.astro';
 import { getEvents, isPublishable } from '../../lib/content';
+import { EVENT_FIELDS } from '../../lib/availability';
 import type { Event } from '../../lib/types';
 
 export function getStaticPaths() {
   return getEvents()
-    .filter((event) => isPublishable(event, 'it', ['title', 'excerpt', 'description']))
+    .filter((event) => isPublishable(event, 'it', EVENT_FIELDS))
     .map((event) => ({ params: { slug: event.slug }, props: { event } }));
 }
 

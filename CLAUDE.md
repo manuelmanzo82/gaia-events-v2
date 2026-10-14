@@ -76,6 +76,21 @@ Mai nel codice, mai nei commit.
   La mappa sta in `site/src/i18n/routes.ts` — unica fonte, usala sempre.
 - Ogni campo di testo ha versione IT ed EN. **Se l'EN è vuoto, la pagina EN non viene
   generata** e non compare né in sitemap né negli hreflang.
+- La stessa regola vale per gli **elenchi**: se nessun elemento è tradotto, la
+  pagina indice EN non esiste. Senza nessun articolo inglese niente `/en/blog/`,
+  e la pagina ricompare da sola appena arriva la prima traduzione.
+- Chi decide tutto questo è **`site/src/lib/availability.ts`**, fonte unica usata
+  da sitemap, hreflang, menu, piè di pagina e selettore di lingua. I campi che
+  rendono pubblicabile un contenuto (`EVENT_FIELDS`, `POST_FIELDS`, …) stanno lì:
+  elenco e pagina di dettaglio devono usare gli stessi, altrimenti un indice
+  linka una scheda che il build non ha generato.
+- Le pagine indice EN vivono in `site/src/pages/en/[section].astro`, una rotta
+  dinamica: un file statico verrebbe generato comunque.
+- Nessun link verso una pagina che in quella lingua non esiste: menu, piè di
+  pagina e CTA sono filtrati con `existsIn()`.
+- Il **selettore di lingua resta sempre visibile**. Se la pagina non esiste
+  nell'altra lingua porta alla home di quella lingua, senza `rel="alternate"`
+  né `hreflang`: non è una traduzione di quella pagina.
 - `hreflang` su ogni pagina (it, en, x-default) + sitemap bilingue.
 
 **SEO / AEO**

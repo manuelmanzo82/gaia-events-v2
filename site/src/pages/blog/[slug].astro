@@ -2,11 +2,12 @@
 // Lo slug degli articoli è tradotto: /blog/titolo-it ↔ /en/blog/title-en
 import BlogPost from '../../components/pages/BlogPost.astro';
 import { getPosts, isPublishable, pick } from '../../lib/content';
+import { POST_FIELDS } from '../../lib/availability';
 import type { Post } from '../../lib/types';
 
 export function getStaticPaths() {
   return getPosts()
-    .filter((post) => isPublishable(post, 'it', ['title', 'slug', 'body']))
+    .filter((post) => isPublishable(post, 'it', POST_FIELDS))
     .map((post) => ({
       params: { slug: pick(post.slug, 'it')! },
       props: { post },

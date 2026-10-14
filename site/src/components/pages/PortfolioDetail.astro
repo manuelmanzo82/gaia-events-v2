@@ -4,6 +4,7 @@ import { formatDate, useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { availableLangs, text } from '../../lib/content';
+import { EVENT_FIELDS } from '../../lib/availability';
 import { picture } from '../../lib/images';
 import { breadcrumbs, event as eventSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
@@ -18,7 +19,7 @@ interface Props {
 const { lang, event } = Astro.props;
 const t = useTranslations(lang);
 
-const langs = availableLangs(event, ['title', 'excerpt', 'description']);
+const langs = availableLangs(event, EVENT_FIELDS);
 
 const title = text(event.title, lang);
 

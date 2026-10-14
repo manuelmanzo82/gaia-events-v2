@@ -2,15 +2,8 @@ import type { APIRoute } from 'astro';
 import { DEFAULT_LANG, IS_STAGING, LANGS, type Lang } from '../config/site';
 import { HTML_LANG } from '../i18n';
 import { url, type RouteKey } from '../i18n/routes';
-import {
-  availableLangs,
-  getDestinationWedding,
-  getEvents,
-  getPage,
-  getPosts,
-  isPublishable,
-  pick,
-} from '../lib/content';
+import { EVENT_FIELDS, POST_FIELDS, langsFor } from '../lib/availability';
+import { availableLangs, getEvents, getPage, getPosts, isPublishable, pick } from '../lib/content';
 
 /**
  * Sitemap scritta a mano invece di @astrojs/sitemap.
@@ -19,8 +12,9 @@ import {
  * mentre qui gli slug sono tradotti (/servizi ↔ /en/services). Con
  * l'integrazione metà delle pagine restava senza alternate.
  *
- * Qui gli alternate escono dalla stessa mappa di ROUTES usata dalle pagine,
- * e una lingua compare solo se quella pagina è stata davvero generata.
+ * In quali lingue esista ogni pagina lo decide lib/availability.ts, lo
+ * stesso modulo che usano le pagine e il menu: così la sitemap non può
+ * annunciare un URL che il build non genera.
  */
 
 interface Entry {
@@ -30,47 +24,41 @@ interface Entry {
   lastmod?: string;
 }
 
-/** Campi che devono esistere perché la pagina abbia senso in quella lingua. */
-const PAGE_REQUIREMENTS: Partial<Record<RouteKey, string[]>> = {
-  about: ['title', 'body'],
-  privacy: ['title', 'body'],
-  cookie: ['title', 'body'],
-  services: ['title'],
-  portfolio: ['title'],
-  reviews: ['title'],
-  blog: ['title'],
-  faq: ['title'],
-  quote: ['title'],
-  contact: ['title'],
-};
+/** Pagine senza elenco, dichiarate una volta sola. */
+const STATIC_KEYS: RouteKey[] = [
+  'home',
+  'about',
+  'services',
+  'portfolio',
+  'reviews',
+  'blog',
+  'faq',
+  'quote',
+  'contact',
+  'destinationWedding',
+  'privacy',
+  'cookie',
+];
 
 function entries(): Entry[] {
   const list: Entry[] = [];
 
-  // La home esiste sempre in entrambe le lingue.
-  list.push({ key: 'home', langs: [...LANGS] });
+  for (const key of STATIC_KEYS) {
+    const langs = langsFor(key);
+    if (langs.length === 0) continue;
 
-  for (const [key, required] of Object.entries(PAGE_REQUIREMENTS) as Array<[RouteKey, string[]]>) {
-    const page = getPage(key);
-    if (!page) continue;
-    const langs = availableLangs(page, required as Array<keyof typeof page>);
-    if (langs.length > 0) list.push({ key, langs, lastmod: page.updatedAt });
+    list.push({ key, langs, lastmod: getPage(key)?.updatedAt });
   }
 
-  const dw = getDestinationWedding();
-  const dwLangs = availableLangs(dw, ['title', 'intro']);
-  if (dwLangs.length > 0) list.push({ key: 'destinationWedding', langs: dwLangs });
-
   for (const event of getEvents()) {
-    const langs = availableLangs(event, ['title', 'excerpt', 'description']);
+    const langs = availableLangs(event, EVENT_FIELDS);
     if (langs.length > 0) {
       list.push({ key: 'portfolio', slug: event.slug, langs, lastmod: event.date });
     }
   }
 
   for (const post of getPosts()) {
-    const langs = availableLangs(post, ['title', 'slug', 'body']);
-    for (const lang of langs) {
+    for (const lang of availableLangs(post, POST_FIELDS)) {
       // Lo slug cambia da lingua a lingua: ogni URL dichiara gli alternate
       // con lo slug corretto dell'altra lingua.
       const slug = pick(post.slug, lang);
@@ -89,7 +77,7 @@ function postAlternates(slug: string): Array<{ lang: Lang; href: string }> {
   );
   if (!post) return [];
 
-  return LANGS.filter((lang) => isPublishable(post, lang, ['title', 'slug', 'body']))
+  return LANGS.filter((lang) => isPublishable(post, lang, POST_FIELDS))
     .map((lang) => ({ lang, href: url('blog', lang, pick(post.slug, lang)!) }));
 }
 

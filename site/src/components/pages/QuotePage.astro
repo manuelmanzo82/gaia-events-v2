@@ -1,9 +1,10 @@
 ---
-import { DEFAULT_LANG, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getPage, text } from '../../lib/content';
+import { getPage, text } from '../../lib/content';
+import { existsIn, langsFor } from '../../lib/availability';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import PlaceholderSection from '../PlaceholderSection.astro';
@@ -16,7 +17,7 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const page = getPage('quote');
-const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+const langs = langsFor('quote');
 
 const title = text(page?.title, lang) || t('nav.quote');
 
@@ -54,5 +55,5 @@ const crumbs = [
     </p>
   </PlaceholderSection>
 
-  <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>
+  {existsIn('contact', lang) && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
 </BaseLayout>

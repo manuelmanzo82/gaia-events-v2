@@ -1,9 +1,10 @@
 ---
-import { DEFAULT_LANG, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path, type RouteKey } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getPage, text } from '../../lib/content';
+import { getPage, text } from '../../lib/content';
+import { langsFor } from '../../lib/availability';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import PlaceholderSection from '../PlaceholderSection.astro';
@@ -21,7 +22,7 @@ const { lang, routeKey } = Astro.props;
 const t = useTranslations(lang);
 
 const page = getPage(routeKey);
-const langs = page ? availableLangs(page, ['title', 'body']) : [DEFAULT_LANG];
+const langs = langsFor(routeKey);
 
 const title = text(page?.title, lang);
 const body = text(page?.body, lang);

@@ -1,9 +1,10 @@
 ---
-import { DEFAULT_LANG, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getPage, getServices, pick, text } from '../../lib/content';
+import { isPublishable, getPage, getServices, pick, text } from '../../lib/content';
+import { SERVICE_FIELDS, existsIn, langsFor } from '../../lib/availability';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 
@@ -15,10 +16,10 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const page = getPage('services');
-const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+const langs = langsFor('services');
 
 // Un servizio compare solo se tradotto nella lingua della pagina.
-const services = getServices().filter((item) => text(item.title, lang));
+const services = getServices().filter((item) => isPublishable(item, lang, SERVICE_FIELDS));
 
 const title = text(page?.title, lang) || t('nav.services');
 
@@ -72,5 +73,5 @@ const jsonLd = [
     ))
   }
 
-  <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>
+  {existsIn('quote', lang) && <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>}
 </BaseLayout>

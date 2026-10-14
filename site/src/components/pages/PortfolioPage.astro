@@ -1,9 +1,10 @@
 ---
-import { DEFAULT_LANG, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { formatDate, useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getEvents, getPage, text } from '../../lib/content';
+import { getEvents, getPage, isPublishable, text } from '../../lib/content';
+import { EVENT_FIELDS, langsFor } from '../../lib/availability';
 import { picture } from '../../lib/images';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
@@ -17,12 +18,11 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const page = getPage('portfolio');
-const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+const langs = langsFor('portfolio');
 
-// Un evento compare nell'indice solo se ha titolo ed estratto nella lingua.
-const events = getEvents().filter(
-  (event) => text(event.title, lang) && text(event.excerpt, lang),
-);
+// Stessi campi che richiede la pagina di dettaglio: altrimenti l'indice
+// linkerebbe una scheda che il build non ha generato.
+const events = getEvents().filter((event) => isPublishable(event, lang, EVENT_FIELDS));
 
 const title = text(page?.title, lang) || t('nav.portfolio');
 

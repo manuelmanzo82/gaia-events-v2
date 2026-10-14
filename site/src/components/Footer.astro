@@ -1,7 +1,8 @@
 ---
 import { BUSINESS, type Lang } from '../config/site';
 import { useTranslations } from '../i18n';
-import { path } from '../i18n/routes';
+import { path, type RouteKey } from '../i18n/routes';
+import { existsIn } from '../lib/availability';
 
 interface Props {
   lang: Lang;
@@ -12,6 +13,15 @@ const t = useTranslations(lang);
 
 const year = new Date().getFullYear();
 const whatsappHref = `https://wa.me/${BUSINESS.whatsapp}`;
+
+// Come nel menu: niente link verso pagine che in questa lingua non esistono.
+const VOCI: Array<{ key: RouteKey; label: string }> = [
+  { key: 'destinationWedding', label: t('nav.destinationWedding') },
+  { key: 'privacy', label: t('footer.privacy') },
+  { key: 'cookie', label: t('footer.cookie') },
+];
+
+const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
 ---
 
 <footer class="site-footer">
@@ -30,9 +40,7 @@ const whatsappHref = `https://wa.me/${BUSINESS.whatsapp}`;
 
   <nav aria-label={t('footer.follow')}>
     <ul>
-      <li><a href={path('destinationWedding', lang)}>{t('nav.destinationWedding')}</a></li>
-      <li><a href={path('privacy', lang)}>{t('footer.privacy')}</a></li>
-      <li><a href={path('cookie', lang)}>{t('footer.cookie')}</a></li>
+      {voci.map((voce) => <li><a href={path(voce.key, lang)}>{voce.label}</a></li>)}
     </ul>
   </nav>
 

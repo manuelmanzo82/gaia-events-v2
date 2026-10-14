@@ -1,9 +1,10 @@
 ---
-import { DEFAULT_LANG, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { formatDate, useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, getPage, getPosts, pick, text } from '../../lib/content';
+import { getPage, getPosts, isPublishable, pick, text } from '../../lib/content';
+import { POST_FIELDS, langsFor } from '../../lib/availability';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 
@@ -15,13 +16,13 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const page = getPage('blog');
-const langs = page ? availableLangs(page, ['title']) : [DEFAULT_LANG];
+const langs = langsFor('blog');
 
 // Nella v1 l'indice leggeva Sanity + un file locale e gli articoli solo il
 // file: un articolo nuovo restava senza pagina. Qui la fonte è una sola.
 const posts = getPosts()
-  .map((post) => ({ post, slug: pick(post.slug, lang) }))
-  .filter((entry) => entry.slug && text(entry.post.title, lang));
+  .filter((post) => isPublishable(post, lang, POST_FIELDS))
+  .map((post) => ({ post, slug: pick(post.slug, lang)! }));
 
 const title = text(page?.title, lang) || t('nav.blog');
 
@@ -56,13 +57,13 @@ const crumbs = [
   {
     posts.map(({ post, slug }) => (
       <article>
-        <h2><a href={path('blog', lang, slug!)}>{text(post.title, lang)}</a></h2>
+        <h2><a href={path('blog', lang, slug)}>{text(post.title, lang)}</a></h2>
         <p>
           <time datetime={post.date}>{formatDate(post.date, lang)}</time>
           {post.readingTime > 0 && <span> — {post.readingTime} {t('common.readingTime')}</span>}
         </p>
         <p>{text(post.excerpt, lang)}</p>
-        <p><a href={path('blog', lang, slug!)}>{t('cta.readMore')}</a></p>
+        <p><a href={path('blog', lang, slug)}>{t('cta.readMore')}</a></p>
       </article>
     ))
   }
