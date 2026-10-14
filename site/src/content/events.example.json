@@ -3,10 +3,19 @@
     "id": 1,
     "slug": "villa-aurelia-giugno",
     "macroCategory": "wedding",
-    "title": { "it": "Chiara e Marco — Villa Aurelia", "en": "Chiara & Marco — Villa Aurelia" },
-    "location": { "it": "Villa Aurelia, Roma", "en": "Villa Aurelia, Rome" },
+    "title": {
+      "it": "Chiara e Marco — Villa Aurelia",
+      "en": "Chiara & Marco — Villa Aurelia"
+    },
+    "location": {
+      "it": "Villa Aurelia, Roma",
+      "en": "Villa Aurelia, Rome"
+    },
     "date": "2026-06-14",
-    "category": { "it": "Matrimonio classico", "en": "Classic wedding" },
+    "category": {
+      "it": "Matrimonio classico",
+      "en": "Classic wedding"
+    },
     "excerpt": {
       "it": "Un matrimonio al tramonto fra i pini del Gianicolo, con tavoli lunghi e luci calde.",
       "en": "A sunset wedding among the pines of the Janiculum, with long tables and warm light."
@@ -19,9 +28,22 @@
       "src": "esempi/villa-aurelia-cover.jpg",
       "width": 2000,
       "height": 1333,
-      "alt": { "it": "Tavolo imperiale allestito al tramonto", "en": "Long table set at sunset" },
-      "formats": { "webp": true, "avif": false },
-      "widths": [480, 800, 1200, 1600]
+      "alt": {
+        "it": "Tavolo imperiale allestito al tramonto",
+        "en": "Long table set at sunset"
+      },
+      "formats": {
+        "webp": true,
+        "avif": false
+      },
+      "widths": [
+        480,
+        800,
+        1200,
+        1600
+      ],
+      "maxWidth": 1000,
+      "usage": "gallery_large"
     },
     "hero": null,
     "video": null,
@@ -30,17 +52,42 @@
         "src": "esempi/villa-aurelia-01.jpg",
         "width": 2000,
         "height": 1333,
-        "alt": { "it": "Bouquet di peonie bianche", "en": "White peony bouquet" },
-        "formats": { "webp": true, "avif": false },
-        "widths": [480, 800, 1200, 1600]
+        "alt": {
+          "it": "Bouquet di peonie bianche",
+          "en": "White peony bouquet"
+        },
+        "formats": {
+          "webp": true,
+          "avif": false
+        },
+        "widths": [
+          480,
+          800,
+          1200,
+          1600
+        ],
+        "maxWidth": 1000,
+        "usage": "gallery_large"
       },
       {
         "src": "esempi/villa-aurelia-02.jpg",
         "width": 1333,
         "height": 2000,
-        "alt": { "it": "Dettaglio della mise en place", "en": "Mise en place detail" },
-        "formats": { "webp": true, "avif": false },
-        "widths": [480, 800, 1200]
+        "alt": {
+          "it": "Dettaglio della mise en place",
+          "en": "Mise en place detail"
+        },
+        "formats": {
+          "webp": true,
+          "avif": false
+        },
+        "widths": [
+          480,
+          800,
+          1200
+        ],
+        "maxWidth": 666,
+        "usage": "card"
       }
     ],
     "featured": true,
@@ -51,10 +98,19 @@
     "id": 2,
     "slug": "convention-eur",
     "macroCategory": "corporate",
-    "title": { "it": "Convention annuale — EUR", "en": "Annual convention — EUR" },
-    "location": { "it": "Roma, EUR", "en": "Rome, EUR" },
+    "title": {
+      "it": "Convention annuale — EUR",
+      "en": "Annual convention — EUR"
+    },
+    "location": {
+      "it": "Roma, EUR",
+      "en": "Rome, EUR"
+    },
     "date": "2026-03-05",
-    "category": { "it": "Evento aziendale", "en": "Corporate event" },
+    "category": {
+      "it": "Evento aziendale",
+      "en": "Corporate event"
+    },
     "excerpt": {
       "it": "Duecento ospiti, due sale e una cena di gala coordinata al minuto.",
       "en": "Two hundred guests, two rooms and a gala dinner timed to the minute."
@@ -67,9 +123,22 @@
       "src": "esempi/convention-cover.jpg",
       "width": 2000,
       "height": 1333,
-      "alt": { "it": "Sala allestita per la cena di gala", "en": "Room set for the gala dinner" },
-      "formats": { "webp": true, "avif": false },
-      "widths": [480, 800, 1200, 1600]
+      "alt": {
+        "it": "Sala allestita per la cena di gala",
+        "en": "Room set for the gala dinner"
+      },
+      "formats": {
+        "webp": true,
+        "avif": false
+      },
+      "widths": [
+        480,
+        800,
+        1200,
+        1600
+      ],
+      "maxWidth": 1000,
+      "usage": "gallery_large"
     },
     "hero": null,
     "video": null,

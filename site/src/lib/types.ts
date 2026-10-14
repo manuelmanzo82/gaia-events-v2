@@ -8,12 +8,26 @@ import type { Lang } from '../config/site';
  */
 export type Localized<T = string> = Partial<Record<Lang, T>>;
 
+/** Uso consentito di un'immagine, deciso dalla sua risoluzione. */
+export type ImageUsage = 'hero' | 'gallery_large' | 'card' | 'thumbnail';
+
 /** Immagine caricata dal back office. Le varianti sono già su disco in /uploads/. */
 export interface Image {
   /** Percorso relativo dentro /uploads/, es. 'eventi/villa-aurelia/01.jpg' */
   src: string;
   width: number;
   height: number;
+  /**
+   * Larghezza massima in pixel CSS a cui l'immagine resta nitida: la
+   * larghezza del file diviso 2, perché su retina servono due pixel di file
+   * per ogni pixel CSS. La calcola il back office all'upload.
+   *
+   * È un limite, non un suggerimento: nessun componente, lightbox inclusa,
+   * deve mostrare l'immagine più larga di così. Meglio una foto piccola
+   * usata bene che la stessa foto ingrandita e molle.
+   */
+  maxWidth?: number;
+  usage?: ImageUsage;
   alt: Localized;
   /** Varianti generate da ImageService: WebP sempre, AVIF se il server lo supporta. */
   formats?: { webp?: boolean; avif?: boolean };

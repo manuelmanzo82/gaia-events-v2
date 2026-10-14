@@ -76,6 +76,25 @@ Mai nel codice, mai nei commit.
 - Le immagini **non passano mai dal build**: restano in `uploads/` sull'host e il sito
   statico le linka come `/uploads/...`. Ogni `<img>` ha sempre `width` e `height`
   (la v1 aveva 14 immagini senza dimensioni → CLS).
+- **Ogni immagine si porta dietro il proprio limite di ingrandimento.** All'upload
+  `ImageService` calcola `max_css_width` = larghezza del file ÷ 2 (su retina
+  servono due pixel di file per ogni pixel CSS) e da lì ricava `usage_tier`:
+
+  | Uso | Larghezza CSS | File largo almeno |
+  |---|---|---|
+  | `hero` | da 1440 px | 2880 px |
+  | `gallery_large` | da 1000 px | 2000 px |
+  | `card` | da 480 px | 960 px |
+  | `thumbnail` | sotto | — |
+
+  Il limite viaggia nel JSON (`maxWidth`, `usage`), `Picture.astro` lo applica
+  come `max-width` e lo espone in `data-max-width`. **Nessun componente, lightbox
+  compresa, deve mostrare un'immagine più larga del suo limite.** Serve a usare
+  davvero anche le foto piccole, ciascuna al suo posto, invece di scartarle: una
+  foto da 1024 px sta benissimo in una card, non in un hero.
+- `images.max_original` in `admin/config.php` limita il **lato lungo**: su una
+  verticale 2:3 la larghezza risultante è due terzi di quel valore. È per questo
+  che vale 4500 e non 3000, altrimenti nessuna foto verticale potrebbe fare da hero.
 
 **Bilingue IT/EN su tutto il sito**
 - `/` italiano, `/en/` inglese. **Slug tradotti**: `/servizi` ↔ `/en/services`.

@@ -26,6 +26,54 @@ final class ImageService
         'image/webp' => 'webp',
     ];
 
+    /**
+     * Soglie dell'uso consentito, in pixel CSS.
+     *
+     * Su uno schermo retina servono due pixel di file per ogni pixel CSS,
+     * quindi la larghezza massima utile e' larghezza/2. La soglia guarda la
+     * LARGHEZZA e non il lato lungo: e' lo spazio orizzontale da riempire a
+     * decidere se l'immagine regge.
+     *
+     * Serve a usare davvero anche le foto piccole, ciascuna al suo posto,
+     * invece di scartarle: una foto da 1024 px sta benissimo in una card.
+     */
+    private const SOGLIE = [
+        1440 => 'hero',
+        1000 => 'gallery_large',
+        480 => 'card',
+    ];
+
+    /** Larghezza massima in pixel CSS a cui l'immagine resta nitida. */
+    public static function maxCssWidth(int $larghezza): int
+    {
+        return intdiv($larghezza, 2);
+    }
+
+    /** Uso consentito ricavato dalla larghezza del file. */
+    public static function usageTier(int $larghezza): string
+    {
+        $css = self::maxCssWidth($larghezza);
+
+        foreach (self::SOGLIE as $minimo => $tier) {
+            if ($css >= $minimo) {
+                return $tier;
+            }
+        }
+
+        return 'thumbnail';
+    }
+
+    /** Etichetta leggibile, per il back office. */
+    public static function usageLabel(string $tier): string
+    {
+        return match ($tier) {
+            'hero' => 'hero / fascia a tutta larghezza',
+            'gallery_large' => 'gallery grande',
+            'card' => 'gallery e card',
+            default => 'solo miniatura',
+        };
+    }
+
     public static function avifSupported(): bool
     {
         return function_exists('imageavif');
@@ -109,6 +157,8 @@ final class ImageService
             'path' => ($folder !== '' ? $folder . '/' : '') . $name . '.' . $originalExtension,
             'width' => $width,
             'height' => $height,
+            'max_css_width' => self::maxCssWidth($width),
+            'usage_tier' => self::usageTier($width),
             'bytes' => filesize($originalPath) ?: 0,
             'variant_widths' => json_encode(array_values($widths)),
             'has_webp' => $formats['webp'] ? 1 : 0,

@@ -79,7 +79,14 @@ return [
         'webp_quality' => 82,
         'avif_quality' => 60,
         // Lato massimo dell'originale conservato, in pixel.
-        'max_original' => 3000,
+        //
+        // ATTENZIONE: limita il LATO LUNGO, quindi su una foto verticale 2:3
+        // la larghezza risultante e' due terzi di questo valore. Siccome
+        // l'uso consentito dipende dalla larghezza, con 3000 una verticale
+        // arriverebbe a soli 2000 px di larghezza e non potrebbe mai fare da
+        // hero. Con 4500 una verticale conserva 3000 px di larghezza, che
+        // bastano per una fascia a tutta larghezza su retina.
+        'max_original' => 4500,
         'max_upload_bytes' => 12 * 1024 * 1024,
     ],
 

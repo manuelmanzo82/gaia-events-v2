@@ -63,6 +63,19 @@ $uploadsUrl = rtrim((string) Gaia\Admin\Config::get('uploads_url', '/uploads'), 
             AVIF <?= !empty($row['has_avif']) ? 'sì' : 'no' ?>
           </p>
 
+          <?php
+          $maxCss = (int) ($row['max_css_width'] ?? 0);
+          $tier = (string) ($row['usage_tier'] ?? 'thumbnail');
+          ?>
+          <p class="limite limite-<?= e($tier) ?>">
+            Si può mostrare fino a <strong><?= $maxCss ?> px</strong> di larghezza:
+            <?= e(Gaia\Admin\ImageService::usageLabel($tier)) ?>.
+          </p>
+          <p class="help">
+            Oltre questa misura si sgrana. È un limite tecnico della foto, non una
+            preferenza: il sito e la lightbox non la ingrandiranno mai di più.
+          </p>
+
           <label>Testo alternativo</label>
           <div class="pair">
             <div><span>Italiano</span>

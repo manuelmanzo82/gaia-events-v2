@@ -68,6 +68,13 @@ CREATE TABLE IF NOT EXISTS `media` (
   -- rapporto diverso da quello della foto.
   `focal_x`        DECIMAL(4,3) NOT NULL DEFAULT 0.500,
   `focal_y`        DECIMAL(4,3) NOT NULL DEFAULT 0.500,
+  -- Larghezza massima in pixel CSS a cui l'immagine resta nitida: e' la
+  -- larghezza del file diviso 2, perche' su uno schermo retina servono due
+  -- pixel di file per ogni pixel CSS. Calcolata all'upload da ImageService.
+  `max_css_width`  INT UNSIGNED NOT NULL DEFAULT 0,
+  -- Uso consentito, ricavato da max_css_width. Il sito non deve mai mostrare
+  -- un'immagine piu' grande di cosi', lightbox compresa.
+  `usage_tier`     ENUM('hero','gallery_large','card','thumbnail') NOT NULL DEFAULT 'thumbnail',
   `alt_it`         VARCHAR(255) DEFAULT NULL,
   `alt_en`         VARCHAR(255) DEFAULT NULL,
   `caption_it`     VARCHAR(500) DEFAULT NULL,

@@ -48,6 +48,9 @@
   .actions { margin-top: 1.5rem; display: flex; gap: .5rem; flex-wrap: wrap; }
   .muted { color: #666; font-size: .85rem; }
   fieldset { border: 1px solid var(--bordo); background: #fff; margin: 1rem 0; }
+  .limite { margin: .4rem 0 0; padding: .35rem .6rem; border-left: 4px solid #8b9a7d; background: #f6f5f2; font-size: .85rem; }
+  .limite-card { border-color: #c9a962; }
+  .limite-thumbnail { border-color: #722f37; }
   legend { padding: 0 .4rem; font-size: .8rem; text-transform: uppercase; }
 </style>
 </head>

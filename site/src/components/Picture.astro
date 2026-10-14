@@ -3,11 +3,20 @@ import type { PictureData } from '../lib/images';
 
 interface Props {
   data: PictureData | null;
-  /** Rapporto forzato via CSS; il crop usa il punto focale. */
   class?: string;
   loading?: 'lazy' | 'eager';
   fetchpriority?: 'high' | 'low' | 'auto';
   decoding?: 'async' | 'sync' | 'auto';
+  /**
+   * Applica il limite di larghezza dell'immagine.
+   *
+   * Acceso di default: nessuna foto viene mai mostrata più larga di quanto
+   * la sua risoluzione consenta, lightbox compresa. Si spegne solo quando il
+   * contenitore ritaglia davvero l'immagine — per esempio una fascia a tutta
+   * larghezza con `object-fit: cover` — perché lì la larghezza visibile non
+   * corrisponde ai pixel richiesti all'immagine.
+   */
+  cap?: boolean;
 }
 
 const {
@@ -16,7 +25,15 @@ const {
   loading = 'lazy',
   fetchpriority = 'auto',
   decoding = 'async',
+  cap = true,
 } = Astro.props;
+
+const stile = [
+  data?.objectPosition ? `object-position: ${data.objectPosition}` : null,
+  cap && data ? `max-width: ${data.maxWidth}px` : null,
+]
+  .filter(Boolean)
+  .join('; ');
 ---
 
 {
@@ -35,7 +52,9 @@ const {
         loading={loading}
         fetchpriority={fetchpriority}
         decoding={decoding}
-        style={data.objectPosition ? `object-position: ${data.objectPosition}` : undefined}
+        data-usage={data.usage}
+        data-max-width={data.maxWidth}
+        style={stile || undefined}
       />
     </picture>
   )

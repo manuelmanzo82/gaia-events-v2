@@ -401,6 +401,10 @@ final class Exporter
             'src' => (string) $row['path'],
             'width' => (int) $row['width'],
             'height' => (int) $row['height'],
+            // Limite di visualizzazione: il sito non deve mai mostrare
+            // l'immagine piu' larga di cosi', lightbox compresa.
+            'maxWidth' => (int) ($row['max_css_width'] ?? intdiv((int) $row['width'], 2)),
+            'usage' => (string) ($row['usage_tier'] ?? 'thumbnail'),
             'alt' => self::text($row['alt_it'], $row['alt_en']),
             'caption' => self::text($row['caption_it'], $row['caption_en']),
             'formats' => [

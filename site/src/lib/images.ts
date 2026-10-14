@@ -1,6 +1,6 @@
 import { UPLOADS_BASE } from '../config/site';
 import { text } from './content';
-import type { Image } from './types';
+import type { Image, ImageUsage } from './types';
 import type { Lang } from '../config/site';
 
 /**
@@ -55,6 +55,26 @@ export interface PictureData {
   sizes: string;
   /** Per il crop via CSS quando il contenitore ha un rapporto diverso. */
   objectPosition?: string;
+  /** Larghezza massima in pixel CSS oltre la quale l'immagine si sgrana. */
+  maxWidth: number;
+  usage: ImageUsage;
+}
+
+/**
+ * Larghezza massima a cui l'immagine resta nitida.
+ *
+ * La calcola il back office e viaggia nel JSON; se manca, la ricaviamo qui
+ * con la stessa regola (larghezza del file diviso 2, per il retina).
+ */
+export function maxDisplayWidth(image: Image): number {
+  return image.maxWidth && image.maxWidth > 0
+    ? image.maxWidth
+    : Math.floor(image.width / 2);
+}
+
+/** True se l'immagine regge la larghezza richiesta senza sgranarsi. */
+export function fitsWidth(image: Image, cssWidth: number): boolean {
+  return maxDisplayWidth(image) >= cssWidth;
 }
 
 /**
@@ -87,6 +107,8 @@ export function picture(
     height: image.height,
     alt: text(image.alt, lang),
     sizes,
+    maxWidth: maxDisplayWidth(image),
+    usage: image.usage ?? 'thumbnail',
     objectPosition: image.focal
       ? `${(image.focal.x * 100).toFixed(1)}% ${(image.focal.y * 100).toFixed(1)}%`
       : undefined,
