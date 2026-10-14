@@ -31,6 +31,17 @@ DirectoryIndex index.php
     # DEVE corrispondere a 'base_path' in config.php, con lo slash finale.
     RewriteBase /admin/
 
+    # Blocco dei file derivati PRIMA di ogni altra cosa.
+    #
+    # Deve stare in mod_rewrite e non in un <FilesMatch>: le sezioni <If>
+    # (quella della basic auth, in radice) sono valutate per ultime e hanno
+    # la precedenza sull autorizzazione dei <Files>, quindi un "Require all
+    # denied" piu in basso verrebbe scavalcato. [F] di mod_rewrite no.
+    #
+    # Serve a non servire come TESTO un file che non e piu PHP:
+    # config.php.bak-20261014 conterrebbe le credenziali del database.
+    RewriteRule "(^|/)\.env|\.bak|\.php\.|\.(sql|log|orig|old|save|ini|sh)$" - [F,L]
+
     # Su CGI e FastCGI Apache NON passa l'header Authorization a PHP, per
     # non esporre le credenziali a ogni script. Ma a api/export.php quel
     # bearer token serve: lo ricopiamo in una variabile d'ambiente, che lo
@@ -50,8 +61,10 @@ DirectoryIndex index.php
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Doppia sicurezza se mod_rewrite non è attivo.
-<FilesMatch "^(config.*\.php|.*\.sql|.*\.log|composer\.(json|lock))$">
+# Doppia sicurezza se mod_rewrite non è attivo, e soprattutto blocco dei
+# file derivati: un config.php.bak-20261014 non e' piu' PHP per Apache, che
+# lo servirebbe come testo con dentro le credenziali del database.
+<FilesMatch "(^\.env|^config.*\.php$|\.bak|\.(sql|log|orig|old|save|ini|sh)$|\.php\.)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

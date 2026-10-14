@@ -287,6 +287,34 @@ Il file delle password sta **fuori dalla cartella pubblica**, in
 `/kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging`, e deve essere
 **644**: Apache gira come `www-data` e con 640 risponde 500.
 
+### File derivati: mai serviti
+
+Un `config.php.bak-20261014` per Apache **non è più PHP**: lo serve come testo,
+con dentro le credenziali del database. Vale per `.bak`, `.old`, `.orig`,
+`.save`, `.sql`, `.log`, `.env` e per i doppi suffissi tipo `qualcosa.php.altro`.
+
+Il blocco sta in **mod_rewrite** (`RewriteRule ... [F,L]`) e non in un
+`<FilesMatch>`, in entrambi i `.htaccess`. Il motivo è lo stesso incontrato con
+`export.php`: le sezioni `<If>` sono valutate per ultime e hanno la precedenza
+sull'autorizzazione dei `<Files>`, quindi con la basic auth attiva un
+`Require all denied` più in basso **viene scavalcato**. `[F]` di mod_rewrite no.
+
+Per la stessa ragione nessuno script deve lasciare copie accanto all'originale:
+`imposta-token-github.php` scrive la sua in `admin/storage/` e la cancella appena
+ha finito.
+
+### Chiavi SSH su Windows
+
+OpenSSH rifiuta una chiave privata leggibile da altri utenti. Su Windows non
+basta `chmod`: servono le ACL.
+
+```powershell
+icacls "percorso\della\chiave" /inheritance:r /grant:r "$env:USERNAME:(F)"
+```
+
+E `known_hosts` va salvato con **fine riga LF**: con CRLF il `` finisce dentro
+la chiave, non combacia mai e ssh continua a chiedere conferma dell'host.
+
 ### Cose che su IONOS vanno sapute
 
 - `RewriteBase /admin/` è **indispensabile**: la `DOCUMENT_ROOT` vista da Apache

@@ -27,6 +27,24 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 # ---------------------------------------------------------------------
+# File derivati: mai serviti
+# ---------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Blocco dei file derivati PRIMA di ogni altra cosa.
+    #
+    # Deve stare in mod_rewrite e non in un <FilesMatch>: le sezioni <If>
+    # (quella della basic auth, in radice) sono valutate per ultime e hanno
+    # la precedenza sull autorizzazione dei <Files>, quindi un "Require all
+    # denied" piu in basso verrebbe scavalcato. [F] di mod_rewrite no.
+    #
+    # Serve a non servire come TESTO un file che non e piu PHP:
+    # config.php.bak-20261014 conterrebbe le credenziali del database.
+    RewriteRule "(^|/)\.env|\.bak|\.php\.|\.(sql|log|orig|old|save|ini|sh)$" - [F,L]
+</IfModule>
+
+# ---------------------------------------------------------------------
 # Header di sicurezza
 # ---------------------------------------------------------------------
 <IfModule mod_headers.c>
@@ -133,9 +151,17 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 # ---------------------------------------------------------------------
-# File che non devono essere scaricabili, se per sbaglio finiscono qui
+# File che non devono MAI essere scaricabili
+#
+# Non basta elencare i nomi noti: il pericolo sono i file derivati, quelli
+# che nascono accanto a un file buono e ne conservano il contenuto senza
+# piu' essere eseguiti. Un config.php.bak-20261014 e' PHP che Apache serve
+# come testo, credenziali del database comprese.
+#
+# Per questo si bloccano anche i doppi suffissi (qualcosa.php.altro) e
+# qualunque nome che contenga .bak, non solo quelli che ci finiscono.
 # ---------------------------------------------------------------------
-<FilesMatch "^(\.env.*|.*\.sql|.*\.log|config\.php|package(-lock)?\.json)$">
+<FilesMatch "(^\.env|^config.*\.php$|\.bak|\.(sql|log|orig|old|save|ini|sh)$|\.php\.)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

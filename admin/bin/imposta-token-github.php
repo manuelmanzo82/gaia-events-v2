@@ -214,12 +214,23 @@ if ($nuovo === null || $sostituzioni !== 1) {
     );
 }
 
-// Una copia prima di toccare il file: se qualcosa va storto si torna indietro.
-$backup = $configFile . '.bak-' . date('Ymd-His');
+// Una copia prima di toccare il file, ma NON accanto all'originale: un
+// config.php.bak-20261014 non e' piu' PHP per Apache, che lo servirebbe
+// come testo con dentro le credenziali del database. Finisce in
+// admin/storage/, che il .htaccess nega, e a fine operazione sparisce.
+$cartellaBackup = __DIR__ . '/../storage';
+
+if (!is_dir($cartellaBackup) && !mkdir($cartellaBackup, 0750, true) && !is_dir($cartellaBackup)) {
+    rinuncia('Non riesco a creare admin/storage per la copia di sicurezza.');
+}
+
+$backup = $cartellaBackup . '/config.php.prima-del-token-' . date('Ymd-His');
 
 if (!copy($configFile, $backup)) {
-    rinuncia('Non riesco a fare il backup di config.php.');
+    rinuncia('Non riesco a fare la copia di sicurezza di config.php.');
 }
+
+@chmod($backup, 0600);
 
 if (file_put_contents($configFile, $nuovo) === false) {
     fwrite(STDERR, "Scrittura di config.php non riuscita. Il backup e' in {$backup}\n");
@@ -234,10 +245,17 @@ $ok = ($riletto['github']['token'] ?? '') === $token;
 
 if (!$ok) {
     fwrite(STDERR, "ATTENZIONE: file scritto ma il valore riletto non corrisponde.\n");
-    fwrite(STDERR, "Controlla config.php a mano. Backup: " . basename($backup) . "\n");
+    fwrite(STDERR, 'Rimetti a posto con:  cp ' . $backup . ' ' . $configFile . "\n");
     exit(1);
 }
 
+// E' andata: la copia non serve piu' e non ha motivo di restare su un
+// server, visto che contiene le credenziali del database.
+if (!@unlink($backup)) {
+    fwrite(STDERR, 'ATTENZIONE: non sono riuscito a cancellare ' . $backup . "\n");
+    fwrite(STDERR, "Toglilo a mano: contiene le credenziali del database.\n");
+}
+
 echo "Token salvato in config.php, permessi 640.\n";
-echo 'Backup: ' . basename($backup) . "\n\n";
+echo "Copia di sicurezza creata e poi rimossa.\n\n";
 echo "Il pulsante «Pubblica» del back office adesso avvia il deploy.\n";
