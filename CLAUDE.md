@@ -224,9 +224,14 @@ staging non può toccare la produzione.
 | `SFTP_HOST` | secret | host SFTP dell'hosting |
 | `SFTP_PORT` | secret | opzionale, default 22 |
 | `SFTP_USER` | secret | utente SFTP |
-| `SFTP_PASSWORD` | secret | password SFTP |
+| `SFTP_KEY` | secret | chiave privata SSH dedicata alla Action, per intero |
 | `SFTP_KNOWN_HOSTS` | secret | riga di `ssh-keyscan -p 22 host`; se manca, la chiave del server non viene verificata |
 | `REMOTE_PATH` | secret | cartella remota del sito, es. `/public_html` |
+
+Il deploy si autentica **a chiave, non a password**: sul server c'è una chiave
+dedicata alla sola GitHub Action, separata da quelle usate a mano. Per revocarla
+basta togliere da `~/.ssh/authorized_keys` la riga che finisce con
+`github-actions-gaia-staging`.
 
 Il token GitHub che il back office usa per il `repository_dispatch` sta solo in
 `admin/config.php` sul server, sotto `github.token`.

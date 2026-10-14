@@ -144,14 +144,14 @@ jobs:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_KEY: ${{ secrets.SFTP_KEY }}
           SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
           REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -euo pipefail
 
-          for name in SFTP_HOST SFTP_USER SFTP_PASSWORD REMOTE_PATH; do
+          for name in SFTP_HOST SFTP_USER SFTP_KEY REMOTE_PATH; do
             if [ -z "${!name:-}" ]; then
               echo "::error::Manca il segreto $name."
               exit 1
@@ -163,17 +163,32 @@ jobs:
 
           port="${SFTP_PORT:-22}"
 
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # L'autenticazione è a chiave, non a password: sul server c'è una
+          # chiave dedicata alla sola GitHub Action, separata da quelle usate
+          # a mano. Revocarla significa togliere una riga da authorized_keys.
+          printf '%s\n' "$SFTP_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "::error::SFTP_KEY non è una chiave privata valida. Incollala per intero, righe BEGIN e END comprese."
+            exit 1
+          fi
+
           # Verifica della chiave del server se SFTP_KNOWN_HOSTS è impostato.
           # Senza, lftp accetta la chiave al primo collegamento: funziona, ma
           # è meglio impostare il segreto.
           if [ -n "${SFTP_KNOWN_HOSTS:-}" ]; then
-            mkdir -p ~/.ssh
             printf '%s\n' "$SFTP_KNOWN_HOSTS" > ~/.ssh/known_hosts
             chmod 600 ~/.ssh/known_hosts
             verify="set sftp:auto-confirm no;"
+            host_check="-o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
           else
             echo "::warning::SFTP_KNOWN_HOSTS non impostato: la chiave del server non viene verificata."
             verify="set sftp:auto-confirm yes;"
+            host_check="-o StrictHostKeyChecking=no"
           fi
 
           delete_flag="--delete"
@@ -188,12 +203,12 @@ jobs:
           # cancella. Toccarli qui significherebbe perdere il back office o
           # tutte le foto di Gaia.
           lftp -c "
-            set sftp:connect-program 'ssh -a -x -p ${port}';
+            set sftp:connect-program 'ssh -a -x -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes ${host_check} -p ${port}';
             ${verify}
             set net:max-retries 3;
             set net:timeout 20;
             set mirror:parallel-transfer-count 3;
-            open -u '${SFTP_USER}','${SFTP_PASSWORD}' sftp://${SFTP_HOST};
+            open -u '${SFTP_USER}',' ' sftp://${SFTP_HOST};
             mirror -R ${delete_flag} --verbose=1 \
               --exclude-glob admin \
               --exclude-glob admin/ \
@@ -205,6 +220,10 @@ jobs:
               site/dist/ '${REMOTE_PATH}';
             bye
           "
+
+      - name: Rimuovi la chiave dal runner
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
 
       - name: Esito
         run: |
