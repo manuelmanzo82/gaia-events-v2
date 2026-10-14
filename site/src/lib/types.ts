@@ -128,17 +128,39 @@ export interface Page extends SeoFields {
   /** HTML già sanificato dal back office. */
   body: Localized;
   hero: Image | null;
+  /** Blocchi ripetibili, es. percorso e valori in «chi sono». */
+  blocks: Block[];
   updatedAt?: string;
 }
 
-/** Blocco della pagina destination wedding. */
+/**
+ * Blocco ripetibile di una pagina: serve alla destination wedding e alla
+ * pagina chi sono (percorso e valori).
+ */
 export interface Block {
-  kind: 'intro' | 'services' | 'destinations' | 'process' | 'faq' | 'testimonial' | 'cta';
+  kind:
+    | 'intro'
+    | 'services'
+    | 'destinations'
+    | 'process'
+    | 'faq'
+    | 'testimonial'
+    | 'cta'
+    | 'timeline'
+    | 'values';
   title: Localized;
   text: Localized;
-  items?: Array<{ title: Localized; text: Localized; image?: Image | null }>;
+  items?: BlockItem[];
   image?: Image | null;
   order: number;
+}
+
+export interface BlockItem {
+  /** Etichetta breve non tradotta, es. l'anno in una timeline. */
+  label?: string;
+  title: Localized;
+  text: Localized;
+  image?: Image | null;
 }
 
 export interface DestinationWedding extends SeoFields {

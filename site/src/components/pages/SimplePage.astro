@@ -27,6 +27,16 @@ const langs = langsFor(routeKey);
 const title = text(page?.title, lang);
 const body = text(page?.body, lang);
 
+// Blocchi ripetibili: percorso e valori in «chi sono». Un blocco compare
+// solo se ha almeno una voce tradotta in questa lingua.
+const blocks = (page?.blocks ?? [])
+  .map((block) => ({
+    ...block,
+    items: (block.items ?? []).filter((item) => text(item.title, lang)),
+  }))
+  .filter((block) => text(block.title, lang) || block.items.length > 0)
+  .sort((a, b) => a.order - b.order);
+
 const meta = buildMeta({
   lang,
   routeKey,
@@ -57,6 +67,29 @@ const jsonLd = [breadcrumbs(crumbs)];
   {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
 
   {body ? <div set:html={body} /> : <PlaceholderSection lang={lang} id={routeKey} />}
+
+  {
+    blocks.map((block) => (
+      <section data-block={block.kind}>
+        <h2>{text(block.title, lang)}</h2>
+        {text(block.text, lang) && <p>{text(block.text, lang)}</p>}
+        {
+          block.items.length > 0 && (
+            <ul>
+              {block.items.map((item) => (
+                <li>
+                  {item.label && <strong>{item.label}</strong>}
+                  {' '}
+                  <strong>{text(item.title, lang)}</strong>
+                  {text(item.text, lang) && <p>{text(item.text, lang)}</p>}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </section>
+    ))
+  }
 
   {page?.updatedAt && <p><small>{t('common.publishedOn')} {page.updatedAt}</small></p>}
 </BaseLayout>

@@ -99,6 +99,7 @@ final class Exporter
             'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
             'hero' => self::image(self::mediaById((int) ($row['hero_media_id'] ?? 0))),
             'ogImage' => self::image(self::mediaById((int) ($row['og_media_id'] ?? 0))),
+            'blocks' => self::blocks((int) $row['id']),
             'updatedAt' => self::date($row['updated_at']),
         ], $rows);
     }
@@ -262,42 +263,7 @@ final class Exporter
             ];
         }
 
-        $sections = Db::all(
-            'SELECT * FROM page_sections WHERE page_id = ? ORDER BY sort_order, id',
-            [(int) $page['id']],
-        );
-
-        $blocks = array_map(static function (array $row): array {
-            $itemsIt = self::jsonItems($row['items_it']);
-            $itemsEn = self::jsonItems($row['items_en']);
-
-            // Le voci sono allineate per posizione: la riga n di items_it
-            // e quella di items_en descrivono la stessa voce.
-            $count = max(count($itemsIt), count($itemsEn));
-            $items = [];
-
-            for ($index = 0; $index < $count; $index++) {
-                $items[] = [
-                    'title' => self::text(
-                        $itemsIt[$index]['title'] ?? null,
-                        $itemsEn[$index]['title'] ?? null,
-                    ),
-                    'text' => self::text(
-                        $itemsIt[$index]['text'] ?? null,
-                        $itemsEn[$index]['text'] ?? null,
-                    ),
-                ];
-            }
-
-            return [
-                'kind' => $row['kind'],
-                'title' => self::text($row['title_it'], $row['title_en']),
-                'text' => self::text($row['text_it'], $row['text_en']),
-                'items' => $items,
-                'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
-                'order' => (int) $row['sort_order'],
-            ];
-        }, $sections);
+        $blocks = self::blocks((int) $page['id']);
 
         return [
             'title' => self::text($page['title_it'], $page['title_en']),
@@ -308,6 +274,64 @@ final class Exporter
             'ogImage' => self::image(self::mediaById((int) ($page['og_media_id'] ?? 0))),
             'blocks' => $blocks,
         ];
+    }
+
+    // -----------------------------------------------------------------
+    // Blocchi di pagina
+    // -----------------------------------------------------------------
+
+    /**
+     * Blocchi ripetibili di una pagina: destination wedding, ma anche
+     * timeline e valori di «chi sono».
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function blocks(int $pageId): array
+    {
+        $rows = Db::all(
+            'SELECT * FROM page_sections WHERE page_id = ? ORDER BY sort_order, id',
+            [$pageId],
+        );
+
+        return array_map(static function (array $row): array {
+            $itemsIt = self::jsonItems($row['items_it']);
+            $itemsEn = self::jsonItems($row['items_en']);
+
+            // Le voci sono allineate per posizione: la riga n di items_it
+            // e quella di items_en descrivono la stessa voce.
+            $count = max(count($itemsIt), count($itemsEn));
+            $items = [];
+
+            for ($index = 0; $index < $count; $index++) {
+                $item = [
+                    'title' => self::text(
+                        $itemsIt[$index]['title'] ?? null,
+                        $itemsEn[$index]['title'] ?? null,
+                    ),
+                    'text' => self::text(
+                        $itemsIt[$index]['text'] ?? null,
+                        $itemsEn[$index]['text'] ?? null,
+                    ),
+                ];
+
+                // Etichetta breve non tradotta, es. l'anno nella timeline.
+                $label = $itemsIt[$index]['label'] ?? null;
+                if (is_string($label) && $label !== '') {
+                    $item['label'] = $label;
+                }
+
+                $items[] = $item;
+            }
+
+            return [
+                'kind' => $row['kind'],
+                'title' => self::text($row['title_it'], $row['title_en']),
+                'text' => self::text($row['text_it'], $row['text_en']),
+                'items' => $items,
+                'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
+                'order' => (int) $row['sort_order'],
+            ];
+        }, $rows);
     }
 
     // -----------------------------------------------------------------

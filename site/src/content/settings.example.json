@@ -9,72 +9,114 @@
     "en": "Gaia Events — Wedding & Event Planner in Rome"
   },
   "metaDescription": {
-    "it": "Gaia Crognale progetta matrimoni ed eventi su misura a Roma e in tutta Italia, con cura dei dettagli e organizzazione impeccabile.",
-    "en": "Gaia Crognale designs bespoke weddings and events in Rome and across Italy, with meticulous attention to detail."
+    "it": "Wedding Planner & Event Manager a Roma. Gaia Crognale organizza matrimoni ed eventi esclusivi in Italia e all'estero. Destination wedding, cerimonie civili e religiose, eventi corporate. Trasformiamo i tuoi sogni in realtà.",
+    "en": ""
   },
   "ogImage": null,
   "hero": {
-    "eyebrow": { "it": "Wedding & Event Planner", "en": "Wedding & Event Planner" },
-    "title": { "it": "Il vostro giorno, progettato nei dettagli", "en": "Your day, designed down to the detail" },
+    "eyebrow": {
+      "it": "Wedding Planner & Event Manager",
+      "en": ""
+    },
+    "title": {
+      "it": "Creiamo Insieme il Tuo Sogno",
+      "en": ""
+    },
     "subtitle": {
-      "it": "Matrimoni ed eventi su misura a Roma e in tutta Italia.",
-      "en": "Bespoke weddings and events in Rome and across Italy."
+      "it": "Esclusività e ricercatezza per il giorno più importante della tua vita",
+      "en": ""
     },
     "image": null,
-    "ctaLabel": { "it": "Raccontami il tuo evento", "en": "Tell me about your event" }
+    "ctaLabel": {
+      "it": "Parliamone Insieme",
+      "en": ""
+    }
   },
   "sections": {
     "about": {
-      "title": { "it": "Chi sono", "en": "About me" },
+      "title": {
+        "it": "Ciao, sono Gaia",
+        "en": ""
+      },
       "text": {
-        "it": "Mi chiamo Gaia Crognale e da anni accompagno coppie e aziende nella progettazione di eventi che somigliano a chi li vive.",
-        "en": "I am Gaia Crognale and for years I have guided couples and companies in designing events that look like the people living them."
+        "it": "Da oltre 10 anni trasformo i sogni in eventi indimenticabili. Ho organizzato matrimoni in location esclusive in tutta Italia e all'estero, curando ogni dettaglio con passione. Ho avuto anche l'onore di collaborare con brand prestigiosi come Calzedonia, BNL e Zurich. Il mio obiettivo è rendere il vostro giorno speciale unico e senza stress, curando ogni dettaglio con passione e professionalità.",
+        "en": ""
       }
     },
     "services": {
-      "title": { "it": "Come lavoro", "en": "How I work" },
+      "title": {
+        "it": "Come Posso Aiutarti",
+        "en": ""
+      },
       "text": {
         "it": "Dalla consulenza iniziale al coordinamento del giorno, scegliete quanto affidarmi.",
         "en": "From the first consultation to day-of coordination, you choose how much to hand over."
       }
     },
     "portfolio": {
-      "title": { "it": "Eventi realizzati", "en": "Selected events" },
+      "title": {
+        "it": "I Nostri Eventi",
+        "en": ""
+      },
       "text": {
         "it": "Ogni evento è una storia diversa: queste sono alcune di quelle che ho avuto la fortuna di raccontare.",
         "en": "Every event is a different story: here are a few I have been lucky enough to tell."
       }
     },
     "reviews": {
-      "title": { "it": "Dicono di me", "en": "Kind words" },
-      "text": { "it": "", "en": "" }
+      "title": {
+        "it": "Dicono di me",
+        "en": "Kind words"
+      },
+      "text": {
+        "it": "",
+        "en": ""
+      }
     },
     "instagram": {
-      "title": { "it": "Su Instagram", "en": "On Instagram" },
-      "text": { "it": "", "en": "" }
+      "title": {
+        "it": "Su Instagram",
+        "en": "On Instagram"
+      },
+      "text": {
+        "it": "",
+        "en": ""
+      }
     },
     "cta": {
-      "title": { "it": "Parliamo del vostro evento", "en": "Let's talk about your event" },
+      "title": {
+        "it": "Il Tuo Evento Perfetto Inizia da Qui",
+        "en": ""
+      },
       "text": {
-        "it": "Scrivimi: in poche righe raccontami data, luogo e atmosfera che immaginate.",
-        "en": "Write to me: in a few lines tell me the date, the place and the mood you imagine."
+        "it": "Ogni grande evento inizia con una conversazione. Raccontami la tua visione e insieme la trasformeremo in realtà.",
+        "en": ""
       }
     }
   },
   "about": {
-    "title": { "it": "Gaia Crognale", "en": "Gaia Crognale" },
+    "title": {
+      "it": "Ciao, sono Gaia",
+      "en": ""
+    },
     "text": {
-      "it": "Testo segnaposto. Il contenuto definitivo arriva dal back office.",
-      "en": "Placeholder text. The final content comes from the back office."
+      "it": "Da oltre dieci anni dedico la mia vita alla realizzazione di matrimoni da sogno. La mia storia con gli eventi è iniziata quasi per caso, organizzando il matrimonio di una cara amica, e da quel momento ho capito che questa era la mia vocazione.",
+      "en": ""
     },
     "image": null
   },
   "contact": {
-    "title": { "it": "Contatti", "en": "Contact" },
+    "title": {
+      "it": "Contatti",
+      "en": "Contact"
+    },
     "text": {
       "it": "Rispondo di solito entro 24 ore, dal lunedì al venerdì.",
       "en": "I usually reply within 24 hours, Monday to Friday."
     },
-    "address": { "it": "Roma, Italia", "en": "Rome, Italy" }
+    "address": {
+      "it": "Viale Vaticano 53 - 00165 Roma",
+      "en": ""
+    }
   }
 }

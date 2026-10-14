@@ -22,6 +22,7 @@ secrets.json
 !admin/sql/schema.sql
 !admin/sql/seed.example.sql
 !admin/sql/seed-contenuti-v1.sql
+!admin/sql/seed-contenuti-sanity.sql
 *.sql.gz
 *.dump
 *.bak

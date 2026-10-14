@@ -1,62 +1,163 @@
 [
   {
     "id": 1,
-    "slug": "full-planning",
-    "title": { "it": "Full planning", "en": "Full planning" },
+    "slug": "planning",
+    "title": {
+      "it": "Wedding Planning Completo",
+      "en": ""
+    },
     "subtitle": {
-      "it": "Dalla prima idea all'ultimo brindisi",
-      "en": "From the first idea to the last toast"
+      "it": "Full Service",
+      "en": ""
     },
     "description": {
-      "it": "Vi accompagno in ogni fase: concept, budget, selezione dei fornitori, progettazione degli allestimenti e coordinamento del giorno.",
-      "en": "I guide you through every stage: concept, budget, supplier selection, design and day-of coordination."
+      "it": "Un servizio a 360 gradi che vi accompagna dalla prima idea fino all'ultimo ballo. Mi occupo di ogni aspetto dell'organizzazione, permettendovi di vivere il periodo del fidanzamento senza stress.",
+      "en": ""
     },
     "features": {
-      "it": ["Concept e mood board", "Gestione del budget", "Selezione fornitori", "Coordinamento del giorno"],
-      "en": ["Concept and mood board", "Budget management", "Supplier selection", "Day-of coordination"]
+      "it": [
+        "Consulenza iniziale e definizione del concept",
+        "Ricerca e selezione delle location",
+        "Gestione budget e contratti fornitori",
+        "Coordinamento catering, fiori, musica",
+        "Design personalizzato degli allestimenti",
+        "Gestione inviti e RSVP",
+        "Timeline dettagliata della giornata",
+        "Coordinamento completo il giorno del matrimonio"
+      ],
+      "en": []
     },
-    "icon": "sparkles",
+    "icon": "calendar",
     "image": null,
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
     "active": true,
     "order": 1
   },
   {
     "id": 2,
     "slug": "coordinamento",
-    "title": { "it": "Coordinamento del giorno", "en": "Day-of coordination" },
+    "title": {
+      "it": "Coordinamento del Giorno",
+      "en": ""
+    },
     "subtitle": {
-      "it": "Avete organizzato tutto: ci penso io a farlo funzionare",
-      "en": "You planned it all: I make it run"
+      "it": "Day-of",
+      "en": ""
     },
     "description": {
-      "it": "Entro in gioco nelle settimane finali, raccolgo i fili e gestisco la regia della giornata.",
-      "en": "I step in during the final weeks, pull the threads together and direct the day."
+      "it": "Avete già organizzato tutto ma desiderate un professionista che gestisca la giornata? Questo servizio è pensato per garantire che tutto proceda perfettamente mentre voi vi godete ogni istante.",
+      "en": ""
     },
     "features": {
-      "it": ["Timeline dettagliata", "Briefing dei fornitori", "Regia della giornata"],
-      "en": ["Detailed timeline", "Supplier briefing", "On-site direction"]
+      "it": [
+        "Incontri pre-matrimonio per conoscere i dettagli",
+        "Verifica e coordinamento con tutti i fornitori",
+        "Gestione della timeline",
+        "Supervisione allestimenti",
+        "Punto di riferimento per ospiti e fornitori",
+        "Gestione imprevisti",
+        "Presenza dal setup alla chiusura"
+      ],
+      "en": []
     },
-    "icon": "clock",
+    "icon": "users",
     "image": null,
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
     "active": true,
     "order": 2
   },
   {
     "id": 3,
-    "slug": "eventi-aziendali",
-    "title": { "it": "Eventi aziendali", "en": "Corporate events" },
-    "subtitle": { "it": "Quando l'immagine conta", "en": "When image matters" },
+    "slug": "design",
+    "title": {
+      "it": "Design & Styling",
+      "en": ""
+    },
+    "subtitle": {
+      "it": "Creative",
+      "en": ""
+    },
     "description": {
-      "it": "Inaugurazioni, cene di gala e convention: eventi coerenti con l'identità dell'azienda.",
-      "en": "Openings, gala dinners and conventions: events consistent with your brand."
+      "it": "La bellezza sta nei dettagli. Creo concept unici e allestimenti che trasformano qualsiasi location in uno spazio magico, riflettendo la vostra personalità e il vostro stile.",
+      "en": ""
     },
     "features": {
-      "it": ["Location scouting", "Allestimenti brandizzati", "Gestione ospiti"],
+      "it": [
+        "Creazione mood board e concept visivo",
+        "Progettazione allestimenti personalizzati",
+        "Selezione palette colori e materiali",
+        "Coordinamento con fioristi e fornitori",
+        "Styling tavoli e aree cerimonia",
+        "Elementi decorativi personalizzati",
+        "Supervisione montaggio e smontaggio"
+      ],
       "en": []
     },
-    "icon": "briefcase",
+    "icon": "palette",
     "image": null,
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
     "active": true,
     "order": 3
+  },
+  {
+    "id": 4,
+    "slug": "destination",
+    "title": {
+      "it": "Destination Wedding",
+      "en": ""
+    },
+    "subtitle": {
+      "it": "Worldwide",
+      "en": ""
+    },
+    "description": {
+      "it": "Sognate un matrimonio in una location lontana da casa? Organizzo destination wedding in tutta Italia e all'estero, gestendo ogni aspetto logistico con la stessa cura di un evento locale.",
+      "en": ""
+    },
+    "features": {
+      "it": [
+        "Ricerca location esclusive",
+        "Gestione logistica viaggi e alloggi",
+        "Selezione e coordinamento fornitori locali",
+        "Supporto burocratico e permessi",
+        "Organizzazione attività per gli ospiti",
+        "Welcome dinner e farewell brunch",
+        "Presenza in loco per tutto il soggiorno"
+      ],
+      "en": []
+    },
+    "icon": "plane",
+    "image": null,
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
+    "active": true,
+    "order": 4
   }
 ]

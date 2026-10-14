@@ -132,12 +132,13 @@ CREATE TABLE IF NOT EXISTS `pages` (
   CONSTRAINT `fk_pages_og` FOREIGN KEY (`og_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Blocchi ripetibili di una pagina: serve alla destination wedding, che
--- ha servizi, destinazioni, processo, FAQ, testimonial e CTA.
+-- Blocchi ripetibili di una pagina: servono alla destination wedding
+-- (servizi, destinazioni, processo, FAQ, testimonial, CTA) e alla pagina
+-- chi sono (timeline del percorso e valori).
 CREATE TABLE IF NOT EXISTS `page_sections` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `page_id`    INT UNSIGNED NOT NULL,
-  `kind`       ENUM('intro','services','destinations','process','faq','testimonial','cta') NOT NULL,
+  `kind`       ENUM('intro','services','destinations','process','faq','testimonial','cta','timeline','values') NOT NULL,
   `title_it`   VARCHAR(255) DEFAULT NULL,
   `title_en`   VARCHAR(255) DEFAULT NULL,
   `text_it`    TEXT DEFAULT NULL,

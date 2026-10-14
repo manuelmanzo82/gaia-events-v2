@@ -31,12 +31,22 @@ export const BUSINESS = {
   city: 'Roma',
   region: 'Lazio',
   country: 'IT',
+  /**
+   * Indirizzo recuperato dalle impostazioni di Sanity.
+   * DA CONFERMARE CON GAIA: vedi docs/DA-CHIEDERE-A-GAIA.md.
+   * Finché non è confermato resta fuori dai contenuti pubblici e compare
+   * solo nel JSON-LD, dove serve a qualificare l'attività come locale.
+   */
+  street: 'Viale Vaticano 53',
+  postalCode: '00165',
   email: 'gaiacrognale@gmail.com',
   /** Formato E.164, per i link tel: e wa.me */
   phone: '+393273855362',
   whatsapp: '393273855362',
   instagram: 'gaiacrognale_events',
   instagramUrl: 'https://www.instagram.com/gaiacrognale_events/',
+  /** Pagina trovata nelle impostazioni di Sanity, mai citata prima. */
+  facebookUrl: 'https://www.facebook.com/GaiaCrognaleEventi',
 } as const;
 
 /** Percorso pubblico delle immagini caricate dal back office. */

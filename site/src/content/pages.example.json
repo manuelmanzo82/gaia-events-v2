@@ -2,7 +2,7 @@
   {
     "key": "about",
     "title": {
-      "it": "Chi sono",
+      "it": "Chi Sono",
       "en": "About me"
     },
     "metaTitle": {
@@ -14,20 +14,136 @@
       "en": "Gaia Crognale, wedding & event planner in Rome: how I work."
     },
     "intro": {
-      "it": "Progetto eventi da anni e continuo a pensare che il lusso vero sia non dover pensare a niente.",
+      "it": "La passione per i matrimoni perfetti",
       "en": "I have been designing events for years and I still believe real luxury is not having to think about anything."
     },
     "body": {
-      "it": "<p>Testo segnaposto. Il contenuto definitivo arriva dal back office.</p>",
+      "it": "<h2>Ciao, sono Gaia</h2><p>Da oltre dieci anni dedico la mia vita alla realizzazione di matrimoni da sogno. La mia storia con gli eventi è iniziata quasi per caso, organizzando il matrimonio di una cara amica, e da quel momento ho capito che questa era la mia vocazione.</p><p>Ogni coppia che incontro porta con sé una storia unica, sogni e desideri che meritano di essere ascoltati e realizzati. Il mio approccio è basato sull'ascolto attento e sulla comprensione profonda di ciò che rende speciale ogni storia d'amore.</p><p>Roma, con la sua bellezza senza tempo, è la cornice perfetta per i matrimoni che organizzo. Ma la mia esperienza si estende ben oltre i confini della città eterna, abbracciando location mozzafiato in tutta Italia e all'estero.</p><blockquote>Il mio obiettivo è trasformare la vostra visione in realtà, curando ogni dettaglio con passione e dedizione per creare un giorno che superi ogni aspettativa.</blockquote>",
       "en": "<p>Placeholder text. The final content comes from the back office.</p>"
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": [
+      {
+        "kind": "timeline",
+        "title": {
+          "it": "Il mio percorso",
+          "en": ""
+        },
+        "text": {
+          "it": "",
+          "en": ""
+        },
+        "items": [
+          {
+            "label": "2014",
+            "title": {
+              "it": "L'Inizio del Viaggio",
+              "en": ""
+            },
+            "text": {
+              "it": "Il primo matrimonio organizzato per una cara amica. La scintilla che ha acceso una passione inarrestabile.",
+              "en": ""
+            }
+          },
+          {
+            "label": "2016",
+            "title": {
+              "it": "Prima Collaborazione Corporate",
+              "en": ""
+            },
+            "text": {
+              "it": "Il primo grande evento aziendale. La collaborazione con brand prestigiosi apre nuovi orizzonti professionali.",
+              "en": ""
+            }
+          },
+          {
+            "label": "2018",
+            "title": {
+              "it": "Destination Weddings",
+              "en": ""
+            },
+            "text": {
+              "it": "L'avventura si allarga oltre i confini italiani. Matrimoni da sogno in Toscana, Puglia, Costiera Amalfitana e oltre.",
+              "en": ""
+            }
+          },
+          {
+            "label": "2022",
+            "title": {
+              "it": "150+ Eventi",
+              "en": ""
+            },
+            "text": {
+              "it": "Un traguardo importante: oltre 150 eventi realizzati con successo, ognuno unico e indimenticabile.",
+              "en": ""
+            }
+          }
+        ],
+        "image": null,
+        "order": 1
+      },
+      {
+        "kind": "values",
+        "title": {
+          "it": "I miei valori",
+          "en": ""
+        },
+        "text": {
+          "it": "",
+          "en": ""
+        },
+        "items": [
+          {
+            "title": {
+              "it": "Eleganza",
+              "en": ""
+            },
+            "text": {
+              "it": "Ogni dettaglio curato con raffinatezza e gusto impeccabile.",
+              "en": ""
+            }
+          },
+          {
+            "title": {
+              "it": "Passione",
+              "en": ""
+            },
+            "text": {
+              "it": "Dedizione totale per rendere ogni evento un'esperienza unica.",
+              "en": ""
+            }
+          },
+          {
+            "title": {
+              "it": "Eccellenza",
+              "en": ""
+            },
+            "text": {
+              "it": "Standard elevati e fornitori selezionati per risultati impeccabili.",
+              "en": ""
+            }
+          },
+          {
+            "title": {
+              "it": "Creatività",
+              "en": ""
+            },
+            "text": {
+              "it": "Idee originali e concept unici che riflettono la vostra personalità.",
+              "en": ""
+            }
+          }
+        ],
+        "image": null,
+        "order": 2
+      }
+    ]
   },
   {
     "key": "services",
     "title": {
-      "it": "Servizi",
+      "it": "I Miei Servizi",
       "en": "Services"
     },
     "metaTitle": {
@@ -39,20 +155,21 @@
       "en": "Full planning, day-of coordination and corporate events: you choose how much to hand over."
     },
     "intro": {
-      "it": "Tre formule di lavoro, pensate per livelli diversi di coinvolgimento.",
+      "it": "Soluzioni su misura per ogni esigenza",
       "en": "Three ways of working, for different levels of involvement."
     },
     "body": {
-      "it": "",
+      "it": "<p>Scoprite i servizi pensati per accompagnarvi verso il giorno più bello della vostra vita. Che desideriate un supporto completo o solo una guida esperta per il grande giorno, troveremo insieme la soluzione perfetta per voi.</p>",
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "portfolio",
     "title": {
-      "it": "Portfolio",
+      "it": "Storie ed Emozioni",
       "en": "Portfolio"
     },
     "metaTitle": {
@@ -64,7 +181,7 @@
       "en": "Weddings and events delivered in Rome and across Italy."
     },
     "intro": {
-      "it": "Ogni evento è una storia diversa.",
+      "it": "Ogni evento racconta una storia unica. Scoprite alcuni dei momenti magici creati per i miei clienti.",
       "en": "Every event is a different story."
     },
     "body": {
@@ -72,7 +189,8 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "reviews",
@@ -97,7 +215,8 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "blog",
@@ -122,7 +241,8 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "faq",
@@ -147,7 +267,8 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "quote",
@@ -172,12 +293,13 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "contact",
     "title": {
-      "it": "Contatti",
+      "it": "Iniziamo a Conoscerci",
       "en": "Contact"
     },
     "metaTitle": {
@@ -189,7 +311,7 @@
       "en": "Write to me for a first chat, with no commitment."
     },
     "intro": {
-      "it": "",
+      "it": "Sono qui per ascoltare i vostri sogni e trasformarli in realtà",
       "en": ""
     },
     "body": {
@@ -197,7 +319,8 @@
       "en": ""
     },
     "hero": null,
-    "ogImage": null
+    "ogImage": null,
+    "blocks": []
   },
   {
     "key": "privacy",
@@ -223,7 +346,8 @@
     },
     "hero": null,
     "ogImage": null,
-    "updatedAt": "2026-02-01"
+    "updatedAt": "2026-02-01",
+    "blocks": []
   },
   {
     "key": "cookie",
@@ -249,6 +373,7 @@
     },
     "hero": null,
     "ogImage": null,
-    "updatedAt": "2026-02-01"
+    "updatedAt": "2026-02-01",
+    "blocks": []
   }
 ]

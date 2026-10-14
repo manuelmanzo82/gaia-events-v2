@@ -18,6 +18,14 @@ come riferimento**: niente copia-incolla acritico. La recon completa è in
 | Email | `gaiacrognale@gmail.com` |
 | WhatsApp | `+39 327 385 5362` |
 | Instagram | `@gaiacrognale_events` |
+| Facebook | `facebook.com/GaiaCrognaleEventi` |
+| Indirizzo | `Viale Vaticano 53 - 00165 Roma` — **da confermare** |
+
+> **L'indirizzo non è confermato.** Viene dalle impostazioni di Sanity e non
+> sappiamo se sia uno studio o un domicilio privato. Per questo oggi compare
+> **solo nel JSON-LD** `LocalBusiness` e in nessuna pagina. Prima di metterlo
+> nei contatti o su Google Business serve l'ok di Gaia:
+> vedi [docs/DA-CHIEDERE-A-GAIA.md](docs/DA-CHIEDERE-A-GAIA.md).
 
 ## Decisioni prese (non rimetterle in discussione senza chiedere)
 
@@ -160,6 +168,25 @@ npm run preview          # anteprima del build
 # export dei contenuti dal database (sul server)
 php admin/bin/export-content.php --out=../site/src/content
 ```
+
+## Contenuti importati e domande aperte
+
+I contenuti reali sono già dentro, in italiano:
+
+| Da dove | Cosa | Dove sta l'import |
+|---|---|---|
+| Codice della v1 | 8 articoli, 12 FAQ, privacy, cookie | `admin/sql/seed-contenuti-v1.sql` |
+| Sanity | 4 servizi, contatti, biografia, citazione, percorso, valori, hero delle pagine | `admin/sql/seed-contenuti-sanity.sql` |
+
+Da Sanity **non** sono stati importati eventi, Instagram e le immagini Adobe
+Stock: erano materiale di prova o con licenza da verificare. Il dataset
+completo è salvato in `E:\CLAUDE CODE\gaia-backup-sanity` — fuori dalla repo,
+e non va mai committato.
+
+Le domande che restano aperte (recensioni vere o no, diritti delle foto, foto
+originali per la gallery, conferma dell'indirizzo) stanno in
+[docs/DA-CHIEDERE-A-GAIA.md](docs/DA-CHIEDERE-A-GAIA.md). **Leggilo prima di
+lavorare su recensioni o gallery.**
 
 ## Secrets e variabili su GitHub
 

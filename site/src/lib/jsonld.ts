@@ -37,6 +37,8 @@ export function localBusiness(opts: {
     image: opts.image ?? undefined,
     address: {
       '@type': 'PostalAddress',
+      streetAddress: BUSINESS.street,
+      postalCode: BUSINESS.postalCode,
       addressLocality: BUSINESS.city,
       addressRegion: BUSINESS.region,
       addressCountry: BUSINESS.country,
@@ -45,7 +47,7 @@ export function localBusiness(opts: {
       { '@type': 'City', name: BUSINESS.city },
       { '@type': 'Country', name: 'Italia' },
     ],
-    sameAs: [BUSINESS.instagramUrl],
+    sameAs: [BUSINESS.instagramUrl, BUSINESS.facebookUrl],
     knowsLanguage: ['it', 'en'],
   };
 }
