@@ -1,0 +1,149 @@
+- generic [active] [ref=e1]:
+  - link "Vai al contenuto" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - link "Gaia Events" [ref=e4] [cursor=pointer]:
+      - /url: /
+    - navigation "Menu" [ref=e5]:
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "Chi sono" [ref=e8] [cursor=pointer]:
+            - /url: /chi-sono/
+        - listitem [ref=e9]:
+          - link "Servizi" [ref=e10] [cursor=pointer]:
+            - /url: /servizi/
+        - listitem [ref=e11]:
+          - link "Portfolio" [ref=e12] [cursor=pointer]:
+            - /url: /portfolio/
+        - listitem [ref=e13]:
+          - link "Dicono di me" [ref=e14] [cursor=pointer]:
+            - /url: /dicono-di-me/
+        - listitem [ref=e15]:
+          - link "Blog" [ref=e16] [cursor=pointer]:
+            - /url: /blog/
+        - listitem [ref=e17]:
+          - link "FAQ" [ref=e18] [cursor=pointer]:
+            - /url: /faq/
+        - listitem [ref=e19]:
+          - link "Contatti" [ref=e20] [cursor=pointer]:
+            - /url: /contatti/
+        - listitem [ref=e21]:
+          - link "Preventivo" [ref=e22] [cursor=pointer]:
+            - /url: /preventivo/
+    - navigation "Cambia lingua" [ref=e23]:
+      - link "English" [ref=e24] [cursor=pointer]:
+        - /url: /en/
+  - main [ref=e25]:
+    - generic [ref=e26]:
+      - heading "Il vostro giorno, progettato nei dettagli" [level=2] [ref=e27]
+      - paragraph [ref=e28]: Matrimoni ed eventi su misura a Roma e in tutta Italia.
+      - paragraph [ref=e29]: Wedding & Event Planner
+      - paragraph [ref=e30]:
+        - link "Raccontami il tuo evento" [ref=e31] [cursor=pointer]:
+          - /url: /preventivo/
+      - paragraph [ref=e32]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e33]:
+          - text: —
+          - code [ref=e34]: hero
+    - generic [ref=e35]:
+      - heading "Chi sono" [level=2] [ref=e36]
+      - paragraph [ref=e37]: Mi chiamo Gaia Crognale e da anni accompagno coppie e aziende nella progettazione di eventi che somigliano a chi li vive.
+      - paragraph [ref=e38]:
+        - link "Scopri di più" [ref=e39] [cursor=pointer]:
+          - /url: /chi-sono/
+      - paragraph [ref=e40]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e41]:
+          - text: —
+          - code [ref=e42]: about
+    - generic [ref=e43]:
+      - heading "Come lavoro" [level=2] [ref=e44]
+      - paragraph [ref=e45]: Dalla consulenza iniziale al coordinamento del giorno, scegliete quanto affidarmi.
+      - list [ref=e46]:
+        - listitem [ref=e47]: Full planning
+        - listitem [ref=e48]: Coordinamento del giorno
+        - listitem [ref=e49]: Eventi aziendali
+      - paragraph [ref=e50]:
+        - link "Scopri di più" [ref=e51] [cursor=pointer]:
+          - /url: /servizi/
+      - paragraph [ref=e52]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e53]:
+          - text: —
+          - code [ref=e54]: services
+    - generic [ref=e55]:
+      - heading "Eventi realizzati" [level=2] [ref=e56]
+      - paragraph [ref=e57]: "Ogni evento è una storia diversa: queste sono alcune di quelle che ho avuto la fortuna di raccontare."
+      - list [ref=e58]:
+        - listitem [ref=e59]:
+          - link "Chiara e Marco — Villa Aurelia" [ref=e60] [cursor=pointer]:
+            - /url: /portfolio/villa-aurelia-giugno/
+        - listitem [ref=e61]:
+          - link "Convention annuale — EUR" [ref=e62] [cursor=pointer]:
+            - /url: /portfolio/convention-eur/
+      - paragraph [ref=e63]:
+        - link "Tutti gli eventi" [ref=e64] [cursor=pointer]:
+          - /url: /portfolio/
+      - paragraph [ref=e65]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e66]:
+          - text: —
+          - code [ref=e67]: portfolio
+    - generic [ref=e68]:
+      - heading "Dicono di me" [level=2] [ref=e69]
+      - list [ref=e70]:
+        - listitem [ref=e71]: Chiara e Marco — Testo segnaposto della recensione. Gaia ha tenuto insieme ogni dettaglio e noi abbiamo potuto goderci la giornata.
+      - paragraph [ref=e72]:
+        - link "Scopri di più" [ref=e73] [cursor=pointer]:
+          - /url: /dicono-di-me/
+      - paragraph [ref=e74]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e75]:
+          - text: —
+          - code [ref=e76]: reviews
+    - generic [ref=e77]:
+      - heading "Su Instagram" [level=2] [ref=e78]
+      - paragraph [ref=e79]: "Feed Instagram: arriva più avanti via API ufficiale."
+      - paragraph [ref=e80]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e81]:
+          - text: —
+          - code [ref=e82]: instagram
+    - generic [ref=e83]:
+      - heading "Parliamo del vostro evento" [level=2] [ref=e84]
+      - paragraph [ref=e85]: "Scrivimi: in poche righe raccontami data, luogo e atmosfera che immaginate."
+      - paragraph [ref=e86]:
+        - link "Contattami" [ref=e87] [cursor=pointer]:
+          - /url: /contatti/
+      - paragraph [ref=e88]:
+        - text: "Sezione segnaposto: il design arriva nella fase successiva."
+        - generic [ref=e89]:
+          - text: —
+          - code [ref=e90]: cta
+  - contentinfo [ref=e91]:
+    - generic [ref=e92]:
+      - paragraph [ref=e93]: Gaia Events
+      - paragraph [ref=e94]: Gaia Crognale — Roma, Italia
+    - generic [ref=e95]:
+      - paragraph [ref=e96]:
+        - link "gaiacrognale@gmail.com" [ref=e97] [cursor=pointer]:
+          - /url: mailto:gaiacrognale@gmail.com
+      - paragraph [ref=e98]:
+        - link "Scrivimi su WhatsApp" [ref=e99] [cursor=pointer]:
+          - /url: https://wa.me/393273855362
+      - paragraph [ref=e100]:
+        - link "@gaiacrognale_events" [ref=e101] [cursor=pointer]:
+          - /url: https://www.instagram.com/gaiacrognale_events/
+    - navigation "Seguimi" [ref=e102]:
+      - list [ref=e103]:
+        - listitem [ref=e104]:
+          - link "Destination wedding" [ref=e105] [cursor=pointer]:
+            - /url: /destination-wedding/
+        - listitem [ref=e106]:
+          - link "Privacy policy" [ref=e107] [cursor=pointer]:
+            - /url: /privacy/
+        - listitem [ref=e108]:
+          - link "Cookie policy" [ref=e109] [cursor=pointer]:
+            - /url: /cookie/
+    - paragraph [ref=e110]: © 2026 Gaia Crognale — Tutti i diritti riservati

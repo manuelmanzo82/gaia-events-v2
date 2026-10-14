@@ -15,3 +15,8 @@ né in sitemap né negli hreflang. I tipi sono in `src/lib/types.ts`.
 Le immagini sono riferimenti a file in `/uploads/` sull'host: il back office
 genera le varianti WebP (e AVIF se il server lo supporta) e scrive qui
 `width`, `height` e i formati disponibili.
+
+> **In locale le immagini di esempio danno 404**, ed è normale: `/uploads/`
+> esiste solo sul server e i file di `esempi/` non sono mai stati caricati.
+> I riferimenti restano negli esempi apposta, per poter verificare che
+> `lib/images.ts` costruisca `srcset` e `<picture>` come deve.

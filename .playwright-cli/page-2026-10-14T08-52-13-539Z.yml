@@ -1,0 +1,94 @@
+- generic [active] [ref=f3e1]:
+  - link "Vai al contenuto" [ref=f3e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=f3e3]:
+    - link "Gaia Events" [ref=f3e4] [cursor=pointer]:
+      - /url: /
+    - navigation "Menu" [ref=f3e5]:
+      - list [ref=f3e6]:
+        - listitem [ref=f3e7]:
+          - link "Chi sono" [ref=f3e8] [cursor=pointer]:
+            - /url: /chi-sono/
+        - listitem [ref=f3e9]:
+          - link "Servizi" [ref=f3e10] [cursor=pointer]:
+            - /url: /servizi/
+        - listitem [ref=f3e11]:
+          - link "Portfolio" [ref=f3e12] [cursor=pointer]:
+            - /url: /portfolio/
+        - listitem [ref=f3e13]:
+          - link "Dicono di me" [ref=f3e14] [cursor=pointer]:
+            - /url: /dicono-di-me/
+        - listitem [ref=f3e15]:
+          - link "Blog" [ref=f3e16] [cursor=pointer]:
+            - /url: /blog/
+        - listitem [ref=f3e17]:
+          - link "FAQ" [ref=f3e18] [cursor=pointer]:
+            - /url: /faq/
+        - listitem [ref=f3e19]:
+          - link "Contatti" [ref=f3e20] [cursor=pointer]:
+            - /url: /contatti/
+        - listitem [ref=f3e21]:
+          - link "Preventivo" [ref=f3e22] [cursor=pointer]:
+            - /url: /preventivo/
+    - navigation "Cambia lingua" [ref=f3e23]:
+      - link "English" [ref=f3e24] [cursor=pointer]:
+        - /url: /en/portfolio/villa-aurelia-giugno/
+  - main [ref=f3e25]:
+    - navigation "Percorso di navigazione" [ref=f3e26]:
+      - list [ref=f3e27]:
+        - listitem [ref=f3e28]:
+          - link "Home" [ref=f3e29] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=f3e30]:
+          - text: /
+          - link "Portfolio" [ref=f3e31] [cursor=pointer]:
+            - /url: /portfolio/
+        - listitem [ref=f3e32]: /Chiara e Marco — Villa Aurelia
+    - article [ref=f3e33]:
+      - heading "Chiara e Marco — Villa Aurelia" [level=1] [ref=f3e34]
+      - generic [ref=f3e35]:
+        - term [ref=f3e36]: Location
+        - definition [ref=f3e37]: Villa Aurelia, Roma
+        - term [ref=f3e38]: Data
+        - definition [ref=f3e39]:
+          - time [ref=f3e40]: 14 giugno 2026
+        - term [ref=f3e41]: Categoria
+        - definition [ref=f3e42]: Matrimonio classico
+      - img "Tavolo imperiale allestito al tramonto" [ref=f3e44]
+      - paragraph [ref=f3e46]: Testo segnaposto per la descrizione dell'evento. Il contenuto definitivo arriva dal back office.
+      - generic [ref=f3e47]:
+        - heading "Galleria" [level=2] [ref=f3e48]
+        - list [ref=f3e49]:
+          - listitem [ref=f3e50]:
+            - img "Bouquet di peonie bianche" [ref=f3e52]
+          - listitem [ref=f3e53]:
+            - img "Dettaglio della mise en place" [ref=f3e55]
+      - paragraph [ref=f3e56]:
+        - link "Tutti gli eventi" [ref=f3e57] [cursor=pointer]:
+          - /url: /portfolio/
+  - contentinfo [ref=f3e58]:
+    - generic [ref=f3e59]:
+      - paragraph [ref=f3e60]: Gaia Events
+      - paragraph [ref=f3e61]: Gaia Crognale — Roma, Italia
+    - generic [ref=f3e62]:
+      - paragraph [ref=f3e63]:
+        - link "gaiacrognale@gmail.com" [ref=f3e64] [cursor=pointer]:
+          - /url: mailto:gaiacrognale@gmail.com
+      - paragraph [ref=f3e65]:
+        - link "Scrivimi su WhatsApp" [ref=f3e66] [cursor=pointer]:
+          - /url: https://wa.me/393273855362
+      - paragraph [ref=f3e67]:
+        - link "@gaiacrognale_events" [ref=f3e68] [cursor=pointer]:
+          - /url: https://www.instagram.com/gaiacrognale_events/
+    - navigation "Seguimi" [ref=f3e69]:
+      - list [ref=f3e70]:
+        - listitem [ref=f3e71]:
+          - link "Destination wedding" [ref=f3e72] [cursor=pointer]:
+            - /url: /destination-wedding/
+        - listitem [ref=f3e73]:
+          - link "Privacy policy" [ref=f3e74] [cursor=pointer]:
+            - /url: /privacy/
+        - listitem [ref=f3e75]:
+          - link "Cookie policy" [ref=f3e76] [cursor=pointer]:
+            - /url: /cookie/
+    - paragraph [ref=f3e77]: © 2026 Gaia Crognale — Tutti i diritti riservati
