@@ -1,0 +1,146 @@
+[
+  {
+    "key": "about",
+    "title": { "it": "Chi sono", "en": "About me" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Gaia Crognale, wedding & event planner a Roma: il mio metodo di lavoro.",
+      "en": "Gaia Crognale, wedding & event planner in Rome: how I work."
+    },
+    "intro": {
+      "it": "Progetto eventi da anni e continuo a pensare che il lusso vero sia non dover pensare a niente.",
+      "en": "I have been designing events for years and I still believe real luxury is not having to think about anything."
+    },
+    "body": {
+      "it": "<p>Testo segnaposto. Il contenuto definitivo arriva dal back office.</p>",
+      "en": "<p>Placeholder text. The final content comes from the back office.</p>"
+    },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "services",
+    "title": { "it": "Servizi", "en": "Services" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Full planning, coordinamento del giorno ed eventi aziendali: scegliete quanto affidarmi.",
+      "en": "Full planning, day-of coordination and corporate events: you choose how much to hand over."
+    },
+    "intro": {
+      "it": "Tre formule di lavoro, pensate per livelli diversi di coinvolgimento.",
+      "en": "Three ways of working, for different levels of involvement."
+    },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "portfolio",
+    "title": { "it": "Portfolio", "en": "Portfolio" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Matrimoni ed eventi realizzati a Roma e in Italia.",
+      "en": "Weddings and events delivered in Rome and across Italy."
+    },
+    "intro": { "it": "Ogni evento è una storia diversa.", "en": "Every event is a different story." },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "reviews",
+    "title": { "it": "Dicono di me", "en": "Reviews" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Le parole delle coppie e delle aziende con cui ho lavorato.",
+      "en": "Words from the couples and companies I have worked with."
+    },
+    "intro": { "it": "", "en": "" },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "blog",
+    "title": { "it": "Blog", "en": "Blog" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Consigli pratici su organizzazione, budget e location per matrimoni a Roma.",
+      "en": "Practical advice on planning, budget and venues for weddings in Rome."
+    },
+    "intro": { "it": "", "en": "" },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "faq",
+    "title": { "it": "Domande frequenti", "en": "Frequently asked questions" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Tempi, costi, modalità di lavoro: le domande che mi fanno più spesso.",
+      "en": "Timing, costs, ways of working: the questions I am asked most often."
+    },
+    "intro": { "it": "", "en": "" },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "quote",
+    "title": { "it": "Richiedi un preventivo", "en": "Request a quote" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Raccontami il tuo evento e ti preparo una proposta su misura.",
+      "en": "Tell me about your event and I will prepare a bespoke proposal."
+    },
+    "intro": {
+      "it": "Poche domande per capire cosa avete in mente. Nessun prezzo automatico: la proposta la scrivo io.",
+      "en": "A few questions to understand what you have in mind. No automatic pricing: I write the proposal myself."
+    },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "contact",
+    "title": { "it": "Contatti", "en": "Contact" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Scrivimi per un primo confronto senza impegno.",
+      "en": "Write to me for a first chat, with no commitment."
+    },
+    "intro": { "it": "", "en": "" },
+    "body": { "it": "", "en": "" },
+    "hero": null,
+    "ogImage": null
+  },
+  {
+    "key": "privacy",
+    "title": { "it": "Privacy policy", "en": "Privacy policy" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "intro": { "it": "", "en": "" },
+    "body": {
+      "it": "<p>Testo segnaposto. L'informativa della v1 va importata nel back office, con l'email corretta gaiacrognale@gmail.com.</p>",
+      "en": "<p>Placeholder text.</p>"
+    },
+    "hero": null,
+    "ogImage": null,
+    "updatedAt": "2026-10-14"
+  },
+  {
+    "key": "cookie",
+    "title": { "it": "Cookie policy", "en": "Cookie policy" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "intro": { "it": "", "en": "" },
+    "body": {
+      "it": "<p>Testo segnaposto. La cookie policy della v1 va importata nel back office.</p>",
+      "en": "<p>Placeholder text.</p>"
+    },
+    "hero": null,
+    "ogImage": null,
+    "updatedAt": "2026-10-14"
+  }
+]

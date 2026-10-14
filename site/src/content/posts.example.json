@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "slug": {
+      "it": "quanto-costa-un-wedding-planner",
+      "en": "how-much-does-a-wedding-planner-cost"
+    },
+    "title": {
+      "it": "Quanto costa un wedding planner?",
+      "en": "How much does a wedding planner cost?"
+    },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": {
+      "it": "Come si costruisce il compenso di una wedding planner e cosa è compreso davvero.",
+      "en": "How a wedding planner's fee is built and what is actually included."
+    },
+    "excerpt": {
+      "it": "Percentuale sul budget, forfait o coordinamento: le tre formule più diffuse, spiegate senza giri di parole.",
+      "en": "Percentage of budget, flat fee or coordination: the three most common formulas, explained plainly."
+    },
+    "category": { "it": "Organizzazione", "en": "Planning" },
+    "date": "2026-02-10",
+    "readingTime": 6,
+    "cover": null,
+    "body": {
+      "it": "<p>Testo segnaposto dell'articolo. Gli 8 articoli della v1 vanno importati nel back office.</p>",
+      "en": "<p>Placeholder article text.</p>"
+    },
+    "active": true
+  },
+  {
+    "id": 2,
+    "slug": { "it": "matrimonio-a-roma-le-location", "en": "" },
+    "title": { "it": "Matrimonio a Roma: dove sposarsi", "en": "" },
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "Ville storiche, terrazze e casali: come scegliere la location giusta a Roma.", "en": "" },
+    "excerpt": {
+      "it": "Ville storiche, terrazze sul centro e casali fuori porta: come restringere il campo senza impazzire.",
+      "en": ""
+    },
+    "category": { "it": "Location", "en": "" },
+    "date": "2026-01-22",
+    "readingTime": 8,
+    "cover": null,
+    "body": {
+      "it": "<p>Testo segnaposto dell'articolo, disponibile solo in italiano: la pagina EN non viene generata.</p>",
+      "en": ""
+    },
+    "active": true
+  }
+]

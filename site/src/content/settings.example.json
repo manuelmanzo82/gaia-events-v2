@@ -1,0 +1,80 @@
+{
+  "siteName": "Gaia Events",
+  "tagline": {
+    "it": "Wedding & event planner a Roma",
+    "en": "Wedding & event planner in Rome"
+  },
+  "metaTitle": {
+    "it": "Gaia Events — Wedding & Event Planner a Roma",
+    "en": "Gaia Events — Wedding & Event Planner in Rome"
+  },
+  "metaDescription": {
+    "it": "Gaia Crognale progetta matrimoni ed eventi su misura a Roma e in tutta Italia, con cura dei dettagli e organizzazione impeccabile.",
+    "en": "Gaia Crognale designs bespoke weddings and events in Rome and across Italy, with meticulous attention to detail."
+  },
+  "ogImage": null,
+  "hero": {
+    "eyebrow": { "it": "Wedding & Event Planner", "en": "Wedding & Event Planner" },
+    "title": { "it": "Il vostro giorno, progettato nei dettagli", "en": "Your day, designed down to the detail" },
+    "subtitle": {
+      "it": "Matrimoni ed eventi su misura a Roma e in tutta Italia.",
+      "en": "Bespoke weddings and events in Rome and across Italy."
+    },
+    "image": null,
+    "ctaLabel": { "it": "Raccontami il tuo evento", "en": "Tell me about your event" }
+  },
+  "sections": {
+    "about": {
+      "title": { "it": "Chi sono", "en": "About me" },
+      "text": {
+        "it": "Mi chiamo Gaia Crognale e da anni accompagno coppie e aziende nella progettazione di eventi che somigliano a chi li vive.",
+        "en": "I am Gaia Crognale and for years I have guided couples and companies in designing events that look like the people living them."
+      }
+    },
+    "services": {
+      "title": { "it": "Come lavoro", "en": "How I work" },
+      "text": {
+        "it": "Dalla consulenza iniziale al coordinamento del giorno, scegliete quanto affidarmi.",
+        "en": "From the first consultation to day-of coordination, you choose how much to hand over."
+      }
+    },
+    "portfolio": {
+      "title": { "it": "Eventi realizzati", "en": "Selected events" },
+      "text": {
+        "it": "Ogni evento è una storia diversa: queste sono alcune di quelle che ho avuto la fortuna di raccontare.",
+        "en": "Every event is a different story: here are a few I have been lucky enough to tell."
+      }
+    },
+    "reviews": {
+      "title": { "it": "Dicono di me", "en": "Kind words" },
+      "text": { "it": "", "en": "" }
+    },
+    "instagram": {
+      "title": { "it": "Su Instagram", "en": "On Instagram" },
+      "text": { "it": "", "en": "" }
+    },
+    "cta": {
+      "title": { "it": "Parliamo del vostro evento", "en": "Let's talk about your event" },
+      "text": {
+        "it": "Scrivimi: in poche righe raccontami data, luogo e atmosfera che immaginate.",
+        "en": "Write to me: in a few lines tell me the date, the place and the mood you imagine."
+      }
+    }
+  },
+  "about": {
+    "title": { "it": "Gaia Crognale", "en": "Gaia Crognale" },
+    "text": {
+      "it": "Testo segnaposto. Il contenuto definitivo arriva dal back office.",
+      "en": "Placeholder text. The final content comes from the back office."
+    },
+    "image": null
+  },
+  "contact": {
+    "title": { "it": "Contatti", "en": "Contact" },
+    "text": {
+      "it": "Rispondo di solito entro 24 ore, dal lunedì al venerdì.",
+      "en": "I usually reply within 24 hours, Monday to Friday."
+    },
+    "address": { "it": "Roma, Italia", "en": "Rome, Italy" }
+  }
+}

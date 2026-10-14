@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "question": {
+      "it": "Quanto tempo prima vi devo contattare?",
+      "en": "How far in advance should I contact you?"
+    },
+    "answer": {
+      "it": "Per un matrimonio l'ideale è dodici mesi prima, ma ho organizzato eventi splendidi anche in tre mesi.",
+      "en": "Twelve months ahead is ideal for a wedding, but I have organised beautiful events in three months too."
+    },
+    "group": "generale",
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "question": {
+      "it": "Lavorate solo a Roma?",
+      "en": "Do you work only in Rome?"
+    },
+    "answer": {
+      "it": "Roma è la mia base, ma seguo eventi in tutta Italia e destination wedding per coppie che arrivano dall'estero.",
+      "en": "Rome is my base, but I work across Italy and handle destination weddings for couples coming from abroad."
+    },
+    "group": "generale",
+    "active": true,
+    "order": 2
+  },
+  {
+    "id": 3,
+    "question": {
+      "it": "Posso affidarvi solo una parte dell'organizzazione?",
+      "en": "Can I hand over only part of the planning?"
+    },
+    "answer": {
+      "it": "Sì: il coordinamento del giorno è pensato esattamente per chi ha già organizzato tutto.",
+      "en": "Yes: day-of coordination is designed exactly for those who have already planned everything."
+    },
+    "group": "servizi",
+    "active": true,
+    "order": 3
+  },
+  {
+    "id": 4,
+    "question": {
+      "it": "Come si costruisce il preventivo?",
+      "en": "How is the quote built?"
+    },
+    "answer": {
+      "it": "Dopo una prima chiacchierata preparo una proposta su misura: non ci sono listini automatici.",
+      "en": "After a first conversation I prepare a bespoke proposal: there are no automatic price lists."
+    },
+    "group": "servizi",
+    "active": true,
+    "order": 4
+  }
+]

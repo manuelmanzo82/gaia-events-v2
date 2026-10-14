@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "slug": "full-planning",
+    "title": { "it": "Full planning", "en": "Full planning" },
+    "subtitle": {
+      "it": "Dalla prima idea all'ultimo brindisi",
+      "en": "From the first idea to the last toast"
+    },
+    "description": {
+      "it": "Vi accompagno in ogni fase: concept, budget, selezione dei fornitori, progettazione degli allestimenti e coordinamento del giorno.",
+      "en": "I guide you through every stage: concept, budget, supplier selection, design and day-of coordination."
+    },
+    "features": {
+      "it": ["Concept e mood board", "Gestione del budget", "Selezione fornitori", "Coordinamento del giorno"],
+      "en": ["Concept and mood board", "Budget management", "Supplier selection", "Day-of coordination"]
+    },
+    "icon": "sparkles",
+    "image": null,
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "slug": "coordinamento",
+    "title": { "it": "Coordinamento del giorno", "en": "Day-of coordination" },
+    "subtitle": {
+      "it": "Avete organizzato tutto: ci penso io a farlo funzionare",
+      "en": "You planned it all: I make it run"
+    },
+    "description": {
+      "it": "Entro in gioco nelle settimane finali, raccolgo i fili e gestisco la regia della giornata.",
+      "en": "I step in during the final weeks, pull the threads together and direct the day."
+    },
+    "features": {
+      "it": ["Timeline dettagliata", "Briefing dei fornitori", "Regia della giornata"],
+      "en": ["Detailed timeline", "Supplier briefing", "On-site direction"]
+    },
+    "icon": "clock",
+    "image": null,
+    "active": true,
+    "order": 2
+  },
+  {
+    "id": 3,
+    "slug": "eventi-aziendali",
+    "title": { "it": "Eventi aziendali", "en": "Corporate events" },
+    "subtitle": { "it": "Quando l'immagine conta", "en": "When image matters" },
+    "description": {
+      "it": "Inaugurazioni, cene di gala e convention: eventi coerenti con l'identità dell'azienda.",
+      "en": "Openings, gala dinners and conventions: events consistent with your brand."
+    },
+    "features": {
+      "it": ["Location scouting", "Allestimenti brandizzati", "Gestione ospiti"],
+      "en": []
+    },
+    "icon": "briefcase",
+    "image": null,
+    "active": true,
+    "order": 3
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "author": "Chiara e Marco",
+    "eventName": { "it": "Matrimonio a Villa Aurelia", "en": "Wedding at Villa Aurelia" },
+    "date": "2026-06-20",
+    "text": {
+      "it": "Testo segnaposto della recensione. Gaia ha tenuto insieme ogni dettaglio e noi abbiamo potuto goderci la giornata.",
+      "en": "Placeholder review text. Gaia held every detail together and we could simply enjoy the day."
+    },
+    "rating": 5,
+    "image": null,
+    "featured": true,
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "author": "Studio Bianchi",
+    "eventName": { "it": "Convention annuale", "en": "Annual convention" },
+    "date": "2026-03-10",
+    "text": {
+      "it": "Testo segnaposto della recensione aziendale.",
+      "en": ""
+    },
+    "rating": 5,
+    "image": null,
+    "featured": false,
+    "active": true,
+    "order": 2
+  }
+]

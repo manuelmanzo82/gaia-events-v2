@@ -1,0 +1,58 @@
+{
+  "title": { "it": "Destination wedding in Italia", "en": "Destination wedding in Italy" },
+  "metaTitle": { "it": "", "en": "" },
+  "metaDescription": {
+    "it": "Organizzazione completa di destination wedding a Roma e in Italia per coppie che arrivano dall'estero.",
+    "en": "Full destination wedding planning in Rome and across Italy for couples travelling from abroad."
+  },
+  "intro": {
+    "it": "Sposarsi in Italia arrivando da lontano richiede un referente sul posto: quello sono io.",
+    "en": "Getting married in Italy from abroad calls for someone on the ground: that is me."
+  },
+  "hero": null,
+  "ogImage": null,
+  "blocks": [
+    {
+      "kind": "services",
+      "title": { "it": "Cosa comprende", "en": "What is included" },
+      "text": { "it": "", "en": "" },
+      "items": [
+        {
+          "title": { "it": "Documenti e burocrazia", "en": "Paperwork and bureaucracy" },
+          "text": {
+            "it": "Vi guido fra i documenti necessari per sposarsi in Italia.",
+            "en": "I guide you through the documents needed to marry in Italy."
+          }
+        },
+        {
+          "title": { "it": "Location scouting", "en": "Venue scouting" },
+          "text": {
+            "it": "Visito le location per voi e vi mando materiale onesto, non da brochure.",
+            "en": "I visit venues for you and send honest material, not brochure shots."
+          }
+        }
+      ],
+      "order": 1
+    },
+    {
+      "kind": "destinations",
+      "title": { "it": "Dove", "en": "Where" },
+      "text": { "it": "", "en": "" },
+      "items": [
+        { "title": { "it": "Roma", "en": "Rome" }, "text": { "it": "", "en": "" } },
+        { "title": { "it": "Costiera Amalfitana", "en": "Amalfi Coast" }, "text": { "it": "", "en": "" } },
+        { "title": { "it": "Lago di Como", "en": "Lake Como" }, "text": { "it": "", "en": "" } }
+      ],
+      "order": 2
+    },
+    {
+      "kind": "cta",
+      "title": { "it": "Scriviamoci", "en": "Let's talk" },
+      "text": {
+        "it": "Fuso orario diverso? Fissiamo una videochiamata.",
+        "en": "Different time zone? Let's set up a video call."
+      },
+      "order": 3
+    }
+  ]
+}
