@@ -22,12 +22,16 @@ come riferimento**: niente copia-incolla acritico. La recon completa è in
 ## Decisioni prese (non rimetterle in discussione senza chiedere)
 
 **Stack**
-- Astro 5 con `output: 'static'`. **Nessun adapter** (niente Vercel): l'hosting di
+- Astro 7 con `output: 'static'`. **Nessun adapter** (niente Vercel): l'hosting di
   produzione è condiviso, solo PHP + MySQL, **niente Node**.
 - React 19 **solo come islands**, dove serve interattività. Tutto il resto è `.astro`.
-- **Tailwind 4** via `@tailwindcss/vite` (`@astrojs/tailwind` è deprecato su
-  Astro 5). Configurazione CSS-first: i token stanno in `@theme` dentro
+- **Node ≥ 22.12** (lo impone Astro 7). In CI il workflow usa `node-version: 22`.
+- **Tailwind 4** via `@tailwindcss/vite` (`@astrojs/tailwind` è deprecato).
+  Configurazione CSS-first: i token stanno in `@theme` dentro
   `src/styles/global.css`, **non** in un `tailwind.config`.
+- **TypeScript resta su 5.x**: `@astrojs/check` accetta come peer solo
+  `^5 || ^6`, e TypeScript 7 è già uscito. Non aggiornarlo finché
+  `@astrojs/check` non lo supporta, altrimenti `npm install` fallisce.
 - Font **self-hosted** in `site/public/fonts/`. I `.woff2` non sono ancora in
   repo e le `@font-face` in `src/styles/fonts.css` sono commentate: si
   attivano in fase di design.
@@ -108,7 +112,7 @@ Font: **Cormorant Garamond** (display) + **Montserrat** (testo), self-hosted.
 ## Struttura
 
 ```
-site/                   Astro 5
+site/                   Astro 7
   src/config/site.ts    SITE_URL, contatti, lingue — fonte unica
   src/i18n/             routes.ts (slug IT↔EN) · ui.ts (stringhe) · index.ts (helper)
   src/lib/              content.ts · seo.ts · jsonld.ts · images.ts

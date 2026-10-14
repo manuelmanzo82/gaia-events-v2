@@ -1,9 +1,9 @@
 # Gaia Events — sito v2
 
 Sito di **Gaia Crognale**, wedding & event planner a Roma.
-Astro 5 statico bilingue IT/EN + back office PHP/MySQL su hosting condiviso.
+Astro 7 statico bilingue IT/EN + back office PHP/MySQL su hosting condiviso.
 
-- `site/` — frontend Astro 5 (`output: 'static'`), React 19 solo come islands, Tailwind
+- `site/` — frontend Astro 7 (`output: 'static'`), React 19 solo come islands, Tailwind
 - `admin/` — back office PHP 8.2 + MySQL, sostituisce Sanity
 - `docs/` — recon del sito v1 e documentazione
 - `.github/workflows/` — build e deploy SFTP
