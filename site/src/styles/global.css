@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/**
+ * Design token di Gaia Events.
+ * Tailwind 4 è CSS-first: i token definiti qui diventano utility
+ * (--color-bordeaux → bg-bordeaux, text-bordeaux, border-bordeaux).
+ */
+@theme {
+  --color-avorio: #faf8f5;
+  --color-beige: #e8e2d9;
+  --color-salvia: #8b9a7d;
+  --color-bordeaux: #722f37;
+  --color-oro: #c9a962;
+  --color-antracite: #2d2d2d;
+
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-avorio);
+    color: var(--color-antracite);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* Le immagini arrivano da /uploads/ con width e height sempre dichiarati:
+     questo evita il CLS che aveva la v1. */
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Link di salto, visibile solo da tastiera. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-bordeaux);
+    color: var(--color-avorio);
+  }
+
+  .skip-link:focus {
+    left: 0;
+  }
+}
