@@ -7,21 +7,32 @@ namespace Gaia\Admin;
 /**
  * Il pulsante "Pubblica" del back office.
  *
- * Non fa il build: manda un repository_dispatch a GitHub. È la Action che
- * poi scarica i contenuti da api/export.php, fa il build di Astro e carica
- * il sito via SFTP.
+ * Non fa il build: chiede a GitHub di avviare il workflow. È poi la Action
+ * a scaricare i contenuti da api/export.php, fare il build di Astro e
+ * caricare il sito via SFTP.
  *
- * Il token GitHub sta solo in config.php sul server.
+ * Usa workflow_dispatch e non repository_dispatch: a parità di risultato,
+ * un token fine-grained per workflow_dispatch richiede solo
+ * «Actions: Read and write», mentre repository_dispatch pretende
+ * «Contents: Read and write», cioè il permesso di scrivere codice nella
+ * repo. Questo token vive su un hosting condiviso: meno può fare, meglio è.
+ *
+ * Il token sta solo in config.php sul server, sotto github.token.
  */
 final class Publisher
 {
+    public const WORKFLOW_PREDEFINITO = 'deploy.yml';
+    public const REF_PREDEFINITO = 'main';
+
     /** @return array{ok: bool, status: int, message: string} */
     public static function dispatch(): array
     {
         $owner = (string) Config::get('github.owner', '');
         $repo = (string) Config::get('github.repo', '');
         $token = (string) Config::get('github.token', '');
-        $eventType = (string) Config::get('github.event_type', 'publish');
+        $workflow = (string) Config::get('github.workflow', self::WORKFLOW_PREDEFINITO);
+        $ref = (string) Config::get('github.ref', self::REF_PREDEFINITO);
+        $target = (string) Config::get('github.target', 'production');
 
         if ($owner === '' || $repo === '' || $token === '') {
             return self::log('failed', 0, 'Configurazione GitHub incompleta in config.php.');
@@ -31,17 +42,66 @@ final class Publisher
             return self::log('failed', 0, 'Estensione cURL non disponibile su questo hosting.');
         }
 
-        $user = Auth::user();
-
+        // Gli input di un workflow_dispatch viaggiano come stringhe: anche
+        // le caselle di spunta vogliono "true" o "false", non un booleano.
         $payload = json_encode([
-            'event_type' => $eventType,
-            'client_payload' => [
-                'triggered_by' => $user['email'] ?? 'sconosciuto',
-                'triggered_at' => date('c'),
+            'ref' => $ref,
+            'inputs' => [
+                'target' => $target,
+                'skip_content' => 'false',
+                'dry_run' => 'false',
             ],
         ], JSON_UNESCAPED_SLASHES);
 
-        $handle = curl_init(sprintf('https://api.github.com/repos/%s/%s/dispatches', $owner, $repo));
+        $url = sprintf(
+            'https://api.github.com/repos/%s/%s/actions/workflows/%s/dispatches',
+            rawurlencode($owner),
+            rawurlencode($repo),
+            rawurlencode($workflow),
+        );
+
+        $risposta = self::chiamaGitHub($url, $token, $payload);
+
+        if ($risposta['errore'] !== '') {
+            return self::log('failed', $risposta['stato'], 'Chiamata a GitHub non riuscita: ' . $risposta['errore']);
+        }
+
+        // workflow_dispatch risponde 204 quando accetta la richiesta.
+        if ($risposta['stato'] === 204) {
+            return self::log(
+                'accepted',
+                204,
+                'Pubblicazione avviata su ' . $target . '. Il sito si aggiorna entro pochi minuti.',
+            );
+        }
+
+        return self::log('failed', $risposta['stato'], self::spiega($risposta, $workflow, $ref));
+    }
+
+    /**
+     * Traduce gli errori più comuni in qualcosa di leggibile, invece di
+     * lasciare a Gaia un numero e un JSON.
+     *
+     * @param array{stato: int, corpo: string, errore: string} $risposta
+     */
+    private static function spiega(array $risposta, string $workflow, string $ref): string
+    {
+        $corpo = substr($risposta['corpo'], 0, 300);
+
+        return match ($risposta['stato']) {
+            401 => 'Il token GitHub non è valido o è scaduto. Va rigenerato.',
+            403 => 'Il token non ha il permesso «Actions: Read and write» su questa repo.',
+            404 => 'GitHub non trova il workflow ' . $workflow . ' sul ramo ' . $ref
+                . '. Può anche voler dire che il token non è autorizzato su questa repo.',
+            422 => 'GitHub ha rifiutato i parametri: ' . $corpo,
+            default => 'GitHub ha risposto ' . $risposta['stato'] . ': ' . $corpo,
+        };
+    }
+
+    /** @return array{stato: int, corpo: string, errore: string} */
+    private static function chiamaGitHub(string $url, string $token, string $payload): array
+    {
+        $handle = curl_init($url);
 
         curl_setopt_array($handle, [
             CURLOPT_POST => true,
@@ -57,29 +117,16 @@ final class Publisher
             ],
         ]);
 
-        $response = curl_exec($handle);
-        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
-        $error = curl_error($handle);
+        $corpo = curl_exec($handle);
+        $stato = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        $errore = curl_error($handle);
         curl_close($handle);
 
-        if ($response === false || $error !== '') {
-            return self::log('failed', $status, 'Chiamata a GitHub non riuscita: ' . $error);
-        }
-
-        // repository_dispatch risponde 204 quando accetta la richiesta.
-        if ($status === 204) {
-            return self::log(
-                'accepted',
-                $status,
-                'Pubblicazione avviata. Il sito si aggiorna entro pochi minuti.',
-            );
-        }
-
-        return self::log(
-            'failed',
-            $status,
-            'GitHub ha risposto ' . $status . ': ' . substr((string) $response, 0, 300),
-        );
+        return [
+            'stato' => $stato,
+            'corpo' => is_string($corpo) ? $corpo : '',
+            'errore' => $corpo === false ? ($errore !== '' ? $errore : 'risposta vuota') : '',
+        ];
     }
 
     /** @return array{ok: bool, status: int, message: string} */

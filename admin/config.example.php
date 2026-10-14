@@ -54,9 +54,20 @@ return [
     'github' => [
         'owner' => 'manuelmanzo82',
         'repo' => 'gaia-events-v2',
-        // Personal access token con permesso "contents: write" sulla repo.
+
+        // Token fine-grained limitato a questa sola repo, con il permesso
+        // «Actions: Read and write». Non serve altro: il pulsante Pubblica
+        // avvia un workflow, non scrive codice.
+        //
+        // Non incollarlo a mano: usa
+        //   php bin/imposta-token-github.php
+        // che lo legge senza mostrarlo e lo prova prima di salvarlo.
         'token' => '',
-        'event_type' => 'publish',
+
+        // Quale workflow avviare, su quale ramo e verso quale ambiente.
+        'workflow' => 'deploy.yml',
+        'ref' => 'main',
+        'target' => 'production',
     ],
 
     // ------------------------------------------------------------------

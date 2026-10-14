@@ -60,11 +60,22 @@ cambiato in `site/src/config/site.ts` e nell'impostazione `contact.address`.
 
 **Pubblicazione**
 1. Gaia preme **Pubblica** nel back office.
-2. `admin/` chiama la GitHub API con un `repository_dispatch` (evento `publish`).
+2. `admin/` chiama la GitHub API con un **`workflow_dispatch`** su `deploy.yml`,
+   passando `target` con l'ambiente da aggiornare.
 3. La Action fa `GET admin/api/export.php` con un bearer token, riceve i JSON e li
    scrive in `site/src/content/`.
 4. Build di Astro, poi upload SFTP di `site/dist/`.
 5. Il deploy **non cancella e non sovrascrive** `admin/` e `uploads/`.
+
+Si usa `workflow_dispatch` e non `repository_dispatch` per via dei permessi: un
+token fine-grained per il primo richiede solo **`Actions: Read and write`**,
+mentre il secondo pretende `Contents: Read and write`, cioè il permesso di
+scrivere codice nella repo. Quel token vive su un hosting condiviso, quindi meno
+può fare meglio è.
+
+Il token non si incolla a mano in `config.php`: `admin/bin/imposta-token-github.php`
+lo legge senza mostrarlo, verifica che apra davvero il workflow — con un avvio a
+vuoto, l'unico modo per provare il permesso di scrittura — e solo allora lo salva.
 
 Le credenziali stanno **solo** nei GitHub Secrets e in `admin/config.php` sul server.
 Mai nel codice, mai nei commit.

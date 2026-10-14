@@ -1,9 +1,13 @@
 name: Build e deploy del sito
 
-# Due modi per partire:
+# Si avvia in due modi, che passano entrambi da qui:
 #  - a mano, da Actions, scegliendo l'ambiente;
-#  - da repository_dispatch, che è quello che fa il pulsante "Pubblica" del
-#    back office (admin/src/Publisher.php).
+#  - dal pulsante "Pubblica" del back office, che chiama la stessa API di
+#    workflow_dispatch (admin/src/Publisher.php).
+#
+# Prima si usava anche repository_dispatch: l'abbiamo tolto perché un token
+# fine-grained per quello richiede «Contents: write», cioè il permesso di
+# scrivere codice, mentre a workflow_dispatch basta «Actions: write».
 on:
   workflow_dispatch:
     inputs:
@@ -20,13 +24,11 @@ on:
         description: Prova il deploy senza scrivere niente sul server
         type: boolean
         default: false
-  repository_dispatch:
-    types: [publish]
 
 # Un deploy per volta: due build in parallelo sullo stesso hosting si
 # pesterebbero i piedi.
 concurrency:
-  group: deploy-${{ github.event.client_payload.target || inputs.target || 'production' }}
+  group: deploy-${{ inputs.target || 'production' }}
   cancel-in-progress: false
 
 permissions:
@@ -37,10 +39,10 @@ jobs:
     runs-on: ubuntu-latest
 
     # I segreti stanno negli Environment di GitHub, uno per ambiente.
-    environment: ${{ github.event.client_payload.target || inputs.target || 'production' }}
+    environment: ${{ inputs.target || 'production' }}
 
     env:
-      TARGET: ${{ github.event.client_payload.target || inputs.target || 'production' }}
+      TARGET: ${{ inputs.target || 'production' }}
       SITE_URL: ${{ vars.SITE_URL }}
 
     steps:
@@ -231,5 +233,5 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Ambiente: \`$TARGET\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Sito: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Avviato da: ${{ github.event.client_payload.triggered_by || github.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Avviato da: ${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- admin/ e uploads/ esclusi dal deploy" >> "$GITHUB_STEP_SUMMARY"
