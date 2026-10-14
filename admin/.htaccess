@@ -7,6 +7,10 @@
 
 Options -Indexes -MultiViews
 
+# Senza questa riga la richiesta di /admin/ si ferma sulla cartella e Apache
+# risponde 403, perche' l'elenco dei file e' disattivato.
+DirectoryIndex index.php
+
 # Il back office non va mai indicizzato, in nessun ambiente.
 <IfModule mod_headers.c>
     Header always set X-Robots-Tag "noindex, nofollow, noarchive"
@@ -18,6 +22,14 @@ Options -Indexes -MultiViews
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Indispensabile su IONOS, e in generale su ogni hosting dove la DOCUMENT_ROOT
+    # vista da Apache non coincide con il percorso fisico (qui /kunden/homepages/...
+    # contro /homepages/...). Senza, la riscrittura verso index.php viene risolta
+    # sul filesystem, non trova nulla e la richiesta cade nel 404 del sito.
+    #
+    # DEVE corrispondere a 'base_path' in config.php, con lo slash finale.
+    RewriteBase /admin/
 
     # Cartelle che non devono essere raggiungibili dal web: la
     # configurazione, le classi, i template, gli script CLI e lo schema.
