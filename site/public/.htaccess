@@ -1,0 +1,163 @@
+# ---------------------------------------------------------------------
+# Gaia Events — sito statico su hosting condiviso (Apache)
+#
+# Questo file viene copiato in dist/ dal build e caricato dal deploy.
+# Sostituisce gli header che la v1 aveva in vercel.json.
+#
+# Non tocca admin/ e uploads/: quelle cartelle hanno regole proprie.
+# ---------------------------------------------------------------------
+
+Options -Indexes -MultiViews
+
+DirectoryIndex index.html
+
+# Il build genera 404.html in radice.
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------
+# Staging
+#
+# Sul sottodominio di incognito.work il sito non va indicizzato. L'header
+# si attiva da solo in base al dominio, così non serve ricordarsene a mano
+# (il build aggiunge già anche il meta robots, vedi IS_STAGING in
+# site/src/config/site.ts).
+# ---------------------------------------------------------------------
+<IfModule mod_setenvif.c>
+    SetEnvIf Host "incognito\.work$" STAGING=1
+</IfModule>
+
+# ---------------------------------------------------------------------
+# Header di sicurezza
+# ---------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+
+    # Noindex automatico in staging.
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive" env=STAGING
+
+    # HSTS: attivarlo SOLO quando il dominio definitivo è su HTTPS stabile.
+    # Una volta inviato, i browser lo ricordano per un anno.
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # -----------------------------------------------------------------
+    # Content Security Policy
+    #
+    # Rispetto alla v1: via Sanity (i contenuti arrivano dal nostro PHP) e
+    # via Web3Forms (i form vanno al nostro endpoint, quindi form-action
+    # resta 'self'). Instagram non serve: le immagini del feed vengono
+    # scaricate in /uploads/ e servite dal nostro dominio.
+    #
+    # script-src tiene 'unsafe-inline' perché il CSP si applica anche ai
+    # blocchi <script type="application/ld+json"> del JSON-LD.
+    # Niente 'unsafe-eval': il sito è statico e non ne ha bisogno.
+    #
+    # Se un giorno aggiungiamo Google Analytics o Tag Manager, i domini
+    # vanno aggiunti qui in script-src, img-src e connect-src, altrimenti
+    # lo script viene bloccato senza errori visibili.
+    # -----------------------------------------------------------------
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self'; connect-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+</IfModule>
+
+# ---------------------------------------------------------------------
+# Compressione
+# ---------------------------------------------------------------------
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
+    AddOutputFilterByType BROTLI_COMPRESS application/xml application/rss+xml
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml application/rss+xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------
+# Tipi MIME che gli hosting condivisi spesso non conoscono
+# ---------------------------------------------------------------------
+<IfModule mod_mime.c>
+    AddType image/avif .avif
+    AddType image/webp .webp
+    AddType font/woff2 .woff2
+    AddType application/manifest+json .webmanifest
+    AddCharset UTF-8 .html .css .js .json .xml .txt .svg
+</IfModule>
+
+# ---------------------------------------------------------------------
+# Cache
+#
+# Gli asset di Astro hanno l'hash nel nome, quindi possono stare in cache
+# per un anno. L'HTML no: deve cambiare appena pubblichiamo.
+# ---------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/plain "access plus 1 hour"
+    ExpiresByType application/xml "access plus 1 hour"
+
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+
+    ExpiresByType image/jpeg "access plus 6 months"
+    ExpiresByType image/png "access plus 6 months"
+    ExpiresByType image/webp "access plus 6 months"
+    ExpiresByType image/avif "access plus 6 months"
+    ExpiresByType image/svg+xml "access plus 6 months"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # File con hash nel nome: immutabili.
+    <FilesMatch "\.[0-9a-zA-Z_-]{8,}\.(css|js|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # HTML e file di testo generati: sempre riverificati.
+    <FilesMatch "\.(html|txt|xml)$">
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </FilesMatch>
+
+    # I font self-hosted possono servire a pagine su altri sottodomini.
+    <FilesMatch "\.woff2$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# ---------------------------------------------------------------------
+# File che non devono essere scaricabili, se per sbaglio finiscono qui
+# ---------------------------------------------------------------------
+<FilesMatch "^(\.env.*|.*\.sql|.*\.log|config\.php|package(-lock)?\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ---------------------------------------------------------------------
+# Protezione con password dello staging
+#
+# Da attivare a mano sul solo staging: crea il file .htpasswd FUORI dalla
+# cartella pubblica e togli i commenti qui sotto.
+# Il deploy non cancella .htpasswd (è fra le esclusioni del workflow).
+#
+#   htpasswd -c /percorso/fuori/dal/web/.htpasswd gaia
+#
+# <IfModule mod_auth_basic.c>
+#     AuthType Basic
+#     AuthName "Anteprima Gaia Events"
+#     AuthUserFile /percorso/fuori/dal/web/.htpasswd
+#     Require valid-user
+# </IfModule>
+# ---------------------------------------------------------------------

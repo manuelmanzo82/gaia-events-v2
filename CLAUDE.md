@@ -25,7 +25,19 @@ come riferimento**: niente copia-incolla acritico. La recon completa è in
 - Astro 5 con `output: 'static'`. **Nessun adapter** (niente Vercel): l'hosting di
   produzione è condiviso, solo PHP + MySQL, **niente Node**.
 - React 19 **solo come islands**, dove serve interattività. Tutto il resto è `.astro`.
-- Tailwind per lo stile. Font **self-hosted** in `site/public/fonts/`.
+- **Tailwind 4** via `@tailwindcss/vite` (`@astrojs/tailwind` è deprecato su
+  Astro 5). Configurazione CSS-first: i token stanno in `@theme` dentro
+  `src/styles/global.css`, **non** in un `tailwind.config`.
+- Font **self-hosted** in `site/public/fonts/`. I `.woff2` non sono ancora in
+  repo e le `@font-face` in `src/styles/fonts.css` sono commentate: si
+  attivano in fase di design.
+- `trailingSlash: 'always'` con `build.format: 'directory'`. Tutti i percorsi
+  passano da `path()` di `i18n/routes.ts`, che aggiunge lo slash finale: così
+  l'URL canonico è esattamente quello che Apache serve, senza il 301 di
+  `DirectorySlash`.
+- La **sitemap è un endpoint nostro** (`src/pages/sitemap.xml.ts`), non
+  `@astrojs/sitemap`: l'integrazione accoppia le lingue solo quando lo slug è
+  identico, e qui gli slug sono tradotti.
 
 **Contenuti**
 - Back office su misura in `admin/` (PHP 8.2+, MySQL), sostituisce Sanity.
@@ -129,6 +141,26 @@ npm run preview          # anteprima del build
 # export dei contenuti dal database (sul server)
 php admin/bin/export-content.php --out=../site/src/content
 ```
+
+## Secrets e variabili su GitHub
+
+Per ambiente (**Settings → Environments**: `production` e `staging`), così lo
+staging non può toccare la produzione.
+
+| Nome | Tipo | Cosa contiene |
+|---|---|---|
+| `SITE_URL` | variabile | `https://gaiaevents.it` o `https://gaia.incognito.work` |
+| `EXPORT_URL` | secret | URL completo di `admin/api/export.php` |
+| `EXPORT_TOKEN` | secret | lo stesso valore di `export_token` in `config.php` |
+| `SFTP_HOST` | secret | host SFTP dell'hosting |
+| `SFTP_PORT` | secret | opzionale, default 22 |
+| `SFTP_USER` | secret | utente SFTP |
+| `SFTP_PASSWORD` | secret | password SFTP |
+| `SFTP_KNOWN_HOSTS` | secret | riga di `ssh-keyscan -p 22 host`; se manca, la chiave del server non viene verificata |
+| `REMOTE_PATH` | secret | cartella remota del sito, es. `/public_html` |
+
+Il token GitHub che il back office usa per il `repository_dispatch` sta solo in
+`admin/config.php` sul server, sotto `github.token`.
 
 ## Layout sull'hosting
 

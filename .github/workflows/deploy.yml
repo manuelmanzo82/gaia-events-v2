@@ -1,0 +1,216 @@
+name: Build e deploy del sito
+
+# Due modi per partire:
+#  - a mano, da Actions, scegliendo l'ambiente;
+#  - da repository_dispatch, che è quello che fa il pulsante "Pubblica" del
+#    back office (admin/src/Publisher.php).
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Ambiente
+        type: choice
+        default: production
+        options: [production, staging]
+      skip_content:
+        description: Salta l'export e usa i contenuti di esempio in repo
+        type: boolean
+        default: false
+      dry_run:
+        description: Prova il deploy senza scrivere niente sul server
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [publish]
+
+# Un deploy per volta: due build in parallelo sullo stesso hosting si
+# pesterebbero i piedi.
+concurrency:
+  group: deploy-${{ github.event.client_payload.target || inputs.target || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # I segreti stanno negli Environment di GitHub, uno per ambiente.
+    environment: ${{ github.event.client_payload.target || inputs.target || 'production' }}
+
+    env:
+      TARGET: ${{ github.event.client_payload.target || inputs.target || 'production' }}
+      SITE_URL: ${{ vars.SITE_URL }}
+
+    steps:
+      - name: Scarica il codice
+        uses: actions/checkout@v4
+
+      - name: Prepara Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Installa le dipendenze
+        working-directory: site
+        run: npm ci
+
+      - name: Controlla la configurazione
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "::error::Manca la variabile SITE_URL nell'ambiente $TARGET."
+            exit 1
+          fi
+          echo "Ambiente: $TARGET"
+          echo "SITE_URL: $SITE_URL"
+
+      - name: Scarica i contenuti dal back office
+        if: ${{ inputs.skip_content != true }}
+        env:
+          EXPORT_URL: ${{ secrets.EXPORT_URL }}
+          EXPORT_TOKEN: ${{ secrets.EXPORT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${EXPORT_URL:-}" ] || [ -z "${EXPORT_TOKEN:-}" ]; then
+            echo "::error::Mancano i segreti EXPORT_URL o EXPORT_TOKEN."
+            exit 1
+          fi
+
+          # Un solo scaricamento: così i contenuti sono uno scatto coerente.
+          status=$(curl -sS --fail-with-body --max-time 60 \
+            -H "Authorization: Bearer ${EXPORT_TOKEN}" \
+            -o payload.json -w '%{http_code}' \
+            "${EXPORT_URL}") || {
+              echo "::error::Export non raggiungibile (HTTP ${status:-?})."
+              head -c 500 payload.json || true
+              exit 1
+            }
+
+          if ! jq -e '.content | type == "object"' payload.json > /dev/null; then
+            echo "::error::Risposta dell'export non valida."
+            head -c 500 payload.json
+            exit 1
+          fi
+
+          # Una chiave del JSON = un file in site/src/content/.
+          for key in $(jq -r '.content | keys[]' payload.json); do
+            jq --arg k "$key" '.content[$k]' payload.json > "site/src/content/${key}.json"
+            echo "scritto ${key}.json ($(wc -c < "site/src/content/${key}.json") byte)"
+          done
+
+          rm -f payload.json
+
+      - name: Avvisa se si usano i contenuti di esempio
+        if: ${{ inputs.skip_content == true }}
+        run: echo "::warning::Build con i contenuti di esempio in repo, non con quelli del database."
+
+      - name: Controllo dei tipi
+        working-directory: site
+        run: npx astro check
+
+      - name: Build
+        working-directory: site
+        run: npm run build
+
+      - name: Controlla il risultato del build
+        run: |
+          set -euo pipefail
+
+          # Senza questo controllo un build vuoto più il mirror con --delete
+          # cancellerebbe il sito pubblicato.
+          if [ ! -f site/dist/index.html ]; then
+            echo "::error::site/dist/index.html non esiste: build non valido."
+            exit 1
+          fi
+
+          files=$(find site/dist -type f | wc -l)
+          echo "File generati: $files"
+
+          if [ "$files" -lt 10 ]; then
+            echo "::error::Solo $files file in dist: troppo pochi, non pubblico."
+            exit 1
+          fi
+
+          if [ ! -f site/dist/.htaccess ]; then
+            echo "::warning::.htaccess assente in dist: header di sicurezza e cache non verranno applicati."
+          fi
+
+      - name: Deploy via SFTP
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          SFTP_KNOWN_HOSTS: ${{ secrets.SFTP_KNOWN_HOSTS }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          for name in SFTP_HOST SFTP_USER SFTP_PASSWORD REMOTE_PATH; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Manca il segreto $name."
+              exit 1
+            fi
+          done
+
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+          port="${SFTP_PORT:-22}"
+
+          # Verifica della chiave del server se SFTP_KNOWN_HOSTS è impostato.
+          # Senza, lftp accetta la chiave al primo collegamento: funziona, ma
+          # è meglio impostare il segreto.
+          if [ -n "${SFTP_KNOWN_HOSTS:-}" ]; then
+            mkdir -p ~/.ssh
+            printf '%s\n' "$SFTP_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+            verify="set sftp:auto-confirm no;"
+          else
+            echo "::warning::SFTP_KNOWN_HOSTS non impostato: la chiave del server non viene verificata."
+            verify="set sftp:auto-confirm yes;"
+          fi
+
+          delete_flag="--delete"
+          if [ "${DRY_RUN:-false}" = "true" ]; then
+            echo "Prova a vuoto: nessuna scrittura sul server."
+            delete_flag="--delete --dry-run"
+          fi
+
+          # ESCLUSIONI OBBLIGATORIE.
+          # admin/ e uploads/ vivono sullo stesso hosting ma non fanno parte
+          # del build: il mirror non li carica e, soprattutto, non li
+          # cancella. Toccarli qui significherebbe perdere il back office o
+          # tutte le foto di Gaia.
+          lftp -c "
+            set sftp:connect-program 'ssh -a -x -p ${port}';
+            ${verify}
+            set net:max-retries 3;
+            set net:timeout 20;
+            set mirror:parallel-transfer-count 3;
+            open -u '${SFTP_USER}','${SFTP_PASSWORD}' sftp://${SFTP_HOST};
+            mirror -R ${delete_flag} --verbose=1 \
+              --exclude-glob admin \
+              --exclude-glob admin/ \
+              --exclude-glob uploads \
+              --exclude-glob uploads/ \
+              --exclude-glob .well-known/ \
+              --exclude-glob cgi-bin/ \
+              --exclude-glob .htpasswd \
+              site/dist/ '${REMOTE_PATH}';
+            bye
+          "
+
+      - name: Esito
+        run: |
+          echo "### Deploy completato" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Ambiente: \`$TARGET\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Sito: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Avviato da: ${{ github.event.client_payload.triggered_by || github.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- admin/ e uploads/ esclusi dal deploy" >> "$GITHUB_STEP_SUMMARY"
