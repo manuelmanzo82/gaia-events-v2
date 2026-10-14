@@ -148,16 +148,26 @@ ErrorDocument 404 /404.html
 # ---------------------------------------------------------------------
 # Protezione con password dello staging
 #
-# Da attivare a mano sul solo staging: crea il file .htpasswd FUORI dalla
-# cartella pubblica e togli i commenti qui sotto.
-# Il deploy non cancella .htpasswd (è fra le esclusioni del workflow).
+# Vale SOLO sui domini incognito.work: in produzione il blocco non viene
+# nemmeno valutato, quindi questo stesso file va bene per entrambi gli
+# ambienti e sopravvive ai deploy, che lo riscrivono ogni volta.
 #
-#   htpasswd -c /percorso/fuori/dal/web/.htpasswd gaia
+# Il file delle password sta FUORI dalla cartella pubblica, un livello
+# sopra /gaia-staging, e il nome inizia per .ht così la configurazione
+# globale di Apache lo nega comunque.
 #
-# <IfModule mod_auth_basic.c>
-#     AuthType Basic
-#     AuthName "Anteprima Gaia Events"
-#     AuthUserFile /percorso/fuori/dal/web/.htpasswd
-#     Require valid-user
-# </IfModule>
+# Unica eccezione: admin/api/export.php, che la GitHub Action deve poter
+# chiamare e che non ha modo di presentare queste credenziali. È già
+# protetto dal suo bearer token: senza, risponde 401 da solo.
+#
+# L'eccezione sta QUI dentro, nella stessa condizione, e non in un
+# <Files> dentro admin/api/: le sezioni <If> vengono valutate per ultime e
+# hanno la precedenza su <Files> e <Directory>, quindi un'eccezione
+# dichiarata più in basso verrebbe semplicemente ignorata.
 # ---------------------------------------------------------------------
+<If "%{HTTP_HOST} =~ /incognito\.work$/ && %{REQUEST_URI} !~ m#^/admin/api/export\.php$#">
+    AuthType Basic
+    AuthName "Anteprima Gaia Events"
+    AuthUserFile /kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging
+    Require valid-user
+</If>

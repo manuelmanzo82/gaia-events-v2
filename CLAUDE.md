@@ -231,6 +231,66 @@ staging non può toccare la produzione.
 Il token GitHub che il back office usa per il `repository_dispatch` sta solo in
 `admin/config.php` sul server, sotto `github.token`.
 
+## Staging — in piedi dal 14/10/2026
+
+**https://gaia.incognito.work** su IONOS Webhosting Plus. Sito, back office e
+database funzionanti; manca solo il deploy automatico.
+
+| | |
+|---|---|
+| Sito | `/gaia-staging/` nel webspace |
+| Back office | `/gaia-staging/admin/`, `config.php` a 640 |
+| Upload | `/gaia-staging/uploads/` |
+| Percorso assoluto | `/kunden/homepages/30/d593572430/htdocs/gaia-staging` |
+| Database | `dbs16227921` su `db5021647935.hosting-data.io`, MariaDB 11.8.8 |
+| Accesso | chiave SSH dedicata, nessuna password |
+
+Il server è più generoso del previsto: PHP **8.4**, `memory_limit` **illimitato**,
+upload fino a 64 MB, e GD con **WebP e AVIF**. Una foto da 32 MP passa senza
+problemi, quindi niente Imagick e niente ridimensionamento in più passaggi.
+`max_upload_bytes` è a 32 MB: sotto il limite del server, così l'errore lo diamo
+noi con un messaggio chiaro invece di lasciarlo dare ad Apache.
+
+**Il webspace ospita altri progetti** (`incassi/`, `brasili.cozzolino/`, `gaia/`
+e altri): non toccare mai nulla fuori da `/gaia-staging`. Il `REMOTE_PATH` del
+deploy punta lì apposta, così il mirror con `--delete` resta confinato.
+
+### Protezione
+
+Tutto il sito è dietro **basic auth**, dichiarata in `site/public/.htaccess`
+dentro un `<If>` legato al dominio `incognito.work`: lo stesso file vale per
+produzione e staging e sopravvive ai deploy, che lo riscrivono ogni volta.
+
+L'unica eccezione è `admin/api/export.php`, che la GitHub Action deve poter
+chiamare e che si difende da sé col bearer token. L'eccezione sta **nella stessa
+condizione `<If>`**, non in un `<Files>` dentro `admin/api/`: le sezioni `<If>`
+vengono valutate per ultime e hanno la precedenza, quindi un'eccezione
+dichiarata più in basso verrebbe ignorata.
+
+Il file delle password sta **fuori dalla cartella pubblica**, in
+`/kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging`, e deve essere
+**644**: Apache gira come `www-data` e con 640 risponde 500.
+
+### Cose che su IONOS vanno sapute
+
+- `RewriteBase /admin/` è **indispensabile**: la `DOCUMENT_ROOT` vista da Apache
+  (`/kunden/homepages/...`) non coincide con il percorso fisico
+  (`/homepages/...`), e senza quella riga la riscrittura verso `index.php`
+  finisce nel 404 del sito.
+- Apache **non passa l'header `Authorization` a PHP** in CGI: lo ricopiamo in
+  una variabile d'ambiente con una `RewriteRule` in `admin/.htaccess`, altrimenti
+  `export.php` non vede mai il token.
+- Da shell c'è solo **php-cgi**, non la SAPI `cli`: gli script in `admin/bin/`
+  si usano con `php8.3 -q`, non definiscono `STDIN`/`STDERR` da soli (li
+  dichiariamo noi) e non accettano `-r`.
+
+### Password e chiavi
+
+Tutto fuori dalla repo, in `E:\CLAUDE CODE\gaia-staging-config\`:
+`config.php`, `CREDENZIALI-STAGING.txt` (token di export),
+`PASSWORD-BASIC-AUTH.txt`, `PASSWORD-ADMIN-BACKOFFICE.txt` e la chiave SSH in
+`ssh/`. **Niente di tutto questo va committato.**
+
 ## Layout sull'hosting
 
 ```

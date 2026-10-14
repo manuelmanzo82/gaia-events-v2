@@ -15,9 +15,20 @@
 
 declare(strict_types=1);
 
-if (PHP_SAPI !== 'cli') {
+// Il controllo giusto non e' «sono in CLI» ma «non sono una richiesta web»:
+// molti hosting condivisi, IONOS compreso, da shell offrono solo php-cgi, e
+// con il controllo sulla SAPI questi script non partirebbero mai.
+if (!empty($_SERVER['REQUEST_METHOD']) || !empty($_SERVER['HTTP_HOST'])) {
     http_response_code(403);
     exit("Questo script si usa solo da riga di comando.\n");
+}
+
+// php-cgi non definisce STDIN, STDOUT e STDERR: sono costanti della sola
+// SAPI cli. Senza queste tre righe lo script muore sul primo fwrite.
+foreach (['STDIN' => 'php://stdin', 'STDOUT' => 'php://stdout', 'STDERR' => 'php://stderr'] as $nome => $flusso) {
+    if (!defined($nome)) {
+        define($nome, fopen($flusso, str_starts_with($flusso, 'php://stdin') ? 'rb' : 'wb'));
+    }
 }
 
 require __DIR__ . '/../src/bootstrap.php';
@@ -49,7 +60,13 @@ if (!in_array($role, ['admin', 'editor'], true)) {
 /** Legge la password senza mostrarla a schermo, se il terminale lo permette. */
 $readPassword = static function (): ?string {
     if (!stream_isatty(STDIN)) {
-        return null;
+        // Non e' un terminale: puo' essere una pipe, per esempio da ssh.
+        // Cosi' la password non passa dagli argomenti, dove finirebbe
+        // nella cronologia della shell e nell'elenco dei processi.
+        $riga = fgets(STDIN);
+        $password = is_string($riga) ? trim($riga) : '';
+
+        return $password === '' ? null : $password;
     }
 
     echo 'Password (non viene mostrata): ';

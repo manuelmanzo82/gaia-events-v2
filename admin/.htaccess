@@ -31,6 +31,12 @@ DirectoryIndex index.php
     # DEVE corrispondere a 'base_path' in config.php, con lo slash finale.
     RewriteBase /admin/
 
+    # Su CGI e FastCGI Apache NON passa l'header Authorization a PHP, per
+    # non esporre le credenziali a ogni script. Ma a api/export.php quel
+    # bearer token serve: lo ricopiamo in una variabile d'ambiente, che lo
+    # script legge come REDIRECT_HTTP_AUTHORIZATION.
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
     # Cartelle che non devono essere raggiungibili dal web: la
     # configurazione, le classi, i template, gli script CLI e lo schema.
     RewriteRule ^(src|views|bin|sql|storage)(/|$) - [F,L]

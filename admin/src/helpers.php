@@ -16,10 +16,24 @@ function admin_url(string $path = ''): string
     return $base . '/' . ltrim($path, '/');
 }
 
-/** Redirect e stop. */
+/**
+ * Redirect e stop.
+ *
+ * Accetta tre forme: un URL completo, un percorso gia' assoluto come
+ * '/admin/richieste' (per esempio la pagina che l'utente stava cercando di
+ * aprire prima del login) e un percorso relativo al back office come
+ * 'login'. Solo l'ultimo va prefissato con base_path: prefissare anche gli
+ * assoluti produceva /admin/admin/.
+ */
 function redirect(string $path): never
 {
-    header('Location: ' . (str_starts_with($path, 'http') ? $path : admin_url($path)), true, 302);
+    if (str_starts_with($path, 'http') || str_starts_with($path, '/')) {
+        $url = $path;
+    } else {
+        $url = admin_url($path);
+    }
+
+    header('Location: ' . $url, true, 302);
     exit;
 }
 
