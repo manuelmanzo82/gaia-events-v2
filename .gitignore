@@ -21,6 +21,7 @@ secrets.json
 *.sql
 !admin/sql/schema.sql
 !admin/sql/seed.example.sql
+!admin/sql/seed-contenuti-v1.sql
 *.sql.gz
 *.dump
 *.bak

@@ -112,7 +112,14 @@ ON DUPLICATE KEY UPDATE `title_it` = VALUES(`title_it`);
 
 -- ---------------------------------------------------------------------
 -- Blocchi della destination wedding
+--
+-- I blocchi non hanno una chiave unica, quindi si ripulisce prima: così il
+-- file si può ricaricare senza ritrovarsi gli stessi blocchi in doppio.
 -- ---------------------------------------------------------------------
+
+DELETE ps FROM `page_sections` ps
+JOIN `pages` p ON p.id = ps.page_id
+WHERE p.page_key = 'destinationWedding';
 
 INSERT INTO `page_sections` (`page_id`, `kind`, `title_it`, `title_en`, `text_it`, `text_en`, `items_it`, `items_en`, `sort_order`)
 SELECT p.id, 'services', 'Cosa comprende', 'What is included', NULL, NULL,
@@ -137,7 +144,17 @@ FROM `pages` p WHERE p.page_key = 'destinationWedding';
 
 -- ---------------------------------------------------------------------
 -- FAQ di esempio
+--
+-- Segnaposto: se carichi anche seed-contenuti-v1.sql, quello le cancella
+-- e mette al loro posto le 12 FAQ vere della v1.
 -- ---------------------------------------------------------------------
+
+DELETE FROM `faqs` WHERE `question_it` IN (
+  'Quanto tempo prima vi devo contattare?',
+  'Lavorate solo a Roma?',
+  'Posso affidarvi solo una parte dell''organizzazione?',
+  'Come si costruisce il preventivo?'
+);
 
 INSERT INTO `faqs` (`question_it`, `question_en`, `answer_it`, `answer_en`, `group_name`, `active`, `sort_order`) VALUES
 ('Quanto tempo prima vi devo contattare?', 'How far in advance should I contact you?',
@@ -182,4 +199,5 @@ INSERT INTO `services` (`slug`, `title_it`, `title_en`, `subtitle_it`, `subtitle
  'Openings, gala dinners and conventions: events consistent with your brand.',
  '["Location scouting","Allestimenti brandizzati","Gestione ospiti"]',
  NULL,
- 'briefcase', 1, 3);
+ 'briefcase', 1, 3)
+ON DUPLICATE KEY UPDATE `title_it` = VALUES(`title_it`), `description_it` = VALUES(`description_it`);

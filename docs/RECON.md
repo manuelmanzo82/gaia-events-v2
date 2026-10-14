@@ -25,6 +25,9 @@ Live: `gaia-events-astro.vercel.app` · dominio previsto: `gaiaevents.it`
 - **Servizio**: titolo, slug, sottotitolo, descrizione, caratteristiche, icona, immagine, attivo, ordine
 - **Recensione**: autore, evento, data, testo, valutazione, immagine, attivo, in evidenza
 - **Articolo blog**: titolo, slug, meta descrizione, estratto, categoria, data, tempo lettura, copertina, contenuto rich text, attivo
+  > **Correzione (14/10/2026).** Lo schema esisteva su Sanity, ma gli articoli
+  > pubblicati stavano nel codice. Vale lo stesso per FAQ, privacy e cookie.
+  > Vedi la sezione «Contenuti già importati» in fondo.
 - **Instagram gallery**: lista manuale di immagini con tipo (foto/video), caption, link al post — l'account è `@gaiacrognale_events`
 
 ## Cosa teniamo
@@ -49,5 +52,27 @@ Live: `gaia-events-astro.vercel.app` · dominio previsto: `gaiaevents.it`
 - Bilingue solo su una pagina: decidere se IT/EN su tutto il sito
 - La chiave Web3Forms è nel codice di una repo pubblica (è una chiave pensata per stare nel frontend, ma con il back office nostro i form possono passare dal nostro PHP)
 
+## Contenuti già importati nella v2 (14/10/2026)
+
+**Correzione alla recon.** Articoli, FAQ, privacy e cookie **non erano su Sanity**:
+stavano nel codice della v1. Sono già stati importati, solo in italiano.
+
+| Cosa | Dove stava nella v1 | Dove sta ora |
+|---|---|---|
+| 8 articoli blog | `src/data/blog-articles.ts` | `posts` + `posts.example.json` |
+| 12 FAQ in 4 gruppi | `src/pages/faq.astro` | `faqs` + `faq.example.json` |
+| Privacy policy | `src/pages/privacy.astro` | `pages` (`privacy`) |
+| Cookie policy | `src/pages/cookie.astro` | `pages` (`cookie`) |
+
+L'import è in `admin/sql/seed-contenuti-v1.sql`. Nelle policy l'email è stata
+corretta da `info@gaiaevents.it` a `gaiacrognale@gmail.com`.
+
+L'inglese di questi contenuti è vuoto: finché resta così, le loro pagine EN non
+vengono generate.
+
 ## Non verificato
-- Quanti eventi, recensioni, articoli e immagini ci sono davvero su Sanity: l'API non è raggiungibile da questo ambiente. Lo controlliamo dallo studio o da Claude Code prima di spegnerlo.
+
+Su Sanity restano da censire **solo**: eventi, servizi, recensioni, impostazioni
+e Instagram. Quanti ce ne sono davvero, e quante immagini, non è ancora noto:
+l'API non era raggiungibile da questo ambiente. Va controllato dallo studio
+**prima di spegnerlo**, perché è l'unica cosa non più recuperabile dopo.

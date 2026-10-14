@@ -15,7 +15,8 @@ chmod 640 config.php
 
 # 3. database
 mysql -u UTENTE -p NOME_DB < sql/schema.sql
-mysql -u UTENTE -p NOME_DB < sql/seed.example.sql   # opzionale, testi segnaposto
+mysql -u UTENTE -p NOME_DB < sql/seed.example.sql        # chiavi e testi segnaposto
+mysql -u UTENTE -p NOME_DB < sql/seed-contenuti-v1.sql   # contenuti reali dalla v1
 
 # 4. cartella degli upload, accanto al sito (non dentro admin/)
 mkdir -p ../uploads && chmod 755 ../uploads

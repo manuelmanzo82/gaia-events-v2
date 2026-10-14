@@ -15,6 +15,8 @@ return [
     // ------------------------------------------------------------------
     'db' => [
         'host' => 'localhost',
+        // Opzionale: lascia 0 per la 3306 standard.
+        'port' => 0,
         'name' => 'gaia_events',
         'user' => '',
         'pass' => '',

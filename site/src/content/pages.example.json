@@ -1,8 +1,14 @@
 [
   {
     "key": "about",
-    "title": { "it": "Chi sono", "en": "About me" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Chi sono",
+      "en": "About me"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Gaia Crognale, wedding & event planner a Roma: il mio metodo di lavoro.",
       "en": "Gaia Crognale, wedding & event planner in Rome: how I work."
@@ -20,8 +26,14 @@
   },
   {
     "key": "services",
-    "title": { "it": "Servizi", "en": "Services" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Servizi",
+      "en": "Services"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Full planning, coordinamento del giorno ed eventi aziendali: scegliete quanto affidarmi.",
       "en": "Full planning, day-of coordination and corporate events: you choose how much to hand over."
@@ -30,66 +42,123 @@
       "it": "Tre formule di lavoro, pensate per livelli diversi di coinvolgimento.",
       "en": "Three ways of working, for different levels of involvement."
     },
-    "body": { "it": "", "en": "" },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "portfolio",
-    "title": { "it": "Portfolio", "en": "Portfolio" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Portfolio",
+      "en": "Portfolio"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Matrimoni ed eventi realizzati a Roma e in Italia.",
       "en": "Weddings and events delivered in Rome and across Italy."
     },
-    "intro": { "it": "Ogni evento è una storia diversa.", "en": "Every event is a different story." },
-    "body": { "it": "", "en": "" },
+    "intro": {
+      "it": "Ogni evento è una storia diversa.",
+      "en": "Every event is a different story."
+    },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "reviews",
-    "title": { "it": "Dicono di me", "en": "Reviews" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Dicono di me",
+      "en": "Reviews"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Le parole delle coppie e delle aziende con cui ho lavorato.",
       "en": "Words from the couples and companies I have worked with."
     },
-    "intro": { "it": "", "en": "" },
-    "body": { "it": "", "en": "" },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "blog",
-    "title": { "it": "Blog", "en": "Blog" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Blog",
+      "en": "Blog"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Consigli pratici su organizzazione, budget e location per matrimoni a Roma.",
       "en": "Practical advice on planning, budget and venues for weddings in Rome."
     },
-    "intro": { "it": "", "en": "" },
-    "body": { "it": "", "en": "" },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "faq",
-    "title": { "it": "Domande frequenti", "en": "Frequently asked questions" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Domande frequenti",
+      "en": "Frequently asked questions"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Tempi, costi, modalità di lavoro: le domande che mi fanno più spesso.",
       "en": "Timing, costs, ways of working: the questions I am asked most often."
     },
-    "intro": { "it": "", "en": "" },
-    "body": { "it": "", "en": "" },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "quote",
-    "title": { "it": "Richiedi un preventivo", "en": "Request a quote" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Richiedi un preventivo",
+      "en": "Request a quote"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Raccontami il tuo evento e ti preparo una proposta su misura.",
       "en": "Tell me about your event and I will prepare a bespoke proposal."
@@ -98,49 +167,88 @@
       "it": "Poche domande per capire cosa avete in mente. Nessun prezzo automatico: la proposta la scrivo io.",
       "en": "A few questions to understand what you have in mind. No automatic pricing: I write the proposal myself."
     },
-    "body": { "it": "", "en": "" },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "contact",
-    "title": { "it": "Contatti", "en": "Contact" },
-    "metaTitle": { "it": "", "en": "" },
+    "title": {
+      "it": "Contatti",
+      "en": "Contact"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
     "metaDescription": {
       "it": "Scrivimi per un primo confronto senza impegno.",
       "en": "Write to me for a first chat, with no commitment."
     },
-    "intro": { "it": "", "en": "" },
-    "body": { "it": "", "en": "" },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
+    "body": {
+      "it": "",
+      "en": ""
+    },
     "hero": null,
     "ogImage": null
   },
   {
     "key": "privacy",
-    "title": { "it": "Privacy policy", "en": "Privacy policy" },
-    "metaTitle": { "it": "", "en": "" },
-    "metaDescription": { "it": "", "en": "" },
-    "intro": { "it": "", "en": "" },
+    "title": {
+      "it": "Privacy policy",
+      "en": "Privacy policy"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
     "body": {
-      "it": "<p>Testo segnaposto. L'informativa della v1 va importata nel back office, con l'email corretta gaiacrognale@gmail.com.</p>",
+      "it": "<h2>1. Titolare del trattamento</h2>\n<p>\nIl titolare del trattamento dei dati personali è <strong>Gaia Events di Gaia Crognale</strong>, con sede a Roma, Italia.<br />\nEmail di contatto: <a href=\"mailto:gaiacrognale@gmail.com\">gaiacrognale@gmail.com</a>\n</p>\n<h2>2. Tipi di dati raccolti</h2>\n<p>Il sito <strong>gaiaevents.it</strong> raccoglie le seguenti categorie di dati:</p>\n<ul>\n<li><strong>Dati di navigazione:</strong> indirizzo IP (anonimizzato), tipo di browser, sistema operativo, pagine visitate, orari di accesso e altre informazioni trasmesse automaticamente dal browser.</li>\n<li><strong>Cookie:</strong> cookie tecnici necessari al funzionamento del sito e, previo consenso, cookie analitici di terze parti (Google Analytics). Per maggiori dettagli consulta la <a href=\"/cookie\">Cookie Policy</a>.</li>\n<li><strong>Dati forniti volontariamente:</strong> nome, email, numero di telefono e altre informazioni inserite dall'utente nei form di contatto e preventivo.</li>\n</ul>\n<h2>3. Finalità del trattamento</h2>\n<p>I dati personali sono trattati per le seguenti finalità:</p>\n<ul>\n<li><strong>Funzionamento del sito:</strong> garantire la corretta navigazione, la sicurezza e le funzionalità tecniche del sito.</li>\n<li><strong>Analisi statistiche anonime:</strong> comprendere come gli utenti utilizzano il sito per migliorarne contenuti e prestazioni (solo con consenso).</li>\n<li><strong>Risposta a richieste:</strong> gestire richieste di preventivo, informazioni e contatto inviate tramite i form del sito.</li>\n</ul>\n<h2>4. Base giuridica del trattamento</h2>\n<ul>\n<li><strong>Consenso</strong> (art. 6.1.a GDPR): per l'installazione di cookie analitici (Google Analytics).</li>\n<li><strong>Legittimo interesse</strong> (art. 6.1.f GDPR): per i cookie tecnici necessari al funzionamento del sito.</li>\n<li><strong>Esecuzione di misure precontrattuali</strong> (art. 6.1.b GDPR): per la gestione delle richieste di preventivo e contatto.</li>\n</ul>\n<h2>5. Servizi di terze parti</h2>\n<p>Il sito si avvale dei seguenti servizi esterni che possono trattare dati personali:</p>\n<h3>Google Analytics (Google LLC)</h3>\n<p>\nServizio di analisi web che utilizza cookie per raccogliere dati statistici anonimi sull'utilizzo del sito.\nI dati sono trattati con IP anonimizzato. Attivato solo previo consenso dell'utente.<br />\n<a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy di Google</a>\n</p>\n<h3>Web3Forms</h3>\n<p>\nServizio utilizzato per la gestione dei form di contatto e preventivo. I dati inseriti nei form (nome, email, telefono, dettagli richiesta) vengono inviati tramite Web3Forms ai nostri recapiti email.<br />\n<a href=\"https://web3forms.com/privacy\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy di Web3Forms</a>\n</p>\n<h3>Sanity CMS</h3>\n<p>\nSistema di gestione contenuti (Content Management System) utilizzato per gestire i contenuti del sito. Sanity non raccoglie dati personali dei visitatori del sito.<br />\n<a href=\"https://www.sanity.io/legal/privacy\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy di Sanity</a>\n</p>\n<h3>Vercel</h3>\n<p>\nPiattaforma di hosting utilizzata per pubblicare il sito. Vercel può raccogliere dati tecnici di navigazione (log del server).<br />\n<a href=\"https://vercel.com/legal/privacy-policy\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy di Vercel</a>\n</p>\n<h2>6. Conservazione dei dati</h2>\n<p>\nI dati personali forniti tramite i form sono conservati per il tempo necessario a gestire la richiesta e, successivamente, per il periodo previsto dagli obblighi di legge. I dati di navigazione e i cookie analitici sono conservati in forma anonima per un massimo di 26 mesi.\n</p>\n<h2>7. Trasferimento dei dati</h2>\n<p>\nAlcuni servizi di terze parti (Google Analytics, Vercel) possono comportare il trasferimento di dati verso paesi extra-UE (Stati Uniti). Tali trasferimenti avvengono sulla base di garanzie adeguate, incluse le Clausole Contrattuali Standard approvate dalla Commissione Europea.\n</p>\n<h2>8. Diritti dell'utente</h2>\n<p>Ai sensi degli articoli 15-22 del GDPR, l'utente ha diritto di:</p>\n<ul>\n<li><strong>Accesso:</strong> ottenere conferma dell'esistenza di un trattamento e accedere ai propri dati.</li>\n<li><strong>Rettifica:</strong> richiedere la correzione di dati inesatti o incompleti.</li>\n<li><strong>Cancellazione:</strong> richiedere la cancellazione dei propri dati personali.</li>\n<li><strong>Limitazione:</strong> richiedere la limitazione del trattamento.</li>\n<li><strong>Portabilità:</strong> ricevere i propri dati in un formato strutturato e leggibile.</li>\n<li><strong>Opposizione:</strong> opporsi al trattamento per motivi legittimi.</li>\n<li><strong>Revoca del consenso:</strong> revocare in qualsiasi momento il consenso prestato per i cookie analitici tramite il pannello di gestione cookie del sito.</li>\n</ul>\n<p>\nPer esercitare i propri diritti, l'utente può contattare il titolare all'indirizzo email <a href=\"mailto:gaiacrognale@gmail.com\">gaiacrognale@gmail.com</a>.\n</p>\n<p>\nL'utente ha inoltre il diritto di proporre reclamo al <strong>Garante per la protezione dei dati personali</strong> (<a href=\"https://www.garanteprivacy.it\" target=\"_blank\" rel=\"noopener noreferrer\">www.garanteprivacy.it</a>).\n</p>\n<h2>9. Modifiche alla presente informativa</h2>\n<p>\nIl titolare si riserva il diritto di apportare modifiche alla presente informativa in qualsiasi momento. Le modifiche saranno pubblicate su questa pagina con indicazione della data di ultimo aggiornamento.\n</p>",
       "en": "<p>Placeholder text.</p>"
     },
     "hero": null,
     "ogImage": null,
-    "updatedAt": "2026-10-14"
+    "updatedAt": "2026-02-01"
   },
   {
     "key": "cookie",
-    "title": { "it": "Cookie policy", "en": "Cookie policy" },
-    "metaTitle": { "it": "", "en": "" },
-    "metaDescription": { "it": "", "en": "" },
-    "intro": { "it": "", "en": "" },
+    "title": {
+      "it": "Cookie policy",
+      "en": "Cookie policy"
+    },
+    "metaTitle": {
+      "it": "",
+      "en": ""
+    },
+    "metaDescription": {
+      "it": "",
+      "en": ""
+    },
+    "intro": {
+      "it": "",
+      "en": ""
+    },
     "body": {
-      "it": "<p>Testo segnaposto. La cookie policy della v1 va importata nel back office.</p>",
+      "it": "<h2>1. Cosa sono i cookie</h2>\n<p>\nI cookie sono piccoli file di testo che i siti web visitati inviano al browser dell'utente, dove vengono memorizzati per essere ritrasmessi agli stessi siti alla visita successiva. I cookie sono utilizzati per diverse finalità, come permettere la navigazione efficiente tra le pagine, ricordare le preferenze dell'utente e, in generale, migliorare l'esperienza di navigazione.\n</p>\n<h2>2. Cookie tecnici (necessari)</h2>\n<p>\nQuesti cookie sono indispensabili per il corretto funzionamento del sito e non possono essere disattivati. Non raccolgono informazioni personali identificabili.\n</p>\n<div>\n<table>\n<thead>\n<tr>\n<th>Cookie</th>\n<th>Finalità</th>\n<th>Durata</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>gaia-cookie-consent</code></td>\n<td>Memorizza le preferenze cookie dell'utente</td>\n<td>12 mesi</td>\n</tr>\n</tbody>\n</table>\n</div>\n<h2>3. Cookie analitici (previo consenso)</h2>\n<p>\nQuesti cookie sono utilizzati per raccogliere informazioni statistiche anonime sull'utilizzo del sito, come il numero di visitatori, le pagine più visitate e la durata delle visite. Vengono installati solo dopo aver ottenuto il consenso esplicito dell'utente tramite il banner cookie.\n</p>\n<h3>Google Analytics</h3>\n<p>\nIl sito utilizza Google Analytics, un servizio di analisi web fornito da Google LLC. Google Analytics utilizza i seguenti cookie:\n</p>\n<div>\n<table>\n<thead>\n<tr>\n<th>Cookie</th>\n<th>Finalità</th>\n<th>Durata</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>_ga</code></td>\n<td>Distingue gli utenti unici assegnando un ID generato casualmente. Utilizzato per calcolare dati su visitatori, sessioni e campagne.</td>\n<td>24 mesi</td>\n</tr>\n<tr>\n<td><code>_ga_*</code></td>\n<td>Utilizzato da Google Analytics 4 per mantenere lo stato della sessione.</td>\n<td>24 mesi</td>\n</tr>\n<tr>\n<td><code>_gid</code></td>\n<td>Distingue gli utenti. Utilizzato per dati statistici sulle visite giornaliere.</td>\n<td>24 ore</td>\n</tr>\n</tbody>\n</table>\n</div>\n<p>\nI dati sono raccolti con indirizzo IP anonimizzato e trattati in forma aggregata. Per maggiori informazioni su come Google utilizza i dati, consulta la <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy Policy di Google</a>.\n</p>\n<h2>4. Come gestire i cookie</h2>\n<h3>Tramite il nostro sito</h3>\n<p>\nPuoi gestire le tue preferenze cookie in qualsiasi momento cliccando sull'icona <strong>impostazioni cookie</strong> presente in basso a sinistra su ogni pagina del sito, oppure modificando le impostazioni al primo accesso tramite il banner cookie.\n</p>\n<h3>Tramite il browser</h3>\n<p>\nPuoi anche gestire i cookie direttamente dalle impostazioni del tuo browser. Ecco i link alle guide dei principali browser:\n</p>\n<ul>\n<li><a href=\"https://support.google.com/chrome/answer/95647\" target=\"_blank\" rel=\"noopener noreferrer\">Google Chrome</a></li>\n<li><a href=\"https://support.mozilla.org/it/kb/protezione-antitracciamento-avanzata-firefox-desktop\" target=\"_blank\" rel=\"noopener noreferrer\">Mozilla Firefox</a></li>\n<li><a href=\"https://support.apple.com/it-it/guide/safari/sfri11471/mac\" target=\"_blank\" rel=\"noopener noreferrer\">Apple Safari</a></li>\n<li><a href=\"https://support.microsoft.com/it-it/microsoft-edge/eliminare-i-cookie-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09\" target=\"_blank\" rel=\"noopener noreferrer\">Microsoft Edge</a></li>\n</ul>\n<p>\n<strong>Nota:</strong> la disattivazione dei cookie tecnici potrebbe compromettere alcune funzionalità del sito.\n</p>\n<h2>5. Aggiornamenti</h2>\n<p>\nLa presente Cookie Policy può essere aggiornata periodicamente. Ti consigliamo di consultare questa pagina regolarmente per essere informato su eventuali modifiche.\n</p>\n<h2>6. Riferimenti</h2>\n<p>\nPer informazioni complete sul trattamento dei dati personali, consulta la nostra <a href=\"/privacy\">Privacy Policy</a>.<br />\nPer qualsiasi domanda, contattaci all'indirizzo <a href=\"mailto:gaiacrognale@gmail.com\">gaiacrognale@gmail.com</a>.\n</p>",
       "en": "<p>Placeholder text.</p>"
     },
     "hero": null,
     "ogImage": null,
-    "updatedAt": "2026-10-14"
+    "updatedAt": "2026-02-01"
   }
 ]

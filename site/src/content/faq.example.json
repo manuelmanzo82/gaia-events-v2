@@ -2,57 +2,169 @@
   {
     "id": 1,
     "question": {
-      "it": "Quanto tempo prima vi devo contattare?",
-      "en": "How far in advance should I contact you?"
+      "it": "Come funziona la consulenza iniziale?",
+      "en": ""
     },
     "answer": {
-      "it": "Per un matrimonio l'ideale è dodici mesi prima, ma ho organizzato eventi splendidi anche in tre mesi.",
-      "en": "Twelve months ahead is ideal for a wedding, but I have organised beautiful events in three months too."
+      "it": "Ci prendiamo un caffè — di persona a Roma o in videochiamata — e mi raccontate come immaginate il vostro giorno. Nessun impegno, nessun costo. È semplicemente il modo migliore per capire se siamo sulla stessa lunghezza d'onda.",
+      "en": ""
     },
-    "group": "generale",
+    "group": "Organizzazione",
     "active": true,
     "order": 1
   },
   {
     "id": 2,
     "question": {
-      "it": "Lavorate solo a Roma?",
-      "en": "Do you work only in Rome?"
+      "it": "Con quanto anticipo devo contattare un wedding planner?",
+      "en": ""
     },
     "answer": {
-      "it": "Roma è la mia base, ma seguo eventi in tutta Italia e destination wedding per coppie che arrivano dall'estero.",
-      "en": "Rome is my base, but I work across Italy and handle destination weddings for couples coming from abroad."
+      "it": "Prima è, meglio è: con 12–18 mesi di anticipo avete la scelta più ampia su location e fornitori. Per un destination wedding, meglio 18–24 mesi. Ma se avete meno tempo, non preoccupatevi — ho organizzato matrimoni bellissimi anche in sei mesi.",
+      "en": ""
     },
-    "group": "generale",
+    "group": "Organizzazione",
     "active": true,
     "order": 2
   },
   {
     "id": 3,
     "question": {
-      "it": "Posso affidarvi solo una parte dell'organizzazione?",
-      "en": "Can I hand over only part of the planning?"
+      "it": "Organizzi solo matrimoni o anche altri eventi?",
+      "en": ""
     },
     "answer": {
-      "it": "Sì: il coordinamento del giorno è pensato esattamente per chi ha già organizzato tutto.",
-      "en": "Yes: day-of coordination is designed exactly for those who have already planned everything."
+      "it": "Non solo matrimoni. Ho organizzato feste private, anniversari e anche eventi aziendali per brand come Calzedonia, BNL e Zurich. Se c'è qualcosa da festeggiare, sono la persona giusta.",
+      "en": ""
     },
-    "group": "servizi",
+    "group": "Organizzazione",
     "active": true,
     "order": 3
   },
   {
     "id": 4,
     "question": {
-      "it": "Come si costruisce il preventivo?",
-      "en": "How is the quote built?"
+      "it": "Quali servizi offri?",
+      "en": ""
     },
     "answer": {
-      "it": "Dopo una prima chiacchierata preparo una proposta su misura: non ci sono listini automatici.",
-      "en": "After a first conversation I prepare a bespoke proposal: there are no automatic price lists."
+      "it": "Quattro strade diverse, tutte su misura. Il Wedding Planning Completo se volete che mi occupi di tutto dall'inizio alla fine. Il Coordinamento del Giorno se avete già organizzato ma volete dormire sonni tranquilli. Design & Styling se cercate qualcuno che curi l'estetica nei minimi dettagli. E Destination Wedding per chi sogna di sposarsi in Italia venendo dall'estero.",
+      "en": ""
     },
-    "group": "servizi",
+    "group": "Servizi",
     "active": true,
     "order": 4
+  },
+  {
+    "id": 5,
+    "question": {
+      "it": "Posso scegliere solo alcuni servizi?",
+      "en": ""
+    },
+    "answer": {
+      "it": "Certo, non esiste un pacchetto uguale per tutti. Ci sediamo insieme e capiamo cosa vi serve davvero. Magari avete bisogno solo di una mano con i fornitori, o solo del coordinamento il giorno stesso. Lo decidiamo insieme.",
+      "en": ""
+    },
+    "group": "Servizi",
+    "active": true,
+    "order": 5
+  },
+  {
+    "id": 6,
+    "question": {
+      "it": "Ti occupi anche della scelta dei fornitori?",
+      "en": ""
+    },
+    "answer": {
+      "it": "Sì, e vi confesso che è una delle parti che preferisco. Negli anni ho costruito una rete di fotografi, fioristi, catering e musicisti che conosco personalmente. Vi presento quelli che si sposano meglio con il vostro stile — e con il vostro budget.",
+      "en": ""
+    },
+    "group": "Servizi",
+    "active": true,
+    "order": 6
+  },
+  {
+    "id": 7,
+    "question": {
+      "it": "Quanto costa un wedding planner?",
+      "en": ""
+    },
+    "answer": {
+      "it": "Dipende da tante cose: il tipo di servizio, quanti ospiti, la location. Non ho un listino fisso perché ogni matrimonio è diverso. Potete farvi un'idea con il preventivo online qui sul sito, oppure scrivetemi e ne parliamo senza impegno.",
+      "en": ""
+    },
+    "group": "Costi",
+    "active": true,
+    "order": 7
+  },
+  {
+    "id": 8,
+    "question": {
+      "it": "La consulenza iniziale è a pagamento?",
+      "en": ""
+    },
+    "answer": {
+      "it": "No, è gratuita. Ci conosciamo, mi raccontate il vostro progetto, e poi decidete con calma se volete lavorare insieme.",
+      "en": ""
+    },
+    "group": "Costi",
+    "active": true,
+    "order": 8
+  },
+  {
+    "id": 9,
+    "question": {
+      "it": "Come funziona il pagamento?",
+      "en": ""
+    },
+    "answer": {
+      "it": "Lo dividiamo in step, in modo che sia comodo per voi. Definiamo le fasi insieme all'inizio, così sapete sempre cosa aspettarvi e gestite il budget senza sorprese.",
+      "en": ""
+    },
+    "group": "Costi",
+    "active": true,
+    "order": 9
+  },
+  {
+    "id": 10,
+    "question": {
+      "it": "In quali zone d'Italia lavori?",
+      "en": ""
+    },
+    "answer": {
+      "it": "La mia base è Roma, ma mi muovo in tutta Italia. Toscana, Costiera Amalfitana, Puglia, Sicilia, Lago di Como, Sardegna, Umbria — ogni regione ha le sue perle e conosco le migliori.",
+      "en": ""
+    },
+    "group": "Location e Destinazioni",
+    "active": true,
+    "order": 10
+  },
+  {
+    "id": 11,
+    "question": {
+      "it": "Organizzi matrimoni all'estero?",
+      "en": ""
+    },
+    "answer": {
+      "it": "Sì, mi è capitato diverse volte. Parlo inglese e lavoro spesso con coppie internazionali, quindi gestire la logistica oltre confine fa parte del mio lavoro.",
+      "en": ""
+    },
+    "group": "Location e Destinazioni",
+    "active": true,
+    "order": 11
+  },
+  {
+    "id": 12,
+    "question": {
+      "it": "Puoi consigliare le location migliori?",
+      "en": ""
+    },
+    "answer": {
+      "it": "È la domanda che mi fa più piacere. Ho visitato personalmente ville, castelli, masserie e resort in tutta Italia. Vi propongo solo posti che conosco davvero e che so essere all'altezza.",
+      "en": ""
+    },
+    "group": "Location e Destinazioni",
+    "active": true,
+    "order": 12
   }
 ]

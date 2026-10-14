@@ -2,8 +2,12 @@
 
 Astro legge i contenuti da questi JSON, **mai dal database**.
 
-- `*.example.json` — dati di esempio, versionati, usati come fallback dal
-  loader (`src/lib/content.ts`) così il build locale funziona sempre.
+- `*.example.json` — versionati, usati come fallback dal loader
+  (`src/lib/content.ts`) così il build locale funziona sempre.
+  `posts`, `faq` e le policy dentro `pages` contengono i **contenuti reali**
+  importati dalla v1, in italiano; il resto è ancora segnaposto.
+  La fonte di verità resta il database: l'import sta in
+  `admin/sql/seed-contenuti-v1.sql` e questi file ne sono la copia.
 - `*.json` — file reali, **gitignorati**: li scrive la GitHub Action leggendo
   `admin/api/export.php` prima del build. In locale puoi crearli con
   `npm run content:seed`.

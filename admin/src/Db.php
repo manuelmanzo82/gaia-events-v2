@@ -31,9 +31,13 @@ final class Db
             return self::$pdo;
         }
 
+        // La porta è opzionale: alcuni hosting condivisi non usano la 3306.
+        $port = (int) (self::$config['port'] ?? 0);
+
         $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
+            'mysql:host=%s;%sdbname=%s;charset=%s',
             self::$config['host'] ?? 'localhost',
+            $port > 0 ? "port={$port};" : '',
             self::$config['name'] ?? '',
             self::$config['charset'] ?? 'utf8mb4',
         );
