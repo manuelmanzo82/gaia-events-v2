@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------
+# REPO PUBBLICA: niente segreti, niente contenuti reali, niente upload.
+# ---------------------------------------------------------------
+
+# Segreti e configurazioni reali
+admin/config.php
+admin/config.*.php
+!admin/config.example.php
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+known_hosts
+secrets.json
+
+# Dump e backup del database (possono contenere dati personali)
+*.sql
+!admin/sql/schema.sql
+!admin/sql/seed.example.sql
+*.sql.gz
+*.dump
+*.bak
+backup/
+backups/
+
+# Upload e media generati dal back office
+uploads/
+admin/uploads/
+site/public/uploads/
+admin/storage/cache/
+admin/storage/logs/
+*.log
+
+# Contenuti esportati dal database durante il build
+# (in repo restano solo i file *.example.json di esempio)
+site/src/content/*.json
+!site/src/content/*.example.json
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+.output/
+.vercel/
+.netlify/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Composer (se mai servisse)
+vendor/
+composer.lock
+
+# Editor e sistema operativo
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+nul
+
+# Temporanei
+tmp/
+.tmp/
+*.tmp
