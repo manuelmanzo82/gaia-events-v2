@@ -90,6 +90,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
   } else if (velo) {
     const fine = (): void => {
       ricorda();
+      window.removeEventListener('keydown', salta);
       velo.remove();
     };
 
@@ -184,12 +185,19 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     // (~13px visivi, relativo al translate che ogni lettera già porta).
     gsap.set(lettere, { y: '+=80' });
 
-    // Un clic o un tasto qualsiasi salta tutto.
-    const salta = (): void => {
-      tl.progress(1); // onComplete fa il resto
-    };
-    velo.addEventListener('click', salta, { once: true });
-    window.addEventListener('keydown', salta, { once: true });
+    // Un clic o un tasto qualsiasi salta tutto — ma solo se è un gesto
+    // intenzionale: l'Invio ancora premuto dalla barra degli indirizzi
+    // arriva qui in auto-repeat appena la pagina carica e salterebbe
+    // l'intro da solo (visto sullo staging: velo per un istante e via).
+    // Quindi niente auto-repeat e una grazia di 600 ms dall'avvio.
+    const attivoDa = performance.now();
+    function salta(event: Event): void {
+      if ((event as KeyboardEvent).repeat) return;
+      if (performance.now() - attivoDa < 600) return;
+      tl.progress(1); // onComplete fa il resto, listener compresi
+    }
+    velo.addEventListener('click', salta);
+    window.addEventListener('keydown', salta);
 
     // Rete di sicurezza: qualunque cosa succeda, il velo non resta mai.
     window.setTimeout(() => {
