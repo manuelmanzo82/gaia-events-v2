@@ -1,27 +1,51 @@
 ---
 /**
- * Intro di apertura (stile Sarah Haywood, reinterpretata): velo a tutto
- * schermo nel colore scuro del brand, il logo appare in avorio, poi il velo
- * scorre verso l'alto e scopre l'hero.
+ * Intro di apertura: il logo si COSTRUISCE sul velo scuro, poi il velo
+ * sale e scopre l'hero (docs/DECISIONI-DESIGN-gaia.md + richiesta 15/10).
  *
- * Regole (docs/DECISIONI-DESIGN-gaia.md):
- *  - durata totale ~1,9 s, solo alla prima visita (sessionStorage);
- *  - saltabile con un clic/tasto, spenta con prefers-reduced-motion;
- *  - NON blocca il rendering: è solo un overlay, l'hero sotto è già
- *    carico e misurabile (LCP incluso).
+ * Sequenza (GSAP, totale ~2,45 s):
+ *  1. il ghirigoro si disegna come tracciato a penna: maschera con i path
+ *     guida (scheletro del tratto) animati in stroke-dashoffset;
+ *  2. "EVENTS" lettera per lettera (salita leggera + fade, stagger breve);
+ *  3. "Gaia Crognale" in dissolvenza;
+ *  4. riga di prestigio con filetti oro + sottoriga;
+ *  5. pausa breve, il velo sale.
+ *
+ * Regole: solo prima visita della sessione (sessionStorage), saltabile con
+ * clic/tasto, spenta con prefers-reduced-motion, overlay che non blocca il
+ * rendering dell'hero sottostante (LCP compreso).
+ *
+ * Confronto varianti: ?velo=notte|bordeaux forza la tinta da URL
+ * (serve alla styleguide; innocuo altrove).
  */
+import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
 
 interface Props {
   /** Colore del velo: inchiostro profondo (default) o bordeaux profondo. */
   tinta?: 'notte' | 'bordeaux';
+  lang?: Lang;
 }
 
-const { tinta = 'notte' } = Astro.props;
+const { tinta = 'notte', lang = 'it' } = Astro.props;
+
+const RIGA: Record<Lang, string> = {
+  it: 'Wedding & Event Planner · Roma',
+  en: 'Wedding & Event Planner · Rome, Italy',
+};
+const SOTTORIGA = 'Italia · Destination Weddings';
 ---
 
 <div id="intro-velo" data-tinta={tinta} aria-hidden="true">
-  <span class="velo-logo"><LogoGaia /></span>
+  <div class="velo-scena">
+    <span class="velo-logo"><LogoGaia animabile /></span>
+    <p class="velo-riga">
+      <span class="velo-filetto"></span>
+      {RIGA[lang]}
+      <span class="velo-filetto"></span>
+    </p>
+    <p class="velo-sottoriga">{SOTTORIGA}</p>
+  </div>
 </div>
 
 {/* Inline e subito dopo il velo: decide PRIMA del primo paint se mostrarlo,
@@ -39,13 +63,19 @@ const { tinta = 'notte' } = Astro.props;
     var riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (vista || riduci) {
       velo.remove();
-    } else {
-      velo.setAttribute('data-attivo', '');
+      return;
     }
+    var forzata = new URLSearchParams(location.search).get('velo');
+    if (forzata === 'notte' || forzata === 'bordeaux') {
+      velo.setAttribute('data-tinta', forzata);
+    }
+    velo.setAttribute('data-attivo', '');
   })();
 </script>
 
 <script>
+  import { gsap } from 'gsap';
+
   const velo = document.getElementById('intro-velo');
 
   function ricorda(): void {
@@ -56,25 +86,74 @@ const { tinta = 'notte' } = Astro.props;
     }
   }
 
-  if (velo) {
+  if (velo && !velo.hasAttribute('data-attivo')) {
+    // L'inline script non l'ha attivato (e non l'ha rimosso): via subito.
+    velo.remove();
+  } else if (velo) {
     const fine = (): void => {
       ricorda();
       velo.remove();
     };
 
-    velo.addEventListener('animationend', (event) => {
-      if ((event as AnimationEvent).animationName === 'velo-su') fine();
-    });
+    const guide = [...velo.querySelectorAll<SVGPathElement>('.velo-guida')];
+    const copertura = velo.querySelector<SVGRectElement>('.velo-copertura');
+    const lettere = velo.querySelectorAll<SVGPathElement>('.logo-lettera');
+    const firma = velo.querySelector<SVGGElement>('.logo-firma');
+    const ghirigoro = velo.querySelector<SVGGElement>('.logo-ghirigoro');
+    const riga = velo.querySelector<HTMLElement>('.velo-riga');
+    const sottoriga = velo.querySelector<HTMLElement>('.velo-sottoriga');
 
-    // Un clic o un tasto qualsiasi salta l'intro.
+    const tl = gsap.timeline({ onComplete: fine, defaults: { ease: 'power2.out' } });
+
+    // 1 — il ghirigoro si disegna (dashoffset sui path guida della maschera)
+    for (const guida of guide) {
+      const lunghezza = guida.getTotalLength();
+      gsap.set(guida, { strokeDasharray: lunghezza, strokeDashoffset: lunghezza });
+    }
+    if (ghirigoro) tl.set(ghirigoro, { opacity: 1 }, 0);
+    if (guide.length > 0) {
+      // prima il cammino principale, poi i rami residui
+      tl.to(guide[0], { strokeDashoffset: 0, duration: 0.8, ease: 'power1.inOut' }, 0.05);
+      tl.to(
+        guide.slice(1),
+        { strokeDashoffset: 0, duration: 0.3, ease: 'power1.out', stagger: 0.07 },
+        0.7,
+      );
+    }
+    // la copertura chiude la maschera: scopre eventuali residui del tratto
+    if (copertura) tl.to(copertura, { opacity: 1, duration: 0.2 }, 0.95);
+
+    // 2 — EVENTS lettera per lettera. I path hanno già un translate proprio
+    // (è la loro posizione): i tween devono essere RELATIVI, altrimenti GSAP
+    // sostituisce quel translate e le lettere saltano via.
+    tl.to(lettere, { opacity: 1, y: '-=80', duration: 0.5, stagger: 0.06 }, 0.55);
+
+    // 3 — la firma in dissolvenza
+    if (firma) tl.to(firma, { opacity: 1, duration: 0.4 }, 1.15);
+
+    // 4 — riga di prestigio e sottoriga
+    if (riga) tl.to(riga, { opacity: 1, y: 0, duration: 0.45 }, 1.25);
+    if (sottoriga) tl.to(sottoriga, { opacity: 1, duration: 0.4 }, 1.45);
+
+    // 5 — pausa breve, poi il velo sale
+    tl.to(velo, { yPercent: -101, duration: 0.5, ease: 'power4.inOut' }, 1.95);
+
+    // GSAP parte dopo il primo paint: gli stati iniziali nascosti li mette
+    // il CSS sotto [data-attivo], qui si aggiunge solo l'offset di partenza
+    // (~13px visivi, relativo al translate che ogni lettera già porta).
+    gsap.set(lettere, { y: '+=80' });
+
+    // Un clic o un tasto qualsiasi salta tutto.
     const salta = (): void => {
-      velo.classList.add('velo--salta');
-      velo.addEventListener('transitionend', fine, { once: true });
-      // rete di sicurezza se il transitionend non arriva
-      window.setTimeout(fine, 600);
+      tl.progress(1); // onComplete fa il resto
     };
     velo.addEventListener('click', salta, { once: true });
     window.addEventListener('keydown', salta, { once: true });
+
+    // Rete di sicurezza: qualunque cosa succeda, il velo non resta mai.
+    window.setTimeout(() => {
+      if (document.getElementById('intro-velo')) fine();
+    }, 4000);
   }
 </script>
 
@@ -88,6 +167,7 @@ const { tinta = 'notte' } = Astro.props;
     background: var(--color-notte);
     color: var(--color-avorio-su-notte);
     cursor: pointer;
+    will-change: transform;
   }
 
   #intro-velo[data-tinta='bordeaux'] {
@@ -96,38 +176,69 @@ const { tinta = 'notte' } = Astro.props;
 
   #intro-velo[data-attivo] {
     display: grid;
-    animation: velo-su 0.75s var(--ease-velo) 1.15s forwards;
   }
 
-  #intro-velo .velo-logo {
-    font-size: clamp(1.5rem, 1rem + 2.5vw, 2.75rem);
+  .velo-scena {
+    display: grid;
+    justify-items: center;
+    gap: 1.4rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  /* Stati iniziali: nel CSS (non in GSAP) così non c'è nessun frame col
+     logo già completo prima che la timeline parta. */
+  #intro-velo[data-attivo] :global(.logo-ghirigoro) {
     opacity: 0;
   }
 
-  #intro-velo[data-attivo] .velo-logo {
-    animation: velo-logo-in 0.7s var(--ease-gaia) 0.12s both;
+  #intro-velo[data-attivo] :global(.logo-lettera) {
+    opacity: 0;
   }
 
-  #intro-velo.velo--salta {
-    animation: none;
-    transition: transform 0.5s var(--ease-velo);
-    transform: translateY(-101%);
+  #intro-velo[data-attivo] :global(.logo-firma) {
+    opacity: 0;
   }
 
-  @keyframes velo-su {
-    to {
-      transform: translateY(-101%);
+  .velo-riga,
+  .velo-sottoriga {
+    margin: 0;
+    opacity: 0;
+  }
+
+  .velo-riga {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    transform: translateY(10px);
+  }
+
+  .velo-filetto {
+    width: 2.5rem;
+    height: 1px;
+    background: var(--color-oro);
+  }
+
+  .velo-sottoriga {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-velato-su-notte);
+  }
+
+  @media (max-width: 40rem) {
+    .velo-riga {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      gap: 0.7rem;
     }
-  }
 
-  @keyframes velo-logo-in {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    .velo-filetto {
+      width: 1.5rem;
     }
   }
 

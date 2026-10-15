@@ -293,12 +293,16 @@ const PALETTE_NOTTE = [
             <div class="comp" data-reveal="alto">
               <span class="scala-label">Intro a velo</span>
               <p class="colonna-stretta">
-                Velo scuro a tutto schermo, logo in avorio, poi il velo sale e scopre l'hero.
-                Un secondo e nove in tutto, solo alla prima visita della sessione, saltabile con
-                un clic o un tasto.
+                Il logo si costruisce sul velo: il ghirigoro si disegna come tracciato a penna
+                (maschera stroke sullo scheletro del tratto), EVENTS sale lettera per lettera,
+                poi firma e riga di prestigio con i filetti oro. ~2,5 s in tutto, solo alla
+                prima visita della sessione, saltabile con un clic o un tasto.
               </p>
               <p class="comp-fila">
-                <button type="button" class="btn" id="rivedi-intro">Rivedi l'intro</button>
+                <button type="button" class="btn" data-rivedi-intro="notte">Rivedi — notte</button>
+                <button type="button" class="btn" data-rivedi-intro="bordeaux">
+                  Rivedi — bordeaux
+                </button>
               </p>
             </div>
           </div>
@@ -351,14 +355,16 @@ const PALETTE_NOTTE = [
         aggiornaScrim();
       }
 
-      document.getElementById('rivedi-intro')?.addEventListener('click', () => {
-        try {
-          sessionStorage.removeItem('gaia-intro-vista');
-        } catch {
-          /* senza storage l'intro riparte comunque */
-        }
-        location.reload();
-      });
+      for (const bottone of document.querySelectorAll<HTMLButtonElement>('[data-rivedi-intro]')) {
+        bottone.addEventListener('click', () => {
+          try {
+            sessionStorage.removeItem('gaia-intro-vista');
+          } catch {
+            /* senza storage l'intro riparte comunque */
+          }
+          location.href = `${location.pathname}?velo=${bottone.dataset.rivediIntro}`;
+        });
+      }
     </script>
 
     <style>
