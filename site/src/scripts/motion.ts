@@ -84,5 +84,13 @@ export function initReveals(): void {
 /** Avvia tutto: da chiamare una volta per pagina. */
 export function initMotion(): void {
   initLenis();
-  initReveals();
+
+  // SplitText misura le righe: se parte prima che i font siano caricati,
+  // il reflow del font swap sposta le parole in righe già "tagliate"
+  // (es. una «»» orfana). Quindi i reveal aspettano document.fonts.ready.
+  if (document.fonts?.ready) {
+    void document.fonts.ready.then(() => initReveals());
+  } else {
+    initReveals();
+  }
 }

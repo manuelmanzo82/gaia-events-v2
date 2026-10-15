@@ -132,6 +132,14 @@
     color: var(--color-avorio-su-notte);
   }
 
+  /* Sulle superfici scure il logo diventa monocromo (come logo-bianco.png
+     della v1): il ghirigoro passa da pesca a currentColor. */
+  [data-theme='dark'],
+  [data-header-theme='dark'],
+  #intro-velo {
+    --logo-accento: currentColor;
+  }
+
   [data-theme='dark'][data-tinta='bordeaux'] {
     background-color: var(--color-bordeaux-notte);
   }

@@ -312,10 +312,12 @@ const PALETTE_NOTTE = [
           <h2 class="text-display">Cosa manca, cosa decidere</h2>
           <ul class="lista-regole colonna-stretta">
             <li>
-              <strong>Logo:</strong> nelle vecchie repo esiste solo in PNG
-              (<code>D:\GMS\Gaia Events\preventivo\logo.png</code>). Qui c'è un wordmark
-              provvisorio in Cormorant con <code>currentColor</code>: serve il vettoriale
-              ufficiale, o il via libera a ridisegnarlo.
+              <strong>Logo:</strong> il vettoriale ufficiale non esiste in nessuna cartella
+              (solo PNG; i favicon.svg della v1 sono PNG incapsulati). Questo è un SVG
+              <em>ricostruito per tracciatura</em> dal PNG 231×152: ghirigoro su
+              <code>--logo-accento</code> (pesca), testo su <code>currentColor</code>,
+              monocromo sulle sezioni scure. Da sostituire quando arriva il sorgente
+              ufficiale. Dimensioni v1 mantenute: 80px mobile, 130px desktop.
             </li>
             <li>
               <strong>Velo dell'intro:</strong> qui è in inchiostro <code>notte</code>; la
@@ -370,7 +372,7 @@ const PALETTE_NOTTE = [
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.1rem clamp(1.25rem, 4vw, 3.5rem);
+        padding: 0.6rem clamp(1.25rem, 4vw, 3.5rem);
         color: var(--color-inchiostro);
         transition:
           color 0.5s var(--ease-gaia),
