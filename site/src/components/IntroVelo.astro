@@ -22,13 +22,14 @@ import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
 
 interface Props {
-  /** Colore del velo: inchiostro profondo (default), bordeaux profondo,
-      grigio caldo o salvia — tutti token di global.css. */
+  /** Colore del velo: salvia (default, scelta del 15/10), inchiostro
+      profondo, bordeaux profondo o grigio caldo — tutti token di
+      global.css. Le altre tinte restano per il confronto via ?velo=. */
   tinta?: 'notte' | 'bordeaux' | 'grigio' | 'salvia';
   lang?: Lang;
 }
 
-const { tinta = 'notte', lang = 'it' } = Astro.props;
+const { tinta = 'salvia', lang = 'it' } = Astro.props;
 
 const RIGA: Record<Lang, string> = {
   it: 'Wedding & Event Planner · Roma',
@@ -130,7 +131,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 
     // 4 — riga di prestigio e sottoriga
     if (riga) tl.to(riga, { opacity: 1, y: 0, duration: 0.45 }, 1.25);
-    if (sottoriga) tl.to(sottoriga, { opacity: 1, duration: 0.4 }, 1.45);
+    // Su salvia la sottoriga è bianca a ~0.85, non piena: il tween deve
+    // fermarsi lì, altrimenti lo stile inline vince sul CSS.
+    const opacitaSottoriga = velo.getAttribute('data-tinta') === 'salvia' ? 0.85 : 1;
+    if (sottoriga) tl.to(sottoriga, { opacity: opacitaSottoriga, duration: 0.4 }, 1.45);
 
     // 5 — pausa breve, poi il velo sale
     tl.to(velo, { yPercent: -101, duration: 0.5, ease: 'power4.inOut' }, 1.95);
@@ -177,6 +181,14 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 
   #intro-velo[data-tinta='salvia'] {
     background: var(--color-salvia);
+    /* Sul salvia il pesca si perde (~1,7:1): ghirigoro bianco come il
+       testo, solo qui nell'intro. Fuori dall'intro il logo resta com'è. */
+    --logo-accento: currentColor;
+  }
+
+  #intro-velo[data-tinta='salvia'] .velo-sottoriga {
+    color: var(--color-avorio-su-notte);
+    opacity: 0.85;
   }
 
   #intro-velo[data-attivo] {
