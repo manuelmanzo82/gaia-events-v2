@@ -1,0 +1,12 @@
+I font in questa cartella sono distribuiti sotto SIL Open Font License 1.1
+(https://openfontlicense.org):
+
+- Cormorant Garamond — Copyright 2015 The Cormorant Project Authors
+  (https://github.com/CatharsisFonts/Cormorant)
+- Montserrat — Copyright 2011 The Montserrat Project Authors
+  (https://github.com/JulietaUla/Montserrat)
+
+La OFL 1.1 consente l'uso, lo studio, la modifica e la ridistribuzione dei
+font, anche a scopo commerciale, purché non vengano venduti da soli e
+conservino nome e licenza. Il testo completo della licenza è disponibile
+all'indirizzo sopra e nei repository dei rispettivi progetti.

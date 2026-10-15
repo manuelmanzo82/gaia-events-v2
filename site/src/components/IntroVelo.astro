@@ -1,0 +1,139 @@
+---
+/**
+ * Intro di apertura (stile Sarah Haywood, reinterpretata): velo a tutto
+ * schermo nel colore scuro del brand, il logo appare in avorio, poi il velo
+ * scorre verso l'alto e scopre l'hero.
+ *
+ * Regole (docs/DECISIONI-DESIGN-gaia.md):
+ *  - durata totale ~1,9 s, solo alla prima visita (sessionStorage);
+ *  - saltabile con un clic/tasto, spenta con prefers-reduced-motion;
+ *  - NON blocca il rendering: è solo un overlay, l'hero sotto è già
+ *    carico e misurabile (LCP incluso).
+ */
+import LogoGaia from './LogoGaia.astro';
+
+interface Props {
+  /** Colore del velo: inchiostro profondo (default) o bordeaux profondo. */
+  tinta?: 'notte' | 'bordeaux';
+}
+
+const { tinta = 'notte' } = Astro.props;
+---
+
+<div id="intro-velo" data-tinta={tinta} aria-hidden="true">
+  <span class="velo-logo"><LogoGaia /></span>
+</div>
+
+{/* Inline e subito dopo il velo: decide PRIMA del primo paint se mostrarlo,
+    così chi l'ha già visto non vede neanche un frame di velo. */}
+<script is:inline>
+  (() => {
+    var velo = document.getElementById('intro-velo');
+    if (!velo) return;
+    var vista = false;
+    try {
+      vista = sessionStorage.getItem('gaia-intro-vista') === '1';
+    } catch (e) {
+      /* storage bloccato: l'intro parte, ma senza memoria */
+    }
+    var riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (vista || riduci) {
+      velo.remove();
+    } else {
+      velo.setAttribute('data-attivo', '');
+    }
+  })();
+</script>
+
+<script>
+  const velo = document.getElementById('intro-velo');
+
+  function ricorda(): void {
+    try {
+      sessionStorage.setItem('gaia-intro-vista', '1');
+    } catch {
+      /* niente storage, pazienza */
+    }
+  }
+
+  if (velo) {
+    const fine = (): void => {
+      ricorda();
+      velo.remove();
+    };
+
+    velo.addEventListener('animationend', (event) => {
+      if ((event as AnimationEvent).animationName === 'velo-su') fine();
+    });
+
+    // Un clic o un tasto qualsiasi salta l'intro.
+    const salta = (): void => {
+      velo.classList.add('velo--salta');
+      velo.addEventListener('transitionend', fine, { once: true });
+      // rete di sicurezza se il transitionend non arriva
+      window.setTimeout(fine, 600);
+    };
+    velo.addEventListener('click', salta, { once: true });
+    window.addEventListener('keydown', salta, { once: true });
+  }
+</script>
+
+<style>
+  #intro-velo {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: none;
+    place-items: center;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+    cursor: pointer;
+  }
+
+  #intro-velo[data-tinta='bordeaux'] {
+    background: var(--color-bordeaux-notte);
+  }
+
+  #intro-velo[data-attivo] {
+    display: grid;
+    animation: velo-su 0.75s var(--ease-velo) 1.15s forwards;
+  }
+
+  #intro-velo .velo-logo {
+    font-size: clamp(1.5rem, 1rem + 2.5vw, 2.75rem);
+    opacity: 0;
+  }
+
+  #intro-velo[data-attivo] .velo-logo {
+    animation: velo-logo-in 0.7s var(--ease-gaia) 0.12s both;
+  }
+
+  #intro-velo.velo--salta {
+    animation: none;
+    transition: transform 0.5s var(--ease-velo);
+    transform: translateY(-101%);
+  }
+
+  @keyframes velo-su {
+    to {
+      transform: translateY(-101%);
+    }
+  }
+
+  @keyframes velo-logo-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #intro-velo {
+      display: none !important;
+    }
+  }
+</style>

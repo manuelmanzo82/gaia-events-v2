@@ -1,0 +1,47 @@
+---
+/**
+ * Logo PROVVISORIO: wordmark tipografico in attesa del vettoriale ufficiale
+ * (nelle vecchie repo esiste solo in PNG; chiesto a Manuel il sorgente).
+ *
+ * Il colore è currentColor: il logo eredita il colore del header, che a sua
+ * volta cambia con il tema della sezione sottostante (theme-observer.ts).
+ * Quando arriverà l'SVG vero, basterà sostituire il contenuto qui dentro
+ * mantenendo fill="currentColor".
+ */
+interface Props {
+  class?: string;
+}
+---
+
+<span class:list={['logo-gaia', Astro.props.class]} translate="no">
+  <em class="logo-gaia-nome">Gaia</em>
+  <span class="logo-gaia-events">Events</span>
+</span>
+
+<style>
+  .logo-gaia {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45em;
+    font-family: var(--font-display);
+    line-height: 1;
+    color: currentColor;
+    white-space: nowrap;
+  }
+
+  .logo-gaia-nome {
+    font-size: 1.6em;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .logo-gaia-events {
+    font-size: 1.05em;
+    font-weight: 400;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    /* compensa il letter-spacing dopo l'ultima lettera */
+    margin-right: -0.34em;
+  }
+</style>

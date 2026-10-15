@@ -1,0 +1,598 @@
+---
+/**
+ * /styleguide — pagina di lavoro per la fase design, NON linkata dal sito:
+ * mostra token, tipografia, componenti base, sezioni scure, motion e intro.
+ * È noindex e non compare in sitemap (la sitemap elenca solo le RouteKey).
+ */
+import '../styles/global.css';
+import IntroVelo from '../components/IntroVelo.astro';
+import LogoGaia from '../components/LogoGaia.astro';
+
+const PALETTE_BASE = [
+  { nome: 'Avorio', token: 'avorio', hex: '#FAF8F5', uso: 'fondo del sito' },
+  { nome: 'Bianco caldo', token: 'bianco-caldo', hex: '#FFFDFA', uso: 'card e superfici' },
+  { nome: 'Beige', token: 'beige', hex: '#E8E2D9', uso: 'fondi alternati, bordi' },
+  { nome: 'Inchiostro', token: 'inchiostro', hex: '#262019', uso: 'testo e titoli' },
+  { nome: 'Grigio caldo', token: 'grigio-caldo', hex: '#6F675D', uso: 'testo secondario' },
+];
+
+const PALETTE_ACCENTI = [
+  { nome: 'Bordeaux', token: 'bordeaux', hex: '#722F37', uso: 'unico accento forte: CTA, hover' },
+  { nome: 'Oro', token: 'oro', hex: '#C9A962', uso: 'solo dettagli: eyebrow, filetti, numeri' },
+  { nome: 'Salvia', token: 'salvia', hex: '#8B9A7D', uso: 'accento naturale, raro' },
+];
+
+const PALETTE_NOTTE = [
+  { nome: 'Notte', token: 'notte', hex: '#1B1611', uso: 'hero, citazioni, CTA finale, intro' },
+  { nome: 'Bordeaux notte', token: 'bordeaux-notte', hex: '#2C151A', uso: 'variante scura calda' },
+  { nome: 'Avorio su notte', token: 'avorio-su-notte', hex: '#F4EFE8', uso: 'testo su scuro' },
+  { nome: 'Velato su notte', token: 'velato-su-notte', hex: '#B5AA9B', uso: 'secondario su scuro' },
+];
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Gaia Events — Styleguide</title>
+    <link
+      rel="preload"
+      href="/fonts/cormorant-garamond-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href="/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <IntroVelo />
+
+    <header class="sg-header" data-header-theme="light">
+      <a href="#inizio" class="sg-brand"><LogoGaia /></a>
+      <span class="sg-tag">Styleguide · fase design</span>
+    </header>
+
+    <main id="inizio">
+      <!-- ============ APERTURA ============ -->
+      <section class="sezione" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow" data-reveal="alto">Gaia Events · Roma</p>
+          <h1 class="text-display-xl" data-reveal="righe">
+            Roma <em>editoriale</em>,<br />con un tocco di notte
+          </h1>
+          <p class="text-lead text-velato colonna-stretta" data-reveal="alto">
+            Base chiara d'avorio, inchiostro al posto del nero, bordeaux come unico accento forte e
+            oro nei dettagli. Le sezioni scure — hero, citazioni, chiusure — portano il
+            cinematografico di Haywood dentro l'eleganza romana.
+          </p>
+          <hr class="filetto" />
+          <p class="didascalia">
+            Scorri: il logo in alto cambia colore quando passa sopra una sezione scura.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ PALETTE ============ -->
+      <section class="sezione" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow">01 · Colore</p>
+          <h2 class="text-display" data-reveal="righe">La palette</h2>
+
+          <h3 class="sg-sottotitolo">Base chiara</h3>
+          <div class="chips" data-reveal="alto">
+            {
+              PALETTE_BASE.map((c) => (
+                <figure class="chip">
+                  <span class="chip-colore" style={`background:${c.hex}`} />
+                  <figcaption>
+                    <strong>{c.nome}</strong>
+                    <code>{c.hex}</code>
+                    <span class="didascalia">{c.uso}</span>
+                  </figcaption>
+                </figure>
+              ))
+            }
+          </div>
+
+          <h3 class="sg-sottotitolo">Accenti</h3>
+          <div class="chips" data-reveal="alto">
+            {
+              PALETTE_ACCENTI.map((c) => (
+                <figure class="chip">
+                  <span class="chip-colore" style={`background:${c.hex}`} />
+                  <figcaption>
+                    <strong>{c.nome}</strong>
+                    <code>{c.hex}</code>
+                    <span class="didascalia">{c.uso}</span>
+                  </figcaption>
+                </figure>
+              ))
+            }
+          </div>
+
+          <h3 class="sg-sottotitolo">Sezioni scure</h3>
+          <div class="chips" data-reveal="alto">
+            {
+              PALETTE_NOTTE.map((c) => (
+                <figure class="chip">
+                  <span class="chip-colore" style={`background:${c.hex}`} />
+                  <figcaption>
+                    <strong>{c.nome}</strong>
+                    <code>{c.hex}</code>
+                    <span class="didascalia">{c.uso}</span>
+                  </figcaption>
+                </figure>
+              ))
+            }
+          </div>
+
+          <p class="didascalia colonna-stretta">
+            Regola dell'oro: compare al massimo due o tre volte per schermata — un eyebrow, un
+            filetto, un numero. Mai come sfondo. Il bordeaux è l'unico accento forte: se due
+            elementi lo chiedono, ne resta uno.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ TIPOGRAFIA ============ -->
+      <section class="sezione sezione--alt" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow">02 · Tipografia</p>
+          <h2 class="text-display" data-reveal="righe">Cormorant Garamond<br />e Montserrat</h2>
+          <p class="text-velato colonna-stretta">
+            Serif grande e leggero per i titoli, con i corsivi come voce di Gaia; sans pulito per
+            il testo. Font variabili self-hosted: tre file, nessuna richiesta a Google.
+          </p>
+
+          <div class="scala">
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">display-xl · hero e manifesto</span>
+              <p class="font-display text-display-xl">Il vostro <em>giorno</em></p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">display · titoli di sezione</span>
+              <p class="font-display text-display">Matrimoni a Roma e oltre</p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">title · sottosezioni e card</span>
+              <p class="font-display text-title">Villa sul lago · Toscana</p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">lead · incipit</span>
+              <p class="text-lead text-velato colonna-stretta">
+                Ogni matrimonio comincia da un racconto: il vostro. Lo ascoltiamo, poi costruiamo
+                tutto il resto.
+              </p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">body · testo corrente</span>
+              <p class="colonna-stretta">
+                Montserrat 400, interlinea 1,75, colonna di lettura di 44 rem. Il corpo resta fermo
+                a 16 px su ogni schermo: cresce solo il display. I corsivi dentro al testo passano
+                a Cormorant, <em>come una firma</em>.
+              </p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">eyebrow · etichette</span>
+              <p class="eyebrow">Destination wedding</p>
+            </div>
+            <div class="scala-riga" data-reveal="alto">
+              <span class="scala-label">caption · didascalie e crediti</span>
+              <p class="didascalia">Fotografia di — nome del partner · Roma, 2026</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ COMPONENTI ============ -->
+      <section class="sezione" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow">03 · Componenti base</p>
+          <h2 class="text-display" data-reveal="righe">Pochi pezzi, ben fatti</h2>
+
+          <div class="comp-griglia">
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Bottoni</span>
+              <p class="comp-fila">
+                <a href="#inizio" class="btn">Raccontaci il vostro giorno</a>
+                <a href="#inizio" class="btn btn--pieno">Richiedi un preventivo</a>
+              </p>
+              <p class="didascalia">
+                Ghost di default, il bordeaux arriva all'hover. Il pieno è riservato alla CTA
+                principale: uno per schermata.
+              </p>
+            </div>
+
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Link</span>
+              <p class="comp-fila">
+                <a href="#inizio" class="link-filo">Scopri i luoghi</a>
+              </p>
+              <p class="didascalia">Il filo si ritira e riparte dal lato opposto.</p>
+            </div>
+
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Lista numerata editoriale (servizi)</span>
+              <ol class="lista-editoriale">
+                <li>
+                  <span class="numero">N° 01</span>
+                  <span class="font-display text-title">Regia completa</span>
+                </li>
+                <li>
+                  <span class="numero">N° 02</span>
+                  <span class="font-display text-title">Design e allestimento</span>
+                </li>
+                <li>
+                  <span class="numero">N° 03</span>
+                  <span class="font-display text-title">Coordinamento del giorno</span>
+                </li>
+              </ol>
+            </div>
+
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Card foto (segnaposto: niente foto in repo)</span>
+              <figure class="card-foto">
+                <span class="card-foto-finta" data-reveal="maschera"></span>
+                <figcaption>
+                  <span class="eyebrow">Lazio</span>
+                  <span class="font-display text-title">Roma e dintorni</span>
+                  <span class="didascalia">Le foto arrivano da /uploads/ sullo staging</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SEZIONE SCURA: CITAZIONE ============ -->
+      <section class="sezione sezione--notte" data-theme="dark">
+        <div class="container-gaia centro">
+          <p class="eyebrow" data-reveal="alto">Dicono di noi</p>
+          <blockquote class="font-display text-display citazione" data-reveal="righe">
+            «Non un dettaglio fuori posto,<br />non un momento <em>senza grazia</em>»
+          </blockquote>
+          <p class="didascalia" data-reveal="alto">Una coppia, più avanti: le recensioni vere arrivano con i consensi</p>
+        </div>
+      </section>
+
+      <!-- ============ SEZIONE SCURA: TINTA BORDEAUX ============ -->
+      <section class="sezione sezione--notte" data-theme="dark" data-tinta="bordeaux">
+        <div class="container-gaia centro">
+          <p class="eyebrow" data-reveal="alto">CTA finale</p>
+          <h2 class="text-display" data-reveal="righe">Raccontaci il <em>vostro</em> giorno</h2>
+          <p class="comp-fila centro-fila" data-reveal="alto">
+            <a href="#inizio" class="btn">Scrivici</a>
+          </p>
+          <p class="didascalia">Variante bordeaux profondo, per le chiusure di pagina.</p>
+        </div>
+      </section>
+
+      <!-- ============ MOTION ============ -->
+      <section class="sezione" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow">04 · Motion</p>
+          <h2 class="text-display" data-reveal="righe">Lento, morbido,<br />mai invadente</h2>
+
+          <div class="comp-griglia">
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Regole</span>
+              <ul class="lista-regole">
+                <li>Lenis per lo scroll, GSAP + ScrollTrigger per i reveal.</li>
+                <li>Durata 1,1 s, ease <code>power3.out</code> — niente rimbalzi.</li>
+                <li>Testi riga per riga (<code>data-reveal="righe"</code>), foto con maschera dal basso (<code>maschera</code>), blocchi in fade (<code>alto</code>).</li>
+                <li>Ogni reveal parte una sola volta, all'85% della viewport.</li>
+                <li>Con <code>prefers-reduced-motion</code> tutto è spento e i contenuti sono subito visibili.</li>
+                <li>Nessun effetto può peggiorare LCP o CLS: stati iniziali impostati da GSAP, mai dal CSS.</li>
+              </ul>
+            </div>
+
+            <div class="comp" data-reveal="alto">
+              <span class="scala-label">Intro a velo</span>
+              <p class="colonna-stretta">
+                Velo scuro a tutto schermo, logo in avorio, poi il velo sale e scopre l'hero.
+                Un secondo e nove in tutto, solo alla prima visita della sessione, saltabile con
+                un clic o un tasto.
+              </p>
+              <p class="comp-fila">
+                <button type="button" class="btn" id="rivedi-intro">Rivedi l'intro</button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ NOTE PER MANUEL ============ -->
+      <section class="sezione sezione--alt" data-theme="light">
+        <div class="container-gaia">
+          <p class="eyebrow">05 · Note</p>
+          <h2 class="text-display">Cosa manca, cosa decidere</h2>
+          <ul class="lista-regole colonna-stretta">
+            <li>
+              <strong>Logo:</strong> nelle vecchie repo esiste solo in PNG
+              (<code>D:\GMS\Gaia Events\preventivo\logo.png</code>). Qui c'è un wordmark
+              provvisorio in Cormorant con <code>currentColor</code>: serve il vettoriale
+              ufficiale, o il via libera a ridisegnarlo.
+            </li>
+            <li>
+              <strong>Velo dell'intro:</strong> qui è in inchiostro <code>notte</code>; la
+              variante <code>bordeaux</code> è pronta (si cambia con una prop).
+            </li>
+            <li>
+              <strong>Salvia:</strong> tenuta in palette come accento raro; nella home non
+              dovrebbe comparire.
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      import { initMotion } from '../scripts/motion';
+      import { initThemeObserver } from '../scripts/theme-observer';
+
+      initMotion();
+
+      const header = document.querySelector<HTMLElement>('.sg-header');
+      if (header) {
+        initThemeObserver(header);
+
+        // Scrim: appena si scrolla, il header si dà un fondo sfumato nel
+        // colore del tema corrente, così non collide mai con i contenuti.
+        const aggiornaScrim = (): void => {
+          header.classList.toggle('con-scrim', window.scrollY > 24);
+        };
+        window.addEventListener('scroll', aggiornaScrim, { passive: true });
+        aggiornaScrim();
+      }
+
+      document.getElementById('rivedi-intro')?.addEventListener('click', () => {
+        try {
+          sessionStorage.removeItem('gaia-intro-vista');
+        } catch {
+          /* senza storage l'intro riparte comunque */
+        }
+        location.reload();
+      });
+    </script>
+
+    <style>
+      /* ——— Header demo (fisso, cambia colore col tema) ——— */
+      .sg-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem clamp(1.25rem, 4vw, 3.5rem);
+        color: var(--color-inchiostro);
+        transition:
+          color 0.5s var(--ease-gaia),
+          background-color 0.4s var(--ease-gaia);
+        pointer-events: none;
+      }
+
+      .sg-header.con-scrim {
+        background: color-mix(in srgb, var(--color-avorio) 90%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+
+      .sg-header[data-header-theme='dark'].con-scrim {
+        background: color-mix(in srgb, var(--color-notte) 85%, transparent);
+      }
+
+      @media (max-width: 40rem) {
+        .sg-tag {
+          display: none;
+        }
+      }
+
+      .sg-header a {
+        pointer-events: auto;
+      }
+
+      .sg-header[data-header-theme='dark'] {
+        color: var(--color-avorio-su-notte);
+      }
+
+      .sg-brand {
+        font-size: 1.05rem;
+        text-decoration: none;
+      }
+
+      .sg-tag {
+        font-size: var(--text-eyebrow);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.55;
+      }
+
+      /* ——— Sezioni ——— */
+      .sezione {
+        padding-block: var(--spacing-section);
+      }
+
+      .sezione--alt {
+        background: color-mix(in srgb, var(--color-beige) 38%, var(--color-avorio));
+      }
+
+      .sezione--notte .citazione {
+        max-width: 56rem;
+        margin-inline: auto;
+      }
+
+      .centro {
+        text-align: center;
+      }
+
+      .centro .eyebrow {
+        justify-content: center;
+      }
+
+      .centro-fila {
+        justify-content: center;
+      }
+
+      .colonna-stretta {
+        max-width: 44rem;
+      }
+
+      .centro .colonna-stretta {
+        margin-inline: auto;
+      }
+
+      h1,
+      h2 {
+        margin-block: 1.1rem 1.4rem;
+      }
+
+      .sg-sottotitolo {
+        font-family: var(--font-sans);
+        font-size: var(--text-eyebrow);
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-grigio-caldo);
+        margin: 3rem 0 1.25rem;
+      }
+
+      /* ——— Palette ——— */
+      .chips {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+        gap: 1.25rem;
+      }
+
+      .chip {
+        margin: 0;
+        border: 1px solid var(--color-beige);
+        background: var(--color-bianco-caldo);
+      }
+
+      .chip-colore {
+        display: block;
+        height: 5.5rem;
+        border-bottom: 1px solid var(--color-beige);
+      }
+
+      .chip figcaption {
+        display: grid;
+        gap: 0.15rem;
+        padding: 0.8rem 0.9rem 0.9rem;
+        font-size: 0.8125rem;
+      }
+
+      .chip code {
+        font-size: 0.75rem;
+        color: var(--color-grigio-caldo);
+        letter-spacing: 0.06em;
+      }
+
+      /* ——— Scala tipografica ——— */
+      .scala {
+        display: grid;
+        gap: 2.75rem;
+        margin-top: 3rem;
+      }
+
+      .scala-riga p {
+        margin: 0.35rem 0 0;
+      }
+
+      .scala-label {
+        display: block;
+        font-size: var(--text-eyebrow);
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-grigio-caldo);
+      }
+
+      /* ——— Componenti ——— */
+      .comp-griglia {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+        gap: 2.5rem;
+        margin-top: 3rem;
+      }
+
+      .comp {
+        display: grid;
+        gap: 1rem;
+        align-content: start;
+      }
+
+      .comp-fila {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin: 0;
+      }
+
+      .lista-editoriale {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .lista-editoriale li {
+        display: flex;
+        align-items: baseline;
+        gap: 1.25rem;
+        padding: 1.1rem 0;
+        border-bottom: 1px solid var(--color-beige);
+      }
+
+      .lista-editoriale li:first-child {
+        border-top: 1px solid var(--color-beige);
+      }
+
+      .card-foto {
+        margin: 0;
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      .card-foto-finta {
+        display: block;
+        aspect-ratio: 4 / 5;
+        max-width: 24rem;
+        border-radius: 4px;
+        background:
+          linear-gradient(0deg, color-mix(in srgb, var(--color-notte) 12%, transparent), transparent 45%),
+          var(--color-beige);
+      }
+
+      .card-foto figcaption {
+        display: grid;
+        gap: 0.3rem;
+      }
+
+      .lista-regole {
+        margin: 0;
+        padding-left: 1.1rem;
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      .lista-regole code {
+        font-size: 0.8125rem;
+        background: color-mix(in srgb, var(--color-beige) 55%, transparent);
+        padding: 0.05rem 0.35rem;
+        border-radius: 2px;
+      }
+
+      [data-theme='dark'] .lista-regole code {
+        background: color-mix(in srgb, var(--color-avorio-su-notte) 14%, transparent);
+      }
+    </style>
+  </body>
+</html>

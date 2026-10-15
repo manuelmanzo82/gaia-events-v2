@@ -2,20 +2,62 @@
 @import './fonts.css';
 
 /**
- * Design token di Gaia Events.
- * Tailwind 4 è CSS-first: i token definiti qui diventano utility
- * (--color-bordeaux → bg-bordeaux, text-bordeaux, border-bordeaux).
+ * Design system di Gaia Events — direzione "Roma Editoriale" (A + Haywood).
+ * Base chiara avorio con inchiostro al posto del nero, bordeaux come unico
+ * accento forte, oro solo nei dettagli; alcune sezioni scure profonde
+ * (hero, citazioni, CTA finali) per il tocco cinematografico.
+ *
+ * Tailwind 4 è CSS-first: i token definiti in @theme diventano utility
+ * (--color-bordeaux → bg-bordeaux, text-bordeaux, border-bordeaux;
+ *  --text-display → text-display; --font-display → font-display).
  */
 @theme {
-  --color-avorio: #faf8f5;
-  --color-beige: #e8e2d9;
-  --color-salvia: #8b9a7d;
-  --color-bordeaux: #722f37;
-  --color-oro: #c9a962;
+  /* — Base chiara — */
+  --color-avorio: #faf8f5; /* fondo del sito */
+  --color-bianco-caldo: #fffdfa; /* card e superfici in rilievo */
+  --color-beige: #e8e2d9; /* fondi alternati, bordi */
+  --color-inchiostro: #262019; /* testo e titoli: inchiostro caldo, mai nero puro */
+  --color-grigio-caldo: #6f675d; /* testo secondario, didascalie */
+
+  /* — Accenti — */
+  --color-bordeaux: #722f37; /* unico accento forte: CTA, focus, dettagli attivi */
+  --color-oro: #c9a962; /* solo dettagli: eyebrow, filetti, numeri */
+  --color-salvia: #8b9a7d; /* accento naturale raro (badge, grafici) */
+
+  /* — Sezioni scure (hero, citazioni, CTA finale, intro) — */
+  --color-notte: #1b1611; /* inchiostro profondo caldo */
+  --color-bordeaux-notte: #2c151a; /* variante bordeaux profondo */
+  --color-avorio-su-notte: #f4efe8; /* testo sulle sezioni scure */
+  --color-velato-su-notte: #b5aa9b; /* testo secondario sulle sezioni scure */
+
+  /* — Compatibilità con la fase placeholder — */
   --color-antracite: #2d2d2d;
 
+  /* — Tipografia — */
   --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
   --font-sans: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+
+  /* Scala fluida: il display cresce con lo schermo, il corpo resta fermo. */
+  --text-display-xl: clamp(2.875rem, 2rem + 6vw, 6.75rem); /* hero, manifesto */
+  --text-display-xl--line-height: 1.02;
+  --text-display: clamp(2.25rem, 1.6rem + 3.4vw, 4.25rem); /* titoli di sezione */
+  --text-display--line-height: 1.08;
+  --text-title: clamp(1.5rem, 1.25rem + 1.6vw, 2.375rem); /* sottosezioni, card */
+  --text-title--line-height: 1.18;
+  --text-lead: clamp(1.125rem, 1.05rem + 0.5vw, 1.375rem); /* incipit, citazioni brevi */
+  --text-lead--line-height: 1.55;
+  --text-caption: 0.8125rem; /* didascalie, crediti */
+  --text-caption--line-height: 1.5;
+  --text-eyebrow: 0.6875rem; /* etichette sopra i titoli */
+  --text-eyebrow--line-height: 1.4;
+
+  /* — Spaziatura di sezione — */
+  --spacing-section: clamp(5rem, 4rem + 8vh, 8.5rem);
+  --spacing-section-sm: clamp(3rem, 2.5rem + 4vh, 5rem);
+
+  /* — Motion: lento ed elegante, mai invadente — */
+  --ease-gaia: cubic-bezier(0.22, 1, 0.36, 1); /* uscita morbida, senza rimbalzi */
+  --ease-velo: cubic-bezier(0.76, 0, 0.24, 1); /* per il velo dell'intro */
 }
 
 @layer base {
@@ -30,11 +72,13 @@
 
   body {
     background-color: var(--color-avorio);
-    color: var(--color-antracite);
+    color: var(--color-inchiostro);
     font-family: var(--font-sans);
     font-size: 1rem;
-    line-height: 1.7;
+    font-weight: 400;
+    line-height: 1.75;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   h1,
@@ -42,9 +86,21 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 300;
-    line-height: 1.15;
+    font-weight: 340;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
     text-wrap: balance;
+    color: var(--color-inchiostro);
+  }
+
+  em,
+  i {
+    font-family: var(--font-display);
+    font-style: italic;
+    /* Il corsivo Cormorant dentro un titolo mantiene il corpo del tondo;
+       dentro il testo Montserrat va leggermente alzato per pareggiare. */
+    font-size: 1.06em;
+    letter-spacing: 0;
   }
 
   a {
@@ -59,9 +115,34 @@
     height: auto;
   }
 
+  ::selection {
+    background: var(--color-bordeaux);
+    color: var(--color-avorio);
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-bordeaux);
     outline-offset: 2px;
+  }
+
+  /* — Sezioni a tema: il header e il logo leggono data-theme per cambiare
+       colore (IntersectionObserver in scripts/theme-observer.ts). — */
+  [data-theme='dark'] {
+    background-color: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  [data-theme='dark'][data-tinta='bordeaux'] {
+    background-color: var(--color-bordeaux-notte);
+  }
+
+  [data-theme='dark'] :is(h1, h2, h3, h4) {
+    color: var(--color-avorio-su-notte);
+  }
+
+  [data-theme='dark'] ::selection {
+    background: var(--color-oro);
+    color: var(--color-notte);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -93,5 +174,159 @@
 
   .skip-link:focus {
     left: 0;
+  }
+
+  /* — Contenitori editoriali — */
+  .container-gaia {
+    width: 100%;
+    max-width: 80rem; /* 1280px */
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  .container-prosa {
+    width: 100%;
+    max-width: 44rem; /* colonna di lettura */
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  /* — Etichetta sopra i titoli — */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-oro);
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  /* — Filetto oro — */
+  .filetto {
+    width: 2.5rem;
+    height: 1px;
+    border: 0;
+    margin: 2rem 0;
+    background: var(--color-oro);
+  }
+
+  /* — Bottoni: ghost editoriale, il bordeaux arriva all'hover — */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.95rem 2.1rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-inchiostro);
+    cursor: pointer;
+    transition:
+      background-color 0.35s var(--ease-gaia),
+      border-color 0.35s var(--ease-gaia),
+      color 0.35s var(--ease-gaia);
+  }
+
+  .btn:hover {
+    background: var(--color-bordeaux);
+    border-color: var(--color-bordeaux);
+    color: var(--color-avorio);
+  }
+
+  .btn--pieno {
+    background: var(--color-bordeaux);
+    border-color: var(--color-bordeaux);
+    color: var(--color-avorio);
+  }
+
+  .btn--pieno:hover {
+    background: var(--color-inchiostro);
+    border-color: var(--color-inchiostro);
+  }
+
+  [data-theme='dark'] .btn {
+    color: var(--color-avorio-su-notte);
+  }
+
+  [data-theme='dark'] .btn:hover {
+    background: var(--color-avorio-su-notte);
+    border-color: var(--color-avorio-su-notte);
+    color: var(--color-notte);
+  }
+
+  /* — Link con sottolineatura animata — */
+  .link-filo {
+    position: relative;
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .link-filo::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform-origin: right;
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .link-filo:hover::after {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  /* — Numero editoriale (servizi, elenchi) — */
+  .numero {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-caption);
+    color: var(--color-oro);
+    letter-spacing: 0.08em;
+  }
+
+  /* — Didascalia — */
+  .didascalia {
+    font-size: var(--text-caption);
+    letter-spacing: 0.04em;
+    color: var(--color-grigio-caldo);
+  }
+
+  [data-theme='dark'] .didascalia {
+    color: var(--color-velato-su-notte);
+  }
+}
+
+@layer utilities {
+  /* Testo secondario coerente nei due temi. */
+  .text-velato {
+    color: var(--color-grigio-caldo);
+  }
+
+  [data-theme='dark'] .text-velato {
+    color: var(--color-velato-su-notte);
   }
 }

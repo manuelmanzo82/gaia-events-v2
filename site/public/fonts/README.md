@@ -1,22 +1,20 @@
 # Font self-hosted
 
-Qui vanno i `.woff2` di **Cormorant Garamond** e **Montserrat**, da aggiungere
-in fase di design. Nella v1 i font arrivavano da Google Fonts, quindi i file non
-sono ancora in repo.
-
-File attesi (sottoinsieme latin + latin-ext):
+**Cormorant Garamond** e **Montserrat** come font **variabili** (asse `wght`):
+un solo `.woff2` per famiglia copre tutti i pesi, invece di un file per peso.
+Scaricati da Google Fonts il 15/10/2026.
 
 ```
-cormorant-garamond-300.woff2
-cormorant-garamond-400.woff2
-cormorant-garamond-400-italic.woff2
-montserrat-300.woff2
-montserrat-400.woff2
-montserrat-500.woff2
+cormorant-garamond-var.woff2             wght 300–700, normale, latin
+cormorant-garamond-var-ext.woff2         idem, latin-ext (scaricato solo se serve)
+cormorant-garamond-italic-var.woff2      wght 300–700, corsivo, latin
+cormorant-garamond-italic-var-ext.woff2  idem, latin-ext
+montserrat-var.woff2                     wght 100–900, latin
+montserrat-var-ext.woff2                 idem, latin-ext
 ```
 
-Quando i file sono qui, togli i commenti in `src/styles/fonts.css` e aggiungi
-il `<link rel="preload">` dei due pesi principali in `BaseLayout.astro`.
+Le `@font-face` stanno in `src/styles/fonts.css`; i due file principali
+(`cormorant-garamond-var` e `montserrat-var`) sono precaricati in
+`BaseLayout.astro`.
 
-Entrambi i font sono sotto **SIL Open Font License 1.1**: il self-hosting è
-consentito, il file di licenza va tenuto accanto ai font.
+Entrambi i font sono sotto **SIL Open Font License 1.1** — vedi `LICENSE.txt`.
