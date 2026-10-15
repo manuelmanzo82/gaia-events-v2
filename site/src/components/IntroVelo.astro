@@ -3,20 +3,20 @@
  * Intro di apertura: il logo si COSTRUISCE sul velo scuro, poi il velo
  * sale e scopre l'hero (docs/DECISIONI-DESIGN-gaia.md + richiesta 15/10).
  *
- * Sequenza (GSAP, totale ~2,45 s):
+ * Sequenza (GSAP, totale ~4,5-5 s; tutti i tempi nell'oggetto TEMPI):
  *  1. il ghirigoro si disegna come tracciato a penna: maschera con i path
  *     guida (scheletro del tratto) animati in stroke-dashoffset;
- *  2. "EVENTS" lettera per lettera (salita leggera + fade, stagger breve);
+ *  2. "EVENTS" lettera per lettera, dall'80% del ghirigoro;
  *  3. "Gaia Crognale" in dissolvenza;
- *  4. riga di prestigio con filetti oro + sottoriga;
- *  5. pausa breve, il velo sale.
+ *  4. riga di prestigio + sottoriga sfalsata;
+ *  5. pausa con il logo completo fermo, poi il velo sale.
  *
  * Regole: solo prima visita della sessione (sessionStorage), saltabile con
  * clic/tasto, spenta con prefers-reduced-motion, overlay che non blocca il
  * rendering dell'hero sottostante (LCP compreso).
  *
- * Confronto varianti: ?velo=notte|bordeaux forza la tinta da URL
- * (serve alla styleguide; innocuo altrove).
+ * Confronto varianti: ?velo=notte|bordeaux|grigio|salvia forza la tinta da
+ * URL (serve alla styleguide; innocuo altrove).
  */
 import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
@@ -101,43 +101,83 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     const riga = velo.querySelector<HTMLElement>('.velo-riga');
     const sottoriga = velo.querySelector<HTMLElement>('.velo-sottoriga');
 
+    // Tutti i tempi dell'intro in un punto solo (secondi, salvo nota).
+    const TEMPI = {
+      avvio: 0.05,
+      ghirigoro: 1.8, // disegno completo del tratto
+      lettereAvvioFrazione: 0.8, // EVENTS parte all'80% del ghirigoro
+      lettera: 0.6,
+      lettereStagger: 0.12,
+      firma: 0.8,
+      riga: 0.8,
+      sottorigaSfalso: 0.2,
+      pausa: 0.8, // logo completo, fermo
+      velo: 1.1, // salita del velo
+      sicurezzaMs: 7000, // rete di sicurezza
+    };
+
+    // Posizioni derivate: la firma entra sulla coda delle lettere, la riga
+    // subito dopo, e la pausa parte quando anche la sottoriga è a posto.
+    const tLettere = TEMPI.avvio + TEMPI.ghirigoro * TEMPI.lettereAvvioFrazione;
+    const tFirma = tLettere + TEMPI.lettera * 0.5;
+    const tRiga = tFirma + 0.15;
+    const tSottoriga = tRiga + TEMPI.sottorigaSfalso;
+    const tVelo = tSottoriga + TEMPI.riga + TEMPI.pausa;
+
     const tl = gsap.timeline({ onComplete: fine, defaults: { ease: 'power2.out' } });
 
-    // 1 — il ghirigoro si disegna (dashoffset sui path guida della maschera)
+    // 1 — il ghirigoro si disegna (dashoffset sui path guida della maschera):
+    // prima il cammino principale, poi i rami residui, tutto dentro
+    // TEMPI.ghirigoro; la copertura chiude la maschera sugli ultimi residui.
     for (const guida of guide) {
       const lunghezza = guida.getTotalLength();
       gsap.set(guida, { strokeDasharray: lunghezza, strokeDashoffset: lunghezza });
     }
     if (ghirigoro) tl.set(ghirigoro, { opacity: 1 }, 0);
     if (guide.length > 0) {
-      // prima il cammino principale, poi i rami residui
-      tl.to(guide[0], { strokeDashoffset: 0, duration: 0.8, ease: 'power1.inOut' }, 0.05);
+      tl.to(
+        guide[0],
+        { strokeDashoffset: 0, duration: TEMPI.ghirigoro * 0.75, ease: 'power2.inOut' },
+        TEMPI.avvio,
+      );
       tl.to(
         guide.slice(1),
-        { strokeDashoffset: 0, duration: 0.3, ease: 'power1.out', stagger: 0.07 },
-        0.7,
+        {
+          strokeDashoffset: 0,
+          duration: TEMPI.ghirigoro * 0.2,
+          ease: 'power2.out',
+          stagger: 0.06,
+        },
+        TEMPI.avvio + TEMPI.ghirigoro * 0.7,
       );
     }
-    // la copertura chiude la maschera: scopre eventuali residui del tratto
-    if (copertura) tl.to(copertura, { opacity: 1, duration: 0.2 }, 0.95);
+    if (copertura) {
+      tl.to(copertura, { opacity: 1, duration: 0.25 }, TEMPI.avvio + TEMPI.ghirigoro * 0.85);
+    }
 
     // 2 — EVENTS lettera per lettera. I path hanno già un translate proprio
     // (è la loro posizione): i tween devono essere RELATIVI, altrimenti GSAP
     // sostituisce quel translate e le lettere saltano via.
-    tl.to(lettere, { opacity: 1, y: '-=80', duration: 0.5, stagger: 0.06 }, 0.55);
+    tl.to(
+      lettere,
+      { opacity: 1, y: '-=80', duration: TEMPI.lettera, stagger: TEMPI.lettereStagger },
+      tLettere,
+    );
 
     // 3 — la firma in dissolvenza
-    if (firma) tl.to(firma, { opacity: 1, duration: 0.4 }, 1.15);
+    if (firma) tl.to(firma, { opacity: 1, duration: TEMPI.firma }, tFirma);
 
-    // 4 — riga di prestigio e sottoriga
-    if (riga) tl.to(riga, { opacity: 1, y: 0, duration: 0.45 }, 1.25);
+    // 4 — riga di prestigio e sottoriga, sfalsate
+    if (riga) tl.to(riga, { opacity: 1, y: 0, duration: TEMPI.riga }, tRiga);
     // Su salvia la sottoriga è bianca a ~0.85, non piena: il tween deve
     // fermarsi lì, altrimenti lo stile inline vince sul CSS.
     const opacitaSottoriga = velo.getAttribute('data-tinta') === 'salvia' ? 0.85 : 1;
-    if (sottoriga) tl.to(sottoriga, { opacity: opacitaSottoriga, duration: 0.4 }, 1.45);
+    if (sottoriga) {
+      tl.to(sottoriga, { opacity: opacitaSottoriga, duration: TEMPI.riga }, tSottoriga);
+    }
 
-    // 5 — pausa breve, poi il velo sale
-    tl.to(velo, { yPercent: -101, duration: 0.5, ease: 'power4.inOut' }, 1.95);
+    // 5 — pausa con il logo completo fermo, poi il velo sale
+    tl.to(velo, { yPercent: -101, duration: TEMPI.velo, ease: 'power3.inOut' }, tVelo);
 
     // GSAP parte dopo il primo paint: gli stati iniziali nascosti li mette
     // il CSS sotto [data-attivo], qui si aggiunge solo l'offset di partenza
@@ -154,7 +194,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     // Rete di sicurezza: qualunque cosa succeda, il velo non resta mai.
     window.setTimeout(() => {
       if (document.getElementById('intro-velo')) fine();
-    }, 4000);
+    }, TEMPI.sicurezzaMs);
   }
 </script>
 
@@ -186,9 +226,11 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     --logo-accento: currentColor;
   }
 
+  /* Solo il colore: l'opacità finale (0,85) la mette il tween GSAP,
+     altrimenti questa regola, più specifica, scavalcherebbe lo stato
+     iniziale nascosto e la sottoriga apparirebbe subito. */
   #intro-velo[data-tinta='salvia'] .velo-sottoriga {
     color: var(--color-avorio-su-notte);
-    opacity: 0.85;
   }
 
   #intro-velo[data-attivo] {
