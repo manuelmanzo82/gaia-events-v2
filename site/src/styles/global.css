@@ -132,11 +132,12 @@
     color: var(--color-avorio-su-notte);
   }
 
-  /* Sulle superfici scure il logo diventa monocromo (come logo-bianco.png
-     della v1): il ghirigoro passa da pesca a currentColor. */
+  /* Sulle sezioni scure il logo diventa monocromo (come logo-bianco.png
+     della v1): il ghirigoro passa da pesca a currentColor. Sul velo
+     dell'intro invece NO: lì il ghirigoro resta nel suo colore e solo il
+     testo è bianco (richiesta 15/10). */
   [data-theme='dark'],
-  [data-header-theme='dark'],
-  #intro-velo {
+  [data-header-theme='dark'] {
     --logo-accento: currentColor;
   }
 

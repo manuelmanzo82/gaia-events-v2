@@ -22,8 +22,9 @@ import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
 
 interface Props {
-  /** Colore del velo: inchiostro profondo (default) o bordeaux profondo. */
-  tinta?: 'notte' | 'bordeaux';
+  /** Colore del velo: inchiostro profondo (default), bordeaux profondo,
+      grigio caldo o salvia — tutti token di global.css. */
+  tinta?: 'notte' | 'bordeaux' | 'grigio' | 'salvia';
   lang?: Lang;
 }
 
@@ -39,11 +40,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 <div id="intro-velo" data-tinta={tinta} aria-hidden="true">
   <div class="velo-scena">
     <span class="velo-logo"><LogoGaia animabile /></span>
-    <p class="velo-riga">
-      <span class="velo-filetto"></span>
-      {RIGA[lang]}
-      <span class="velo-filetto"></span>
-    </p>
+    <p class="velo-riga">{RIGA[lang]}</p>
     <p class="velo-sottoriga">{SOTTORIGA}</p>
   </div>
 </div>
@@ -66,7 +63,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
       return;
     }
     var forzata = new URLSearchParams(location.search).get('velo');
-    if (forzata === 'notte' || forzata === 'bordeaux') {
+    if (['notte', 'bordeaux', 'grigio', 'salvia'].indexOf(forzata) !== -1) {
       velo.setAttribute('data-tinta', forzata);
     }
     velo.setAttribute('data-attivo', '');
@@ -174,6 +171,14 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     background: var(--color-bordeaux-notte);
   }
 
+  #intro-velo[data-tinta='grigio'] {
+    background: var(--color-grigio-caldo);
+  }
+
+  #intro-velo[data-tinta='salvia'] {
+    background: var(--color-salvia);
+  }
+
   #intro-velo[data-attivo] {
     display: grid;
   }
@@ -206,26 +211,22 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     opacity: 0;
   }
 
+  /* Con il letter-spacing largo l'ultimo carattere si porta dietro il suo
+     tracking: il margin-right negativo pari al tracking lo compensa, così
+     il testo resta centrato otticamente. */
   .velo-riga {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
     font-size: 0.72rem;
     font-weight: 500;
     letter-spacing: 0.26em;
+    margin-right: -0.26em;
     text-transform: uppercase;
     transform: translateY(10px);
-  }
-
-  .velo-filetto {
-    width: 2.5rem;
-    height: 1px;
-    background: var(--color-oro);
   }
 
   .velo-sottoriga {
     font-size: 0.6rem;
     letter-spacing: 0.3em;
+    margin-right: -0.3em;
     text-transform: uppercase;
     color: var(--color-velato-su-notte);
   }
@@ -234,11 +235,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     .velo-riga {
       font-size: 0.6rem;
       letter-spacing: 0.2em;
-      gap: 0.7rem;
-    }
-
-    .velo-filetto {
-      width: 1.5rem;
+      margin-right: -0.2em;
     }
   }
 
