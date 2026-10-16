@@ -24,8 +24,8 @@
   --color-oro: #c9a962; /* solo dettagli: filetti, numeri e eyebrow sulle sezioni scure */
   /* L'oro su avorio sta a 2,1:1 e non si legge: per il TESTO piccolo sulle
      sezioni chiare (eyebrow, numeri) vale questa tinta piu' profonda,
-     4,6:1 su avorio. I filetti restano in oro, e sul notte torna l'oro. */
-  --color-oro-testo: #8a6d2e;
+     5,1:1 sul beige piu' chiaro. I filetti restano in oro, e sul notte torna l'oro. */
+  --color-oro-testo: #7d6227;
   --color-salvia: #8b9a7d; /* accento naturale raro (badge, grafici) */
 
   /* — Sezioni scure (hero, citazioni, CTA finale, intro) — */
@@ -38,8 +38,9 @@
   --color-antracite: #2d2d2d;
 
   /* — Tipografia — */
-  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
-  --font-sans: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+  /* I «Fallback» sono le facce a metriche compatibili di fonts.css. */
+  --font-display: 'Cormorant Garamond', 'Cormorant Fallback', 'Cormorant Fallback Times', Georgia, serif;
+  --font-sans: 'Montserrat', 'Montserrat Fallback', 'Segoe UI', system-ui, sans-serif;
 
   /* Scala fluida: il display cresce con lo schermo, il corpo resta fermo. */
   --text-display-xl: clamp(2.875rem, 2rem + 6vw, 6.75rem); /* hero, manifesto */

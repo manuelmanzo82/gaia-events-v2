@@ -479,11 +479,41 @@ Fatto:
   negli EXIF nessun credito finché Gaia non dice chi le ha scattate.
   Nessun matrimonio compare sul sito: niente raggruppamento per coppia.
 
-Prossimi passi (fase 3):
-- Home completa IT/EN: intro + hero (video/foto dal back office) + effetti di
-  scroll reinterpretati da sarahhaywood.com; screenshot 1440/390; Lighthouse
-  mobile e desktop ≥95; deploy staging e ok di Manuel.
-- Rimettere `INTRO_SEMPRE = false` e spostare lo snippet intro in BaseLayout.
+- **Fase 3 — home completa IT/EN** (16/10): header fisso con `LogoGaia`
+  che cambia colore sulle sezioni scure, snippet intro in `BaseLayout`
+  (`INTRO_SEMPRE` ancora `true`), e le sezioni in
+  `site/src/components/home/`: hero (foto di `page_hero` in dissolvenza
+  CSS, video desktop predisposto), manifesto (`settings.home.manifesto`),
+  highlights (5 schede impilate + 11 in fascia orizzontale agganciata),
+  luoghi (nascosta finché non ci sono luoghi), servizi in sticky split
+  (foto del servizio, ripiego = highlights sezione «servizi»), chi è Gaia
+  (highlight «chi-sono» n.1), recensione (nascosta finché non ce n'è una
+  vera), destination, CTA finale. Effetti in `scripts/home-effetti.ts`:
+  solo ≥64rem, spenti con reduced-motion; sotto, scroll naturale e
+  carosello a scroll-snap. Tutti i testi dal back office; in EN i servizi
+  e Chi sono usano le traduzioni in bozza (docs/DA-CHIEDERE-A-GAIA.md).
+  Lighthouse sul build locale: mobile 99/96/100/100, desktop
+  100/96/100/100, CLS 0, LCP mobile ~1,9 s.
+- **Cose imparate in fase 3**: Chrome **esclude dall'LCP un'immagine che
+  riempie tutto il viewport** (la considera sfondo), quindi l'LCP della
+  home è il titolo dell'hero e dipende dall'arrivo del font: il preload
+  della foto hero non ha `fetchpriority=high`. Tutto il CSS è inline
+  (`inlineStylesheets: 'always'`): tre fogli esterni costavano 300 ms di
+  render-blocking su mobile. L'oro `#c9a962` su avorio sta a 2,1:1: per il
+  testo piccolo sulle sezioni chiare c'è `--color-oro-testo` (#8a6d2e),
+  l'oro resta per filetti e per il notte. SplitText va creato con
+  `aria: 'none'` (altrimenti mette `aria-label` sui `<p>`, vietato).
+  L'HTML della home pesa ~150 KB non compressi: il logo SVG tracciato sta
+  inline due volte (header + velo, ~30 KB l'uno), da alleggerire quando
+  arriverà il vettoriale ufficiale.
+
+Prossimi passi (fase 3, resta):
+- Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
+  staging (con l'header di basic auth).
+- Rimettere `INTRO_SEMPRE = false` prima del lancio.
+- Footer: è ancora quello segnaposto, da disegnare.
+- Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)
+  sono ancora segnaposto.
 - DROP di `events`/`event_images` + rimozione di /portfolio quando /storie la
   sostituisce (commit dedicato).
 - Contenuti veri da Gaia (luoghi, location, storie, testi dei partner).

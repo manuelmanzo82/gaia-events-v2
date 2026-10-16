@@ -6,7 +6,43 @@
  *
  * unicode-range: il blocco -ext (latin-ext) viene scaricato solo se nella
  * pagina compare un carattere che lo richiede — per IT/EN in pratica mai.
+ *
+ * Ripieghi a metriche compatibili: finché il webfont non arriva il testo
+ * si vede nel font di sistema (font-display: swap), e al cambio le righe
+ * si riavvolgevano spostando l'hero (CLS 0,05 su mobile). Le facce
+ * «Fallback» qui sotto ridimensionano Georgia/Times/Arial con size-adjust
+ * e sovrascrivono ascent/descent/line-gap, così l'ingombro è lo stesso e
+ * il cambio non muove niente. Valori calcolati con fontTools sui file in
+ * public/fonts/ (larghezza media pesata sulle frequenze delle lettere,
+ * come fa fontaine). Vanno ricalcolati se cambiano i font.
  */
+
+@font-face {
+  font-family: 'Cormorant Fallback';
+  src: local('Georgia');
+  size-adjust: 88.21%;
+  ascent-override: 104.75%;
+  descent-override: 32.54%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Cormorant Fallback Times';
+  src: local('Times New Roman'), local('Times');
+  size-adjust: 97.07%;
+  ascent-override: 95.19%;
+  descent-override: 29.57%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Montserrat Fallback';
+  src: local('Arial'), local('Helvetica');
+  size-adjust: 110.99%;
+  ascent-override: 87.21%;
+  descent-override: 22.61%;
+  line-gap-override: 0%;
+}
 
 @font-face {
   font-family: 'Cormorant Garamond';
