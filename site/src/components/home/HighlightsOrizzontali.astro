@@ -1,0 +1,159 @@
+---
+/**
+ * Highlights, seconda parte: le foto restanti della sezione "home" in una
+ * fascia che si aggancia e scorre in orizzontale con lo scroll verticale
+ * (home-effetti.ts, [data-orizzontale], rif. sarahhaywood.com/weddings/).
+ *
+ * Sotto i 64rem nessun pin: carosello a scorrimento libero con
+ * scroll-snap, puro CSS. Ogni foto è alta quanto la fascia e larga quanto
+ * il suo rapporto, mai oltre il proprio maxWidth.
+ */
+import type { Lang } from '../../config/site';
+import type { Highlight } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  highlights: Highlight[];
+  /** Da quale numero continua la numerazione delle schede. */
+  da?: number;
+}
+
+const { lang, highlights, da = 1 } = Astro.props;
+
+// Larghezza resa: ~ altezza della fascia × rapporto; per il srcset basta
+// una stima prudente.
+const SIZES = '(min-width: 64rem) 48vw, 82vw';
+
+const foto = highlights
+  .map((h, i) => {
+    const data = picture(h.image, lang, SIZES);
+    if (!data || !h.image) return null;
+    return {
+      data,
+      rapporto: `${h.image.width} / ${h.image.height}`,
+      numero: String(da + i).padStart(2, '0'),
+    };
+  })
+  .filter((f): f is NonNullable<typeof f> => f !== null);
+---
+
+{
+  foto.length > 0 && (
+    <section class="orizzontale" data-theme="light" data-orizzontale>
+      <ul class="binario" role="list">
+        {foto.map((f) => (
+          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.data.maxWidth}px`}>
+            <figure class="tessera-figura">
+              <Picture data={f.data} class="tessera-img" />
+              <figcaption class="tessera-testo">
+                <span class="numero">N° {f.numero}</span>
+                <span class="didascalia">{f.data.alt}</span>
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .orizzontale {
+    background: color-mix(in srgb, var(--color-beige) 38%, var(--color-avorio));
+    padding-block: var(--spacing-section-sm);
+    overflow: hidden;
+  }
+
+  .binario {
+    display: flex;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    margin: 0;
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+    list-style: none;
+  }
+
+  .tessera {
+    flex: 0 0 auto;
+  }
+
+  .tessera-figura {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .tessera-figura :global(picture) {
+    display: block;
+  }
+
+  .tessera-figura :global(.tessera-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 2px;
+    background: var(--color-beige);
+  }
+
+  .tessera-testo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .tessera-testo .numero {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* — Mobile: carosello libero con scroll-snap, niente JS — */
+  @media (max-width: 63.98rem) {
+    .binario {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .binario::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tessera {
+      width: min(82vw, var(--limite));
+      scroll-snap-align: start;
+    }
+  }
+
+  /* — Desktop: fascia alta quanto lo schermo, il binario lo muove GSAP — */
+  @media (min-width: 64rem) {
+    .orizzontale {
+      padding-block: 0;
+    }
+
+    .binario {
+      align-items: center;
+      height: 100vh;
+      height: 100svh;
+      width: max-content;
+      padding-inline: clamp(1.25rem, 4vw, 3.5rem) 12vw;
+      will-change: transform;
+    }
+
+    /* Altezza fissa, larghezza dal rapporto, mai oltre il limite della foto. */
+    .tessera {
+      width: min(calc((100svh - 14rem) * var(--rapporto)), var(--limite), 70vw);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
+    .binario {
+      height: auto;
+      width: auto;
+      flex-wrap: wrap;
+      padding-block: var(--spacing-section-sm);
+    }
+  }
+</style>

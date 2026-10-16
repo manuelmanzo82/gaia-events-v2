@@ -16,6 +16,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   getFeaturedReviews,
   getHero,
+  getHighlights,
   getServices,
   getSettings,
   isPublishable,
@@ -26,6 +27,9 @@ import { picture } from '../../lib/images';
 import { localBusiness, webSite } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import HeroHome from '../home/HeroHome.astro';
+import HighlightsImpilati from '../home/HighlightsImpilati.astro';
+import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
+import Manifesto from '../home/Manifesto.astro';
 import PlaceholderSection from '../PlaceholderSection.astro';
 
 interface Props {
@@ -37,6 +41,13 @@ const t = useTranslations(lang);
 
 const settings = getSettings();
 const hero = getHero('home');
+
+// Highlights della home: le prime cinque come schede impilate, le altre
+// nella fascia orizzontale (16 schermate di schede sarebbero troppe).
+const highlights = getHighlights('home');
+const SCHEDE_IMPILATE = 5;
+const impilati = highlights.slice(0, SCHEDE_IMPILATE);
+const orizzontali = highlights.slice(SCHEDE_IMPILATE);
 
 // In evidenza solo i contenuti pubblicabili in questa lingua: altrimenti la
 // home inglese elencherebbe voci vuote e linkerebbe schede non generate.
@@ -80,16 +91,17 @@ const esiste = (key: Parameters<typeof existsIn>[0]) => existsIn(key, lang);
 
   <HeroHome lang={lang} hero={hero} settings={settings} />
 
+  <Manifesto lang={lang} settings={settings} />
+
+  <HighlightsImpilati
+    lang={lang}
+    highlights={impilati}
+    eyebrow={text(section('portfolio')?.text, lang)}
+    titolo={text(section('portfolio')?.title, lang)}
+  />
+  <HighlightsOrizzontali lang={lang} highlights={orizzontali} da={impilati.length + 1} />
+
   <div class="container-gaia">
-    <PlaceholderSection
-      lang={lang}
-      id="manifesto"
-      title={text(settings.home.manifesto, lang)}
-      text={text(settings.home.manifestoFirma, lang)}
-    />
-
-    <PlaceholderSection lang={lang} id="highlights" title={text(section('portfolio')?.title, lang)} />
-
     <PlaceholderSection
       lang={lang}
       id="services"
@@ -135,3 +147,15 @@ const esiste = (key: Parameters<typeof existsIn>[0]) => existsIn(key, lang);
     </PlaceholderSection>
   </div>
 </BaseLayout>
+
+<script>
+  import { initHomeEffetti } from '../../scripts/home-effetti';
+
+  // Dopo il motion di base (BaseLayout): schede impilate, fascia
+  // orizzontale e sticky split esistono solo da 64rem in su.
+  if (document.fonts?.ready) {
+    void document.fonts.ready.then(() => initHomeEffetti());
+  } else {
+    initHomeEffetti();
+  }
+</script>
