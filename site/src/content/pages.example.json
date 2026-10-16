@@ -2,7 +2,7 @@
   {
     "key": "about",
     "title": {
-      "it": "Chi Sono",
+      "it": "Chi sono",
       "en": "About me"
     },
     "metaTitle": {
@@ -143,7 +143,7 @@
   {
     "key": "services",
     "title": {
-      "it": "I Miei Servizi",
+      "it": "I miei servizi",
       "en": "Services"
     },
     "metaTitle": {
@@ -169,7 +169,7 @@
   {
     "key": "portfolio",
     "title": {
-      "it": "Storie ed Emozioni",
+      "it": "Storie ed emozioni",
       "en": "Portfolio"
     },
     "metaTitle": {
@@ -299,7 +299,7 @@
   {
     "key": "contact",
     "title": {
-      "it": "Iniziamo a Conoscerci",
+      "it": "Iniziamo a conoscerci",
       "en": "Contact"
     },
     "metaTitle": {

@@ -3,11 +3,11 @@
     "id": 1,
     "slug": "planning",
     "title": {
-      "it": "Wedding Planning Completo",
+      "it": "Wedding planning completo",
       "en": ""
     },
     "subtitle": {
-      "it": "Full Service",
+      "it": "Full service",
       "en": ""
     },
     "description": {
@@ -44,7 +44,7 @@
     "id": 2,
     "slug": "coordinamento",
     "title": {
-      "it": "Coordinamento del Giorno",
+      "it": "Coordinamento del giorno",
       "en": ""
     },
     "subtitle": {
@@ -124,7 +124,7 @@
     "id": 4,
     "slug": "destination",
     "title": {
-      "it": "Destination Wedding",
+      "it": "Destination wedding",
       "en": ""
     },
     "subtitle": {

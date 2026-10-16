@@ -19,11 +19,11 @@
       "en": ""
     },
     "title": {
-      "it": "Creiamo Insieme il Tuo Sogno",
+      "it": "Creiamo insieme il vostro sogno",
       "en": ""
     },
     "subtitle": {
-      "it": "Esclusività e ricercatezza per il giorno più importante della tua vita",
+      "it": "Esclusività e ricercatezza per il giorno più importante della vostra vita",
       "en": ""
     },
     "image": null,
@@ -39,13 +39,13 @@
         "en": ""
       },
       "text": {
-        "it": "Da oltre 10 anni trasformo i sogni in eventi indimenticabili. Ho organizzato matrimoni in location esclusive in tutta Italia e all'estero, curando ogni dettaglio con passione. Ho avuto anche l'onore di collaborare con brand prestigiosi come Calzedonia, BNL e Zurich. Il mio obiettivo è rendere il vostro giorno speciale unico e senza stress, curando ogni dettaglio con passione e professionalità.",
+        "it": "Da oltre dieci anni trasformo i sogni in eventi indimenticabili: matrimoni in location esclusive, a Roma, in tutta Italia e all'estero, curati in ogni dettaglio.",
         "en": ""
       }
     },
     "services": {
       "title": {
-        "it": "Come Posso Aiutarti",
+        "it": "Come posso aiutarvi",
         "en": ""
       },
       "text": {
@@ -55,12 +55,12 @@
     },
     "portfolio": {
       "title": {
-        "it": "I Nostri Eventi",
-        "en": ""
+        "it": "Dettagli che restano",
+        "en": "Details that stay"
       },
       "text": {
-        "it": "Ogni evento è una storia diversa: queste sono alcune di quelle che ho avuto la fortuna di raccontare.",
-        "en": "Every event is a different story: here are a few I have been lucky enough to tell."
+        "it": "Ogni storia è diversa.",
+        "en": "Every story is different."
       }
     },
     "reviews": {
@@ -85,11 +85,11 @@
     },
     "cta": {
       "title": {
-        "it": "Il Tuo Evento Perfetto Inizia da Qui",
-        "en": ""
+        "it": "Il vostro giorno inizia da qui",
+        "en": "Your day starts here"
       },
       "text": {
-        "it": "Ogni grande evento inizia con una conversazione. Raccontami la tua visione e insieme la trasformeremo in realtà.",
+        "it": "Ogni grande evento inizia con una conversazione. Raccontatemi la vostra visione e insieme la trasformeremo in realtà.",
         "en": ""
       }
     }
@@ -102,6 +102,12 @@
     "manifestoFirma": {
       "it": "Gaia Crognale",
       "en": "Gaia Crognale"
+    }
+  },
+  "legal": {
+    "piva": {
+      "it": "",
+      "en": ""
     }
   },
   "about": {
