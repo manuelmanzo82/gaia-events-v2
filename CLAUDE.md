@@ -182,6 +182,44 @@ Mai nel codice, mai nei commit.
   4. verifica, poi **cancellare il dump**;
   5. controllare con curl che `/admin/bin/`, `/admin/sql/` e `/admin/storage/`
      rispondano 403.
+- Il `.gitignore` ignora `*.sql`: la riga `!admin/sql/migrations/*.sql` è
+  quella che tiene le migrazioni in repo (la prima, di fase 2, era rimasta
+  fuori fino al 16/10).
+
+**Import delle foto dei fotografi** (16/10/2026, fatto sullo staging)
+- Gli originali non entrano mai in repo. Si caricano via SFTP in
+  `admin/storage/import/` (cartella non servita dal web, `[F]` di mod_rewrite)
+  insieme a un `manifesto.json` con nome parlante, alt IT/EN, nota interna e
+  ruoli (`hero`, `home`, `chi_sono` = ordine nella sezione) per ogni file.
+- `php8.3 -q admin/bin/importa-foto.php` (`--prova` per vedere senza
+  scrivere) passa ogni file da `ImageService::storeFile()`, la stessa strada
+  dell'upload dal back office: varianti WebP/AVIF, `max_css_width`,
+  `usage_tier`. **GD riscrive solo i pixel**, quindi EXIF, GPS, fotocamera e
+  autore non arrivano mai in `uploads/`; lo script lo verifica sul primo
+  JPEG generato e si ferma se trova ancora un blocco EXIF. Rilanciarlo è
+  sicuro: le foto già in `media` vengono saltate, i collegamenti
+  riallineati.
+- Sullo staging la shell SSH ha un tetto di **memoria virtuale di 768 MB**
+  (`ulimit -v`, hard, non alzabile) che non c'entra con `memory_limit`: un
+  processo che macina 110 foto lo supera a metà strada e l'encoder lascia
+  varianti AVIF/WebP vuote, mentre una foto da 33 MP non si apre nemmeno.
+  Per questo `--solo=FILE` importa una foto per processo (il ciclo è nel
+  commento in testa allo script), `--verifica` controlla che originale e
+  varianti ci siano davvero e `--ripara` cancella righe incomplete e file
+  orfani. `php-cgi` senza stdin va in segfault: sempre `< /dev/null`.
+- `ImageService` conta un formato come riuscito solo se **tutte** le
+  larghezze sono andate a buon fine, altrimenti cancella i resti: un
+  `<source>` AVIF con una candidata mancante non ricade sul WebP, il
+  browser mostra l'immagine rotta. Conseguenza sullo staging: le foto di
+  tier `hero` importate da shell hanno **solo WebP** (l'AVIF a 2400 px non
+  entra nei 768 MB), le altre WebP + AVIF. Dal back office, che gira sotto
+  Apache senza quel tetto, l'AVIF si genera: ricaricare da lì le foto
+  grandi quando arriveranno i file senza watermark.
+- A import finito **cancellare `admin/storage/import/`**: gli originali con i
+  metadati non devono restare sul server.
+- `media.note_interne` (migrazione `2026-10-16-media-note-interne.sql`) è la
+  nota di servizio visibile solo nel back office, mai esportata: ci stanno
+  i flag «da sostituire», «da verificare», «per Chi sono».
 
 **Form**
 - Preventivatore: **un unico componente bilingue**, senza prezzi automatici.
@@ -372,7 +410,8 @@ basta `chmod`: servono le ACL.
 icacls "percorso\della\chiave" /inheritance:r /grant:r "$env:USERNAME:(F)"
 ```
 
-E `known_hosts` va salvato con **fine riga LF**: con CRLF il `` finisce dentro
+E `known_hosts` va salvato con **fine riga LF**: con CRLF il `
+` finisce dentro
 la chiave, non combacia mai e ssh continua a chiedere conferma dell'host.
 
 ### Cose che su IONOS vanno sapute
@@ -428,6 +467,18 @@ Fatto:
   Partner/Storie/Hero. Migrazione applicata allo staging (procedura
   dump-sicurezza → applica-migrazione, sopra).
 
+- **Foto vere sullo staging** (16/10): 110 originali dei fotografi importati
+  in `uploads/foto/` con `admin/bin/importa-foto.php`, alt IT/EN su ogni
+  foto, nessun metadato. Galleria hero di `page_hero` «home» con 4 foto
+  (ordine: cerimonia sul prato vista mare, prato sul lago al crepuscolo,
+  pittore sul lago, sposi sotto le luci), 16 Highlights in sezione «home»
+  nell'ordine deciso, 4 Highlights in sezione «chi-sono» (la planner al
+  lavoro). Tre Partner fotografi creati **non pubblicati**: David Vilella /
+  Vdimage, New Light Studio, Eleonora Grasso. Crediti e conteggi in
+  [docs/FOTO-CREDITI.md](docs/FOTO-CREDITI.md); per le 78 foto senza autore
+  negli EXIF nessun credito finché Gaia non dice chi le ha scattate.
+  Nessun matrimonio compare sul sito: niente raggruppamento per coppia.
+
 Prossimi passi (fase 3):
 - Home completa IT/EN: intro + hero (video/foto dal back office) + effetti di
   scroll reinterpretati da sarahhaywood.com; screenshot 1440/390; Lighthouse
@@ -435,7 +486,20 @@ Prossimi passi (fase 3):
 - Rimettere `INTRO_SEMPRE = false` e spostare lo snippet intro in BaseLayout.
 - DROP di `events`/`event_images` + rimozione di /portfolio quando /storie la
   sostituisce (commit dedicato).
-- Contenuti veri da Gaia (luoghi, location, storie, partner, foto hero);
-  crop e varianti AVIF/WebP fuori repo, poi in `uploads/` sullo staging.
+- Contenuti veri da Gaia (luoghi, location, storie, testi dei partner).
+- **Prima del lancio, foto** (le note stanno in `media.note_interne`, sezione
+  Immagini del back office):
+  - **18 foto da sostituire con i file senza watermark**: sono quelle di
+    David Vilella / Vdimage, con il logo VD IMAGE impresso in basso a destra.
+    Sullo staging ci sono con il logo (il fotografo le ha fornite a Gaia);
+    tre di esse sono nella galleria hero della home e tre tra gli
+    Highlights home, tre in «chi-sono». Chiedere i file puliti e
+    ricaricarli dal back office al posto di quelli attuali.
+  - **4 foto da verificare**: menù e partecipazioni con nomi di invitati
+    leggibili (`mise-en-place-menu-salvia`, `menu-piatto-dettaglio`,
+    `menu-stemma-piatto`, `partecipazioni-parquet-scarpe`). Non sono negli
+    highlights né nell'hero.
+  - 53 foto arrivate come screenshot o anteprime a ~1000 px (tier card):
+    chiedere gli originali ai fotografi, se servono più grandi.
 - Logo: sostituire l'SVG ricostruito se arriva il vettoriale ufficiale.
 - Merge di `design/home` su `main` a fine fase design.

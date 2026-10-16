@@ -92,6 +92,14 @@ $uploadsUrl = rtrim((string) Gaia\Admin\Config::get('uploads_url', '/uploads'), 
               <input type="text" name="caption_en" value="<?= e((string) ($row['caption_en'] ?? '')) ?>"></div>
           </div>
 
+          <label for="note_interne_<?= (int) $row['id'] ?>">Nota interna</label>
+          <?php if (!empty($row['note_interne'])): ?>
+            <p class="limite limite-thumbnail"><?= e((string) $row['note_interne']) ?></p>
+          <?php endif; ?>
+          <input id="note_interne_<?= (int) $row['id'] ?>" type="text" name="note_interne"
+                 value="<?= e((string) ($row['note_interne'] ?? '')) ?>"
+                 placeholder="Solo per il back office: non va sul sito">
+
           <label>Punto focale (da 0 a 1)</label>
           <div class="pair">
             <div><span>X</span>

@@ -90,6 +90,7 @@ final class MediaController
             'alt_en' => trim((string) ($_POST['alt_en'] ?? '')) ?: null,
             'caption_it' => trim((string) ($_POST['caption_it'] ?? '')) ?: null,
             'caption_en' => trim((string) ($_POST['caption_en'] ?? '')) ?: null,
+            'note_interne' => trim((string) ($_POST['note_interne'] ?? '')) ?: null,
             'focal_x' => self::focal($_POST['focal_x'] ?? null),
             'focal_y' => self::focal($_POST['focal_y'] ?? null),
         ]);

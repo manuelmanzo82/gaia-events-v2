@@ -79,6 +79,9 @@ CREATE TABLE IF NOT EXISTS `media` (
   `alt_en`         VARCHAR(255) DEFAULT NULL,
   `caption_it`     VARCHAR(500) DEFAULT NULL,
   `caption_en`     VARCHAR(500) DEFAULT NULL,
+  -- Nota di servizio per il back office (es. "da sostituire con il file
+  -- senza watermark prima del lancio"). Non viene mai esportata al sito.
+  `note_interne`   VARCHAR(500) DEFAULT NULL,
   `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_media_path` (`path`)

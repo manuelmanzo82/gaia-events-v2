@@ -80,7 +80,7 @@ final class ImageService
     }
 
     /**
-     * Salva un file caricato e ne genera le varianti.
+     * Salva un file caricato dal browser e ne genera le varianti.
      *
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int} $file
      * @param array{x: int, y: int, width: int, height: int}|null $crop  ritaglio in pixel sull'originale
@@ -90,17 +90,58 @@ final class ImageService
     {
         self::assertUploadOk($file);
 
-        $mime = self::detectMime($file['tmp_name']);
-        $source = self::openImage($file['tmp_name'], $mime);
+        return self::storeFile($file['tmp_name'], $file['name'], $folder, $crop);
+    }
 
-        if ($crop !== null) {
-            $source = self::crop($source, $crop);
+    /**
+     * Salva un'immagine che sta gia' sul disco del server e ne genera le
+     * varianti: e' la stessa strada dell'upload, senza il passaggio da
+     * $_FILES. La usa bin/importa-foto.php per gli originali dei fotografi
+     * caricati via SFTP in admin/storage/import/.
+     *
+     * $originalName decide il nome del file in uploads/ (passa da slug),
+     * quindi puo' essere un nome parlante diverso da quello sul disco.
+     *
+     * Il file generato non conserva i metadati dell'originale: GD riscrive
+     * i pixel e basta, quindi EXIF (GPS, fotocamera, autore), ICC e XMP
+     * non arrivano mai in uploads/.
+     *
+     * @param array{x: int, y: int, width: int, height: int}|null $crop  ritaglio in pixel sull'originale
+     * @return array<string, mixed>  riga pronta per la tabella `media`
+     */
+    public static function storeFile(string $path, string $originalName, string $folder, ?array $crop = null): array
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            throw new RuntimeException('File non trovato o non leggibile.');
         }
 
-        $source = self::limitSize($source, (int) Config::get('images.max_original', 3000));
+        $max = (int) Config::get('images.max_upload_bytes', 12 * 1024 * 1024);
+        if ((int) filesize($path) > $max) {
+            throw new RuntimeException(
+                'Immagine troppo grande: massimo ' . round($max / 1048576) . ' MB.',
+            );
+        }
+
+        $mime = self::detectMime($path);
+        [$source, $angle] = self::openImage($path, $mime);
+
+        if ($crop !== null) {
+            // Il ritaglio e' in pixel sull'originale raddrizzato: prima si
+            // raddrizza, poi si ritaglia, poi si riduce.
+            $source = self::rotate($source, $angle);
+            $source = self::crop($source, $crop);
+            $source = self::limitSize($source, (int) Config::get('images.max_original', 3000));
+        } else {
+            // Senza ritaglio il risultato e' lo stesso ma il picco di memoria
+            // no: ruotare una foto da 32 MP vuol dire tenerne due copie piene
+            // in RAM, ridurla prima e ruotare dopo ne tiene una sola. Il
+            // limite guarda il lato lungo, che la rotazione non cambia.
+            $source = self::limitSize($source, (int) Config::get('images.max_original', 3000));
+            $source = self::rotate($source, $angle);
+        }
 
         $folder = trim(preg_replace('/[^a-z0-9\/\-]/', '', strtolower($folder)) ?? '', '/');
-        $base = Validator::slug(pathinfo($file['name'], PATHINFO_FILENAME));
+        $base = Validator::slug(pathinfo($originalName, PATHINFO_FILENAME));
         if ($base === '') {
             $base = 'immagine';
         }
@@ -131,20 +172,27 @@ final class ImageService
         }
 
         $widths = self::variantWidths($width);
-        $formats = ['webp' => false, 'avif' => false];
+
+        // Un formato vale solo se TUTTE le larghezze sono riuscite: il sito
+        // mette l'intero srcset in un <source> e il browser, se una
+        // candidata manca, non torna indietro al formato successivo. Meglio
+        // niente AVIF che un AVIF con un buco.
+        $formats = ['webp' => true, 'avif' => self::avifSupported()];
 
         foreach ($widths as $targetWidth) {
             $resized = self::resize($source, $targetWidth);
 
-            $webp = sprintf('%s/%s-%d.webp', $directory, $name, $targetWidth);
-            if (imagewebp($resized, $webp, (int) Config::get('images.webp_quality', 82))) {
-                $formats['webp'] = true;
+            if ($formats['webp']) {
+                $webp = sprintf('%s/%s-%d.webp', $directory, $name, $targetWidth);
+                if (!@imagewebp($resized, $webp, (int) Config::get('images.webp_quality', 82)) || !filesize($webp)) {
+                    $formats['webp'] = false;
+                }
             }
 
-            if (self::avifSupported()) {
+            if ($formats['avif']) {
                 $avif = sprintf('%s/%s-%d.avif', $directory, $name, $targetWidth);
-                if (@imageavif($resized, $avif, (int) Config::get('images.avif_quality', 60))) {
-                    $formats['avif'] = true;
+                if (!@imageavif($resized, $avif, (int) Config::get('images.avif_quality', 60)) || !filesize($avif)) {
+                    $formats['avif'] = false;
                 }
             }
 
@@ -152,6 +200,15 @@ final class ImageService
         }
 
         imagedestroy($source);
+
+        // Via i resti di un formato fallito (l'encoder lascia file vuoti).
+        foreach ($formats as $format => $ok) {
+            if (!$ok) {
+                foreach (glob(sprintf('%s/%s-*.%s', $directory, $name, $format)) ?: [] as $leftover) {
+                    @unlink($leftover);
+                }
+            }
+        }
 
         return [
             'path' => ($folder !== '' ? $folder . '/' : '') . $name . '.' . $originalExtension,
@@ -215,12 +272,7 @@ final class ImageService
             throw new RuntimeException('File non valido.');
         }
 
-        $max = (int) Config::get('images.max_upload_bytes', 12 * 1024 * 1024);
-        if ($file['size'] > $max) {
-            throw new RuntimeException(
-                'Immagine troppo grande: massimo ' . round($max / 1048576) . ' MB.',
-            );
-        }
+        // Il limite di peso sta in storeFile(): vale anche per gli import da disco.
     }
 
     private static function detectMime(string $path): string
@@ -236,7 +288,12 @@ final class ImageService
         return $mime;
     }
 
-    private static function openImage(string $path, string $mime): GdImage
+    /**
+     * Apre l'immagine e legge l'orientamento EXIF, senza ancora ruotare.
+     *
+     * @return array{0: GdImage, 1: int}  immagine e angolo da applicare
+     */
+    private static function openImage(string $path, string $mime): array
     {
         $image = match ($mime) {
             'image/jpeg' => @imagecreatefromjpeg($path),
@@ -250,6 +307,7 @@ final class ImageService
         }
 
         // Le foto dei fotografi arrivano spesso ruotate via EXIF.
+        $angle = 0;
         if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
             $exif = @exif_read_data($path);
             $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 0) : 0;
@@ -260,17 +318,25 @@ final class ImageService
                 8 => 90,
                 default => 0,
             };
-
-            if ($angle !== 0) {
-                $rotated = imagerotate($image, $angle, 0);
-                if ($rotated instanceof GdImage) {
-                    imagedestroy($image);
-                    $image = $rotated;
-                }
-            }
         }
 
-        return $image;
+        return [$image, $angle];
+    }
+
+    private static function rotate(GdImage $image, int $angle): GdImage
+    {
+        if ($angle === 0) {
+            return $image;
+        }
+
+        $rotated = imagerotate($image, $angle, 0);
+        if (!$rotated instanceof GdImage) {
+            return $image;
+        }
+
+        imagedestroy($image);
+
+        return $rotated;
     }
 
     /** @param array{x: int, y: int, width: int, height: int} $crop */
