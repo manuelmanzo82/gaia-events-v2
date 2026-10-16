@@ -5,13 +5,16 @@ import {
   getDestinationWedding,
   getEvents,
   getFaqs,
+  getLuoghiFlat,
   getPage,
+  getPartners,
   getPosts,
   getReviews,
   getServices,
+  getStories,
   isPublishable,
 } from './content';
-import type { Event, Faq, Post, Review, Service } from './types';
+import type { Event, Faq, Luogo, Post, Review, Service, Story } from './types';
 
 /**
  * In quali lingue esiste davvero una pagina.
@@ -57,9 +60,11 @@ export const POST_FIELDS: Array<keyof Post> = ['title', 'slug', 'body'];
 export const SERVICE_FIELDS: Array<keyof Service> = ['title', 'description'];
 export const REVIEW_FIELDS: Array<keyof Review> = ['text'];
 export const FAQ_FIELDS: Array<keyof Faq> = ['question', 'answer'];
+export const LUOGO_FIELDS: Array<keyof Luogo> = ['nome', 'slug', 'testo'];
+export const STORY_FIELDS: Array<keyof Story> = ['title', 'slug', 'body'];
 
 /** Pagine che elencano altri contenuti: senza elementi tradotti non esistono. */
-const INDEX_KEYS = ['services', 'portfolio', 'reviews', 'blog', 'faq'] as const;
+const INDEX_KEYS = ['services', 'portfolio', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const;
 
 type IndexKey = (typeof INDEX_KEYS)[number];
 
@@ -80,6 +85,15 @@ function hasItems(key: IndexKey, lang: Lang): boolean {
       return getPosts().some((item) => isPublishable(item, lang, POST_FIELDS));
     case 'faq':
       return getFaqs().some((item) => isPublishable(item, lang, FAQ_FIELDS));
+    case 'places':
+      return getLuoghiFlat().some((item) => isPublishable(item, lang, LUOGO_FIELDS));
+    case 'stories':
+      return getStories().some((item) => isPublishable(item, lang, STORY_FIELDS));
+    case 'partners':
+      // Regola morbida: nome e link non si traducono, quindi l'indice
+      // esiste in entrambe le lingue se c'è almeno un partner attivo;
+      // una descrizione EN vuota nasconde solo il testo, non il partner.
+      return getPartners().length > 0;
   }
 }
 

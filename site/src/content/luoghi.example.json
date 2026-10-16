@@ -1,0 +1,103 @@
+[
+  {
+    "id": 1,
+    "tipo": "regione",
+    "nome": { "it": "Lazio", "en": "Lazio" },
+    "slug": { "it": "lazio", "en": "lazio" },
+    "intro": {
+      "it": "Testo segnaposto: l'intro vera la scrive Gaia nel back office.",
+      "en": "Placeholder text: the real intro comes from the back office."
+    },
+    "testo": {
+      "it": "<p>Testo segnaposto per la regione. Il contenuto definitivo, unico e vero, arriva dal back office.</p>",
+      "en": "<p>Placeholder text for the region. The final content comes from the back office.</p>"
+    },
+    "cover": {
+      "src": "esempi/lazio-cover.jpg",
+      "width": 2000,
+      "height": 1333,
+      "maxWidth": 1000,
+      "usage": "gallery_large",
+      "alt": { "it": "Paesaggio laziale al tramonto (segnaposto)", "en": "Lazio landscape at sunset (placeholder)" },
+      "formats": { "webp": true, "avif": false },
+      "widths": [480, 800, 1200, 1600]
+    },
+    "gallery": [],
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "active": true,
+    "order": 1,
+    "zone": [
+      {
+        "id": 2,
+        "tipo": "zona",
+        "nome": { "it": "Roma e dintorni", "en": "Rome and surroundings" },
+        "slug": { "it": "roma", "en": "rome" },
+        "intro": {
+          "it": "Testo segnaposto per Roma e dintorni.",
+          "en": "Placeholder text for Rome and surroundings."
+        },
+        "testo": {
+          "it": "<p>Testo segnaposto. Le location della zona compaiono come elenco testuale sotto.</p>",
+          "en": "<p>Placeholder text. The venues of the area appear as a text list below.</p>"
+        },
+        "cover": null,
+        "gallery": [],
+        "metaTitle": { "it": "", "en": "" },
+        "metaDescription": { "it": "", "en": "" },
+        "active": true,
+        "order": 1
+      },
+      {
+        "id": 3,
+        "tipo": "zona",
+        "nome": { "it": "Castelli Romani", "en": "" },
+        "slug": { "it": "castelli-romani", "en": "" },
+        "intro": { "it": "Zona di esempio senza traduzione: la pagina EN non esiste.", "en": "" },
+        "testo": { "it": "<p>Testo segnaposto solo in italiano.</p>", "en": "" },
+        "cover": null,
+        "gallery": [],
+        "metaTitle": { "it": "", "en": "" },
+        "metaDescription": { "it": "", "en": "" },
+        "active": true,
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "tipo": "regione",
+    "nome": { "it": "Toscana", "en": "Tuscany" },
+    "slug": { "it": "toscana", "en": "tuscany" },
+    "intro": { "it": "Testo segnaposto per la Toscana.", "en": "Placeholder text for Tuscany." },
+    "testo": {
+      "it": "<p>Testo segnaposto per la regione Toscana.</p>",
+      "en": "<p>Placeholder text for the Tuscany region.</p>"
+    },
+    "cover": null,
+    "gallery": [],
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "active": true,
+    "order": 2,
+    "zone": [
+      {
+        "id": 5,
+        "tipo": "zona",
+        "nome": { "it": "Val d'Orcia", "en": "Val d'Orcia" },
+        "slug": { "it": "val-d-orcia", "en": "val-d-orcia-tuscany" },
+        "intro": { "it": "Testo segnaposto per la Val d'Orcia.", "en": "Placeholder text for Val d'Orcia." },
+        "testo": {
+          "it": "<p>Testo segnaposto per la zona.</p>",
+          "en": "<p>Placeholder text for the area.</p>"
+        },
+        "cover": null,
+        "gallery": [],
+        "metaTitle": { "it": "", "en": "" },
+        "metaDescription": { "it": "", "en": "" },
+        "active": true,
+        "order": 1
+      }
+    ]
+  }
+]

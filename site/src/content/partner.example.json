@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "name": "Studio Fotografico Esempio",
+    "category": "fotografo",
+    "logo": null,
+    "description": {
+      "it": "Partner di esempio: nome e descrizione sono segnaposto.",
+      "en": "Sample partner: name and description are placeholders."
+    },
+    "website": "https://example.com",
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "name": "Fiori di Esempio",
+    "category": "fiori",
+    "logo": null,
+    "description": { "it": "Segnaposto, solo italiano.", "en": "" },
+    "website": null,
+    "active": true,
+    "order": 2
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "home": {
+    "title": { "it": "Il vostro giorno, raccontato con misura", "en": "Your day, told with grace" },
+    "subtitle": {
+      "it": "Testo segnaposto: titolo e sottotitolo veri arrivano dal back office.",
+      "en": "Placeholder: the real title and subtitle come from the back office."
+    },
+    "cta": {
+      "label": { "it": "Raccontaci il vostro giorno", "en": "Tell us about your day" },
+      "route": "quote"
+    },
+    "video": null,
+    "videoUrl": null,
+    "poster": null,
+    "images": [
+      {
+        "src": "esempi/hero-01.jpg",
+        "width": 2880,
+        "height": 1620,
+        "maxWidth": 1440,
+        "usage": "hero",
+        "alt": { "it": "Foto hero di esempio (segnaposto)", "en": "Sample hero photo (placeholder)" },
+        "formats": { "webp": true, "avif": false },
+        "widths": [480, 800, 1200, 1600, 2400]
+      },
+      {
+        "src": "esempi/hero-02.jpg",
+        "width": 2880,
+        "height": 1620,
+        "maxWidth": 1440,
+        "usage": "hero",
+        "alt": { "it": "Seconda foto hero di esempio", "en": "Second sample hero photo" },
+        "formats": { "webp": true, "avif": false },
+        "widths": [480, 800, 1200, 1600, 2400]
+      }
+    ]
+  }
+}

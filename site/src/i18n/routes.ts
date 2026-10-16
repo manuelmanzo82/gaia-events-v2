@@ -17,12 +17,22 @@ export const ROUTES = {
   destinationWedding: { it: 'destination-wedding', en: 'destination-wedding' },
   privacy: { it: 'privacy', en: 'privacy' },
   cookie: { it: 'cookie', en: 'cookie' },
+  places: { it: 'luoghi', en: 'destinations' },
+  stories: { it: 'storie', en: 'stories' },
+  partners: { it: 'partner', en: 'partners' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
 export type RouteKey = keyof typeof ROUTES;
 
 /** Chiavi delle pagine che hanno un dettaglio con slug (`/portfolio/:slug`). */
-export const COLLECTION_ROUTES = ['portfolio', 'blog'] as const satisfies readonly RouteKey[];
+export const COLLECTION_ROUTES = [
+  'portfolio',
+  'blog',
+  'stories',
+  // 'places' ha due livelli: lo slug passato a path() è già composto,
+  // es. 'lazio/roma' — vedi slugLuogo() in lib/content.ts.
+  'places',
+] as const satisfies readonly RouteKey[];
 
 /**
  * Percorso assoluto interno di una pagina, sempre con slash finale.

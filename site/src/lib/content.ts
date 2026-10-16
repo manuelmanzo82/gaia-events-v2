@@ -3,13 +3,20 @@ import type {
   DestinationWedding,
   Event,
   Faq,
+  Highlight,
+  HighlightSection,
   InstagramItem,
   Localized,
+  LocationVenue,
+  Luogo,
   Page,
+  PageHero,
+  Partner,
   Post,
   Review,
   Service,
   Settings,
+  Story,
 } from './types';
 
 /**
@@ -193,6 +200,99 @@ export function getDestinationWedding(): DestinationWedding {
 export function getInstagramItems(limit?: number): InstagramItem[] {
   const items = load<InstagramItem[]>('instagram', []);
   return limit ? items.slice(0, limit) : items;
+}
+
+/* ------------------------------------------------------------------ *
+ * Fase 2: luoghi, location, highlights, partner, storie, hero
+ * ------------------------------------------------------------------ */
+
+/** Le regioni pubblicate, con le zone annidate (anch'esse filtrate). */
+export function getLuoghi(): Luogo[] {
+  return load<Luogo[]>('luoghi', [])
+    .filter(isActive)
+    .sort(byOrder)
+    .map((regione) => ({
+      ...regione,
+      zone: (regione.zone ?? []).filter(isActive).sort(byOrder),
+    }));
+}
+
+/** Tutti i luoghi pubblicati, piatti: regioni e zone insieme. */
+export function getLuoghiFlat(): Luogo[] {
+  return getLuoghi().flatMap((regione) => [regione, ...(regione.zone ?? [])]);
+}
+
+export function getLuogoById(id: number | null | undefined): Luogo | null {
+  if (!id) return null;
+  return getLuoghiFlat().find((luogo) => luogo.id === id) ?? null;
+}
+
+/** La regione a cui appartiene una zona (null per le regioni stesse). */
+export function getRegioneDi(luogo: Luogo): Luogo | null {
+  if (luogo.tipo === 'regione') return null;
+  return getLuoghi().find((regione) => (regione.zone ?? []).some((z) => z.id === luogo.id)) ?? null;
+}
+
+/**
+ * Slug composto per path('places', …): 'lazio' per una regione,
+ * 'lazio/roma' per una zona. Una zona senza regione non è linkabile.
+ */
+export function slugLuogo(luogo: Luogo, lang: Lang): string | null {
+  const proprio = pick(luogo.slug, lang);
+  if (!proprio) return null;
+
+  if (luogo.tipo === 'regione') return proprio;
+
+  const regione = getRegioneDi(luogo);
+  const slugRegione = regione ? pick(regione.slug, lang) : null;
+  return slugRegione ? `${slugRegione}/${proprio}` : null;
+}
+
+export function getLocations(luogoId?: number): LocationVenue[] {
+  const all = load<LocationVenue[]>('location', []).filter(isActive).sort(byOrder);
+  return luogoId === undefined ? all : all.filter((location) => location.luogoId === luogoId);
+}
+
+/** Gli highlights di una sezione, nell'ordine deciso per quella sezione. */
+export function getHighlights(section: HighlightSection, luogoId?: number): Highlight[] {
+  return load<Highlight[]>('highlights', [])
+    .filter(isActive)
+    .map((highlight) => ({
+      highlight,
+      entry: highlight.sections.find((s) => s.section === section),
+    }))
+    .filter(({ highlight, entry }) => {
+      if (!entry) return false;
+      // Nella sezione 'luogo' contano solo le foto del luogo richiesto.
+      if (section === 'luogo') return luogoId !== undefined && highlight.luogoId === luogoId;
+      return true;
+    })
+    .sort((a, b) => (a.entry?.order ?? 0) - (b.entry?.order ?? 0))
+    .map(({ highlight }) => highlight);
+}
+
+export function getPartners(): Partner[] {
+  return load<Partner[]>('partner', []).filter(isActive).sort(byOrder);
+}
+
+export function getPartnerById(id: number | null | undefined): Partner | null {
+  if (!id) return null;
+  return getPartners().find((partner) => partner.id === id) ?? null;
+}
+
+export function getStories(): Story[] {
+  return load<Story[]>('storie', []).filter(isActive).sort(byOrder);
+}
+
+/** Lo slug delle storie è bilingue, come i post del blog. */
+export function getStoryBySlug(slug: string, lang: Lang): Story | null {
+  return getStories().find((story) => pick(story.slug, lang) === slug) ?? null;
+}
+
+/** L'hero configurato per una pagina, se c'è. */
+export function getHero(pageKey: string): PageHero | null {
+  const heroes = load<Record<string, PageHero>>('hero', {});
+  return heroes[pageKey] ?? null;
 }
 
 export type { Lang };

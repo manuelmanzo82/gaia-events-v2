@@ -192,3 +192,105 @@ export interface InstagramItem {
   permalink: string;
   postedAt: string;
 }
+
+/* ------------------------------------------------------------------ *
+ * Fase 2: luoghi, location, highlights, partner, storie, hero
+ * ------------------------------------------------------------------ */
+
+export type LuogoTipo = 'regione' | 'zona';
+
+/** Luogo: una regione o una città/zona (asse SEO principale). */
+export interface Luogo extends SeoFields {
+  id: number;
+  tipo: LuogoTipo;
+  nome: Localized;
+  /** Slug tradotti, unici globalmente: /luoghi/lazio/roma ↔ /en/destinations/lazio/rome */
+  slug: Localized;
+  intro: Localized;
+  testo: Localized;
+  cover: Image | null;
+  gallery: Image[];
+  active: boolean;
+  order: number;
+  /** Solo sulle regioni: le zone annidate. */
+  zone?: Luogo[];
+}
+
+export type LocationTipo =
+  | 'villa'
+  | 'castello'
+  | 'chiesa'
+  | 'terrazza'
+  | 'tenuta'
+  | 'hotel'
+  | 'ristorante'
+  | 'altro';
+
+/** Location come testo: niente foto dedicate, leggibile da Google e dalle AI. */
+export interface LocationVenue {
+  id: number;
+  nome: string;
+  tipo: LocationTipo;
+  luogoId: number;
+  descrizione: Localized;
+  website?: string | null;
+  /** Per il futuro: oggi non genera nessuna pagina. */
+  ownPage: boolean;
+  active: boolean;
+  order: number;
+}
+
+export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' | 'luogo';
+
+/** Foto singola scelta da Gaia. L'alt vive sull'immagine (media). */
+export interface Highlight {
+  id: number;
+  image: Image | null;
+  luogoId: number | null;
+  sections: Array<{ section: HighlightSection; order: number }>;
+  active: boolean;
+}
+
+export type PartnerCategory = 'fotografo' | 'fiori' | 'catering' | 'musica' | 'location' | 'altro';
+
+export interface Partner {
+  id: number;
+  name: string;
+  category: PartnerCategory;
+  logo: Image | null;
+  description: Localized;
+  website?: string | null;
+  active: boolean;
+  order: number;
+}
+
+/** Storia: un matrimonio raccontato per intero (2-3 in tutto). */
+export interface Story extends SeoFields {
+  id: number;
+  /** Slug bilingue come i post del blog. */
+  slug: Localized;
+  title: Localized;
+  couple?: string | null;
+  locationName?: string | null;
+  luogoId: number | null;
+  date?: string | null;
+  cover: Image | null;
+  gallery: Image[];
+  body: Localized;
+  /** Credito del fotografo: un partner, mai una didascalia sotto la foto. */
+  photographerId: number | null;
+  active: boolean;
+  order: number;
+}
+
+/** Hero di una pagina. Il poster è l'elemento LCP; il video arriva dopo. */
+export interface PageHero {
+  title: Localized;
+  subtitle: Localized;
+  cta: { label: Localized; route?: string | null };
+  video: { mp4: string; webm?: string | null; poster: Image | null } | null;
+  /** URL esterno (futuro Vimeo): si userà al posto dei file self-hosted. */
+  videoUrl?: string | null;
+  poster: Image | null;
+  images: Image[];
+}

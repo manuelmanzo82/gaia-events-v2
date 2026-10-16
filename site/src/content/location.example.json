@@ -1,0 +1,49 @@
+[
+  {
+    "id": 1,
+    "nome": "Villa Esempio sul Gianicolo",
+    "tipo": "villa",
+    "luogoId": 2,
+    "descrizione": {
+      "it": "Location di esempio: nome e descrizione sono segnaposto.",
+      "en": "Sample venue: name and description are placeholders."
+    },
+    "website": null,
+    "ownPage": false,
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "nome": "Terrazza Esempio Monti",
+    "tipo": "terrazza",
+    "luogoId": 2,
+    "descrizione": { "it": "", "en": "" },
+    "website": null,
+    "ownPage": false,
+    "active": true,
+    "order": 2
+  },
+  {
+    "id": 3,
+    "nome": "Chiesa di Esempio in Trastevere",
+    "tipo": "chiesa",
+    "luogoId": 2,
+    "descrizione": { "it": "Segnaposto.", "en": "" },
+    "website": null,
+    "ownPage": false,
+    "active": true,
+    "order": 3
+  },
+  {
+    "id": 4,
+    "nome": "Tenuta Esempio in Val d'Orcia",
+    "tipo": "tenuta",
+    "luogoId": 5,
+    "descrizione": { "it": "Segnaposto.", "en": "Placeholder." },
+    "website": null,
+    "ownPage": false,
+    "active": true,
+    "order": 1
+  }
+]

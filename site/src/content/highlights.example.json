@@ -1,0 +1,53 @@
+[
+  {
+    "id": 1,
+    "image": {
+      "src": "esempi/highlight-01.jpg",
+      "width": 2000,
+      "height": 1333,
+      "maxWidth": 1000,
+      "usage": "gallery_large",
+      "alt": { "it": "Allestimento di esempio (segnaposto)", "en": "Sample setup (placeholder)" },
+      "formats": { "webp": true, "avif": false },
+      "widths": [480, 800, 1200, 1600]
+    },
+    "luogoId": 2,
+    "sections": [
+      { "section": "home", "order": 1 },
+      { "section": "luogo", "order": 1 }
+    ],
+    "active": true
+  },
+  {
+    "id": 2,
+    "image": {
+      "src": "esempi/highlight-02.jpg",
+      "width": 1600,
+      "height": 2000,
+      "maxWidth": 800,
+      "usage": "card",
+      "alt": { "it": "Dettaglio floreale di esempio (segnaposto)", "en": "Sample floral detail (placeholder)" },
+      "formats": { "webp": true, "avif": false },
+      "widths": [480, 800, 1200]
+    },
+    "luogoId": null,
+    "sections": [{ "section": "home", "order": 2 }],
+    "active": true
+  },
+  {
+    "id": 3,
+    "image": {
+      "src": "esempi/highlight-03.jpg",
+      "width": 2000,
+      "height": 1333,
+      "maxWidth": 1000,
+      "usage": "gallery_large",
+      "alt": { "it": "Tavolo imperiale di esempio (segnaposto)", "en": "Sample long table (placeholder)" },
+      "formats": { "webp": true, "avif": false },
+      "widths": [480, 800, 1200, 1600]
+    },
+    "luogoId": 5,
+    "sections": [{ "section": "destination", "order": 1 }],
+    "active": true
+  }
+]

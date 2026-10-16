@@ -1,0 +1,59 @@
+[
+  {
+    "id": 1,
+    "slug": { "it": "giulia-e-paolo-esempio", "en": "giulia-and-paolo-sample" },
+    "title": { "it": "Giulia & Paolo — una storia di esempio", "en": "Giulia & Paolo — a sample story" },
+    "couple": "Giulia & Paolo",
+    "locationName": "Villa Esempio sul Gianicolo",
+    "luogoId": 2,
+    "date": "2026-09-12",
+    "cover": {
+      "src": "esempi/storia-01-cover.jpg",
+      "width": 2000,
+      "height": 1333,
+      "maxWidth": 1000,
+      "usage": "gallery_large",
+      "alt": { "it": "Coppia di esempio al tramonto (segnaposto)", "en": "Sample couple at sunset (placeholder)" },
+      "formats": { "webp": true, "avif": false },
+      "widths": [480, 800, 1200, 1600]
+    },
+    "gallery": [
+      {
+        "src": "esempi/storia-01-01.jpg",
+        "width": 2000,
+        "height": 1333,
+        "maxWidth": 1000,
+        "usage": "gallery_large",
+        "alt": { "it": "Dettaglio di esempio", "en": "Sample detail" },
+        "formats": { "webp": true, "avif": false },
+        "widths": [480, 800, 1200, 1600]
+      }
+    ],
+    "body": {
+      "it": "<p>Racconto segnaposto. Le storie vere, 2-3 in tutto, le sceglie Gaia.</p>",
+      "en": "<p>Placeholder story. The real ones, 2-3 in total, are chosen by Gaia.</p>"
+    },
+    "photographerId": 1,
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "active": true,
+    "order": 1
+  },
+  {
+    "id": 2,
+    "slug": { "it": "sara-e-marco-esempio", "en": "" },
+    "title": { "it": "Sara & Marco — solo in italiano", "en": "" },
+    "couple": "Sara & Marco",
+    "locationName": "Tenuta Esempio in Val d'Orcia",
+    "luogoId": 5,
+    "date": "2026-06-20",
+    "cover": null,
+    "gallery": [],
+    "body": { "it": "<p>Racconto segnaposto senza traduzione: la pagina EN non esiste.</p>", "en": "" },
+    "photographerId": null,
+    "metaTitle": { "it": "", "en": "" },
+    "metaDescription": { "it": "", "en": "" },
+    "active": true,
+    "order": 2
+  }
+]
