@@ -46,7 +46,10 @@ export function initReveals(): void {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-reveal="righe"]')) {
-    const split = SplitText.create(el, { type: 'lines', mask: 'lines' });
+    // aria: 'none' — di default SplitText mette aria-label sul target, ma
+    // su un <p> senza ruolo e' vietato (Lighthouse: aria-prohibited-attr);
+    // le righe restano testo normale, leggibile dagli screen reader.
+    const split = SplitText.create(el, { type: 'lines', mask: 'lines', aria: 'none' });
     gsap.from(split.lines, {
       yPercent: 110,
       opacity: 0,

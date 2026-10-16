@@ -84,8 +84,7 @@ const video = hero?.video ?? null;
           data={prima}
           cap={false}
           loading="eager"
-          fetchpriority="high"
-          decoding="sync"
+          decoding="async"
           class="hero-img"
         />
       )
@@ -272,30 +271,33 @@ const video = hero?.video ?? null;
   }
 
   /* Ogni foto ha il suo slot nel ciclo: la n-esima parte con n × per-foto
-     di ritardo (ritardo negativo: la prima è già "in corso" da subito). */
+     di ritardo. Tutte anticipate del 5% del ciclo (la durata della
+     dissolvenza in entrata): così la prima, che è già visibile, non
+     ripassa da opacity 0 quando il ciclo si accende, e ogni successiva
+     entra in dissolvenza mentre la precedente esce. */
   .hero.pronto .hero-foto :global(picture:nth-child(1)),
   .hero.pronto .hero-foto :global(picture:nth-child(1) .hero-img) {
-    animation-delay: 0s;
+    animation-delay: calc(var(--ciclo) * -0.05);
   }
   .hero.pronto .hero-foto :global(picture:nth-child(2)),
   .hero.pronto .hero-foto :global(picture:nth-child(2) .hero-img) {
-    animation-delay: calc(var(--per-foto) * 1);
+    animation-delay: calc(var(--per-foto) * 1 - var(--ciclo) * 0.05);
   }
   .hero.pronto .hero-foto :global(picture:nth-child(3)),
   .hero.pronto .hero-foto :global(picture:nth-child(3) .hero-img) {
-    animation-delay: calc(var(--per-foto) * 2);
+    animation-delay: calc(var(--per-foto) * 2 - var(--ciclo) * 0.05);
   }
   .hero.pronto .hero-foto :global(picture:nth-child(4)),
   .hero.pronto .hero-foto :global(picture:nth-child(4) .hero-img) {
-    animation-delay: calc(var(--per-foto) * 3);
+    animation-delay: calc(var(--per-foto) * 3 - var(--ciclo) * 0.05);
   }
   .hero.pronto .hero-foto :global(picture:nth-child(5)),
   .hero.pronto .hero-foto :global(picture:nth-child(5) .hero-img) {
-    animation-delay: calc(var(--per-foto) * 4);
+    animation-delay: calc(var(--per-foto) * 4 - var(--ciclo) * 0.05);
   }
   .hero.pronto .hero-foto :global(picture:nth-child(6)),
   .hero.pronto .hero-foto :global(picture:nth-child(6) .hero-img) {
-    animation-delay: calc(var(--per-foto) * 5);
+    animation-delay: calc(var(--per-foto) * 5 - var(--ciclo) * 0.05);
   }
 
   /* Con 4 foto ogni foto resta piena per 1/4 del ciclo, con dissolvenze

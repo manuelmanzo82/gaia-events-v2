@@ -21,7 +21,11 @@
 
   /* — Accenti — */
   --color-bordeaux: #722f37; /* unico accento forte: CTA, focus, dettagli attivi */
-  --color-oro: #c9a962; /* solo dettagli: eyebrow, filetti, numeri */
+  --color-oro: #c9a962; /* solo dettagli: filetti, numeri e eyebrow sulle sezioni scure */
+  /* L'oro su avorio sta a 2,1:1 e non si legge: per il TESTO piccolo sulle
+     sezioni chiare (eyebrow, numeri) vale questa tinta piu' profonda,
+     4,6:1 su avorio. I filetti restano in oro, e sul notte torna l'oro. */
+  --color-oro-testo: #8a6d2e;
   --color-salvia: #8b9a7d; /* accento naturale raro (badge, grafici) */
 
   /* — Sezioni scure (hero, citazioni, CTA finale, intro) — */
@@ -210,6 +214,10 @@
     font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  [data-theme='dark'] .eyebrow {
     color: var(--color-oro);
   }
 
@@ -313,8 +321,12 @@
     font-family: var(--font-display);
     font-style: italic;
     font-size: var(--text-caption);
-    color: var(--color-oro);
+    color: var(--color-oro-testo);
     letter-spacing: 0.08em;
+  }
+
+  [data-theme='dark'] .numero {
+    color: var(--color-oro);
   }
 
   /* — Didascalia — */

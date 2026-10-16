@@ -14,7 +14,9 @@ export default defineConfig({
   trailingSlash: 'always',
 
   build: {
-    inlineStylesheets: 'auto',
+    // Tutto il CSS inline: i fogli sono piccoli (pochi KB a pagina) e tre
+    // <link> separati bloccavano il primo paint per ~300 ms su mobile.
+    inlineStylesheets: 'always',
     format: 'directory',
   },
 

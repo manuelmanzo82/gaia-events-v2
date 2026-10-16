@@ -46,8 +46,12 @@ const orizzontali = highlights.slice(SCHEDE_IMPILATE);
 const immagineHome = hero?.images[0] ?? settings.hero.image;
 const meta = buildMeta({ lang, routeKey: 'home', seo: settings, image: immagineHome });
 
-// Preload dell'elemento LCP (prima foto dell'hero) nel formato migliore:
-// il browser ignora un preload con un type che non supporta.
+// Preload della prima foto dell'hero nel formato migliore (il browser
+// ignora un preload con un type che non supporta). Nota: Chrome non conta
+// come LCP un'immagine che riempie tutto il viewport (la tratta da
+// sfondo), quindi l'LCP della home è il titolo e dipende dai font: il
+// preload della foto resta, ma senza fetchpriority alta, così i font
+// passano avanti sulle connessioni lente.
 const preloadHero = picture(immagineHome, lang, '100vw')?.sources[0] ?? null;
 
 const jsonLd = [
@@ -68,7 +72,6 @@ const section = (key: string) => settings.sections[key];
         type={preloadHero.type}
         imagesrcset={preloadHero.srcset}
         imagesizes="100vw"
-        fetchpriority="high"
       />
     )
   }
