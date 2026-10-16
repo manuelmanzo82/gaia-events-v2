@@ -1,43 +1,36 @@
 ---
 /**
  * Home. Struttura da docs/DECISIONI-DESIGN-gaia.md: hero scuro, manifesto,
- * highlights, luoghi, servizi, chi è Gaia, recensione, destination
- * wedding, CTA finale. Le sezioni arrivano una alla volta (fase 3): quelle
- * non ancora disegnate restano segnaposto.
+ * highlights (schede impilate + fascia orizzontale), luoghi, servizi, chi
+ * è Gaia, recensione, destination wedding, CTA finale.
  *
  * Tutti i testi vengono dal back office; una sezione senza contenuti in
  * questa lingua non viene renderizzata, con la stessa logica di
- * availability.ts usata da menu, sitemap e hreflang.
+ * availability.ts usata da menu, sitemap e hreflang. Instagram arriverà
+ * più avanti, via API ufficiale.
  */
 import type { Lang } from '../../config/site';
-import { useTranslations } from '../../i18n';
-import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import {
-  getFeaturedReviews,
-  getHero,
-  getHighlights,
-  getServices,
-  getSettings,
-  isPublishable,
-  text,
-} from '../../lib/content';
-import { REVIEW_FIELDS, SERVICE_FIELDS, existsIn } from '../../lib/availability';
+import { getHero, getHighlights, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { localBusiness, webSite } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import ChiEGaia from '../home/ChiEGaia.astro';
+import CtaFinale from '../home/CtaFinale.astro';
+import DestinationAggancio from '../home/DestinationAggancio.astro';
 import HeroHome from '../home/HeroHome.astro';
 import HighlightsImpilati from '../home/HighlightsImpilati.astro';
 import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
+import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
 import Manifesto from '../home/Manifesto.astro';
-import PlaceholderSection from '../PlaceholderSection.astro';
+import Recensione from '../home/Recensione.astro';
+import ServiziSplit from '../home/ServiziSplit.astro';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 const settings = getSettings();
 const hero = getHero('home');
@@ -48,11 +41,6 @@ const highlights = getHighlights('home');
 const SCHEDE_IMPILATE = 5;
 const impilati = highlights.slice(0, SCHEDE_IMPILATE);
 const orizzontali = highlights.slice(SCHEDE_IMPILATE);
-
-// In evidenza solo i contenuti pubblicabili in questa lingua: altrimenti la
-// home inglese elencherebbe voci vuote e linkerebbe schede non generate.
-const services = getServices().filter((item) => isPublishable(item, lang, SERVICE_FIELDS));
-const reviews = getFeaturedReviews().filter((item) => isPublishable(item, lang, REVIEW_FIELDS)).slice(0, 3);
 
 // OG image e JSON-LD: la prima foto dell'hero, se c'è.
 const immagineHome = hero?.images[0] ?? settings.hero.image;
@@ -68,10 +56,6 @@ const jsonLd = [
 ];
 
 const section = (key: string) => settings.sections[key];
-
-// La home rimanda alle altre pagine: in inglese alcune potrebbero non
-// esistere ancora, e un link a una pagina non generata e' un 404.
-const esiste = (key: Parameters<typeof existsIn>[0]) => existsIn(key, lang);
 ---
 
 <BaseLayout lang={lang} routeKey="home" meta={meta} jsonLd={jsonLd} intro largo>
@@ -101,51 +85,21 @@ const esiste = (key: Parameters<typeof existsIn>[0]) => existsIn(key, lang);
   />
   <HighlightsOrizzontali lang={lang} highlights={orizzontali} da={impilati.length + 1} />
 
-  <div class="container-gaia">
-    <PlaceholderSection
-      lang={lang}
-      id="services"
-      title={text(section('services')?.title, lang)}
-      text={text(section('services')?.text, lang)}
-    >
-      <ul>
-        {services.map((service) => <li>{text(service.title, lang)}</li>)}
-      </ul>
-      {esiste('services') && <p><a href={path('services', lang)}>{t('cta.discover')}</a></p>}
-    </PlaceholderSection>
+  <LuoghiAnteprima lang={lang} />
 
-    <PlaceholderSection
-      lang={lang}
-      id="about"
-      title={text(section('about')?.title, lang)}
-      text={text(section('about')?.text, lang)}
-    >
-      {esiste('about') && <p><a href={path('about', lang)}>{t('cta.discover')}</a></p>}
-    </PlaceholderSection>
+  <ServiziSplit
+    lang={lang}
+    titolo={text(section('services')?.title, lang)}
+    testo={text(section('services')?.text, lang)}
+  />
 
-    {
-      reviews.length > 0 && (
-        <PlaceholderSection lang={lang} id="reviews" title={text(section('reviews')?.title, lang)}>
-          <ul>
-            {reviews.map((review) => (
-              <li>
-                {review.author} — {text(review.text, lang)}
-              </li>
-            ))}
-          </ul>
-        </PlaceholderSection>
-      )
-    }
+  <ChiEGaia lang={lang} settings={settings} />
 
-    <PlaceholderSection
-      lang={lang}
-      id="cta"
-      title={text(section('cta')?.title, lang)}
-      text={text(section('cta')?.text, lang)}
-    >
-      {esiste('contact') && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
-    </PlaceholderSection>
-  </div>
+  <Recensione lang={lang} eyebrow={text(section('reviews')?.title, lang)} />
+
+  <DestinationAggancio lang={lang} />
+
+  <CtaFinale lang={lang} settings={settings} />
 </BaseLayout>
 
 <script>

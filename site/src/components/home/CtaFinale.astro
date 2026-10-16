@@ -1,0 +1,70 @@
+---
+/**
+ * CTA finale: chiusura scura in bordeaux profondo verso il preventivatore
+ * (o i contatti, se il preventivo non esiste in questa lingua). Testi da
+ * settings.sections.cta.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { text, type Settings } from '../../lib/content';
+
+interface Props {
+  lang: Lang;
+  settings: Settings;
+}
+
+const { lang, settings } = Astro.props;
+const t = useTranslations(lang);
+
+const sezione = settings.sections.cta;
+const titolo = text(sezione?.title, lang);
+const testo = text(sezione?.text, lang);
+
+const destinazione = existsIn('quote', lang) ? 'quote' : existsIn('contact', lang) ? 'contact' : null;
+const etichetta = destinazione === 'quote' ? t('cta.quote') : t('cta.contact');
+---
+
+{
+  titolo && destinazione && (
+    <section id="cta" class="cta-finale" data-theme="dark" data-tinta="bordeaux">
+      <div class="container-gaia cta-interno">
+        <h2 class="text-display-xl cta-titolo" data-reveal="righe">
+          {titolo}
+        </h2>
+        {testo && (
+          <p class="text-lead text-velato cta-testo" data-reveal="alto">
+            {testo}
+          </p>
+        )}
+        <p class="cta-coda" data-reveal="alto">
+          <a class="btn" href={path(destinazione, lang)}>
+            {etichetta}
+          </a>
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .cta-finale {
+    padding-block: var(--spacing-section);
+    text-align: center;
+  }
+
+  .cta-titolo {
+    max-width: 18ch;
+    margin: 0 auto;
+  }
+
+  .cta-testo {
+    max-width: 36rem;
+    margin: 1.75rem auto 0;
+  }
+
+  .cta-coda {
+    margin: 2.75rem 0 0;
+  }
+</style>
