@@ -479,19 +479,30 @@ Fatto:
   negli EXIF nessun credito finché Gaia non dice chi le ha scattate.
   Nessun matrimonio compare sul sito: niente raggruppamento per coppia.
 
-- **Fase 3 — home completa IT/EN** (16/10): header fisso con `LogoGaia`
-  che cambia colore sulle sezioni scure, snippet intro in `BaseLayout`
-  (`INTRO_SEMPRE` ancora `true`), e le sezioni in
-  `site/src/components/home/`: hero (foto di `page_hero` in dissolvenza
-  CSS, video desktop predisposto), manifesto (`settings.home.manifesto`),
-  highlights (5 schede impilate + 11 in fascia orizzontale agganciata),
-  luoghi (nascosta finché non ci sono luoghi), servizi in sticky split
-  (foto del servizio, ripiego = highlights sezione «servizi»), chi è Gaia
-  (highlight «chi-sono» n.1), recensione (nascosta finché non ce n'è una
-  vera), destination, CTA finale. Effetti in `scripts/home-effetti.ts`:
-  solo ≥64rem, spenti con reduced-motion; sotto, scroll naturale e
-  carosello a scroll-snap. Tutti i testi dal back office; in EN i servizi
-  e Chi sono usano le traduzioni in bozza (docs/DA-CHIEDERE-A-GAIA.md).
+- **Fase 3 — home completa IT/EN** (16/10, rivista lo stesso giorno):
+  header **senza barra** stile Haywood (`Header.astro`: trasparente in
+  cima, colore dalla sezione sotto via `theme-observer`, si nasconde
+  scorrendo in giù e riappare compatto con fondo pieno avorio/notte in
+  su; menu corto, il resto nel footer), snippet intro in `BaseLayout`
+  (`INTRO_SEMPRE` ancora `true`), footer su notte (`Footer.astro`: logo,
+  tagline, Contatti/Esplora/Seguici/Preventivo, riga legale con
+  `settings.legal.piva`), e le sezioni in `site/src/components/home/`:
+  hero (foto di `page_hero` in dissolvenza CSS, video desktop
+  predisposto), **Gaia** (`GaiaIntro`: highlight «chi-sono» n.1 grande +
+  titolo + manifesto come citazione + presentazione breve), highlights
+  (schede impilate a tutta foto: solo orizzontali con `maxWidth ≥
+  LIMITE_SCHEDA` di `lib/home.ts`, max 5; tutte le altre nella fascia
+  orizzontale agganciata), luoghi (nascosta finché non ci sono luoghi),
+  servizi in sticky split (foto del servizio, ripiego = highlights sezione
+  «servizi»), recensione (nascosta finché non ce n'è una vera),
+  destination a tutta larghezza (highlight sezione «destination» + velo),
+  CTA finale chiara con foto verticale (highlight sezione «cta», ENUM
+  esteso in migrazione). Effetti in `scripts/home-effetti.ts`: solo
+  ≥64rem, pin/sticky al bordo superiore (il header lì è nascosto), spenti
+  con reduced-motion; sotto, scroll naturale e carosello a scroll-snap.
+  Tutti i testi dal back office, in sentence case e con il «voi»; in EN i
+  servizi e Chi sono usano le traduzioni in bozza
+  (docs/DA-CHIEDERE-A-GAIA.md).
   Lighthouse **sullo staging** (16/10, due misure per preset): mobile
   100/100/100, LCP 1,65–1,74 s, CLS 0; desktop 100/100/100, LCP 0,58 s,
   CLS 0,014. SEO lì vale 61 solo per il `noindex` dello staging: sul
