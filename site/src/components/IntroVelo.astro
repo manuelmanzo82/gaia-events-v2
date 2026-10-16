@@ -222,6 +222,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     display: grid;
     justify-items: center;
     gap: 1.4rem;
+    /* Larghezza fissa: se fosse larga quanto il testo, al caricamento del
+       webfont la riga cambierebbe di qualche pixel e tutta la scena si
+       ricentrerebbe (CLS 0,06 su desktop). Così si muove solo la riga. */
+    width: min(100% - 3rem, 30rem);
     padding: 1.5rem;
     text-align: center;
   }
