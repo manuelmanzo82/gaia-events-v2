@@ -293,18 +293,15 @@ const PALETTE_NOTTE = [
             <div class="comp" data-reveal="alto">
               <span class="scala-label">Intro a velo</span>
               <p class="colonna-stretta">
-                Il logo si costruisce sul velo: il ghirigoro si disegna come tracciato a penna
-                (maschera stroke sullo scheletro del tratto), EVENTS sale lettera per lettera,
-                poi firma e riga di prestigio. ~4,5 s in tutto, solo alla
-                prima visita della sessione, saltabile con un clic o un tasto.
+                Il logo si costruisce sul velo avorio, nei suoi colori originali: il ghirigoro
+                pesca si disegna come tracciato a penna (maschera stroke sullo scheletro del
+                tratto), EVENTS sale lettera per lettera in inchiostro, poi firma e riga di
+                prestigio. In uscita logo e righe svaniscono salendo, quindi il velo sale.
+                ~5 s in tutto, solo alla prima visita della sessione, saltabile con un clic o
+                un tasto.
               </p>
               <p class="comp-fila">
-                <button type="button" class="btn" data-rivedi-intro="notte">Rivedi — notte</button>
-                <button type="button" class="btn" data-rivedi-intro="bordeaux">
-                  Rivedi — bordeaux
-                </button>
-                <button type="button" class="btn" data-rivedi-intro="grigio">Rivedi — grigio</button>
-                <button type="button" class="btn" data-rivedi-intro="salvia">Rivedi — salvia</button>
+                <button type="button" class="btn" id="rivedi-intro">Rivedi l'intro</button>
               </p>
             </div>
           </div>
@@ -326,8 +323,8 @@ const PALETTE_NOTTE = [
               ufficiale. Dimensioni v1 mantenute: 80px mobile, 130px desktop.
             </li>
             <li>
-              <strong>Velo dell'intro:</strong> qui è in inchiostro <code>notte</code>; la
-              variante <code>bordeaux</code> è pronta (si cambia con una prop).
+              <strong>Velo dell'intro:</strong> avorio, scelta definitiva del 16/10; il logo
+              resta nei suoi colori originali e le varianti di prova sono state rimosse.
             </li>
             <li>
               <strong>Salvia:</strong> tenuta in palette come accento raro; nella home non
@@ -357,16 +354,14 @@ const PALETTE_NOTTE = [
         aggiornaScrim();
       }
 
-      for (const bottone of document.querySelectorAll<HTMLButtonElement>('[data-rivedi-intro]')) {
-        bottone.addEventListener('click', () => {
-          try {
-            sessionStorage.removeItem('gaia-intro-vista');
-          } catch {
-            /* senza storage l'intro riparte comunque */
-          }
-          location.href = `${location.pathname}?velo=${bottone.dataset.rivediIntro}`;
-        });
-      }
+      document.getElementById('rivedi-intro')?.addEventListener('click', () => {
+        try {
+          sessionStorage.removeItem('gaia-intro-vista');
+        } catch {
+          /* senza storage l'intro riparte comunque */
+        }
+        location.reload();
+      });
     </script>
 
     <style>

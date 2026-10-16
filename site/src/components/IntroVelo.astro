@@ -1,35 +1,32 @@
 ---
 /**
- * Intro di apertura: il logo si COSTRUISCE sul velo scuro, poi il velo
- * sale e scopre l'hero (docs/DECISIONI-DESIGN-gaia.md + richiesta 15/10).
+ * Intro di apertura: il logo si COSTRUISCE su un velo avorio, poi logo e
+ * righe svaniscono e il velo sale a scoprire l'hero
+ * (docs/DECISIONI-DESIGN-gaia.md — scelta definitiva del 16/10).
  *
- * Sequenza (GSAP, totale ~4,5-5 s; tutti i tempi nell'oggetto TEMPI):
+ * Sequenza (GSAP, tutti i tempi nell'oggetto TEMPI):
  *  1. il ghirigoro si disegna come tracciato a penna: maschera con i path
  *     guida (scheletro del tratto) animati in stroke-dashoffset;
  *  2. "EVENTS" lettera per lettera, dall'80% del ghirigoro;
  *  3. "Gaia Crognale" in dissolvenza;
  *  4. riga di prestigio + sottoriga sfalsata;
- *  5. pausa con il logo completo fermo, poi il velo sale.
+ *  5. pausa a logo fermo, poi l'uscita in due tempi: logo e righe salgono
+ *     di qualche px e svaniscono, quindi il velo sale — così lo stacco si
+ *     legge anche su fondo chiaro.
  *
- * Regole: solo prima visita della sessione (sessionStorage), saltabile con
- * clic/tasto, spenta con prefers-reduced-motion, overlay che non blocca il
- * rendering dell'hero sottostante (LCP compreso).
- *
- * Confronto varianti: ?velo=notte|bordeaux|grigio|salvia forza la tinta da
- * URL (serve alla styleguide; innocuo altrove).
+ * Il logo resta nei suoi colori originali: ghirigoro pesca, testo in
+ * inchiostro. Regole: solo prima visita della sessione (sessionStorage),
+ * saltabile con clic/tasto, spenta con prefers-reduced-motion, overlay che
+ * non blocca il rendering dell'hero sottostante (LCP compreso).
  */
 import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
 
 interface Props {
-  /** Colore del velo: salvia (default, scelta del 15/10), inchiostro
-      profondo, bordeaux profondo o grigio caldo — tutti token di
-      global.css. Le altre tinte restano per il confronto via ?velo=. */
-  tinta?: 'notte' | 'bordeaux' | 'grigio' | 'salvia';
   lang?: Lang;
 }
 
-const { tinta = 'salvia', lang = 'it' } = Astro.props;
+const { lang = 'it' } = Astro.props;
 
 const RIGA: Record<Lang, string> = {
   it: 'Wedding & Event Planner · Roma',
@@ -38,7 +35,7 @@ const RIGA: Record<Lang, string> = {
 const SOTTORIGA = 'Italia · Destination Weddings';
 ---
 
-<div id="intro-velo" data-tinta={tinta} aria-hidden="true">
+<div id="intro-velo" aria-hidden="true">
   <div class="velo-scena">
     <span class="velo-logo"><LogoGaia animabile /></span>
     <p class="velo-riga">{RIGA[lang]}</p>
@@ -62,10 +59,6 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     if (vista || riduci) {
       velo.remove();
       return;
-    }
-    var forzata = new URLSearchParams(location.search).get('velo');
-    if (['notte', 'bordeaux', 'grigio', 'salvia'].indexOf(forzata) !== -1) {
-      velo.setAttribute('data-tinta', forzata);
     }
     velo.setAttribute('data-attivo', '');
   })();
@@ -101,6 +94,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     const ghirigoro = velo.querySelector<SVGGElement>('.logo-ghirigoro');
     const riga = velo.querySelector<HTMLElement>('.velo-riga');
     const sottoriga = velo.querySelector<HTMLElement>('.velo-sottoriga');
+    const scena = velo.querySelector<HTMLElement>('.velo-scena');
 
     // Tutti i tempi dell'intro in un punto solo (secondi, salvo nota).
     const TEMPI = {
@@ -113,17 +107,20 @@ const SOTTORIGA = 'Italia · Destination Weddings';
       riga: 0.8,
       sottorigaSfalso: 0.2,
       pausa: 0.8, // logo completo, fermo
+      uscitaScena: 0.5, // logo e righe salgono e svaniscono
+      uscitaSalitaPx: 18, // di quanto sale la scena uscendo
       velo: 1.1, // salita del velo
       sicurezzaMs: 7000, // rete di sicurezza
     };
 
     // Posizioni derivate: la firma entra sulla coda delle lettere, la riga
-    // subito dopo, e la pausa parte quando anche la sottoriga è a posto.
+    // subito dopo; dopo la pausa esce prima la scena, poi sale il velo.
     const tLettere = TEMPI.avvio + TEMPI.ghirigoro * TEMPI.lettereAvvioFrazione;
     const tFirma = tLettere + TEMPI.lettera * 0.5;
     const tRiga = tFirma + 0.15;
     const tSottoriga = tRiga + TEMPI.sottorigaSfalso;
-    const tVelo = tSottoriga + TEMPI.riga + TEMPI.pausa;
+    const tUscita = tSottoriga + TEMPI.riga + TEMPI.pausa;
+    const tVelo = tUscita + TEMPI.uscitaScena;
 
     const tl = gsap.timeline({ onComplete: fine, defaults: { ease: 'power2.out' } });
 
@@ -170,14 +167,18 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 
     // 4 — riga di prestigio e sottoriga, sfalsate
     if (riga) tl.to(riga, { opacity: 1, y: 0, duration: TEMPI.riga }, tRiga);
-    // Su salvia la sottoriga è bianca a ~0.85, non piena: il tween deve
-    // fermarsi lì, altrimenti lo stile inline vince sul CSS.
-    const opacitaSottoriga = velo.getAttribute('data-tinta') === 'salvia' ? 0.85 : 1;
-    if (sottoriga) {
-      tl.to(sottoriga, { opacity: opacitaSottoriga, duration: TEMPI.riga }, tSottoriga);
-    }
+    if (sottoriga) tl.to(sottoriga, { opacity: 1, duration: TEMPI.riga }, tSottoriga);
 
-    // 5 — pausa con il logo completo fermo, poi il velo sale
+    // 5 — pausa a logo fermo, poi l'uscita in due tempi: su fondo chiaro il
+    // velo che sale da solo non si leggerebbe, quindi prima escono logo e
+    // righe, poi sale il velo.
+    if (scena) {
+      tl.to(
+        scena,
+        { opacity: 0, y: -TEMPI.uscitaSalitaPx, duration: TEMPI.uscitaScena, ease: 'power2.in' },
+        tUscita,
+      );
+    }
     tl.to(velo, { yPercent: -101, duration: TEMPI.velo, ease: 'power3.inOut' }, tVelo);
 
     // GSAP parte dopo il primo paint: gli stati iniziali nascosti li mette
@@ -213,32 +214,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     z-index: 90;
     display: none;
     place-items: center;
-    background: var(--color-notte);
-    color: var(--color-avorio-su-notte);
+    background: var(--color-avorio);
+    color: var(--color-inchiostro);
     cursor: pointer;
     will-change: transform;
-  }
-
-  #intro-velo[data-tinta='bordeaux'] {
-    background: var(--color-bordeaux-notte);
-  }
-
-  #intro-velo[data-tinta='grigio'] {
-    background: var(--color-grigio-caldo);
-  }
-
-  #intro-velo[data-tinta='salvia'] {
-    background: var(--color-salvia);
-    /* Sul salvia il pesca si perde (~1,7:1): ghirigoro bianco come il
-       testo, solo qui nell'intro. Fuori dall'intro il logo resta com'è. */
-    --logo-accento: currentColor;
-  }
-
-  /* Solo il colore: l'opacità finale (0,85) la mette il tween GSAP,
-     altrimenti questa regola, più specifica, scavalcherebbe lo stato
-     iniziale nascosto e la sottoriga apparirebbe subito. */
-  #intro-velo[data-tinta='salvia'] .velo-sottoriga {
-    color: var(--color-avorio-su-notte);
   }
 
   #intro-velo[data-attivo] {
@@ -290,7 +269,7 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     letter-spacing: 0.3em;
     margin-right: -0.3em;
     text-transform: uppercase;
-    color: var(--color-velato-su-notte);
+    color: var(--color-grigio-caldo);
   }
 
   @media (max-width: 40rem) {
