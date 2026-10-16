@@ -214,6 +214,15 @@ const preventivo = existsIn('quote', lang);
   .menu-cta {
     padding: 0.7rem 1.4rem;
     font-size: 0.68rem;
+    color: inherit;
+  }
+
+  /* Sopra una sezione scura il bottone eredita l'avorio del header e
+     all'hover si riempie di avorio (come i .btn delle sezioni scure). */
+  .site-header[data-header-theme='dark'] .menu-cta:hover {
+    background: var(--color-avorio-su-notte);
+    border-color: var(--color-avorio-su-notte);
+    color: var(--color-notte);
   }
 
   :global(.site-header .lang-switcher) {
