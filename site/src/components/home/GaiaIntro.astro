@@ -1,0 +1,166 @@
+---
+/**
+ * Gaia, subito dopo l'hero: una sezione sola al posto di manifesto e
+ * «Chi è Gaia». Foto grande (il primo highlight della sezione «chi-sono»),
+ * eyebrow, titolo, la frase-manifesto come citazione grande, due o tre
+ * righe di presentazione e il link alla pagina.
+ *
+ * Testi: settings.sections.about (titolo, testo breve) e
+ * settings.home.manifesto. Niente da ripetere: la presentazione è il
+ * testo accorciato del back office, la citazione è il manifesto.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { getHighlights, text, type Settings } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  settings: Settings;
+}
+
+const { lang, settings } = Astro.props;
+const t = useTranslations(lang);
+
+const sezione = settings.sections.about;
+const titolo = text(sezione?.title, lang);
+const presentazione = text(sezione?.text, lang);
+const manifesto = text(settings.home.manifesto, lang);
+
+const foto = picture(
+  getHighlights('chi-sono')[0]?.image ?? settings.about.image,
+  lang,
+  '(min-width: 64rem) 50vw, 100vw',
+);
+const paginaChiSono = existsIn('about', lang);
+---
+
+{
+  (titolo || manifesto) && (
+    <section id="gaia" class="gaia" data-theme="light">
+      <div class="gaia-griglia">
+        {
+          foto && (
+            <figure class="gaia-figura" data-reveal="maschera">
+              <Picture data={foto} cap={false} class="gaia-img" />
+            </figure>
+          )
+        }
+
+        <div class="gaia-testo">
+          <p class="eyebrow" data-reveal="alto">
+            {t('nav.about')}
+          </p>
+          {titolo && (
+            <h2 class="text-display gaia-titolo" data-reveal="righe">
+              {titolo}
+            </h2>
+          )}
+          {manifesto && (
+            <blockquote class="font-display gaia-citazione" data-reveal="righe">
+              «{manifesto}»
+            </blockquote>
+          )}
+          {presentazione && (
+            <p class="text-lead gaia-presentazione" data-reveal="alto">
+              {presentazione}
+            </p>
+          )}
+          {paginaChiSono && (
+            <p class="gaia-coda" data-reveal="alto">
+              <a class="link-filo" href={path('about', lang)}>
+                {t('cta.discover')}
+              </a>
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .gaia {
+    background: var(--color-avorio);
+  }
+
+  .gaia-griglia {
+    display: grid;
+  }
+
+  .gaia-figura {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--color-beige);
+  }
+
+  .gaia-figura :global(picture),
+  .gaia-figura :global(.gaia-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .gaia-figura :global(.gaia-img) {
+    object-fit: cover;
+  }
+
+  .gaia-testo {
+    padding: var(--spacing-section) clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  .gaia-titolo {
+    margin: 0.9rem 0 1.75rem;
+  }
+
+  .gaia-citazione {
+    margin: 0 0 1.75rem;
+    padding: 0;
+    border: 0;
+    max-width: 24ch;
+    font-size: var(--text-title);
+    font-style: italic;
+    font-weight: 340;
+    line-height: 1.25;
+    text-wrap: balance;
+    color: var(--color-inchiostro);
+  }
+
+  .gaia-presentazione {
+    margin: 0;
+    max-width: 30rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .gaia-coda {
+    margin: 2rem 0 0;
+  }
+
+  @media (min-width: 64rem) {
+    .gaia-griglia {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    .gaia-figura {
+      aspect-ratio: auto;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .gaia-testo {
+      align-self: center;
+      padding-inline: clamp(2.5rem, 6vw, 6rem);
+      max-width: 40rem;
+    }
+
+    .gaia-citazione {
+      font-size: var(--text-display);
+      line-height: 1.12;
+    }
+  }
+</style>

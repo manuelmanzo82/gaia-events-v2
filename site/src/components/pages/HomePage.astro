@@ -1,8 +1,9 @@
 ---
 /**
- * Home. Struttura da docs/DECISIONI-DESIGN-gaia.md: hero scuro, manifesto,
- * highlights (schede impilate + fascia orizzontale), luoghi, servizi, chi
- * è Gaia, recensione, destination wedding, CTA finale.
+ * Home. Struttura da docs/DECISIONI-DESIGN-gaia.md, rivista il 16/10: hero
+ * scuro, Gaia (foto + manifesto + presentazione), highlights (schede
+ * impilate + fascia orizzontale), luoghi, servizi, recensione, destination
+ * wedding, CTA finale.
  *
  * Tutti i testi vengono dal back office; una sezione senza contenuti in
  * questa lingua non viene renderizzata, con la stessa logica di
@@ -15,14 +16,14 @@ import { getHero, getHighlights, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { localBusiness, webSite } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
-import ChiEGaia from '../home/ChiEGaia.astro';
+import { LIMITE_SCHEDA, SCHEDE_IMPILATE } from '../../lib/home';
 import CtaFinale from '../home/CtaFinale.astro';
 import DestinationAggancio from '../home/DestinationAggancio.astro';
+import GaiaIntro from '../home/GaiaIntro.astro';
 import HeroHome from '../home/HeroHome.astro';
 import HighlightsImpilati from '../home/HighlightsImpilati.astro';
 import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
 import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
-import Manifesto from '../home/Manifesto.astro';
 import Recensione from '../home/Recensione.astro';
 import ServiziSplit from '../home/ServiziSplit.astro';
 
@@ -35,12 +36,17 @@ const { lang } = Astro.props;
 const settings = getSettings();
 const hero = getHero('home');
 
-// Highlights della home: le prime cinque come schede impilate, le altre
-// nella fascia orizzontale (16 schermate di schede sarebbero troppe).
+// Highlights della home: nelle schede impilate entrano solo orizzontali
+// che reggono la larghezza della scheda (object-fit: cover non deve mai
+// superare il maxWidth della foto), nell'ordine del back office; tutte le
+// altre, verticali comprese, vanno nella fascia orizzontale.
 const highlights = getHighlights('home');
-const SCHEDE_IMPILATE = 5;
-const impilati = highlights.slice(0, SCHEDE_IMPILATE);
-const orizzontali = highlights.slice(SCHEDE_IMPILATE);
+const reggeLaScheda = (h: (typeof highlights)[number]): boolean =>
+  !!h.image &&
+  h.image.width > h.image.height &&
+  (h.image.maxWidth ?? Math.floor(h.image.width / 2)) >= LIMITE_SCHEDA;
+const impilati = highlights.filter(reggeLaScheda).slice(0, SCHEDE_IMPILATE);
+const orizzontali = highlights.filter((h) => !impilati.includes(h));
 
 // OG image e JSON-LD: la prima foto dell'hero, se c'è.
 const immagineHome = hero?.images[0] ?? settings.hero.image;
@@ -78,7 +84,7 @@ const section = (key: string) => settings.sections[key];
 
   <HeroHome lang={lang} hero={hero} settings={settings} />
 
-  <Manifesto lang={lang} settings={settings} />
+  <GaiaIntro lang={lang} settings={settings} />
 
   <HighlightsImpilati
     lang={lang}
@@ -95,8 +101,6 @@ const section = (key: string) => settings.sections[key];
     titolo={text(section('services')?.title, lang)}
     testo={text(section('services')?.text, lang)}
   />
-
-  <ChiEGaia lang={lang} settings={settings} />
 
   <Recensione lang={lang} eyebrow={text(section('reviews')?.title, lang)} />
 
