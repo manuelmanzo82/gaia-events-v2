@@ -65,6 +65,12 @@ final class HighlightsController extends ResourceController
                 'rules' => 'required',
                 'help' => "L'alt si modifica nella scheda dell'immagine (sezione Immagini): è unico per foto.",
             ],
+            'title' => [
+                'label' => 'Titolo sulla scheda (home, opzionale)',
+                'type' => 'text',
+                'bilingual' => true,
+                'help' => "Frase breve mostrata sopra la foto nelle schede impilate della home. Vuoto = si usa l'alt accorciato.",
+            ],
             'luogo_id' => ['label' => 'Luogo collegato (opzionale)', 'type' => 'select', 'options' => $luoghi],
             'active' => ['label' => 'Pubblicato', 'type' => 'bool'],
         ];

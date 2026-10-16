@@ -1,18 +1,25 @@
 ---
 /**
- * Highlights, prima parte: schede che si impilano con lo scroll
- * (home-effetti.ts, [data-impila]). La foto riempie la scheda
- * (object-fit: cover), niente cornice né bande.
+ * Highlights, prima parte: schede che si impilano con lo scroll, alla
+ * Haywood (home-effetti.ts, [data-impila]).
  *
- * Per non violare il limite di ogni foto (maxWidth, calcolato dal back
- * office) qui entrano solo orizzontali con maxWidth ≥ larghezza della
- * scheda (LIMITE_SCHEDA, 62rem): la selezione la fa HomePage con la
- * stessa costante; verticali e foto più piccole vanno nella fascia
- * orizzontale. Su desktop ogni scheda è sticky al bordo superiore della
- * finestra (il header lì è nascosto); sotto i 64rem colonna semplice.
+ * Schede rettangolari (16:9 su desktop), larghe ~90% della finestra,
+ * angoli a 24 px, foto a tutta scheda (object-fit: cover) e il testo SULLA
+ * foto: una frase breve in Cormorant, avorio, centrata, su un velo scuro
+ * sfumato. Ogni scheda è sticky un gradino più giù della precedente, così
+ * quella sotto resta visibile in alto per una fascia mentre la nuova le
+ * scorre sopra, e lo scrub la rimpicciolisce e la scurisce (.scheda-ombra).
+ *
+ * Testo: il titolo bilingue dell'highlight; senza, l'alt accorciato alla
+ * prima virgola/due punti. Le schede sono foto: dichiarano data-theme="dark"
+ * e data-foto, così il header sopra passa in avorio con l'ombra.
+ *
+ * Per non violare il limite di ogni foto (maxWidth) qui entrano solo
+ * orizzontali con maxWidth ≥ LIMITE_SCHEDA (lib/home.ts): la selezione la
+ * fa HomePage. Sotto i 64rem niente sticky: colonna con gli stessi angoli.
  */
 import type { Lang } from '../../config/site';
-import type { Highlight } from '../../lib/content';
+import { text, type Highlight } from '../../lib/content';
 import { picture } from '../../lib/images';
 import Picture from '../Picture.astro';
 
@@ -25,13 +32,20 @@ interface Props {
 
 const { lang, highlights, eyebrow, titolo } = Astro.props;
 
-const SIZES = '(min-width: 68rem) 62rem, 92vw';
+const SIZES = '(min-width: 64rem) 90vw, 92vw';
+
+/** Prima parte dell'alt, fino alla prima virgola o ai due punti. */
+function accorcia(alt: string): string {
+  const breve = alt.split(/[,:]/)[0]?.trim() ?? alt;
+  return breve.length > 60 ? breve.slice(0, 57).trimEnd() + '…' : breve;
+}
 
 const schede = highlights
   .map((h, i) => {
     const data = picture(h.image, lang, SIZES);
     if (!data) return null;
-    return { data, numero: String(i + 1).padStart(2, '0') };
+    const frase = text(h.title, lang) || accorcia(data.alt);
+    return { data, frase, indice: i, numero: String(i + 1).padStart(2, '0') };
   })
   .filter((s): s is NonNullable<typeof s> => s !== null);
 ---
@@ -50,14 +64,16 @@ const schede = highlights
 
       <div class="impila-pila" data-impila>
         {schede.map((s) => (
-          <article class="scheda">
-            <figure class="scheda-figura" data-reveal="maschera">
+          <article class="scheda" style={`--i: ${s.indice}`} data-theme="dark" data-foto>
+            <figure class="scheda-figura">
               <Picture data={s.data} cap={false} class="scheda-img" />
+              <div class="scheda-velo" aria-hidden="true"></div>
+              <figcaption class="scheda-frase">
+                <span class="numero scheda-numero">N° {s.numero}</span>
+                <span class="font-display scheda-testo">{s.frase}</span>
+              </figcaption>
+              <div class="scheda-ombra" aria-hidden="true"></div>
             </figure>
-            <div class="scheda-testo">
-              <span class="numero">N° {s.numero}</span>
-              <p class="scheda-didascalia">{s.data.alt}</p>
-            </div>
           </article>
         ))}
       </div>
@@ -81,24 +97,26 @@ const schede = highlights
 
   .impila-pila {
     display: grid;
-    gap: clamp(1.5rem, 4vh, 3rem);
+    gap: clamp(1.25rem, 3vh, 2rem);
     padding-bottom: var(--spacing-section);
   }
 
   .scheda {
-    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 62rem);
+    width: min(100% - 2 * clamp(1rem, 4vw, 3.5rem), 90vw);
     margin-inline: auto;
-    display: grid;
-    gap: 0.9rem;
-    will-change: transform, opacity;
+    will-change: transform;
+    /* Le schede non sono sezioni: niente sfondo dal tema, solo il colore. */
+    background: transparent;
   }
 
   .scheda-figura {
+    position: relative;
     margin: 0;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: 3px;
-    background: var(--color-beige);
+    border-radius: 24px;
+    background: var(--color-notte);
+    isolation: isolate;
   }
 
   .scheda-figura :global(picture),
@@ -112,24 +130,47 @@ const schede = highlights
     object-fit: cover;
   }
 
+  /* Velo scuro sfumato dal basso, per la frase. */
+  .scheda-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(0deg, rgb(27 22 17 / 0.72) 0%, rgb(27 22 17 / 0.3) 45%, rgb(27 22 17 / 0.08) 100%);
+  }
+
+  .scheda-frase {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(1.5rem, 5vh, 3rem);
+    text-align: center;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .scheda-numero {
+    color: var(--color-oro);
+  }
+
   .scheda-testo {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
+    font-size: var(--text-display);
+    font-weight: 320;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    max-width: 22ch;
   }
 
-  .scheda-testo .numero {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  .scheda-didascalia {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-lead);
-    line-height: 1.35;
-    color: var(--color-grigio-caldo);
-    text-wrap: pretty;
+  /* Oscuramento della scheda coperta: lo scrub ne alza l'opacità. */
+  .scheda-ombra {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--color-notte);
+    opacity: 0;
+    pointer-events: none;
   }
 
   @media (min-width: 64rem) {
@@ -137,33 +178,35 @@ const schede = highlights
       gap: 0;
     }
 
-    /* Sticky al bordo superiore: la scheda è alta quanto la finestra, la
-       foto riempie tutto meno la riga della didascalia. */
+    /* Sticky un gradino più giù per ogni scheda: la precedente resta
+       visibile in alto per una fascia mentre la nuova le scorre sopra. */
     .scheda {
       position: sticky;
-      top: 0;
-      height: 100vh;
-      height: 100svh;
-      grid-template-rows: minmax(0, 1fr) auto;
-      padding-block: 2rem 1.25rem;
+      top: calc(2.5vh + var(--i) * 1.75rem);
+      margin-bottom: 8vh;
       transform-origin: 50% 0%;
-      background: var(--color-avorio);
+    }
+
+    .scheda:last-child {
+      margin-bottom: 0;
     }
 
     .scheda-figura {
-      aspect-ratio: auto;
-      min-height: 0;
+      aspect-ratio: 16 / 9;
+      max-height: 84vh;
+      max-height: 84svh;
+    }
+
+    .scheda-testo {
+      font-size: var(--text-display-xl);
+      max-width: 18ch;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .scheda {
       position: static;
-      height: auto;
-    }
-
-    .scheda-figura {
-      aspect-ratio: 4 / 3;
+      margin-bottom: 1.5rem;
     }
   }
 </style>

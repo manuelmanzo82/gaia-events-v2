@@ -497,6 +497,9 @@ CREATE TABLE IF NOT EXISTS `highlights` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `media_id`   INT UNSIGNED NOT NULL,
   `luogo_id`   INT UNSIGNED DEFAULT NULL,
+  -- Frase breve SULLA scheda impilata della home; senza, il sito usa l'alt.
+  `title_it`   VARCHAR(190) DEFAULT NULL,
+  `title_en`   VARCHAR(190) DEFAULT NULL,
   `active`     TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

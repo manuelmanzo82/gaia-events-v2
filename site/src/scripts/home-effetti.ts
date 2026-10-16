@@ -29,13 +29,12 @@ function schedeImpilate(): void {
       const successiva = schede[i + 1];
       if (!successiva) return;
 
-      // Mentre la successiva sale a coprirla, la scheda si ritira: un po'
-      // più piccola, un po' più scura. Lo scrub la lega allo scroll.
-      gsap.to(scheda, {
-        scale: 0.94,
-        yPercent: -4,
-        opacity: 0.55,
-        ease: 'none',
+      // Mentre la successiva le scorre sopra, la scheda si ritira: un po'
+      // più piccola e più scura (il velo .scheda-ombra), ma resta visibile
+      // nella fascia in alto perché ogni scheda è sticky un gradino più
+      // giù della precedente. Lo scrub lega tutto allo scroll.
+      const ombra = scheda.querySelector<HTMLElement>('.scheda-ombra');
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: successiva,
           start: 'top bottom',
@@ -43,6 +42,8 @@ function schedeImpilate(): void {
           scrub: true,
         },
       });
+      tl.to(scheda, { scale: 0.95, ease: 'none' }, 0);
+      if (ombra) tl.to(ombra, { opacity: 0.55, ease: 'none' }, 0);
     });
   }
 }

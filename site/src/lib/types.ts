@@ -250,6 +250,8 @@ export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' |
 export interface Highlight {
   id: number;
   image: Image | null;
+  /** Frase breve sulla scheda impilata della home; vuota = alt accorciato. */
+  title?: Localized;
   luogoId: number | null;
   sections: Array<{ section: HighlightSection; order: number }>;
   active: boolean;

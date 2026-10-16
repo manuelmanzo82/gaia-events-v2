@@ -138,6 +138,7 @@ final class Exporter
         return array_map(static fn (array $row): array => [
             'id' => (int) $row['id'],
             'image' => self::image(self::mediaById((int) $row['media_id'])),
+            'title' => self::text($row['title_it'] ?? null, $row['title_en'] ?? null),
             'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
             'sections' => $sections[(int) $row['id']] ?? [],
             'active' => (bool) $row['active'],
