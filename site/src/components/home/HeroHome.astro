@@ -1,0 +1,443 @@
+---
+/**
+ * Hero della home: scuro, a tutto schermo, foto di page_hero in dissolvenza
+ * lenta con leggero zoom, titolo breve e CTA al preventivo.
+ *
+ * Prestazioni, nell'ordine in cui contano:
+ *  - la PRIMA foto è l'elemento LCP: preload nel <head> (slot "head"),
+ *    fetchpriority=high, decoding sync, width/height dichiarati;
+ *  - le altre foto NON entrano nel caricamento iniziale: hanno solo
+ *    data-src/data-srcset e vengono attivate dopo `load`; la dissolvenza
+ *    parte solo allora (classe `pronto`);
+ *  - dissolvenza e Ken Burns sono CSS puro: niente GSAP sull'hero, niente
+ *    reveal sul LCP; con prefers-reduced-motion resta la prima foto ferma;
+ *  - video: solo desktop (≥64rem), solo dopo `load`, mai con saveData o su
+ *    2g/3g, mai elemento LCP. Oggi il campo è vuoto e restano le foto; il
+ *    markup e lo script sono pronti per quando Gaia caricherà MP4 + WebM.
+ *
+ * I testi vengono da page_hero (titolo, sottotitolo, CTA) con fallback ai
+ * testi dell'hero nelle impostazioni; l'eyebrow dalle impostazioni.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path, type RouteKey, ROUTES } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { text, type PageHero, type Settings } from '../../lib/content';
+import { picture, uploadUrl } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  hero: PageHero | null;
+  settings: Settings;
+}
+
+const { lang, hero, settings } = Astro.props;
+const t = useTranslations(lang);
+
+const eyebrow = text(settings.hero.eyebrow, lang);
+const titolo = text(hero?.title, lang) || text(settings.hero.title, lang);
+const sottotitolo = text(hero?.subtitle, lang) || text(settings.hero.subtitle, lang);
+
+// La CTA punta alla rotta scelta nel back office se esiste in questa
+// lingua, altrimenti al preventivo; senza preventivo in questa lingua,
+// niente pulsante (un link a una pagina non generata e' un 404).
+const rottaScelta = hero?.cta.route as RouteKey | null | undefined;
+const rotta: RouteKey | null =
+  rottaScelta && rottaScelta in ROUTES && existsIn(rottaScelta, lang)
+    ? rottaScelta
+    : existsIn('quote', lang)
+      ? 'quote'
+      : null;
+const ctaLabel =
+  text(hero?.cta.label, lang) || text(settings.hero.ctaLabel, lang) || t('cta.quote');
+
+// Foto: quelle di page_hero, in ordine; fallback all'immagine hero delle
+// impostazioni. Tutte a 100vw (è una fascia a tutta larghezza, cover).
+const immagini = (hero?.images.length ? hero.images : [settings.hero.image])
+  .map((img) => picture(img, lang, '100vw'))
+  .filter((p): p is NonNullable<typeof p> => p !== null);
+const prima = immagini[0] ?? null;
+const altre = immagini.slice(1);
+
+// Durata del ciclo: 7 s per foto, come da decisione (6–8 s).
+const PER_FOTO = 7;
+const ciclo = immagini.length * PER_FOTO;
+
+// Il preload del LCP sta in HomePage (slot "head" del layout: gli slot
+// nominati valgono solo per i figli diretti di BaseLayout).
+const video = hero?.video ?? null;
+---
+
+<section
+  class="hero"
+  data-theme="dark"
+  data-foto={immagini.length}
+  data-video-mp4={video ? uploadUrl(video.mp4) : undefined}
+  data-video-webm={video?.webm ? uploadUrl(video.webm) : undefined}
+  style={`--ciclo: ${ciclo}s; --per-foto: ${PER_FOTO}s`}
+>
+  <div class="hero-foto" aria-hidden="true">
+    {
+      prima && (
+        <Picture
+          data={prima}
+          cap={false}
+          loading="eager"
+          fetchpriority="high"
+          decoding="sync"
+          class="hero-img"
+        />
+      )
+    }
+    {
+      altre.map((p, i) => (
+        <picture class="hero-rinviata" data-indice={i + 1}>
+          {p.sources.map((s) => (
+            <source type={s.type} data-srcset={s.srcset} sizes={s.sizes} />
+          ))}
+          <img
+            data-src={p.src}
+            width={p.width}
+            height={p.height}
+            alt=""
+            sizes={p.sizes}
+            class="hero-img"
+            loading="lazy"
+            decoding="async"
+            style={p.objectPosition ? `object-position: ${p.objectPosition}` : undefined}
+          />
+        </picture>
+      ))
+    }
+  </div>
+
+  <div class="hero-velo" aria-hidden="true"></div>
+
+  <div class="hero-testo container-gaia">
+    {eyebrow && <p class="eyebrow hero-eyebrow">{eyebrow}</p>}
+    <h1 class="text-display-xl hero-titolo" set:html={titolo} />
+    {sottotitolo && <p class="text-lead hero-sottotitolo">{sottotitolo}</p>}
+    {
+      rotta && (
+        <p class="hero-azioni">
+          <a class="btn" href={path(rotta, lang)}>
+            {ctaLabel}
+          </a>
+        </p>
+      )
+    }
+  </div>
+
+  <a class="hero-scorri" href="#manifesto" aria-label={t('cta.discover')}>
+    <span></span>
+  </a>
+</section>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('.hero');
+
+  if (hero) {
+    const riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 1. Le foto successive entrano solo dopo il load: così non competono
+    //    mai con il LCP. Poi parte la dissolvenza (classe `pronto`).
+    const attivaAltreFoto = (): void => {
+      const rinviate = hero.querySelectorAll<HTMLPictureElement>('.hero-rinviata');
+      let daCaricare = rinviate.length;
+      if (daCaricare === 0 || riduci) return;
+
+      const pronto = (): void => {
+        if (--daCaricare <= 0) hero.classList.add('pronto');
+      };
+
+      for (const pic of rinviate) {
+        for (const source of pic.querySelectorAll<HTMLSourceElement>('source[data-srcset]')) {
+          source.srcset = source.dataset.srcset ?? '';
+        }
+        const img = pic.querySelector<HTMLImageElement>('img[data-src]');
+        if (!img) {
+          pronto();
+          continue;
+        }
+        img.addEventListener('load', pronto, { once: true });
+        img.addEventListener('error', pronto, { once: true });
+        img.src = img.dataset.src ?? '';
+      }
+    };
+
+    // 2. Video desktop: file self-hosted da page_hero, inserito nel DOM
+    //    solo quando ha senso. Con il campo vuoto non succede niente.
+    const attivaVideo = (): void => {
+      const mp4 = hero.dataset.videoMp4;
+      if (!mp4 || riduci) return;
+      if (!window.matchMedia('(min-width: 64rem)').matches) return;
+
+      const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } })
+        .connection;
+      if (conn?.saveData) return;
+      if (conn?.effectiveType && /2g|3g/.test(conn.effectiveType)) return;
+
+      const video = document.createElement('video');
+      video.className = 'hero-video';
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.preload = 'auto';
+      video.setAttribute('aria-hidden', 'true');
+
+      const webm = hero.dataset.videoWebm;
+      if (webm) {
+        const s = document.createElement('source');
+        s.src = webm;
+        s.type = 'video/webm';
+        video.append(s);
+      }
+      const s = document.createElement('source');
+      s.src = mp4;
+      s.type = 'video/mp4';
+      video.append(s);
+
+      video.addEventListener('canplay', () => hero.classList.add('con-video'), { once: true });
+      hero.querySelector('.hero-foto')?.after(video);
+      void video.play().catch(() => {
+        /* autoplay negato: restano le foto */
+      });
+    };
+
+    const dopoIlLoad = (): void => {
+      attivaAltreFoto();
+      attivaVideo();
+    };
+
+    if (document.readyState === 'complete') dopoIlLoad();
+    else window.addEventListener('load', dopoIlLoad, { once: true });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    align-content: end;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .hero-foto,
+  .hero-foto :global(picture),
+  :global(.hero-video) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-foto :global(.hero-img),
+  :global(.hero-video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  /* La prima foto è visibile subito (è il LCP); le altre partono invisibili
+     e il ciclo si accende solo quando sono caricate (.pronto). */
+  .hero-foto :global(picture) {
+    opacity: 0;
+  }
+
+  .hero-foto :global(picture:first-child) {
+    opacity: 1;
+  }
+
+  .hero-foto :global(.hero-img) {
+    transform: scale(1);
+    transform-origin: 50% 50%;
+    animation: hero-zoom var(--per-foto) linear forwards;
+  }
+
+  .hero.pronto .hero-foto :global(picture) {
+    animation: hero-dissolvenza var(--ciclo) infinite;
+  }
+
+  .hero.pronto .hero-foto :global(.hero-img) {
+    animation: hero-zoom var(--ciclo) linear infinite;
+  }
+
+  /* Ogni foto ha il suo slot nel ciclo: la n-esima parte con n × per-foto
+     di ritardo (ritardo negativo: la prima è già "in corso" da subito). */
+  .hero.pronto .hero-foto :global(picture:nth-child(1)),
+  .hero.pronto .hero-foto :global(picture:nth-child(1) .hero-img) {
+    animation-delay: 0s;
+  }
+  .hero.pronto .hero-foto :global(picture:nth-child(2)),
+  .hero.pronto .hero-foto :global(picture:nth-child(2) .hero-img) {
+    animation-delay: calc(var(--per-foto) * 1);
+  }
+  .hero.pronto .hero-foto :global(picture:nth-child(3)),
+  .hero.pronto .hero-foto :global(picture:nth-child(3) .hero-img) {
+    animation-delay: calc(var(--per-foto) * 2);
+  }
+  .hero.pronto .hero-foto :global(picture:nth-child(4)),
+  .hero.pronto .hero-foto :global(picture:nth-child(4) .hero-img) {
+    animation-delay: calc(var(--per-foto) * 3);
+  }
+  .hero.pronto .hero-foto :global(picture:nth-child(5)),
+  .hero.pronto .hero-foto :global(picture:nth-child(5) .hero-img) {
+    animation-delay: calc(var(--per-foto) * 4);
+  }
+  .hero.pronto .hero-foto :global(picture:nth-child(6)),
+  .hero.pronto .hero-foto :global(picture:nth-child(6) .hero-img) {
+    animation-delay: calc(var(--per-foto) * 5);
+  }
+
+  /* Con 4 foto ogni foto resta piena per 1/4 del ciclo, con dissolvenze
+     incrociate di circa 1,5 s all'inizio e alla fine del proprio slot. */
+  @keyframes hero-dissolvenza {
+    0% {
+      opacity: 0;
+    }
+    5% {
+      opacity: 1;
+    }
+    25% {
+      opacity: 1;
+    }
+    30% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Ken Burns 1,00 → 1,06 lungo lo slot visibile (il 30% del ciclo). */
+  @keyframes hero-zoom {
+    0% {
+      transform: scale(1);
+    }
+    30% {
+      transform: scale(1.06);
+    }
+    100% {
+      transform: scale(1.06);
+    }
+  }
+
+  :global(.hero-video) {
+    opacity: 0;
+    transition: opacity 1.4s var(--ease-gaia);
+  }
+
+  .hero.con-video :global(.hero-video) {
+    opacity: 1;
+  }
+
+  .hero.con-video .hero-foto {
+    transition: opacity 1.4s var(--ease-gaia) 0.4s;
+    opacity: 0;
+  }
+
+  /* Velo: scurisce il basso per il testo e l'alto per il header. */
+  .hero-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(27 22 17 / 0.45) 0%, transparent 28%),
+      linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.25) 45%, transparent 70%);
+  }
+
+  .hero-testo {
+    position: relative;
+    z-index: 2;
+    padding-block: clamp(6rem, 14vh, 9rem) clamp(5rem, 12vh, 8rem);
+    max-width: 80rem;
+  }
+
+  .hero-eyebrow {
+    color: var(--color-oro);
+    margin: 0 0 1.25rem;
+  }
+
+  .hero-titolo {
+    max-width: 14ch;
+    margin: 0;
+    color: var(--color-avorio-su-notte);
+    font-weight: 320;
+  }
+
+  .hero-sottotitolo {
+    max-width: 34rem;
+    margin: 1.5rem 0 0;
+    color: var(--color-velato-su-notte);
+  }
+
+  .hero-azioni {
+    margin: 2.25rem 0 0;
+  }
+
+  .hero-azioni .btn {
+    color: var(--color-avorio-su-notte);
+  }
+
+  .hero-azioni .btn:hover {
+    background: var(--color-avorio-su-notte);
+    border-color: var(--color-avorio-su-notte);
+    color: var(--color-notte);
+  }
+
+  /* Filo che scende: invito allo scroll, discreto. */
+  .hero-scorri {
+    position: absolute;
+    right: clamp(1.25rem, 4vw, 3.5rem);
+    bottom: clamp(2rem, 6vh, 3.5rem);
+    z-index: 2;
+    display: block;
+    width: 1px;
+    height: 4.5rem;
+    overflow: hidden;
+    opacity: 0.7;
+  }
+
+  .hero-scorri span {
+    display: block;
+    width: 1px;
+    height: 100%;
+    background: var(--color-avorio-su-notte);
+    animation: hero-filo 2.6s var(--ease-gaia) infinite;
+  }
+
+  @keyframes hero-filo {
+    0% {
+      transform: translateY(-100%);
+    }
+    55% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .hero-scorri {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-foto :global(.hero-img),
+    .hero.pronto .hero-foto :global(picture),
+    .hero-scorri span {
+      animation: none;
+    }
+  }
+</style>

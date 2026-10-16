@@ -1,24 +1,31 @@
 ---
+/**
+ * Home. Struttura da docs/DECISIONI-DESIGN-gaia.md: hero scuro, manifesto,
+ * highlights, luoghi, servizi, chi è Gaia, recensione, destination
+ * wedding, CTA finale. Le sezioni arrivano una alla volta (fase 3): quelle
+ * non ancora disegnate restano segnaposto.
+ *
+ * Tutti i testi vengono dal back office; una sezione senza contenuti in
+ * questa lingua non viene renderizzata, con la stessa logica di
+ * availability.ts usata da menu, sitemap e hreflang.
+ */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
-  getFeaturedEvents,
   getFeaturedReviews,
+  getHero,
   getServices,
   getSettings,
   isPublishable,
   text,
 } from '../../lib/content';
-import {
-  EVENT_FIELDS,
-  REVIEW_FIELDS,
-  SERVICE_FIELDS,
-  existsIn,
-} from '../../lib/availability';
+import { REVIEW_FIELDS, SERVICE_FIELDS, existsIn } from '../../lib/availability';
+import { picture } from '../../lib/images';
 import { localBusiness, webSite } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import HeroHome from '../home/HeroHome.astro';
 import PlaceholderSection from '../PlaceholderSection.astro';
 
 interface Props {
@@ -29,13 +36,20 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const settings = getSettings();
+const hero = getHero('home');
+
 // In evidenza solo i contenuti pubblicabili in questa lingua: altrimenti la
 // home inglese elencherebbe voci vuote e linkerebbe schede non generate.
 const services = getServices().filter((item) => isPublishable(item, lang, SERVICE_FIELDS));
-const events = getFeaturedEvents().filter((item) => isPublishable(item, lang, EVENT_FIELDS)).slice(0, 6);
 const reviews = getFeaturedReviews().filter((item) => isPublishable(item, lang, REVIEW_FIELDS)).slice(0, 3);
 
-const meta = buildMeta({ lang, routeKey: 'home', seo: settings, image: settings.hero.image });
+// OG image e JSON-LD: la prima foto dell'hero, se c'è.
+const immagineHome = hero?.images[0] ?? settings.hero.image;
+const meta = buildMeta({ lang, routeKey: 'home', seo: settings, image: immagineHome });
+
+// Preload dell'elemento LCP (prima foto dell'hero) nel formato migliore:
+// il browser ignora un preload con un type che non supporta.
+const preloadHero = picture(immagineHome, lang, '100vw')?.sources[0] ?? null;
 
 const jsonLd = [
   localBusiness({ lang, description: meta.description, image: meta.ogImage }),
@@ -49,87 +63,75 @@ const section = (key: string) => settings.sections[key];
 const esiste = (key: Parameters<typeof existsIn>[0]) => existsIn(key, lang);
 ---
 
-<BaseLayout lang={lang} routeKey="home" meta={meta} jsonLd={jsonLd}>
-  <PlaceholderSection
-    lang={lang}
-    id="hero"
-    title={text(settings.hero.title, lang)}
-    text={text(settings.hero.subtitle, lang)}
-  >
-    <p>{text(settings.hero.eyebrow, lang)}</p>
+<BaseLayout lang={lang} routeKey="home" meta={meta} jsonLd={jsonLd} intro largo>
+  {
+    preloadHero && (
+      <link
+        slot="head"
+        rel="preload"
+        as="image"
+        type={preloadHero.type}
+        imagesrcset={preloadHero.srcset}
+        imagesizes="100vw"
+        fetchpriority="high"
+      />
+    )
+  }
+
+  <HeroHome lang={lang} hero={hero} settings={settings} />
+
+  <div class="container-gaia">
+    <PlaceholderSection
+      lang={lang}
+      id="manifesto"
+      title={text(settings.home.manifesto, lang)}
+      text={text(settings.home.manifestoFirma, lang)}
+    />
+
+    <PlaceholderSection lang={lang} id="highlights" title={text(section('portfolio')?.title, lang)} />
+
+    <PlaceholderSection
+      lang={lang}
+      id="services"
+      title={text(section('services')?.title, lang)}
+      text={text(section('services')?.text, lang)}
+    >
+      <ul>
+        {services.map((service) => <li>{text(service.title, lang)}</li>)}
+      </ul>
+      {esiste('services') && <p><a href={path('services', lang)}>{t('cta.discover')}</a></p>}
+    </PlaceholderSection>
+
+    <PlaceholderSection
+      lang={lang}
+      id="about"
+      title={text(section('about')?.title, lang)}
+      text={text(section('about')?.text, lang)}
+    >
+      {esiste('about') && <p><a href={path('about', lang)}>{t('cta.discover')}</a></p>}
+    </PlaceholderSection>
+
     {
-      esiste('quote') && (
-        <p><a href={path('quote', lang)}>{text(settings.hero.ctaLabel, lang) || t('cta.quote')}</a></p>
+      reviews.length > 0 && (
+        <PlaceholderSection lang={lang} id="reviews" title={text(section('reviews')?.title, lang)}>
+          <ul>
+            {reviews.map((review) => (
+              <li>
+                {review.author} — {text(review.text, lang)}
+              </li>
+            ))}
+          </ul>
+        </PlaceholderSection>
       )
     }
-  </PlaceholderSection>
 
-  <PlaceholderSection
-    lang={lang}
-    id="about"
-    title={text(section('about')?.title, lang)}
-    text={text(section('about')?.text, lang)}
-  >
-    {esiste('about') && <p><a href={path('about', lang)}>{t('cta.discover')}</a></p>}
-  </PlaceholderSection>
-
-  <PlaceholderSection
-    lang={lang}
-    id="services"
-    title={text(section('services')?.title, lang)}
-    text={text(section('services')?.text, lang)}
-  >
-    <ul>
-      {services.map((service) => <li>{text(service.title, lang)}</li>)}
-    </ul>
-    {esiste('services') && <p><a href={path('services', lang)}>{t('cta.discover')}</a></p>}
-  </PlaceholderSection>
-
-  <PlaceholderSection
-    lang={lang}
-    id="portfolio"
-    title={text(section('portfolio')?.title, lang)}
-    text={text(section('portfolio')?.text, lang)}
-  >
-    <ul>
-      {
-        events.map((event) => (
-          <li>
-            <a href={path('portfolio', lang, event.slug)}>{text(event.title, lang)}</a>
-          </li>
-        ))
-      }
-    </ul>
-    {esiste('portfolio') && <p><a href={path('portfolio', lang)}>{t('cta.allEvents')}</a></p>}
-  </PlaceholderSection>
-
-  <PlaceholderSection
-    lang={lang}
-    id="reviews"
-    title={text(section('reviews')?.title, lang)}
-    text={text(section('reviews')?.text, lang)}
-  >
-    <ul>
-      {reviews.map((review) => <li>{review.author} — {text(review.text, lang)}</li>)}
-    </ul>
-    {esiste('reviews') && <p><a href={path('reviews', lang)}>{t('cta.discover')}</a></p>}
-  </PlaceholderSection>
-
-  <PlaceholderSection
-    lang={lang}
-    id="instagram"
-    title={text(section('instagram')?.title, lang)}
-    text={text(section('instagram')?.text, lang)}
-  >
-    <p>Feed Instagram: arriva più avanti via API ufficiale.</p>
-  </PlaceholderSection>
-
-  <PlaceholderSection
-    lang={lang}
-    id="cta"
-    title={text(section('cta')?.title, lang)}
-    text={text(section('cta')?.text, lang)}
-  >
-    {esiste('contact') && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
-  </PlaceholderSection>
+    <PlaceholderSection
+      lang={lang}
+      id="cta"
+      title={text(section('cta')?.title, lang)}
+      text={text(section('cta')?.text, lang)}
+    >
+      {esiste('contact') && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
+    </PlaceholderSection>
+  </div>
 </BaseLayout>
