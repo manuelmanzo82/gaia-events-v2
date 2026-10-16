@@ -9,6 +9,7 @@
  */
 export function initThemeObserver(header: HTMLElement): void {
   const sezioni = document.querySelectorAll<HTMLElement>('[data-theme]');
+  // Il torna-su (e chiunque altro) legge lo stesso tema dal header.
   if (sezioni.length === 0) return;
 
   const altezza = () => header.offsetHeight || 80;
@@ -19,6 +20,9 @@ export function initThemeObserver(header: HTMLElement): void {
         if (!entry.isIntersecting) continue;
         const tema = entry.target.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
         header.setAttribute('data-header-theme', tema);
+        // Sopra una foto (hero, schede, destination) il header aggiunge
+        // un'ombra testuale morbidissima: la sezione lo dichiara con data-foto.
+        header.setAttribute('data-header-foto', entry.target.hasAttribute('data-foto') ? '1' : '0');
       }
     },
     {
