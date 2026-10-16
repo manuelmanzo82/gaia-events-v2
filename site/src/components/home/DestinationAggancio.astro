@@ -1,0 +1,71 @@
+---
+/**
+ * Destination wedding: aggancio scuro verso la pagina dedicata, con titolo
+ * e intro della pagina stessa. Solo se la pagina esiste in questa lingua.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { getDestinationWedding, text } from '../../lib/content';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const dw = getDestinationWedding();
+const titolo = text(dw.title, lang);
+const intro = text(dw.intro, lang);
+const esiste = existsIn('destinationWedding', lang) && titolo !== '';
+---
+
+{
+  esiste && (
+    <section id="destination" class="destination" data-theme="dark">
+      <div class="container-gaia destination-interno">
+        <p class="eyebrow" data-reveal="alto">
+          {t('nav.destinationWedding')}
+        </p>
+        <h2 class="text-display" data-reveal="righe">
+          {titolo}
+        </h2>
+        {intro && (
+          <p class="text-lead text-velato destination-intro" data-reveal="alto">
+            {intro}
+          </p>
+        )}
+        <p class="destination-coda" data-reveal="alto">
+          <a class="btn" href={path('destinationWedding', lang)}>
+            {t('cta.discover')}
+          </a>
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .destination {
+    padding-block: var(--spacing-section);
+  }
+
+  .destination-interno {
+    max-width: 56rem;
+  }
+
+  .destination h2 {
+    margin: 0.9rem 0 1.5rem;
+  }
+
+  .destination-intro {
+    margin: 0;
+    max-width: 38rem;
+  }
+
+  .destination-coda {
+    margin: 2.5rem 0 0;
+  }
+</style>
