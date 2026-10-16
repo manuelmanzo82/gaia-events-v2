@@ -1,0 +1,25 @@
+---
+// Luoghi a due livelli: /luoghi/lazio/ (regione) e /luoghi/lazio/roma/ (zona).
+// Lo slug composto lo costruisce slugLuogo(); gli slug sono unici globalmente.
+import PlaceDetail from '../../components/pages/PlaceDetail.astro';
+import { getLuoghiFlat, isPublishable, slugLuogo } from '../../lib/content';
+import { LUOGO_FIELDS } from '../../lib/availability';
+import type { Luogo } from '../../lib/types';
+
+export function getStaticPaths() {
+  return getLuoghiFlat()
+    .filter((luogo) => isPublishable(luogo, 'it', LUOGO_FIELDS))
+    .flatMap((luogo) => {
+      const slug = slugLuogo(luogo, 'it');
+      return slug ? [{ params: { slug }, props: { luogo } }] : [];
+    });
+}
+
+interface Props {
+  luogo: Luogo;
+}
+
+const { luogo } = Astro.props as Props;
+---
+
+<PlaceDetail lang="it" luogo={luogo} />

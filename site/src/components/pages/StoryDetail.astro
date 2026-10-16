@@ -1,0 +1,107 @@
+---
+// Dettaglio di una storia. SEGNAPOSTO: racconto, galleria e credito del
+// fotografo (link alla pagina Partner, mai didascalie sotto le foto).
+import type { Lang } from '../../config/site';
+import { formatDate, useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { STORY_FIELDS } from '../../lib/availability';
+import { availableLangs, getLuogoById, getPartnerById, pick, slugLuogo, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { breadcrumbs, storyArticle } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import type { Story } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  story: Story;
+  slug: string;
+}
+
+const { lang, story, slug } = Astro.props;
+const t = useTranslations(lang);
+
+const langs = availableLangs(story, STORY_FIELDS).filter((l) => pick(story.slug, l) !== null);
+const luogo = getLuogoById(story.luogoId);
+const fotografo = getPartnerById(story.photographerId);
+
+const title = text(story.title, lang);
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'stories',
+  slug,
+  title,
+  description: text(story.metaDescription, lang),
+  seo: story,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: t('nav.stories'), href: path('stories', lang) },
+  { name: title, href: path('stories', lang, slug) },
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="stories"
+  slug={slug}
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={[storyArticle(story, lang, slug), breadcrumbs(crumbs)]}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
+
+  <p>
+    {story.couple}
+    {story.locationName && ` · ${story.locationName}`}
+    {story.date && ` · ${formatDate(story.date, lang)}`}
+  </p>
+
+  {
+    luogo && slugLuogo(luogo, lang) && (
+      <p>
+        <a href={path('places', lang, slugLuogo(luogo, lang)!)}>{text(luogo.nome, lang)}</a>
+      </p>
+    )
+  }
+
+  <Picture data={picture(story.cover, lang, '(min-width: 48rem) 66vw, 100vw')} />
+
+  {text(story.body, lang) && <div set:html={text(story.body, lang)} />}
+
+  {
+    story.gallery.length > 0 && (
+      <ul class="galleria-segnaposto">
+        {story.gallery.map((image) => (
+          <li>
+            <Picture data={picture(image, lang, '(min-width: 48rem) 33vw, 100vw')} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    fotografo && (
+      <p>
+        Fotografie: <a href={path('partners', lang)}>{fotografo.name}</a>
+      </p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .galleria-segnaposto {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    list-style: none;
+    padding: 0;
+  }
+</style>

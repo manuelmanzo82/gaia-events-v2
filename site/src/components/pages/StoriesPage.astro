@@ -1,0 +1,69 @@
+---
+// Indice delle storie. SEGNAPOSTO: il design si fa in fase 3.
+import type { Lang } from '../../config/site';
+import { formatDate, useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { STORY_FIELDS, langsFor } from '../../lib/availability';
+import { getStories, isPublishable, pick, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { breadcrumbs } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const langs = langsFor('stories');
+const stories = getStories().filter((story) => isPublishable(story, lang, STORY_FIELDS));
+
+const title = t('nav.stories');
+const meta = buildMeta({ lang, routeKey: 'stories', title, availableLangs: langs });
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('stories', lang) },
+];
+---
+
+<BaseLayout lang={lang} routeKey="stories" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} crumbs={crumbs}>
+  <h1>{title}</h1>
+  <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
+
+  {stories.length === 0 && <p>{t('common.empty')}</p>}
+
+  <ul class="storie-segnaposto">
+    {
+      stories.map((story) => {
+        const slug = pick(story.slug, lang)!;
+        return (
+          <li>
+            <a href={path('stories', lang, slug)}>
+              <Picture data={picture(story.cover, lang, '(min-width: 48rem) 33vw, 100vw')} />
+              <h2>{text(story.title, lang)}</h2>
+            </a>
+            <p>
+              {story.couple}
+              {story.locationName && ` · ${story.locationName}`}
+              {story.date && ` · ${formatDate(story.date, lang)}`}
+            </p>
+          </li>
+        );
+      })
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .storie-segnaposto {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    list-style: none;
+    padding: 0;
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+// Pagina di un luogo (regione o zona). SEGNAPOSTO: testo, galleria,
+// highlights del luogo e l'elenco testuale delle location, con il
+// JSON-LD Place + ItemList. Il design si fa in fase 3.
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path, url } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LUOGO_FIELDS } from '../../lib/availability';
+import {
+  availableLangs,
+  getHighlights,
+  getLocations,
+  getRegioneDi,
+  slugLuogo,
+  text,
+} from '../../lib/content';
+import { picture } from '../../lib/images';
+import { breadcrumbs, locationItemList, luogoPlace } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import type { Luogo } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  luogo: Luogo;
+}
+
+const { lang, luogo } = Astro.props;
+const t = useTranslations(lang);
+
+const slug = slugLuogo(luogo, lang)!;
+const langs = availableLangs(luogo, LUOGO_FIELDS).filter((l) => slugLuogo(luogo, l) !== null);
+const regione = getRegioneDi(luogo);
+const venues = getLocations(luogo.id);
+const highlights = getHighlights('luogo', luogo.id);
+
+const title = text(luogo.nome, lang);
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'places',
+  slug,
+  title,
+  description: text(luogo.metaDescription, lang) || text(luogo.intro, lang),
+  seo: luogo,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: t('nav.places'), href: path('places', lang) },
+  ...(regione
+    ? [{ name: text(regione.nome, lang), href: path('places', lang, slugLuogo(regione, lang) ?? undefined) }]
+    : []),
+  { name: title, href: path('places', lang, slug) },
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="places"
+  slug={slug}
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={[
+    luogoPlace(luogo, lang, url('places', lang, slug)),
+    locationItemList(venues, lang, `Location — ${title}`),
+    breadcrumbs(crumbs),
+  ]}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
+
+  {text(luogo.intro, lang) && <p>{text(luogo.intro, lang)}</p>}
+  {text(luogo.testo, lang) && <div set:html={text(luogo.testo, lang)} />}
+
+  {luogo.cover && <Picture data={picture(luogo.cover, lang, '(min-width: 48rem) 50vw, 100vw')} />}
+
+  {
+    luogo.gallery.length > 0 && (
+      <ul class="galleria-segnaposto">
+        {luogo.gallery.map((image) => (
+          <li>
+            <Picture data={picture(image, lang, '(min-width: 48rem) 33vw, 100vw')} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    highlights.length > 0 && (
+      <>
+        <h2>Highlights</h2>
+        <ul class="galleria-segnaposto">
+          {highlights.map((highlight) => (
+            <li>
+              <Picture data={picture(highlight.image, lang, '(min-width: 48rem) 33vw, 100vw')} />
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  {
+    venues.length > 0 && (
+      <>
+        <h2>Location</h2>
+        <ul>
+          {venues.map((venue) => (
+            <li>
+              <strong>{venue.nome}</strong> ({venue.tipo})
+              {text(venue.descrizione, lang) && <span> — {text(venue.descrizione, lang)}</span>}
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .galleria-segnaposto {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    list-style: none;
+    padding: 0;
+  }
+</style>

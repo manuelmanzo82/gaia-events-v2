@@ -13,16 +13,32 @@
  */
 import BlogPage from '../../components/pages/BlogPage.astro';
 import FaqPage from '../../components/pages/FaqPage.astro';
+import PartnersPage from '../../components/pages/PartnersPage.astro';
+import PlacesPage from '../../components/pages/PlacesPage.astro';
 import PortfolioPage from '../../components/pages/PortfolioPage.astro';
 import ReviewsPage from '../../components/pages/ReviewsPage.astro';
 import ServicesPage from '../../components/pages/ServicesPage.astro';
+import StoriesPage from '../../components/pages/StoriesPage.astro';
 import { ROUTES } from '../../i18n/routes';
 import { existsIn } from '../../lib/availability';
 
-const INDEXES = ['services', 'portfolio', 'reviews', 'blog', 'faq'] as const;
+const INDEXES = [
+  'services',
+  'portfolio',
+  'reviews',
+  'blog',
+  'faq',
+  'places',
+  'stories',
+  'partners',
+] as const;
 
 export function getStaticPaths() {
-  return (['services', 'portfolio', 'reviews', 'blog', 'faq'] as const)
+  // Stesso elenco di INDEXES: getStaticPaths viene estratta dal modulo e
+  // non vede le costanti del frontmatter, quindi l'array va ripetuto.
+  return (
+    ['services', 'portfolio', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const
+  )
     .filter((key) => existsIn(key, 'en'))
     .map((key) => ({ params: { section: ROUTES[key].en }, props: { key } }));
 }
@@ -39,3 +55,6 @@ const { key } = Astro.props as Props;
 {key === 'reviews' && <ReviewsPage lang="en" />}
 {key === 'blog' && <BlogPage lang="en" />}
 {key === 'faq' && <FaqPage lang="en" />}
+{key === 'places' && <PlacesPage lang="en" />}
+{key === 'stories' && <StoriesPage lang="en" />}
+{key === 'partners' && <PartnersPage lang="en" />}

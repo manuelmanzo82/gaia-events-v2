@@ -1,0 +1,25 @@
+---
+// Lo slug delle storie è tradotto: /storie/titolo-it ↔ /en/stories/title-en
+import StoryDetail from '../../components/pages/StoryDetail.astro';
+import { getStories, isPublishable, pick } from '../../lib/content';
+import { STORY_FIELDS } from '../../lib/availability';
+import type { Story } from '../../lib/types';
+
+export function getStaticPaths() {
+  return getStories()
+    .filter((story) => isPublishable(story, 'it', STORY_FIELDS))
+    .map((story) => ({
+      params: { slug: pick(story.slug, 'it')! },
+      props: { story },
+    }));
+}
+
+interface Props {
+  story: Story;
+}
+
+const { story } = Astro.props as Props;
+const slug = Astro.params.slug!;
+---
+
+<StoryDetail lang="it" story={story} slug={slug} />

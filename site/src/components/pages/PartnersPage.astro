@@ -1,0 +1,62 @@
+---
+// Pagina Partner: qui vivono i crediti (mai sotto le foto). SEGNAPOSTO.
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { langsFor } from '../../lib/availability';
+import { getPartners, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { breadcrumbs, partnerOrganization } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const langs = langsFor('partners');
+const partners = getPartners();
+
+const title = t('nav.partners');
+const meta = buildMeta({ lang, routeKey: 'partners', title, availableLangs: langs });
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('partners', lang) },
+];
+---
+
+<BaseLayout
+  lang={lang}
+  routeKey="partners"
+  meta={meta}
+  availableLangs={langs}
+  jsonLd={[...partners.map((partner) => partnerOrganization(partner, lang)), breadcrumbs(crumbs)]}
+  crumbs={crumbs}
+>
+  <h1>{title}</h1>
+  <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
+
+  {partners.length === 0 && <p>{t('common.empty')}</p>}
+
+  <ul>
+    {
+      partners.map((partner) => (
+        <li>
+          {partner.logo && <Picture data={picture(partner.logo, lang, '120px')} />}
+          <strong>{partner.name}</strong> ({partner.category})
+          {text(partner.description, lang) && <p>{text(partner.description, lang)}</p>}
+          {partner.website && (
+            <a href={partner.website} rel="noopener" target="_blank">
+              {partner.website}
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>

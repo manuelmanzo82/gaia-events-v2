@@ -1,0 +1,24 @@
+---
+// Versione inglese dei luoghi, con gli slug tradotti (lazio/rome).
+import PlaceDetail from '../../../components/pages/PlaceDetail.astro';
+import { getLuoghiFlat, isPublishable, slugLuogo } from '../../../lib/content';
+import { LUOGO_FIELDS } from '../../../lib/availability';
+import type { Luogo } from '../../../lib/types';
+
+export function getStaticPaths() {
+  return getLuoghiFlat()
+    .filter((luogo) => isPublishable(luogo, 'en', LUOGO_FIELDS))
+    .flatMap((luogo) => {
+      const slug = slugLuogo(luogo, 'en');
+      return slug ? [{ params: { slug }, props: { luogo } }] : [];
+    });
+}
+
+interface Props {
+  luogo: Luogo;
+}
+
+const { luogo } = Astro.props as Props;
+---
+
+<PlaceDetail lang="en" luogo={luogo} />

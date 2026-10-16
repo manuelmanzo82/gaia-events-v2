@@ -1,0 +1,68 @@
+---
+// Indice dei luoghi: regioni con le zone. Pagina SEGNAPOSTO: dimostra che
+// i dati arrivano; il design si fa in fase 3.
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LUOGO_FIELDS, langsFor } from '../../lib/availability';
+import { getLuoghi, isPublishable, slugLuogo, text } from '../../lib/content';
+import { breadcrumbs } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const langs = langsFor('places');
+const regioni = getLuoghi().filter((regione) => isPublishable(regione, lang, LUOGO_FIELDS));
+
+const title = t('nav.places');
+const meta = buildMeta({ lang, routeKey: 'places', title, availableLangs: langs });
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path('places', lang) },
+];
+---
+
+<BaseLayout lang={lang} routeKey="places" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} crumbs={crumbs}>
+  <h1>{title}</h1>
+  <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
+
+  {regioni.length === 0 && <p>{t('common.empty')}</p>}
+
+  <ul>
+    {
+      regioni.map((regione) => {
+        const slug = slugLuogo(regione, lang);
+        const zone = (regione.zone ?? []).filter((zona) => isPublishable(zona, lang, LUOGO_FIELDS));
+        return (
+          <li>
+            {slug ? <a href={path('places', lang, slug)}>{text(regione.nome, lang)}</a> : text(regione.nome, lang)}
+            {zone.length > 0 && (
+              <ul>
+                {zone.map((zona) => {
+                  const slugZona = slugLuogo(zona, lang);
+                  return (
+                    <li>
+                      {slugZona ? (
+                        <a href={path('places', lang, slugZona)}>{text(zona.nome, lang)}</a>
+                      ) : (
+                        text(zona.nome, lang)
+                      )}
+                      {text(zona.intro, lang) && <p>{text(zona.intro, lang)}</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+</BaseLayout>
