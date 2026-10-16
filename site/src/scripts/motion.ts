@@ -25,10 +25,18 @@ export function riduciMotion(): boolean {
 }
 
 /** Avvia Lenis e lo aggancia al ticker di GSAP. */
+let lenisAttivo: Lenis | null = null;
+
+/** L'istanza di Lenis della pagina, se lo scroll morbido è acceso. */
+export function getLenis(): Lenis | null {
+  return lenisAttivo;
+}
+
 export function initLenis(): Lenis | null {
   if (riduciMotion()) return null;
 
   const lenis = new Lenis({ duration: 1.15 });
+  lenisAttivo = lenis;
 
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => {

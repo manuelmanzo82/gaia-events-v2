@@ -71,6 +71,7 @@ export const UI = {
   'form.required': { it: 'Campo obbligatorio', en: 'Required field' },
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
+  'nav.backToTop': { it: 'Torna su', en: 'Back to top' },
   'footer.contacts': { it: 'Contatti', en: 'Contact' },
   'footer.explore': { it: 'Esplora', en: 'Explore' },
   'footer.social': { it: 'Seguici', en: 'Follow' },

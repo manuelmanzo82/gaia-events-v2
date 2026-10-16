@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import IntroVelo from '../components/IntroVelo.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Seo from '../components/Seo.astro';
+import TornaSu from '../components/TornaSu.astro';
 import type { Crumb } from '../lib/jsonld';
 
 interface Props {
@@ -115,6 +116,8 @@ const t = useTranslations(lang);
     </main>
 
     <Footer lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
+
+    <TornaSu lang={lang} />
 
     <script>
       import { initMotion } from '../scripts/motion';
