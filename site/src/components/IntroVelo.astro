@@ -18,6 +18,12 @@
  * inchiostro. Regole: solo prima visita della sessione (sessionStorage),
  * saltabile con clic/tasto, spenta con prefers-reduced-motion, overlay che
  * non blocca il rendering dell'hero sottostante (LCP compreso).
+ *
+ * RICHIEDE lo snippet inline nel <head> della pagina (vedi styleguide.astro,
+ * da spostare in BaseLayout quando l'intro andrà sulla home): decide prima
+ * del primo paint se il velo è visibile, mettendo la classe con-intro su
+ * <html>. Lì vive anche il flag INTRO_SEMPRE della modalità testing.
+ * Senza snippet il velo resta nascosto e viene rimosso dal DOM.
  */
 import type { Lang } from '../config/site';
 import LogoGaia from './LogoGaia.astro';
@@ -43,27 +49,6 @@ const SOTTORIGA = 'Italia · Destination Weddings';
   </div>
 </div>
 
-{/* Inline e subito dopo il velo: decide PRIMA del primo paint se mostrarlo,
-    così chi l'ha già visto non vede neanche un frame di velo. */}
-<script is:inline>
-  (() => {
-    var velo = document.getElementById('intro-velo');
-    if (!velo) return;
-    var vista = false;
-    try {
-      vista = sessionStorage.getItem('gaia-intro-vista') === '1';
-    } catch (e) {
-      /* storage bloccato: l'intro parte, ma senza memoria */
-    }
-    var riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (vista || riduci) {
-      velo.remove();
-      return;
-    }
-    velo.setAttribute('data-attivo', '');
-  })();
-</script>
-
 <script>
   import { gsap } from 'gsap';
 
@@ -77,8 +62,9 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     }
   }
 
-  if (velo && !velo.hasAttribute('data-attivo')) {
-    // L'inline script non l'ha attivato (e non l'ha rimosso): via subito.
+  if (velo && !document.documentElement.classList.contains('con-intro')) {
+    // Lo snippet in <head> non l'ha attivata (già vista, reduced-motion o
+    // snippet assente): il velo è già nascosto dal CSS, via dal DOM.
     velo.remove();
   } else if (velo) {
     const fine = (): void => {
@@ -220,7 +206,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     will-change: transform;
   }
 
-  #intro-velo[data-attivo] {
+  /* Lo stato iniziale lo decide lo snippet in <head> PRIMA del primo paint
+     (classe con-intro su <html>): niente lampo del velo quando non deve
+     apparire, né della pagina quando deve. */
+  :global(html.con-intro) #intro-velo {
     display: grid;
   }
 
@@ -234,15 +223,15 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 
   /* Stati iniziali: nel CSS (non in GSAP) così non c'è nessun frame col
      logo già completo prima che la timeline parta. */
-  #intro-velo[data-attivo] :global(.logo-ghirigoro) {
+  #intro-velo :global(.logo-ghirigoro) {
     opacity: 0;
   }
 
-  #intro-velo[data-attivo] :global(.logo-lettera) {
+  #intro-velo :global(.logo-lettera) {
     opacity: 0;
   }
 
-  #intro-velo[data-attivo] :global(.logo-firma) {
+  #intro-velo :global(.logo-firma) {
     opacity: 0;
   }
 

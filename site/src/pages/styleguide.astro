@@ -34,6 +34,31 @@ const PALETTE_NOTTE = [
 <html lang="it">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      /**
+       * Decide PRIMA del primo paint se l'intro parte, mettendo una classe
+       * su <html>: il CSS del velo parte da lì, quindi nessun lampo né del
+       * velo quando non deve apparire, né della pagina quando deve.
+       * Va PRIMA dei fogli di stile, come primo elemento di <head>.
+       * (Quando l'intro andrà sulla home, questo snippet passa in BaseLayout.)
+       *
+       * INTRO_SEMPRE: modalità testing — l'intro parte a OGNI caricamento.
+       * Per il lancio rimetterla a false: torna "una volta per sessione".
+       */
+      (() => {
+        var INTRO_SEMPRE = true;
+        var vista = false;
+        try {
+          vista = sessionStorage.getItem('gaia-intro-vista') === '1';
+        } catch (e) {
+          /* storage bloccato: l'intro parte, ma senza memoria */
+        }
+        var riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if ((INTRO_SEMPRE || !vista) && !riduci) {
+          document.documentElement.classList.add('con-intro');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Gaia Events — Styleguide</title>
