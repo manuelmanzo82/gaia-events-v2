@@ -480,19 +480,21 @@ Fatto:
   Nessun matrimonio compare sul sito: niente raggruppamento per coppia.
 
 - **Fase 3 — home completa IT/EN** (16/10, rivista lo stesso giorno):
-  header **senza barra** stile Haywood (`Header.astro`: trasparente in
-  cima, colore dalla sezione sotto via `theme-observer`, si nasconde
-  scorrendo in giù e riappare compatto con fondo pieno avorio/notte in
-  su; menu corto, il resto nel footer), snippet intro in `BaseLayout`
+  header **senza barra** (`Header.astro`: sempre visibile, mai uno sfondo
+  dietro, colore dalla sezione sotto via `theme-observer`, ombra testuale
+  morbida sopra le sezioni con `data-foto`, logo che scende da 130 a
+  64 px allo scroll; menu corto, il resto nel footer), torna-su in basso a
+  destra (`TornaSu.astro`, usa `getLenis()`), snippet intro in `BaseLayout`
   (`INTRO_SEMPRE` ancora `true`), footer su notte (`Footer.astro`: logo,
   tagline, Contatti/Esplora/Seguici/Preventivo, riga legale con
   `settings.legal.piva`), e le sezioni in `site/src/components/home/`:
   hero (foto di `page_hero` in dissolvenza CSS, video desktop
   predisposto), **Gaia** (`GaiaIntro`: highlight «chi-sono» n.1 grande +
   titolo + manifesto come citazione + presentazione breve), highlights
-  (schede impilate a tutta foto: solo orizzontali con `maxWidth ≥
-  LIMITE_SCHEDA` di `lib/home.ts`, max 5; tutte le altre nella fascia
-  orizzontale agganciata), luoghi (nascosta finché non ci sono luoghi),
+  (schede impilate alla Haywood, 16:9 con il titolo bilingue
+  dell'highlight sulla foto — campo `title_it/en`, senza = alt accorciato;
+  solo orizzontali con `maxWidth ≥ LIMITE_SCHEDA` di `lib/home.ts`, max 5;
+  tutte le altre nella fascia orizzontale agganciata), luoghi (nascosta finché non ci sono luoghi),
   servizi in sticky split (foto del servizio, ripiego = highlights sezione
   «servizi»), recensione (nascosta finché non ce n'è una vera),
   destination a tutta larghezza (highlight sezione «destination» + velo),
@@ -509,6 +511,10 @@ Fatto:
   build locale, che usa l'URL di produzione, è 100. Misurato con
   `lighthouse@12` nello scratchpad e `CHROME_PATH` sul Chromium di
   Playwright (mai chrome.exe), header di basic auth via `--extra-headers`.
+- La dissolvenza dell'hero parte solo a intro finita (evento
+  `gaia:intro-fine` da `IntroVelo`): altrimenti uscendo dal velo si vedeva
+  già la seconda foto a metà crossfade, diversa da quella che si ritrova
+  tornando in cima.
 - **Cose imparate in fase 3**: Chrome **esclude dall'LCP un'immagine che
   riempie tutto il viewport** (la considera sfondo), quindi l'LCP della
   home è il titolo dell'hero e dipende dall'arrivo del font: il preload
