@@ -1,0 +1,60 @@
+---
+/**
+ * Una recensione grande su fondo scuro. SOLO con almeno una recensione
+ * attiva e pubblicabile in questa lingua: oggi non ce ne sono (quelle di
+ * Sanity erano demo), quindi la sezione non appare.
+ */
+import type { Lang } from '../../config/site';
+import { REVIEW_FIELDS } from '../../lib/availability';
+import { getFeaturedReviews, getReviews, isPublishable, text } from '../../lib/content';
+
+interface Props {
+  lang: Lang;
+  eyebrow?: string;
+}
+
+const { lang, eyebrow } = Astro.props;
+
+// In evidenza se c'è, altrimenti la prima attiva: ma sempre e solo vere.
+const candidate = [...getFeaturedReviews(), ...getReviews()].filter((r) =>
+  isPublishable(r, lang, REVIEW_FIELDS),
+);
+const recensione = candidate[0] ?? null;
+---
+
+{
+  recensione && (
+    <section class="recensione" data-theme="dark">
+      <div class="container-gaia recensione-interno">
+        {eyebrow && (
+          <p class="eyebrow" data-reveal="alto">
+            {eyebrow}
+          </p>
+        )}
+        <blockquote class="font-display text-display recensione-testo" data-reveal="righe">
+          «{text(recensione.text, lang)}»
+        </blockquote>
+        <p class="didascalia" data-reveal="alto">
+          {recensione.author}
+          {text(recensione.eventName, lang) && <span> · {text(recensione.eventName, lang)}</span>}
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .recensione {
+    padding-block: var(--spacing-section);
+    text-align: center;
+  }
+
+  .recensione-interno .eyebrow {
+    justify-content: center;
+  }
+
+  .recensione-testo {
+    max-width: 56rem;
+    margin: 1.5rem auto;
+  }
+</style>
