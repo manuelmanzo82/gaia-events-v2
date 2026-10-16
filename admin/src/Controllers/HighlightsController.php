@@ -19,6 +19,7 @@ final class HighlightsController extends ResourceController
         'servizi' => 'Servizi',
         'destination' => 'Destination wedding',
         'luogo' => 'Pagina del luogo collegato',
+        'cta' => 'CTA finale della home (foto accanto al testo)',
     ];
 
     protected function table(): string

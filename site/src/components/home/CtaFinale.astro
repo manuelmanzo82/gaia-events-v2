@@ -1,14 +1,18 @@
 ---
 /**
- * CTA finale: chiusura scura in bordeaux profondo verso il preventivatore
- * (o i contatti, se il preventivo non esiste in questa lingua). Testi da
- * settings.sections.cta.
+ * CTA finale su fondo chiaro: tipografia grande, una foto verticale
+ * accanto (il primo highlight della sezione «cta») e il bottone in
+ * bordeaux pieno come unico accento. Testi da settings.sections.cta;
+ * destinazione il preventivatore, o i contatti se in questa lingua il
+ * preventivo non esiste.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import { existsIn } from '../../lib/availability';
-import { text, type Settings } from '../../lib/content';
+import { getHighlights, text, type Settings } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
 
 interface Props {
   lang: Lang;
@@ -24,25 +28,37 @@ const testo = text(sezione?.text, lang);
 
 const destinazione = existsIn('quote', lang) ? 'quote' : existsIn('contact', lang) ? 'contact' : null;
 const etichetta = destinazione === 'quote' ? t('cta.quote') : t('cta.contact');
+
+const foto = picture(getHighlights('cta')[0]?.image ?? null, lang, '(min-width: 64rem) 36vw, 92vw');
 ---
 
 {
   titolo && destinazione && (
-    <section id="cta" class="cta-finale" data-theme="dark" data-tinta="bordeaux">
-      <div class="container-gaia cta-interno">
-        <h2 class="text-display-xl cta-titolo" data-reveal="righe">
-          {titolo}
-        </h2>
-        {testo && (
-          <p class="text-lead text-velato cta-testo" data-reveal="alto">
-            {testo}
+    <section id="cta" class="cta-finale" data-theme="light">
+      <div class="container-gaia cta-griglia">
+        <div class="cta-testo">
+          <h2 class="text-display-xl cta-titolo" data-reveal="righe">
+            {titolo}
+          </h2>
+          {testo && (
+            <p class="text-lead cta-paragrafo" data-reveal="alto">
+              {testo}
+            </p>
+          )}
+          <p class="cta-coda" data-reveal="alto">
+            <a class="btn btn--pieno" href={path(destinazione, lang)}>
+              {etichetta}
+            </a>
           </p>
-        )}
-        <p class="cta-coda" data-reveal="alto">
-          <a class="btn" href={path(destinazione, lang)}>
-            {etichetta}
-          </a>
-        </p>
+        </div>
+
+        {
+          foto && (
+            <figure class="cta-figura" data-reveal="maschera">
+              <Picture data={foto} class="cta-img" />
+            </figure>
+          )
+        }
       </div>
     </section>
   )
@@ -51,20 +67,51 @@ const etichetta = destinazione === 'quote' ? t('cta.quote') : t('cta.contact');
 <style>
   .cta-finale {
     padding-block: var(--spacing-section);
-    text-align: center;
+    background: color-mix(in srgb, var(--color-beige) 38%, var(--color-avorio));
+  }
+
+  .cta-griglia {
+    display: grid;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
   }
 
   .cta-titolo {
-    max-width: 18ch;
-    margin: 0 auto;
+    max-width: 14ch;
+    margin: 0;
   }
 
-  .cta-testo {
-    max-width: 36rem;
-    margin: 1.75rem auto 0;
+  .cta-paragrafo {
+    max-width: 30rem;
+    margin: 1.75rem 0 0;
+    color: var(--color-grigio-caldo);
   }
 
   .cta-coda {
-    margin: 2.75rem 0 0;
+    margin: 2.5rem 0 0;
+  }
+
+  .cta-figura {
+    margin: 0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .cta-figura :global(.cta-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 64rem) {
+    .cta-griglia {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+
+    .cta-figura {
+      justify-self: end;
+      max-width: 26rem;
+    }
   }
 </style>

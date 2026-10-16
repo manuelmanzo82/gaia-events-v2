@@ -59,6 +59,8 @@ export interface Settings extends SeoFields {
   sections: Record<string, { title: Localized; text: Localized }>;
   /** Manifesto della home: una frase grande sotto l'hero, con la firma. */
   home: { manifesto: Localized; manifestoFirma: Localized };
+  /** Dati legali per il footer: la P.IVA e' obbligatoria sui siti aziendali italiani. */
+  legal: { piva: Localized };
   about: { title: Localized; text: Localized; image: Image | null };
   contact: { title: Localized; text: Localized; address: Localized };
 }
@@ -242,7 +244,7 @@ export interface LocationVenue {
   order: number;
 }
 
-export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' | 'luogo';
+export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' | 'luogo' | 'cta';
 
 /** Foto singola scelta da Gaia. L'alt vive sull'immagine (media). */
 export interface Highlight {

@@ -510,7 +510,7 @@ CREATE TABLE IF NOT EXISTS `highlights` (
 CREATE TABLE IF NOT EXISTS `highlight_sections` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `highlight_id` INT UNSIGNED NOT NULL,
-  `section`      ENUM('home','chi-sono','servizi','destination','luogo') NOT NULL,
+  `section`      ENUM('home','chi-sono','servizi','destination','luogo','cta') NOT NULL,
   `sort_order`   SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_highlight_sections` (`highlight_id`, `section`),
