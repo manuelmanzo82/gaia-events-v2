@@ -492,8 +492,12 @@ Fatto:
   solo ≥64rem, spenti con reduced-motion; sotto, scroll naturale e
   carosello a scroll-snap. Tutti i testi dal back office; in EN i servizi
   e Chi sono usano le traduzioni in bozza (docs/DA-CHIEDERE-A-GAIA.md).
-  Lighthouse sul build locale: mobile 99/96/100/100, desktop
-  100/96/100/100, CLS 0, LCP mobile ~1,9 s.
+  Lighthouse **sullo staging** (16/10, due misure per preset): mobile
+  100/100/100, LCP 1,65–1,74 s, CLS 0; desktop 100/100/100, LCP 0,58 s,
+  CLS 0,014. SEO lì vale 61 solo per il `noindex` dello staging: sul
+  build locale, che usa l'URL di produzione, è 100. Misurato con
+  `lighthouse@12` nello scratchpad e `CHROME_PATH` sul Chromium di
+  Playwright (mai chrome.exe), header di basic auth via `--extra-headers`.
 - **Cose imparate in fase 3**: Chrome **esclude dall'LCP un'immagine che
   riempie tutto il viewport** (la considera sfondo), quindi l'LCP della
   home è il titolo dell'hero e dipende dall'arrivo del font: il preload
@@ -505,7 +509,16 @@ Fatto:
   `aria: 'none'` (altrimenti mette `aria-label` sui `<p>`, vietato).
   L'HTML della home pesa ~150 KB non compressi: il logo SVG tracciato sta
   inline due volte (header + velo, ~30 KB l'uno), da alleggerire quando
-  arriverà il vettoriale ufficiale.
+  arriverà il vettoriale ufficiale. Il cambio font spostava il layout
+  (CLS 0,05): in `fonts.css` ci sono le facce **Fallback** a metriche
+  compatibili (`size-adjust`, `ascent/descent/line-gap-override`,
+  calcolate con fontTools: vanno ricalcolate se cambiano i font) e la
+  scena del velo ha larghezza fissa. Il deploy da push può fallire per un
+  errore TLS transitorio di IONOS sull'export: `gh run rerun` richiede
+  diritti admin e un commit vuoto non fa partire il workflow (nessun file
+  cambiato), quindi si rilancia con un `workflow_dispatch` sul ramo
+  giusto — il «Pubblica» dello staging punta a `main`, non a
+  `design/home`.
 
 Prossimi passi (fase 3, resta):
 - Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
