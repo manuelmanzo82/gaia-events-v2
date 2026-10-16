@@ -133,6 +133,7 @@ export function getSettings(): Settings {
     hero: { eyebrow: {}, title: {}, subtitle: {}, image: null, ctaLabel: {} },
     sections: {},
     home: { manifesto: {}, manifestoFirma: {} },
+    legal: { piva: {} },
     about: { title: {}, text: {}, image: null },
     contact: { title: {}, text: {}, address: {} },
   });

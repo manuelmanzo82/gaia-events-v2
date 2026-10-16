@@ -68,6 +68,13 @@ solo nei `sameAs` del JSON-LD. Se è attiva e Gaia la usa, va messa anche nel pi
 di pagina accanto a Instagram; se è abbandonata, meglio toglierla del tutto —
 un profilo morto linkato dal sito fa più danno che altro.
 
+### 7. Partita IVA
+
+Sui siti delle attività italiane la P.IVA è obbligatoria (art. 35 DPR
+633/72). Il footer ha la riga legale pronta con l'impostazione
+`legal.piva` (Impostazioni → generale): finché è vuota il sito mostra il
+segnaposto «[P.IVA da Gaia]». Serve il numero.
+
 ### 6. Un'email sul dominio?
 
 Oggi è `gaiacrognale@gmail.com`. La v1 usava anche `info@gaiaevents.it` nelle

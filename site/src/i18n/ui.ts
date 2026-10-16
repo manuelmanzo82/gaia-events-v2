@@ -71,6 +71,11 @@ export const UI = {
   'form.required': { it: 'Campo obbligatorio', en: 'Required field' },
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
+  'footer.contacts': { it: 'Contatti', en: 'Contact' },
+  'footer.explore': { it: 'Esplora', en: 'Explore' },
+  'footer.social': { it: 'Seguici', en: 'Follow' },
+  'footer.vat': { it: 'P.IVA', en: 'VAT no.' },
+  'footer.vatMissing': { it: '[P.IVA da Gaia]', en: '[VAT number from Gaia]' },
   'footer.rights': { it: 'Tutti i diritti riservati', en: 'All rights reserved' },
   'footer.privacy': { it: 'Privacy policy', en: 'Privacy policy' },
   'footer.cookie': { it: 'Cookie policy', en: 'Cookie policy' },

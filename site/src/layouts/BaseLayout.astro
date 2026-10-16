@@ -114,7 +114,7 @@ const t = useTranslations(lang);
       <slot />
     </main>
 
-    <Footer lang={lang} />
+    <Footer lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
 
     <script>
       import { initMotion } from '../scripts/motion';

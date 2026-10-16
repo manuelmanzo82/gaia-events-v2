@@ -269,6 +269,7 @@ final class Exporter
             ],
             'sections' => [],
             'home' => ['manifesto' => self::emptyText(), 'manifestoFirma' => self::emptyText()],
+            'legal' => ['piva' => self::emptyText()],
             'about' => ['title' => self::emptyText(), 'text' => self::emptyText(), 'image' => null],
             'contact' => [
                 'title' => self::emptyText(),
