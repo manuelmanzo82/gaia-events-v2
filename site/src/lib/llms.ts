@@ -5,6 +5,8 @@ import {
   getDestinationWedding,
   getEvents,
   getFaqs,
+  getLocations,
+  getLuoghi,
   getPage,
   getPosts,
   getReviews,
@@ -12,8 +14,10 @@ import {
   getSettings,
   isPublishable,
   pick,
+  slugLuogo,
   text,
 } from './content';
+import type { Luogo } from './types';
 
 /**
  * llms.txt e llms-full.txt generati dai contenuti del back office,
@@ -86,6 +90,23 @@ export function llmsTxt(): string {
     lines.push('');
   }
 
+  const luoghi = getLuoghi();
+  if (luoghi.length > 0) {
+    lines.push('## Luoghi', '');
+    for (const regione of luoghi) {
+      lines.push(`- [${text(regione.nome, lang)}](${urlLuogo(regione)})`);
+      for (const zona of regione.zone ?? []) {
+        const venues = getLocations(zona.id)
+          .map((venue) => `${venue.nome} (${venue.tipo})`)
+          .join(', ');
+        lines.push(
+          `  - [${text(zona.nome, lang)}](${urlLuogo(zona)})${venues ? `: location — ${venues}` : ''}`,
+        );
+      }
+    }
+    lines.push('');
+  }
+
   const posts = getPosts();
   if (posts.length > 0) {
     lines.push('## Blog', '');
@@ -98,6 +119,11 @@ export function llmsTxt(): string {
   }
 
   return lines.join('\n');
+}
+
+/** URL italiano di un luogo (slug composto regione/zona). */
+function urlLuogo(luogo: Luogo): string {
+  return url('places', lang, slugLuogo(luogo, lang) ?? undefined);
 }
 
 /** Versione estesa: testo completo, per chi legge l'intero sito in un file. */
@@ -140,6 +166,27 @@ export function llmsFullTxt(): string {
         stripHtml(text(event.description, lang)),
         '',
       );
+    }
+  }
+
+  const luoghi = getLuoghi();
+  if (luoghi.length > 0) {
+    lines.push('## Luoghi e location', '');
+    for (const regione of luoghi) {
+      for (const luogo of [regione, ...(regione.zone ?? [])]) {
+        lines.push(`### ${text(luogo.nome, lang)}`, '', `URL: ${urlLuogo(luogo)}`, '');
+        if (text(luogo.testo, lang)) lines.push(stripHtml(text(luogo.testo, lang)), '');
+
+        const venues = getLocations(luogo.id);
+        if (venues.length > 0) {
+          lines.push('Location:');
+          for (const venue of venues) {
+            const descrizione = text(venue.descrizione, lang);
+            lines.push(`- ${venue.nome} (${venue.tipo})${descrizione ? `: ${descrizione}` : ''}`);
+          }
+          lines.push('');
+        }
+      }
     }
   }
 

@@ -2,8 +2,18 @@ import type { APIRoute } from 'astro';
 import { DEFAULT_LANG, IS_STAGING, LANGS, type Lang } from '../config/site';
 import { HTML_LANG } from '../i18n';
 import { url, type RouteKey } from '../i18n/routes';
-import { EVENT_FIELDS, POST_FIELDS, langsFor } from '../lib/availability';
-import { availableLangs, getEvents, getPage, getPosts, isPublishable, pick } from '../lib/content';
+import { EVENT_FIELDS, LUOGO_FIELDS, POST_FIELDS, STORY_FIELDS, langsFor } from '../lib/availability';
+import {
+  availableLangs,
+  getEvents,
+  getLuoghiFlat,
+  getPage,
+  getPosts,
+  getStories,
+  isPublishable,
+  pick,
+  slugLuogo,
+} from '../lib/content';
 
 /**
  * Sitemap scritta a mano invece di @astrojs/sitemap.
@@ -38,6 +48,9 @@ const STATIC_KEYS: RouteKey[] = [
   'destinationWedding',
   'privacy',
   'cookie',
+  'places',
+  'stories',
+  'partners',
 ];
 
 function entries(): Entry[] {
@@ -67,7 +80,50 @@ function entries(): Entry[] {
     }
   }
 
+  // Storie: slug bilingue come i post, un URL per lingua pubblicabile.
+  for (const story of getStories()) {
+    for (const lang of availableLangs(story, STORY_FIELDS)) {
+      const slug = pick(story.slug, lang);
+      if (!slug) continue;
+      list.push({ key: 'stories', slug, langs: [lang], lastmod: story.date ?? undefined });
+    }
+  }
+
+  // Luoghi: slug composto regione/zona, tradotto per lingua.
+  for (const luogo of getLuoghiFlat()) {
+    for (const lang of availableLangs(luogo, LUOGO_FIELDS)) {
+      const slug = slugLuogo(luogo, lang);
+      if (!slug) continue;
+      list.push({ key: 'places', slug, langs: [lang] });
+    }
+  }
+
   return list;
+}
+
+/** Alternate di una storia: come i post, gli slug vanno ricalcolati. */
+function storyAlternates(slug: string): Array<{ lang: Lang; href: string }> {
+  const story = getStories().find((candidate) =>
+    LANGS.some((lang) => pick(candidate.slug, lang) === slug),
+  );
+  if (!story) return [];
+
+  return LANGS.filter((lang) => isPublishable(story, lang, STORY_FIELDS))
+    .map((lang) => ({ lang, href: url('stories', lang, pick(story.slug, lang)!) }));
+}
+
+/** Alternate di un luogo: lo slug composto va ricalcolato per lingua. */
+function luogoAlternates(slug: string): Array<{ lang: Lang; href: string }> {
+  const luogo = getLuoghiFlat().find((candidate) =>
+    LANGS.some((lang) => slugLuogo(candidate, lang) === slug),
+  );
+  if (!luogo) return [];
+
+  return LANGS.filter((lang) => isPublishable(luogo, lang, LUOGO_FIELDS))
+    .flatMap((lang) => {
+      const tradotto = slugLuogo(luogo, lang);
+      return tradotto ? [{ lang, href: url('places', lang, tradotto) }] : [];
+    });
 }
 
 /** Alternate di un articolo: gli slug sono diversi, quindi vanno ricalcolati. */
@@ -106,10 +162,16 @@ export const GET: APIRoute = () => {
   ];
 
   for (const entry of entries()) {
-    const alternates =
-      entry.key === 'blog' && entry.slug
-        ? postAlternates(entry.slug)
-        : entry.langs.map((lang) => ({ lang, href: url(entry.key, lang, entry.slug) }));
+    let alternates: Array<{ lang: Lang; href: string }>;
+    if (entry.key === 'blog' && entry.slug) {
+      alternates = postAlternates(entry.slug);
+    } else if (entry.key === 'stories' && entry.slug) {
+      alternates = storyAlternates(entry.slug);
+    } else if (entry.key === 'places' && entry.slug) {
+      alternates = luogoAlternates(entry.slug);
+    } else {
+      alternates = entry.langs.map((lang) => ({ lang, href: url(entry.key, lang, entry.slug) }));
+    }
 
     for (const lang of entry.langs) {
       const loc = url(entry.key, lang, entry.slug);

@@ -3,7 +3,18 @@ import { HTML_LANG } from '../i18n';
 import { path, url } from '../i18n/routes';
 import { text } from './content';
 import { imageAbsoluteUrl } from './images';
-import type { Event, Faq, Image, Post, Review, Service } from './types';
+import type {
+  Event,
+  Faq,
+  Image,
+  LocationVenue,
+  Luogo,
+  Partner,
+  Post,
+  Review,
+  Service,
+  Story,
+} from './types';
 
 /**
  * Helper JSON-LD. Ogni funzione restituisce un oggetto schema.org pronto
@@ -195,3 +206,96 @@ export function breadcrumbs(crumbs: Crumb[]): Thing | null {
 }
 
 export type { Image };
+
+/* ------------------------------------------------------------------ *
+ * Fase 2: luoghi (Place + ItemList di location), storie (Article),
+ * partner (Organization)
+ * ------------------------------------------------------------------ */
+
+/** Tipo schema.org di una location, dal suo tipo nel back office. */
+const LOCATION_SCHEMA_TYPE: Record<LocationVenue['tipo'], string> = {
+  villa: 'Place',
+  castello: 'LandmarksOrHistoricalBuildings',
+  chiesa: 'Church',
+  terrazza: 'Place',
+  tenuta: 'Place',
+  hotel: 'Hotel',
+  ristorante: 'Restaurant',
+  altro: 'Place',
+};
+
+/** La pagina di un luogo come Place. `pageUrl` arriva da url('places', …). */
+export function luogoPlace(luogo: Luogo, lang: Lang, pageUrl: string): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: text(luogo.nome, lang),
+    description: text(luogo.intro, lang) || undefined,
+    url: pageUrl,
+    photo: imageAbsoluteUrl(luogo.cover, SITE_URL) ?? undefined,
+    address: { '@type': 'PostalAddress', addressCountry: 'IT' },
+    inLanguage: HTML_LANG[lang],
+  };
+}
+
+/**
+ * Le location di un luogo come elenco leggibile dalle macchine:
+ * ItemList di Place/Church/Hotel/Restaurant a seconda del tipo.
+ */
+export function locationItemList(
+  venues: LocationVenue[],
+  lang: Lang,
+  listName: string,
+): Thing | null {
+  if (venues.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: listName,
+    numberOfItems: venues.length,
+    itemListElement: venues.map((venue, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': LOCATION_SCHEMA_TYPE[venue.tipo],
+        name: venue.nome,
+        description: text(venue.descrizione, lang) || undefined,
+        url: venue.website || undefined,
+        address: { '@type': 'PostalAddress', addressCountry: 'IT' },
+      },
+    })),
+  };
+}
+
+/**
+ * Una storia come Article, non Event: è il racconto di un matrimonio
+ * privato già avvenuto, non un evento pubblico con date e biglietti.
+ */
+export function storyArticle(story: Story, lang: Lang, slug: string): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: text(story.title, lang),
+    datePublished: story.date ?? undefined,
+    image: imageAbsoluteUrl(story.cover, SITE_URL) ?? undefined,
+    author: businessRef,
+    publisher: businessRef,
+    about: story.locationName
+      ? { '@type': 'Place', name: story.locationName, address: { '@type': 'PostalAddress', addressCountry: 'IT' } }
+      : undefined,
+    url: url('stories', lang, slug),
+    inLanguage: HTML_LANG[lang],
+  };
+}
+
+export function partnerOrganization(partner: Partner, lang: Lang): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: partner.name,
+    description: text(partner.description, lang) || undefined,
+    url: partner.website || undefined,
+    logo: imageAbsoluteUrl(partner.logo, SITE_URL) ?? undefined,
+  };
+}
