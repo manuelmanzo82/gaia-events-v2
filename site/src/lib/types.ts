@@ -57,6 +57,8 @@ export interface Settings extends SeoFields {
   };
   /** Introduzione di ogni sezione della home, indicizzata per chiave. */
   sections: Record<string, { title: Localized; text: Localized }>;
+  /** Manifesto della home: una frase grande sotto l'hero, con la firma. */
+  home: { manifesto: Localized; manifestoFirma: Localized };
   about: { title: Localized; text: Localized; image: Image | null };
   contact: { title: Localized; text: Localized; address: Localized };
 }

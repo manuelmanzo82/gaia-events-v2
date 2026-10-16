@@ -268,6 +268,7 @@ final class Exporter
                 'ctaLabel' => self::emptyText(),
             ],
             'sections' => [],
+            'home' => ['manifesto' => self::emptyText(), 'manifestoFirma' => self::emptyText()],
             'about' => ['title' => self::emptyText(), 'text' => self::emptyText(), 'image' => null],
             'contact' => [
                 'title' => self::emptyText(),

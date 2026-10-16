@@ -132,6 +132,7 @@ export function getSettings(): Settings {
     tagline: {},
     hero: { eyebrow: {}, title: {}, subtitle: {}, image: null, ctaLabel: {} },
     sections: {},
+    home: { manifesto: {}, manifestoFirma: {} },
     about: { title: {}, text: {}, image: null },
     contact: { title: {}, text: {}, address: {} },
   });

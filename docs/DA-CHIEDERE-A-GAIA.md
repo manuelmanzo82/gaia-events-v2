@@ -74,3 +74,28 @@ Oggi è `gaiacrognale@gmail.com`. La v1 usava anche `info@gaiaevents.it` nelle
 policy, ma quella casella non risulta esistere. Se prima del lancio si attiva una
 casella sul dominio, conviene passare a quella: su un sito professionale una
 Gmail si nota.
+
+---
+
+## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
+
+Scritte da noi per non lasciare buchi nella home EN, **solo nel database
+dello staging** (non negli example in repo). Tono elegante e naturale, non
+letterale. Gaia le legge, corregge e conferma; fino ad allora la home EN le
+mostra così come sono.
+
+| Dove | Campo | Bozza EN |
+|---|---|---|
+| Impostazioni → home | `home.manifesto` | My work is to turn your vision into a day that exceeds every expectation — with every detail cared for, and nothing left to chance. |
+| Impostazioni → generale | `about.text` | For more than ten years I have devoted my life to creating dream weddings. My story with events began almost by chance, planning a dear friend's wedding — and from that moment I knew this was my calling. |
+| Servizi → Wedding Planning Completo | titolo / sottotitolo / descrizione / 8 punti | Full Wedding Planning · Full service · A complete service that walks beside you from the first idea to the last dance. I take care of every part of the planning, so you can enjoy your engagement without the stress. |
+| Servizi → Coordinamento del Giorno | titolo / sottotitolo / descrizione / 7 punti | Day-of Coordination · On the day · Everything is planned, and now you want a professional to run the day? This service makes sure it all unfolds exactly as it should, while you savour every moment. |
+| Servizi → Design & Styling | titolo / sottotitolo / descrizione / 7 punti | Design & Styling · Creative · Beauty lives in the details. I create unique concepts and settings that turn any venue into a magical space, reflecting who you are and the style you love. |
+| Servizi → Destination Wedding | titolo / sottotitolo / descrizione / 7 punti | Destination Wedding · Worldwide · Dreaming of a wedding far from home? I plan destination weddings across Italy and abroad, handling every logistical detail with the same care as a local event. |
+| Pagina Chi sono | corpo (3 paragrafi + citazione) | Hello, I'm Gaia … (sostituisce il finto «Placeholder text.» che faceva esistere `/en/about/` senza testo) |
+| Pagina Chi sono | blocco «Il mio percorso» → My journey | Where it all began · First corporate collaboration · Destination weddings · 150+ events, con i quattro testi |
+| Pagina Chi sono | blocco «I miei valori» → My values | Elegance · Passion · Excellence · Creativity, con i quattro testi |
+| Pagina Servizi | corpo | Discover the services designed to accompany you towards the most beautiful day of your life… |
+
+I punti dei servizi e i testi dei blocchi si leggono per intero nel back
+office, nelle schede corrispondenti (colonna English).

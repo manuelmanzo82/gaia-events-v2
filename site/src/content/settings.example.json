@@ -94,6 +94,16 @@
       }
     }
   },
+  "home": {
+    "manifesto": {
+      "it": "Frase segnaposto del manifesto: quella vera arriva dal back office.",
+      "en": "Placeholder manifesto line: the real one comes from the back office."
+    },
+    "manifestoFirma": {
+      "it": "Gaia Crognale",
+      "en": "Gaia Crognale"
+    }
+  },
   "about": {
     "title": {
       "it": "Ciao, sono Gaia",
