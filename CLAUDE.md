@@ -59,6 +59,14 @@ cambiato in `site/src/config/site.ts` e nell'impostazione `contact.address`.
   fallback, così il build locale funziona sempre.
 
 **Pubblicazione**
+
+Un push su `main` o su un branch `design/**` fa partire **da solo** il deploy
+sullo **staging** (i push che toccano solo `docs/**` o file `.md` sono
+ignorati). La **produzione non parte mai da un push**: solo da
+`workflow_dispatch` (pulsante Pubblica o avvio manuale) con target
+`production`. La concurrency è per ambiente con `cancel-in-progress`: un
+nuovo push annulla il deploy staging ancora in corso.
+
 1. Gaia preme **Pubblica** nel back office.
 2. `admin/` chiama la GitHub API con un **`workflow_dispatch`** su `deploy.yml`,
    passando `target` con l'ambiente da aggiornare.

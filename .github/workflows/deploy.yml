@@ -1,14 +1,24 @@
 name: Build e deploy del sito
 
-# Si avvia in due modi, che passano entrambi da qui:
+# Si avvia in tre modi, che passano tutti da qui:
 #  - a mano, da Actions, scegliendo l'ambiente;
 #  - dal pulsante "Pubblica" del back office, che chiama la stessa API di
-#    workflow_dispatch (admin/src/Publisher.php).
+#    workflow_dispatch (admin/src/Publisher.php);
+#  - con un push su main o design/**, che deploya SEMPRE sullo staging.
+#
+# La produzione non parte mai da un push: solo da workflow_dispatch con
+# target production. Quando l'evento è push, il target è staging forzato,
+# qualunque sia il branch.
 #
 # Prima si usava anche repository_dispatch: l'abbiamo tolto perché un token
 # fine-grained per quello richiede «Contents: write», cioè il permesso di
 # scrivere codice, mentre a workflow_dispatch basta «Actions: write».
 on:
+  push:
+    branches: [main, 'design/**']
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
     inputs:
       target:
@@ -25,11 +35,13 @@ on:
         type: boolean
         default: false
 
-# Un deploy per volta: due build in parallelo sullo stesso hosting si
-# pesterebbero i piedi.
+# Un deploy per volta e per ambiente: due build in parallelo sullo stesso
+# hosting si pesterebbero i piedi. cancel-in-progress: due push ravvicinati
+# non si accavallano (vince l'ultimo), e un push non si scontra con il
+# "Pubblica" del back office: quello in corso viene annullato dal nuovo.
 concurrency:
-  group: deploy-${{ inputs.target || 'production' }}
-  cancel-in-progress: false
+  group: deploy-${{ github.event_name == 'push' && 'staging' || inputs.target || 'production' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -39,10 +51,11 @@ jobs:
     runs-on: ubuntu-latest
 
     # I segreti stanno negli Environment di GitHub, uno per ambiente.
-    environment: ${{ inputs.target || 'production' }}
+    # Su push il target è staging forzato: la produzione solo da dispatch.
+    environment: ${{ github.event_name == 'push' && 'staging' || inputs.target || 'production' }}
 
     env:
-      TARGET: ${{ inputs.target || 'production' }}
+      TARGET: ${{ github.event_name == 'push' && 'staging' || inputs.target || 'production' }}
       SITE_URL: ${{ vars.SITE_URL }}
 
     steps:
