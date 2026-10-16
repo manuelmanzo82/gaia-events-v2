@@ -7,12 +7,12 @@
 - Obiettivo prestazioni: Lighthouse mobile ≥95, LCP < 2s.
 
 ## Punti fermi
-- **Intro di apertura** (stile Sarah Haywood, scelta definitiva 16/10): velo a tutto schermo **avorio** (`--color-avorio`), il logo si costruisce **nei suoi colori originali** (ghirigoro pesca disegnato come tracciato a penna, testo in inchiostro), riga di prestigio in inchiostro e sottoriga in grigio caldo, **senza filetti oro**. In uscita prima logo e righe svaniscono salendo, poi il velo scorre verso l'alto e scopre l'hero. Durata ~5 s, **solo alla prima visita** (ricordata in sessionStorage/localStorage), saltabile con un clic o un tasto, disattivata con `prefers-reduced-motion`. Non deve bloccare il rendering: l'hero sotto è già carico e misurabile.
+- **Intro di apertura** (stile Sarah Haywood, scelta definitiva 16/10): velo a tutto schermo **avorio** (`--color-avorio`), il logo si costruisce **nei suoi colori originali** (ghirigoro pesca disegnato come tracciato a penna, testo in inchiostro), riga di prestigio in inchiostro e sottoriga in grigio caldo, **senza filetti oro**. In uscita prima logo e righe svaniscono salendo, poi il velo scorre verso l'alto e scopre l'hero. Durata ~5 s, **solo alla prima visita** (ricordata in sessionStorage/localStorage), saltabile con un clic o un tasto, disattivata con `prefers-reduced-motion`. Non deve bloccare il rendering: l'hero sotto è già carico e misurabile. Lo stato iniziale del velo lo decide uno snippet inline nel `<head>` prima dei CSS (classe `con-intro` su `<html>`, niente lampi); lì vive il flag **`INTRO_SEMPRE`**, oggi `true` per il testing (intro a ogni caricamento): **da rimettere a `false` prima del lancio**.
 - **Hero desktop: video** in loop, muto, a tutto schermo, self-hosted (niente Vimeo, niente iframe): clip 15-20 s, 1080p, MP4 H.264 + WebM, 2-4 MB totali. Si mostra prima la **foto poster** (AVIF, preload, è l'elemento LCP), il video parte solo dopo il load e solo su desktop con connessione buona (no `saveData`, no 2g/3g). Fallback: foto in dissolvenza.
 - **Hero mobile:** 3-4 foto in dissolvenza lenta (6-8 s) con leggero zoom, niente video.
 - Back office: campo "video hero" (upload MP4, generazione automatica di poster e versioni compresse se il server lo consente, altrimenti upload delle versioni già pronte) + campo "foto hero" multiplo. Possibilità futura di passare a un URL Vimeo cambiando un solo campo.
 - **Obiettivo prestazioni vincolante:** Lighthouse ≥95 sia mobile sia desktop, LCP < 2 s, CLS < 0,05. Il video non deve mai essere l'elemento LCP né entrare nel caricamento iniziale.
-- **Logo**: stesse dimensioni della v1, SVG con `currentColor`, cambia colore in base allo sfondo della sezione (`data-theme` + IntersectionObserver).
+- **Logo**: stesse dimensioni della v1 (231×152, alto 80px mobile / 130px desktop), SVG con `currentColor`, cambia colore in base allo sfondo della sezione (`data-theme` + IntersectionObserver). **Stato**: il vettoriale ufficiale non esiste da nessuna parte (solo PNG; i favicon.svg della v1 sono PNG incapsulati); in `LogoGaia.astro` c'è un SVG **ricostruito per tracciatura** dal PNG 231×152 — ghirigoro su `--logo-accento` (pesca), testo su `currentColor`, monocromo sulle sezioni scure — **da sostituire** quando arriverà il sorgente ufficiale.
 - **Bilingue IT/EN** ovunque.
 
 ## Riferimenti di motion e pagine (da sarahhaywood.com)
@@ -48,12 +48,16 @@ Regole per tutti questi effetti: GSAP ScrollTrigger + Lenis, versione semplifica
 ## Recensioni
 - Recensioni reali più avanti. **Non** collegate ai luoghi.
 
-## Modello dati da aggiungere al back office
-- **Luoghi**: regione, città/zona, slug IT/EN, testo IT/EN, foto copertina, foto della zona, stato pubblicato.
-- **Location**: nome, tipo, luogo collegato, descrizione breve opzionale, flag "pagina propria" (per il futuro).
-- **Highlights**: foto con sezione/i in cui compaiono, luogo opzionale, ordine.
-- **Partner**: nome, categoria, logo, descrizione IT/EN, link.
-- **Storie**: rimpiazzano gli "eventi" attuali, poche e curate.
+## Modello dati — FATTO (fase 2, 16/10/2026)
+Implementato su `design/home` e migrato sullo staging. Decisioni prese in corso d'opera:
+- **Luoghi**: gerarchia regione→zona via `parent_id`; **slug unici globalmente** (non per ramo); galleria della zona; cancellazione protetta (zone/location collegate bloccano con messaggio).
+- **Location**: nome non tradotto; `luogo_id` con **ON DELETE RESTRICT**; flag `own_page` per il futuro, oggi inerte.
+- **Highlights**: l'**alt vive su media** (unico per foto, non duplicato); sezioni con **ordine per sezione** (home, chi-sono, servizi, destination, luogo); niente didascalie con credito.
+- **Partner**: regola **morbida** per l'EN — l'indice esiste se c'è almeno un partner attivo, la descrizione EN vuota nasconde solo il testo.
+- **Storie**: slug bilingue come il blog; fotografo = riferimento a Partner; JSON-LD **Article, non Event**.
+- **Hero per pagina**: tabella dedicata (`page_hero` + foto ordinate), non nel k/v settings. **Niente ffmpeg su IONOS**: Gaia carica dal back office MP4 + WebM già pronti (max 8 MB l'uno, MIME verificato) + poster via ImageService; `video_url` per un futuro Vimeo.
+- **Tabella events: tenuta e congelata** (dentro solo dati di esempio, niente da migrare); il DROP con la rimozione di /portfolio arriva in fase 3, in un commit dedicato.
+- **Rotte**: `/luoghi/` ↔ `/en/destinations/` (dettagli `/luoghi/[regione]/[zona]/` con slug tradotti), `/storie/` ↔ `/en/stories/`, `/partner/` ↔ `/en/partners/`. Luoghi e location dentro `llms.txt`/`llms-full.txt` e sitemap con alternate ricalcolati.
 
 ## Struttura home
 1. Hero (scuro) con foto in dissolvenza, titolo breve, CTA "Raccontaci il vostro giorno" / "Tell us about your day"

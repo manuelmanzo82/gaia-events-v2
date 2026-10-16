@@ -52,7 +52,8 @@ cambiato in `site/src/config/site.ts` e nell'impostazione `contact.address`.
 **Contenuti**
 - Back office su misura in `admin/` (PHP 8.2+, MySQL), sostituisce Sanity.
   Gaia gestisce: impostazioni e testi di ogni sezione, eventi/matrimoni con gallery,
-  servizi, recensioni, blog, FAQ, richieste di preventivo.
+  servizi, recensioni, blog, FAQ, richieste di preventivo — e dalla fase 2 anche
+  **Luoghi, Location, Highlights, Partner, Storie e Hero** (vedi sotto).
 - Astro legge **file JSON** in `site/src/content/`, mai il database direttamente.
 - In repo stanno solo i `*.example.json`. I file reali (`settings.json`, …) sono
   gitignorati: li scrive la Action durante il build. Il loader usa l'example come
@@ -144,6 +145,44 @@ Mai nel codice, mai nei commit.
 - OG image per pagina. Un solo `SITE_URL` in config: **mai URL scritti a mano**
   (nella v1 metà del sito puntava a `vercel.app` e metà a `gaiaevents.it`).
 
+**Fase 2 — modello dati (16/10/2026, fatto)**
+- Nuove entità: **luoghi** (gerarchia regione→zona via `parent_id`, slug bilingui
+  unici globalmente, galleria), **locations** (nome non tradotto, `luogo_id` con
+  ON DELETE **RESTRICT**: il back office rifiuta la cancellazione di un luogo con
+  zone o location collegate e dice quante sono), **highlights** (alt su `media`,
+  sezioni con ordine PER sezione), **partners**, **stories** (slug bilingue,
+  fotografo = riferimento a partner), **page_hero** + foto ordinate.
+- **Tabella `events` congelata**: dentro solo dati di esempio; il DROP con la
+  rimozione di /portfolio va fatto in fase 3, in un commit dedicato.
+- Rotte nuove: `places` /luoghi/ ↔ /en/destinations/ (dettagli a due livelli con
+  slug composto, vedi `slugLuogo()` in `site/src/lib/content.ts`), `stories`
+  /storie/ ↔ /en/stories/, `partners` /partner/ ↔ /en/partners/. In
+  `availability.ts`: `LUOGO_FIELDS`, `STORY_FIELDS`; i partner hanno la regola
+  morbida (indice EN se c'è almeno un partner attivo).
+- Export: sei file nuovi (`luoghi`, `location`, `highlights`, `partner`,
+  `storie`, `hero`) con i relativi `*.example.json`. JSON-LD: Place + ItemList
+  per i luoghi, **Article** (non Event) per le storie, Organization per i
+  partner. Luoghi e location sono dentro `llms.txt`/`llms-full.txt` e in sitemap
+  con gli alternate ricalcolati per lingua.
+- **Video hero**: su IONOS **non c'è ffmpeg** → Gaia carica dal back office MP4 e
+  WebM già pronti (max 8 MB l'uno, MIME verificato con finfo, salvati in
+  `uploads/video/`) e il poster passa da ImageService; `video_url` è il campo per
+  un futuro passaggio a Vimeo.
+
+**Migrazioni del database**
+- Ogni modifica allo schema = **un file in `admin/sql/migrations/`** (mai solo
+  schema.sql) + le stesse definizioni in `schema.sql`.
+- Procedura sullo staging (admin/ NON viene toccato dal deploy del sito):
+  1. upload dei file di `admin/` via SFTP con la chiave dedicata, **solo dentro
+     `/gaia-staging/admin/`**, mai fuori da `/gaia-staging`;
+  2. `php8.3 -q admin/bin/dump-sicurezza.php` → dump in `admin/storage/`
+     (bloccata dal web dal .htaccess);
+  3. `php8.3 -q admin/bin/applica-migrazione.php` (registra in
+     `schema_migrations`, rilanciarlo è sempre sicuro; `--lista` per lo stato);
+  4. verifica, poi **cancellare il dump**;
+  5. controllare con curl che `/admin/bin/`, `/admin/sql/` e `/admin/storage/`
+     rispondano 403.
+
 **Form**
 - Preventivatore: **un unico componente bilingue**, senza prezzi automatici.
 - Le richieste vanno al nostro PHP (`admin/api/quote.php`), non più a Web3Forms,
@@ -165,8 +204,21 @@ scaricate in `uploads/`, quindi **non serve Instagram nel CSP**.
 
 Font: **Cormorant Garamond** (display) + **Montserrat** (testo), self-hosted.
 
-> Home, gallery e preventivatore sono **segnaposto**: il design si fa dopo, con le
-> skill di design. Non abbellire le pagine segnaposto di iniziativa.
+> La tabella sopra è la palette di partenza. Il **design system completo** della
+> fase design (branch `design/home`) vive in `site/src/styles/global.css`
+> (@theme: base chiara + sezioni scure `notte`/`bordeaux-notte`, scala
+> tipografica fluida, motion token) ed è documentato dal vivo su
+> **`/styleguide/`** (noindex, fuori sitemap). Font **variabili** self-hosted in
+> `public/fonts/` (3 file, OFL). Il logo è un SVG **ricostruito per tracciatura**
+> dal PNG ufficiale (`LogoGaia.astro`, provvisorio: manca il vettoriale
+> sorgente). L'**intro a velo avorio** (`IntroVelo.astro`) costruisce il logo
+> (ghirigoro disegnato a penna, lettere, firma, riga di prestigio) in ~5 s;
+> richiede lo snippet nel `<head>` della pagina (oggi solo in styleguide, in
+> BaseLayout quando andrà sulla home) dove vive il flag **`INTRO_SEMPRE`**:
+> oggi `true` per il testing, **da rimettere a `false` prima del lancio**.
+
+> Home, gallery e preventivatore sono **segnaposto**: il design si fa con le
+> skill di design, per gradi. Non abbellire le pagine segnaposto di iniziativa.
 
 ## Struttura
 
@@ -359,3 +411,31 @@ public_html/uploads/  immagini — mai toccate dal deploy
 - Mai scrivere un URL a mano: passa da `SITE_URL` e dagli helper di `i18n/routes.ts`.
 - Ogni campo nuovo nel database nasce **già bilingue** (`campo_it`, `campo_en`).
 - Niente adapter, niente runtime Node in produzione, niente dipendenze dal cloud.
+
+## Stato e prossimi passi (16/10/2026)
+
+**Dove siamo**: branch `design/home` (push = deploy automatico sullo staging).
+
+Fatto:
+- **Fase 1 — design system**: token, tipografia, componenti base, motion
+  (Lenis + GSAP), `/styleguide/` sullo staging; logo SVG ricostruito
+  (provvisorio); intro a velo **avorio** definitiva, logo nei colori originali,
+  ~5 s, uscita in due tempi, `INTRO_SEMPRE = true` per il testing.
+- **CI**: push su `main`/`design/**` → deploy automatico sullo **staging**
+  (produzione solo da workflow_dispatch); concurrency per ambiente.
+- **Fase 2 — modello dati**: tabelle, back office, export, loader, rotte,
+  JSON-LD, llms, sitemap e pagine segnaposto per Luoghi/Location/Highlights/
+  Partner/Storie/Hero. Migrazione applicata allo staging (procedura
+  dump-sicurezza → applica-migrazione, sopra).
+
+Prossimi passi (fase 3):
+- Home completa IT/EN: intro + hero (video/foto dal back office) + effetti di
+  scroll reinterpretati da sarahhaywood.com; screenshot 1440/390; Lighthouse
+  mobile e desktop ≥95; deploy staging e ok di Manuel.
+- Rimettere `INTRO_SEMPRE = false` e spostare lo snippet intro in BaseLayout.
+- DROP di `events`/`event_images` + rimozione di /portfolio quando /storie la
+  sostituisce (commit dedicato).
+- Contenuti veri da Gaia (luoghi, location, storie, partner, foto hero);
+  crop e varianti AVIF/WebP fuori repo, poi in `uploads/` sullo staging.
+- Logo: sostituire l'SVG ricostruito se arriva il vettoriale ufficiale.
+- Merge di `design/home` su `main` a fine fase design.
