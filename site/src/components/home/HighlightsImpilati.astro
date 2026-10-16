@@ -1,0 +1,212 @@
+---
+/**
+ * Highlights, prima parte: le prime N foto della sezione "home" come schede
+ * che si impilano con lo scroll (home-effetti.ts, [data-impila]).
+ *
+ * Ogni scheda è `position: sticky` su desktop: la successiva sale e copre
+ * la precedente, che si ritira con lo scrub. Sotto i 64rem niente sticky:
+ * colonna semplice con il reveal a maschera.
+ *
+ * Il limite di ogni foto (maxWidth, calcolato dal back office) è
+ * rispettato dal <Picture>: le orizzontali riempiono la scheda, le
+ * verticali stanno centrate al loro limite con l'alt a lato come
+ * didascalia editoriale — le foto piccole sembrano volute, non sgranate.
+ */
+import type { Lang } from '../../config/site';
+import type { Highlight } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  highlights: Highlight[];
+  eyebrow?: string;
+  titolo?: string;
+}
+
+const { lang, highlights, eyebrow, titolo } = Astro.props;
+
+const SIZES = '(min-width: 80rem) 72rem, 92vw';
+
+const schede = highlights
+  .map((h, i) => {
+    const data = picture(h.image, lang, SIZES);
+    if (!data || !h.image) return null;
+    const verticale = h.image.height > h.image.width;
+    return { data, verticale, numero: String(i + 1).padStart(2, '0') };
+  })
+  .filter((s): s is NonNullable<typeof s> => s !== null);
+---
+
+{
+  schede.length > 0 && (
+    <section id="highlights" class="impila" data-theme="light">
+      <header class="impila-testa container-gaia">
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        {titolo && (
+          <h2 class="text-display" data-reveal="righe">
+            {titolo}
+          </h2>
+        )}
+      </header>
+
+      <div class="impila-pila" data-impila>
+        {schede.map((s) => (
+          <article class:list={['scheda', { 'scheda--verticale': s.verticale }]}>
+            <div class="scheda-interno">
+              <figure class="scheda-figura" data-reveal="maschera">
+                <Picture data={s.data} class="scheda-img" />
+              </figure>
+              <div class="scheda-testo">
+                <span class="numero">N° {s.numero}</span>
+                <p class="scheda-didascalia">{s.data.alt}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .impila {
+    padding-block: var(--spacing-section) 0;
+    background: var(--color-avorio);
+  }
+
+  .impila-testa {
+    margin-bottom: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .impila-testa h2 {
+    margin: 0.9rem 0 0;
+  }
+
+  .impila-pila {
+    display: grid;
+    gap: clamp(1.5rem, 4vh, 3rem);
+    padding-bottom: var(--spacing-section);
+  }
+
+  .scheda {
+    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 80rem);
+    margin-inline: auto;
+    will-change: transform, opacity;
+  }
+
+  .scheda-interno {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(0.75rem, 1.5vw, 1.25rem);
+    border-radius: 4px;
+    background: var(--color-bianco-caldo);
+    box-shadow:
+      0 1px 0 var(--color-beige),
+      0 30px 60px -40px rgb(27 22 17 / 0.35);
+  }
+
+  .scheda-figura {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    background: var(--color-beige);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .scheda-figura :global(picture) {
+    display: block;
+    width: 100%;
+  }
+
+  /* Il max-width inline del <Picture> è il limite della foto: qui lo si
+     rispetta e lo si centra, invece di stirare. */
+  .scheda-figura :global(.scheda-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-inline: auto;
+    border-radius: 2px;
+  }
+
+  .scheda-testo {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0 0.25rem 0.5rem;
+  }
+
+  .scheda-testo .numero {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .scheda-didascalia {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lead);
+    line-height: 1.35;
+    color: var(--color-grigio-caldo);
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 64rem) {
+    .impila-pila {
+      gap: 0;
+    }
+
+    /* Sticky: ogni scheda si ferma in alto e lascia che la successiva la
+       copra; l'altezza della pila dà lo spazio di scroll. */
+    .scheda {
+      position: sticky;
+      top: clamp(4rem, 8vh, 6rem);
+      min-height: calc(100vh - clamp(4rem, 8vh, 6rem));
+      min-height: calc(100svh - clamp(4rem, 8vh, 6rem));
+      padding-bottom: 6vh;
+      transform-origin: 50% 0%;
+    }
+
+    .scheda-interno {
+      grid-template-columns: 1fr;
+      min-height: calc(100vh - clamp(4rem, 8vh, 6rem) - 6vh);
+      min-height: calc(100svh - clamp(4rem, 8vh, 6rem) - 6vh);
+    }
+
+    .scheda-figura {
+      align-items: center;
+      max-height: calc(100svh - 14rem);
+    }
+
+    .scheda-figura :global(.scheda-img) {
+      max-height: calc(100svh - 15rem);
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Verticale: foto al suo limite a sinistra, testo a destra. */
+    .scheda--verticale .scheda-interno {
+      grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+      align-items: center;
+    }
+
+    .scheda--verticale .scheda-testo {
+      flex-direction: column;
+      gap: 1.25rem;
+      padding-inline: clamp(1rem, 3vw, 3rem);
+    }
+
+    .scheda--verticale .scheda-didascalia {
+      font-size: var(--text-title);
+      line-height: 1.25;
+      color: var(--color-inchiostro);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scheda {
+      position: static;
+      min-height: 0;
+    }
+  }
+</style>
