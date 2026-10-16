@@ -30,7 +30,217 @@ final class Exporter
             'faq' => self::faqs(),
             'destination-wedding' => self::destinationWedding(),
             'instagram' => self::instagram(),
+            'luoghi' => self::luoghi(),
+            'location' => self::locations(),
+            'highlights' => self::highlights(),
+            'partner' => self::partners(),
+            'storie' => self::stories(),
+            'hero' => self::hero(),
         ];
+    }
+
+    // -----------------------------------------------------------------
+    // Fase 2: luoghi, location, highlights, partner, storie, hero
+    // -----------------------------------------------------------------
+
+    /**
+     * Albero dei luoghi: regioni con le zone annidate. Gli slug sono
+     * unici globalmente, quindi il sito può costruire /luoghi/[regione]/
+     * e /luoghi/[regione]/[zona]/ senza ambiguità.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function luoghi(): array
+    {
+        $rows = Db::all('SELECT * FROM luoghi ORDER BY sort_order, id');
+
+        $galleries = [];
+        foreach (
+            Db::all(
+                'SELECT li.luogo_id, m.*
+                 FROM luogo_images li
+                 JOIN media m ON m.id = li.media_id
+                 ORDER BY li.luogo_id, li.sort_order, li.id',
+            ) as $row
+        ) {
+            $galleries[(int) $row['luogo_id']][] = self::image($row);
+        }
+
+        $shape = static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'tipo' => (string) $row['tipo'],
+            'nome' => self::text($row['nome_it'], $row['nome_en']),
+            'slug' => self::text($row['slug_it'], $row['slug_en']),
+            'intro' => self::text($row['intro_it'], $row['intro_en']),
+            'testo' => self::text($row['testo_it'], $row['testo_en']),
+            'cover' => self::image(self::mediaById((int) ($row['cover_media_id'] ?? 0))),
+            'gallery' => $galleries[(int) $row['id']] ?? [],
+            'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
+            'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ];
+
+        $result = [];
+        foreach ($rows as $row) {
+            if ($row['parent_id'] !== null) {
+                continue;
+            }
+
+            $regione = $shape($row);
+            $regione['zone'] = [];
+            foreach ($rows as $figlio) {
+                if ((int) ($figlio['parent_id'] ?? 0) === (int) $row['id']) {
+                    $regione['zone'][] = $shape($figlio);
+                }
+            }
+
+            $result[] = $regione;
+        }
+
+        return $result;
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function locations(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'nome' => (string) $row['nome'],
+            'tipo' => (string) $row['tipo'],
+            'luogoId' => (int) $row['luogo_id'],
+            'descrizione' => self::text($row['descrizione_it'], $row['descrizione_en']),
+            'website' => $row['website'],
+            'ownPage' => (bool) $row['own_page'],
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM locations ORDER BY luogo_id, sort_order, nome'));
+    }
+
+    /**
+     * L'alt vive sull'immagine (media.alt_it/alt_en), dentro image().
+     * Nessuna didascalia con credito: i crediti stanno nei partner.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function highlights(): array
+    {
+        $sections = [];
+        foreach (
+            Db::all('SELECT highlight_id, section, sort_order FROM highlight_sections ORDER BY section, sort_order') as $row
+        ) {
+            $sections[(int) $row['highlight_id']][] = [
+                'section' => (string) $row['section'],
+                'order' => (int) $row['sort_order'],
+            ];
+        }
+
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'image' => self::image(self::mediaById((int) $row['media_id'])),
+            'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
+            'sections' => $sections[(int) $row['id']] ?? [],
+            'active' => (bool) $row['active'],
+        ], Db::all('SELECT * FROM highlights ORDER BY id'));
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function partners(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'name' => (string) $row['name'],
+            'category' => (string) $row['category'],
+            'logo' => self::image(self::mediaById((int) ($row['logo_media_id'] ?? 0))),
+            'description' => self::text($row['description_it'], $row['description_en']),
+            'website' => $row['website'],
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM partners ORDER BY sort_order, name'));
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function stories(): array
+    {
+        $galleries = [];
+        foreach (
+            Db::all(
+                'SELECT si.story_id, m.*
+                 FROM story_images si
+                 JOIN media m ON m.id = si.media_id
+                 ORDER BY si.story_id, si.sort_order, si.id',
+            ) as $row
+        ) {
+            $galleries[(int) $row['story_id']][] = self::image($row);
+        }
+
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'slug' => self::text($row['slug_it'], $row['slug_en']),
+            'title' => self::text($row['title_it'], $row['title_en']),
+            'couple' => $row['couple'],
+            'locationName' => $row['location_name'],
+            'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
+            'date' => self::date($row['story_date']),
+            'cover' => self::image(self::mediaById((int) ($row['cover_media_id'] ?? 0))),
+            'gallery' => $galleries[(int) $row['id']] ?? [],
+            'body' => self::text($row['body_it'], $row['body_en']),
+            'photographerId' => $row['photographer_partner_id'] !== null
+                ? (int) $row['photographer_partner_id']
+                : null,
+            'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
+            'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM stories ORDER BY sort_order, story_date DESC, id'));
+    }
+
+    /**
+     * Hero per pagina, indicizzato per page_key. Il poster è l'elemento
+     * LCP; il video non entra mai nel caricamento iniziale.
+     *
+     * @return array<string, mixed>
+     */
+    public static function hero(): array
+    {
+        $images = [];
+        foreach (
+            Db::all(
+                'SELECT phi.hero_id, m.*
+                 FROM page_hero_images phi
+                 JOIN media m ON m.id = phi.media_id
+                 ORDER BY phi.hero_id, phi.sort_order, phi.id',
+            ) as $row
+        ) {
+            $images[(int) $row['hero_id']][] = self::image($row);
+        }
+
+        $result = [];
+        foreach (Db::all('SELECT * FROM page_hero') as $row) {
+            $video = null;
+            if (!empty($row['video_path'])) {
+                $video = [
+                    'mp4' => (string) $row['video_path'],
+                    'webm' => $row['video_webm_path'],
+                    'poster' => self::image(self::mediaById((int) ($row['poster_media_id'] ?? 0))),
+                ];
+            }
+
+            $result[(string) $row['page_key']] = [
+                'title' => self::text($row['title_it'], $row['title_en']),
+                'subtitle' => self::text($row['subtitle_it'], $row['subtitle_en']),
+                'cta' => [
+                    'label' => self::text($row['cta_label_it'], $row['cta_label_en']),
+                    'route' => $row['cta_route'],
+                ],
+                'video' => $video,
+                'videoUrl' => $row['video_url'],
+                'poster' => self::image(self::mediaById((int) ($row['poster_media_id'] ?? 0))),
+                'images' => $images[(int) ($row['id'] ?? 0)] ?? [],
+            ];
+        }
+
+        return $result;
     }
 
     // -----------------------------------------------------------------
