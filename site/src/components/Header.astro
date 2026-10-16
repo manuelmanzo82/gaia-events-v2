@@ -4,7 +4,20 @@ import { useTranslations, type UIKey } from '../i18n';
 import { path, type RouteKey } from '../i18n/routes';
 import { existsIn } from '../lib/availability';
 import LangSwitcher from './LangSwitcher.astro';
+import LogoGaia from './LogoGaia.astro';
 
+/**
+ * Header fisso e trasparente: sta sopra l'hero e cambia colore in base
+ * alla sezione che ha sotto (data-header-theme, aggiornato da
+ * scripts/theme-observer.ts leggendo i data-theme delle sezioni). Al primo
+ * scroll si dà uno scrim sfumato nel colore del tema corrente.
+ *
+ * Il logo è l'SVG di LogoGaia (currentColor): sulle sezioni scure diventa
+ * monocromo avorio da solo, via CSS.
+ *
+ * Menu: su desktop le voci stanno in riga; sotto i 64rem un pulsante apre
+ * un pannello a tutto schermo. Nessuna libreria, un toggle e basta.
+ */
 interface Props {
   lang: Lang;
   routeKey: RouteKey;
@@ -26,19 +39,32 @@ const VOCI: Array<{ key: RouteKey; label: UIKey }> = [
   { key: 'blog', label: 'nav.blog' },
   { key: 'faq', label: 'nav.faq' },
   { key: 'contact', label: 'nav.contact' },
-  { key: 'quote', label: 'nav.quote' },
 ];
 
 // Una voce compare solo se quella pagina esiste in questa lingua: senza il
 // filtro, il menu inglese linkerebbe pagine che il build non ha generato.
 const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
+const preventivo = existsIn('quote', lang);
 ---
 
-<header class="site-header">
-  <a class="brand" href={path('home', lang)}>Gaia Events</a>
+<header class="site-header" data-header-theme="light">
+  <a class="brand" href={path('home', lang)} aria-label="Gaia Events">
+    <LogoGaia />
+  </a>
 
-  <nav aria-label={t('nav.menu')}>
-    <ul>
+  <button
+    type="button"
+    class="menu-toggle"
+    aria-expanded="false"
+    aria-controls="menu-principale"
+  >
+    <span class="menu-toggle-testo" data-apri>{t('nav.menu')}</span>
+    <span class="menu-toggle-testo" data-chiudi>{t('nav.close')}</span>
+    <span class="menu-toggle-linee" aria-hidden="true"><i></i><i></i></span>
+  </button>
+
+  <nav id="menu-principale" class="menu" aria-label={t('nav.menu')}>
+    <ul class="menu-voci">
       {
         voci.map((voce) => (
           <li>
@@ -52,40 +78,275 @@ const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
         ))
       }
     </ul>
-  </nav>
 
-  <LangSwitcher lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
+    <div class="menu-coda">
+      {
+        preventivo && (
+          <a class="btn menu-cta" href={path('quote', lang)}>
+            {t('nav.quote')}
+          </a>
+        )
+      }
+      <LangSwitcher lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
+    </div>
+  </nav>
 </header>
 
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const toggle = header?.querySelector<HTMLButtonElement>('.menu-toggle');
+
+  if (header && toggle) {
+    const imposta = (aperto: boolean): void => {
+      header.classList.toggle('menu-aperto', aperto);
+      toggle.setAttribute('aria-expanded', String(aperto));
+      document.documentElement.classList.toggle('menu-bloccato', aperto);
+    };
+
+    toggle.addEventListener('click', () => {
+      imposta(!header.classList.contains('menu-aperto'));
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') imposta(false);
+    });
+
+    // Scrim: appena si scrolla, il header si dà un fondo sfumato nel
+    // colore del tema corrente, così non collide mai con i contenuti.
+    const aggiornaScrim = (): void => {
+      header.classList.toggle('con-scrim', window.scrollY > 24);
+    };
+    window.addEventListener('scroll', aggiornaScrim, { passive: true });
+    aggiornaScrim();
+  }
+</script>
+
 <style>
-  /* Stile minimo: il design del header arriva nella fase successiva. */
   .site-header {
+    --logo-h: 64px;
+    --logo-h-md: 96px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--color-beige);
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.5rem clamp(1.25rem, 4vw, 3.5rem);
+    color: var(--color-inchiostro);
+    transition:
+      color 0.5s var(--ease-gaia),
+      background-color 0.4s var(--ease-gaia);
+    pointer-events: none;
+  }
+
+  .site-header > *,
+  .menu {
+    pointer-events: auto;
+  }
+
+  .site-header[data-header-theme='dark'] {
+    color: var(--color-avorio-su-notte);
+  }
+
+  .site-header.con-scrim {
+    background: color-mix(in srgb, var(--color-avorio) 90%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .site-header[data-header-theme='dark'].con-scrim {
+    background: color-mix(in srgb, var(--color-notte) 85%, transparent);
   }
 
   .brand {
-    font-family: var(--font-display);
-    font-size: 1.25rem;
+    display: inline-flex;
+    line-height: 0;
     text-decoration: none;
   }
 
-  nav ul {
+  /* — Voci del menu — */
+  .menu-voci {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.6rem;
     list-style: none;
     margin: 0;
     padding: 0;
-    font-size: 0.875rem;
   }
 
-  :global(.lang-switcher) {
-    margin-left: auto;
-    font-size: 0.875rem;
+  .menu-voci a {
+    position: relative;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .menu-voci a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .menu-voci a:hover::after,
+  .menu-voci a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .menu-coda {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .menu-cta {
+    padding: 0.7rem 1.4rem;
+    font-size: 0.68rem;
+  }
+
+  :global(.site-header .lang-switcher) {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* — Pulsante del menu (solo sotto i 64rem) — */
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .menu-toggle-linee {
+    display: inline-grid;
+    gap: 5px;
+    width: 22px;
+  }
+
+  .menu-toggle-linee i {
+    display: block;
+    height: 1px;
+    background: currentColor;
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .menu-toggle [data-chiudi] {
+    display: none;
+  }
+
+  .menu-aperto .menu-toggle [data-apri] {
+    display: none;
+  }
+
+  .menu-aperto .menu-toggle [data-chiudi] {
+    display: inline;
+  }
+
+  .menu-aperto .menu-toggle-linee i:first-child {
+    transform: translateY(3px) rotate(45deg);
+  }
+
+  .menu-aperto .menu-toggle-linee i:last-child {
+    transform: translateY(-3px) rotate(-45deg);
+  }
+
+  @media (min-width: 64rem) {
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 2.25rem;
+    }
+  }
+
+  @media (max-width: 63.98rem) {
+    .site-header {
+      --logo-h: 56px;
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+    }
+
+    .menu {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2.5rem;
+      padding: 6rem clamp(1.25rem, 6vw, 3rem) 3rem;
+      background: var(--color-avorio);
+      color: var(--color-inchiostro);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.45s var(--ease-gaia),
+        visibility 0s linear 0.45s;
+    }
+
+    .menu-aperto .menu {
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s;
+    }
+
+    .menu-aperto {
+      color: var(--color-inchiostro) !important;
+      background: var(--color-avorio) !important;
+    }
+
+    .menu-voci {
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .menu-voci a {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 6vw, 2.5rem);
+      font-weight: 340;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .menu-coda {
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+  }
+
+  :global(html.menu-bloccato) {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .menu,
+    .menu-voci a::after,
+    .menu-toggle-linee i {
+      transition: none;
+    }
   }
 </style>

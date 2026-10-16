@@ -8,6 +8,7 @@ import type { Meta } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import IntroVelo from '../components/IntroVelo.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Seo from '../components/Seo.astro';
 import type { Crumb } from '../lib/jsonld';
@@ -21,9 +22,23 @@ interface Props {
   /** Oggetti schema.org della pagina; i null vengono scartati. */
   jsonLd?: unknown[];
   crumbs?: Crumb[];
+  /** Intro a velo con il logo che si costruisce (solo la home). */
+  intro?: boolean;
+  /** Pagina a tutta larghezza: le sezioni gestiscono da sole i contenitori. */
+  largo?: boolean;
 }
 
-const { lang, routeKey, meta, slug, availableLangs, jsonLd = [], crumbs = [] } = Astro.props;
+const {
+  lang,
+  routeKey,
+  meta,
+  slug,
+  availableLangs,
+  jsonLd = [],
+  crumbs = [],
+  intro = false,
+  largo = false,
+} = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -31,6 +46,32 @@ const t = useTranslations(lang);
 <html lang={meta.htmlLang}>
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      /**
+       * Decide PRIMA del primo paint se l'intro parte, mettendo una classe
+       * su <html>: il CSS del velo parte da lì, quindi nessun lampo né del
+       * velo quando non deve apparire, né della pagina quando deve.
+       * Sta qui, primo elemento di <head>, prima dei fogli di stile. Il velo
+       * esiste solo nelle pagine con la prop `intro` (la home): altrove la
+       * classe non ha effetto.
+       *
+       * INTRO_SEMPRE: modalità testing — l'intro parte a OGNI caricamento.
+       * Per il lancio rimetterla a false: torna "una volta per sessione".
+       */
+      (() => {
+        var INTRO_SEMPRE = true;
+        var vista = false;
+        try {
+          vista = sessionStorage.getItem('gaia-intro-vista') === '1';
+        } catch (e) {
+          /* storage bloccato: l'intro parte, ma senza memoria */
+        }
+        var riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if ((INTRO_SEMPRE || !vista) && !riduci) {
+          document.documentElement.classList.add('con-intro');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
 
@@ -40,6 +81,9 @@ const t = useTranslations(lang);
 
     <Seo meta={meta} />
     <JsonLd data={jsonLd} />
+
+    {/* Preload dell'elemento LCP e altro di pagina: lo decide chi usa il layout. */}
+    <slot name="head" />
 
     {/* Solo i due variabili principali: corsivo e latin-ext arrivano on demand. */}
     <link
@@ -59,24 +103,44 @@ const t = useTranslations(lang);
   </head>
 
   <body>
+    {intro && <IntroVelo lang={lang} />}
+
     <a class="skip-link" href="#main">{t('nav.skipToContent')}</a>
 
     <Header lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
 
-    <main id="main">
+    <main id="main" class:list={['main', { 'main--largo': largo }]}>
       {crumbs.length > 1 && <Breadcrumbs lang={lang} crumbs={crumbs} />}
       <slot />
     </main>
 
     <Footer lang={lang} />
+
+    <script>
+      import { initMotion } from '../scripts/motion';
+      import { initThemeObserver } from '../scripts/theme-observer';
+
+      initMotion();
+
+      const header = document.querySelector<HTMLElement>('.site-header');
+      if (header) initThemeObserver(header);
+    </script>
   </body>
 </html>
 
 <style>
-  main {
+  /* Il header è fisso: le pagine normali lasciano spazio sopra, la home
+     (largo) ci passa sotto con l'hero a tutto schermo. */
+  .main {
     max-width: 72rem;
     margin-inline: auto;
-    padding: 2rem 1.5rem;
+    padding: calc(var(--altezza-header, 7rem) + 1rem) 1.5rem 2rem;
+  }
+
+  .main--largo {
+    max-width: none;
+    margin: 0;
+    padding: 0;
   }
 
   :global(.breadcrumbs ol) {
