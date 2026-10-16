@@ -61,8 +61,45 @@ use Gaia\Admin\Db;
 use Gaia\Admin\ImageService;
 use Gaia\Admin\Validator;
 
-$options = getopt('', ['prova', 'verifica', 'ripara', 'solo::', 'manifesto::']) ?: [];
+$options = getopt('', ['prova', 'verifica', 'ripara', 'aggiorna-formati', 'solo::', 'manifesto::']) ?: [];
 $prova = isset($options['prova']);
+
+// --aggiorna-formati: rilegge il disco e corregge has_webp / has_avif di
+// ogni riga di `media`. Serve quando le varianti arrivano da fuori (per
+// esempio AVIF generati in locale e caricati via SFTP, perche' la shell
+// del server non li regge a 2400 px): un formato vale solo se TUTTE le
+// larghezze esistono e non sono vuote, come in ImageService.
+if (isset($options['aggiorna-formati'])) {
+    $uploads = rtrim((string) Config::get('uploads_dir'), '/');
+    $cambiate = 0;
+
+    foreach (Db::all('SELECT id, path, variant_widths, has_webp, has_avif FROM media ORDER BY id') as $riga) {
+        $base = preg_replace('/\.[^.\/]+$/', '', (string) $riga['path']) ?? (string) $riga['path'];
+        $widths = json_decode((string) ($riga['variant_widths'] ?? '[]'), true) ?: [];
+        $nuovi = [];
+
+        foreach (['webp', 'avif'] as $formato) {
+            $ok = $widths !== [];
+            foreach ($widths as $w) {
+                $file = sprintf('%s/%s-%d.%s', $uploads, $base, (int) $w, $formato);
+                if (!is_file($file) || (int) filesize($file) === 0) {
+                    $ok = false;
+                    break;
+                }
+            }
+            $nuovi['has_' . $formato] = $ok ? 1 : 0;
+        }
+
+        if ($nuovi['has_webp'] !== (int) $riga['has_webp'] || $nuovi['has_avif'] !== (int) $riga['has_avif']) {
+            Db::update('media', (int) $riga['id'], $nuovi);
+            $cambiate++;
+            echo "  #{$riga['id']} {$riga['path']}: webp={$nuovi['has_webp']} avif={$nuovi['has_avif']}\n";
+        }
+    }
+
+    echo "Righe aggiornate: {$cambiate}.\n";
+    exit(0);
+}
 
 // --solo=NNN.jpg importa quel solo file e si ferma prima dei collegamenti.
 // Serve sul server: la shell ha un tetto di memoria virtuale (ulimit -v)
