@@ -72,7 +72,8 @@ const video = hero?.video ?? null;
 <section
   class="hero"
   data-theme="dark"
-  data-foto={immagini.length}
+  data-foto
+  data-n-foto={immagini.length}
   data-video-mp4={video ? uploadUrl(video.mp4) : undefined}
   data-video-webm={video?.webm ? uploadUrl(video.webm) : undefined}
   style={`--ciclo: ${ciclo}s; --per-foto: ${PER_FOTO}s`}
@@ -140,14 +141,42 @@ const video = hero?.video ?? null;
     const riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // 1. Le foto successive entrano solo dopo il load: così non competono
-    //    mai con il LCP. Poi parte la dissolvenza (classe `pronto`).
+    //    mai con il LCP. La dissolvenza (classe `pronto`) parte quando sono
+    //    caricate E l'intro a velo è finita: altrimenti il primo fotogramma
+    //    che si vede uscendo dal velo è già a metà di un crossfade, diverso
+    //    da quello che si ritrova tornando in cima.
+    let fotoCaricate = false;
+    let introFinita = !(
+      document.documentElement.classList.contains('con-intro') &&
+      document.getElementById('intro-velo')
+    );
+    const avviaCiclo = (): void => {
+      if (fotoCaricate && introFinita) hero.classList.add('pronto');
+    };
+    document.addEventListener(
+      'gaia:intro-fine',
+      () => {
+        introFinita = true;
+        avviaCiclo();
+      },
+      { once: true },
+    );
+    // Rete di sicurezza: se l'evento non arriva, il ciclo parte comunque.
+    window.setTimeout(() => {
+      introFinita = true;
+      avviaCiclo();
+    }, 9000);
+
     const attivaAltreFoto = (): void => {
       const rinviate = hero.querySelectorAll<HTMLPictureElement>('.hero-rinviata');
       let daCaricare = rinviate.length;
       if (daCaricare === 0 || riduci) return;
 
       const pronto = (): void => {
-        if (--daCaricare <= 0) hero.classList.add('pronto');
+        if (--daCaricare <= 0) {
+          fotoCaricate = true;
+          avviaCiclo();
+        }
       };
 
       for (const pic of rinviate) {
@@ -353,7 +382,7 @@ const video = hero?.video ?? null;
     inset: 0;
     z-index: 1;
     background:
-      linear-gradient(180deg, rgb(27 22 17 / 0.45) 0%, transparent 28%),
+      linear-gradient(180deg, rgb(27 22 17 / 0.5) 0%, rgb(27 22 17 / 0.18) 22%, transparent 40%),
       linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.25) 45%, transparent 70%);
   }
 

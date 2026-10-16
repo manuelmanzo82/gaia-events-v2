@@ -71,6 +71,8 @@ const SOTTORIGA = 'Italia · Destination Weddings';
       ricorda();
       window.removeEventListener('keydown', salta);
       velo.remove();
+      // Chi aspetta la fine dell'intro (la dissolvenza dell'hero) parte ora.
+      document.dispatchEvent(new CustomEvent('gaia:intro-fine'));
     };
 
     const guide = [...velo.querySelectorAll<SVGPathElement>('.velo-guida')];
