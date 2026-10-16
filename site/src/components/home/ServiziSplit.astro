@@ -179,16 +179,18 @@ const paginaServizi = existsIn('services', lang);
 
     /* Colonna destra: la cornice resta ferma mentre i blocchi scorrono;
        le foto sono strati sovrapposti, quella attiva in dissolvenza. */
+    /* Sticky al bordo superiore (il header scorrendo è nascosto). */
     .split-foto {
       display: block;
       position: sticky;
-      top: clamp(5rem, 12vh, 8rem);
+      top: 0;
+      padding-block: 2rem;
     }
 
     .split-foto-cornice {
       position: relative;
-      height: calc(100vh - clamp(5rem, 12vh, 8rem) - 4rem);
-      height: calc(100svh - clamp(5rem, 12vh, 8rem) - 4rem);
+      height: calc(100vh - 4rem);
+      height: calc(100svh - 4rem);
       border-radius: 2px;
       overflow: hidden;
       background: var(--color-beige);

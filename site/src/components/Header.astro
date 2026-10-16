@@ -7,16 +7,24 @@ import LangSwitcher from './LangSwitcher.astro';
 import LogoGaia from './LogoGaia.astro';
 
 /**
- * Header fisso e trasparente: sta sopra l'hero e cambia colore in base
- * alla sezione che ha sotto (data-header-theme, aggiornato da
- * scripts/theme-observer.ts leggendo i data-theme delle sezioni). Al primo
- * scroll si dà uno scrim sfumato nel colore del tema corrente.
+ * Header senza barra, stile Haywood.
  *
- * Il logo è l'SVG di LogoGaia (currentColor): sulle sezioni scure diventa
- * monocromo avorio da solo, via CSS.
+ * In cima alla pagina non ha sfondo: logo e voci stanno direttamente sulla
+ * pagina e prendono il colore dalla sezione sotto (data-header-theme,
+ * aggiornato da scripts/theme-observer.ts: avorio su hero e sezioni
+ * scure, inchiostro su quelle chiare), con transizione morbida.
  *
- * Menu: su desktop le voci stanno in riga; sotto i 64rem un pulsante apre
- * un pannello a tutto schermo. Nessuna libreria, un toggle e basta.
+ * Scorrendo in giù si nasconde (translateY), così non copre mai foto,
+ * schede o fascia orizzontale; scorrendo in su riappare compatto (logo
+ * più piccolo) con fondo PIENO del colore della sezione sotto, mai
+ * semitrasparente. Tornando in cima il fondo sparisce. Con
+ * prefers-reduced-motion niente animazione: appare e sparisce e basta.
+ *
+ * Menu corto: Chi sono · Servizi · Luoghi · Storie · Blog · Contatti,
+ * più Preventivo e lingua. Portfolio, Dicono di me, Partner e FAQ stanno
+ * nel footer. Su desktop le voci sono in riga; sotto i 64rem un pulsante
+ * apre un pannello a tutto schermo. Le voci restano filtrate con
+ * existsIn(): niente link a pagine che in questa lingua non esistono.
  */
 interface Props {
   lang: Lang;
@@ -33,16 +41,10 @@ const VOCI: Array<{ key: RouteKey; label: UIKey }> = [
   { key: 'services', label: 'nav.services' },
   { key: 'places', label: 'nav.places' },
   { key: 'stories', label: 'nav.stories' },
-  { key: 'partners', label: 'nav.partners' },
-  { key: 'portfolio', label: 'nav.portfolio' },
-  { key: 'reviews', label: 'nav.reviews' },
   { key: 'blog', label: 'nav.blog' },
-  { key: 'faq', label: 'nav.faq' },
   { key: 'contact', label: 'nav.contact' },
 ];
 
-// Una voce compare solo se quella pagina esiste in questa lingua: senza il
-// filtro, il menu inglese linkerebbe pagine che il build non ha generato.
 const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
 const preventivo = existsIn('quote', lang);
 ---
@@ -97,27 +99,48 @@ const preventivo = existsIn('quote', lang);
   const toggle = header?.querySelector<HTMLButtonElement>('.menu-toggle');
 
   if (header && toggle) {
-    const imposta = (aperto: boolean): void => {
-      header.classList.toggle('menu-aperto', aperto);
-      toggle.setAttribute('aria-expanded', String(aperto));
-      document.documentElement.classList.toggle('menu-bloccato', aperto);
+    let aperto = false;
+
+    const imposta = (stato: boolean): void => {
+      aperto = stato;
+      header.classList.toggle('menu-aperto', stato);
+      toggle.setAttribute('aria-expanded', String(stato));
+      document.documentElement.classList.toggle('menu-bloccato', stato);
+      if (stato) header.classList.remove('nascosto');
     };
 
-    toggle.addEventListener('click', () => {
-      imposta(!header.classList.contains('menu-aperto'));
-    });
-
+    toggle.addEventListener('click', () => imposta(!aperto));
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') imposta(false);
     });
 
-    // Scrim: appena si scrolla, il header si dà un fondo sfumato nel
-    // colore del tema corrente, così non collide mai con i contenuti.
-    const aggiornaScrim = (): void => {
-      header.classList.toggle('con-scrim', window.scrollY > 24);
+    // Direzione dello scroll: in giù il header si nasconde, in su torna
+    // compatto con il fondo pieno; in cima torna trasparente. La soglia
+    // di 6 px evita il tremolio sui micro-movimenti.
+    const SOGLIA_CIMA = 48;
+    const SOGLIA_DIREZIONE = 6;
+    let ultimoY = window.scrollY;
+
+    const aggiorna = (): void => {
+      const y = window.scrollY;
+
+      if (y < SOGLIA_CIMA) {
+        header.classList.remove('nascosto', 'compatto');
+      } else if (!aperto) {
+        if (y > ultimoY + SOGLIA_DIREZIONE) {
+          header.classList.add('nascosto');
+          header.classList.add('compatto');
+        } else if (y < ultimoY - SOGLIA_DIREZIONE) {
+          header.classList.remove('nascosto');
+          header.classList.add('compatto');
+        }
+      }
+
+      ultimoY = y;
     };
-    window.addEventListener('scroll', aggiornaScrim, { passive: true });
-    aggiornaScrim();
+
+    window.addEventListener('scroll', aggiorna, { passive: true });
+    aggiorna();
   }
 </script>
 
@@ -136,9 +159,13 @@ const preventivo = existsIn('quote', lang);
     gap: 1.5rem;
     padding: 0.5rem clamp(1.25rem, 4vw, 3.5rem);
     color: var(--color-inchiostro);
+    background: transparent;
+    transform: translateY(0);
     transition:
+      transform 0.5s var(--ease-gaia),
       color 0.5s var(--ease-gaia),
-      background-color 0.4s var(--ease-gaia);
+      background-color 0.35s var(--ease-gaia),
+      padding 0.35s var(--ease-gaia);
     pointer-events: none;
   }
 
@@ -151,20 +178,31 @@ const preventivo = existsIn('quote', lang);
     color: var(--color-avorio-su-notte);
   }
 
-  .site-header.con-scrim {
-    background: color-mix(in srgb, var(--color-avorio) 90%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+  /* Scorrendo in giù: via. */
+  .site-header.nascosto {
+    transform: translateY(-110%);
   }
 
-  .site-header[data-header-theme='dark'].con-scrim {
-    background: color-mix(in srgb, var(--color-notte) 85%, transparent);
+  /* Scorrendo in su: compatto, con fondo PIENO del colore della sezione. */
+  .site-header.compatto {
+    --logo-h: 48px;
+    --logo-h-md: 64px;
+    padding-block: 0.4rem;
+    background: var(--color-avorio);
+  }
+
+  .site-header.compatto[data-header-theme='dark'] {
+    background: var(--color-notte);
   }
 
   .brand {
     display: inline-flex;
     line-height: 0;
     text-decoration: none;
+  }
+
+  :global(.site-header .logo-gaia svg) {
+    transition: height 0.35s var(--ease-gaia);
   }
 
   /* — Voci del menu — */
@@ -217,8 +255,6 @@ const preventivo = existsIn('quote', lang);
     color: inherit;
   }
 
-  /* Sopra una sezione scura il bottone eredita l'avorio del header e
-     all'hover si riempie di avorio (come i .btn delle sezioni scure). */
   .site-header[data-header-theme='dark'] .menu-cta:hover {
     background: var(--color-avorio-su-notte);
     border-color: var(--color-avorio-su-notte);
@@ -236,6 +272,7 @@ const preventivo = existsIn('quote', lang);
     display: none;
     align-items: center;
     gap: 0.7rem;
+    min-height: 44px;
     padding: 0.5rem 0;
     border: 0;
     background: none;
@@ -329,10 +366,12 @@ const preventivo = existsIn('quote', lang);
 
     .menu-voci {
       flex-direction: column;
-      gap: 1.1rem;
+      gap: 0.5rem;
     }
 
     .menu-voci a {
+      display: inline-block;
+      padding: 0.35rem 0;
       font-family: var(--font-display);
       font-size: clamp(1.75rem, 6vw, 2.5rem);
       font-weight: 340;
@@ -354,7 +393,8 @@ const preventivo = existsIn('quote', lang);
     .site-header,
     .menu,
     .menu-voci a::after,
-    .menu-toggle-linee i {
+    .menu-toggle-linee i,
+    :global(.site-header .logo-gaia svg) {
       transition: none;
     }
   }
