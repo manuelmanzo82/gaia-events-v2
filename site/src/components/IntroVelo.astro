@@ -113,27 +113,32 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     // 1 — il ghirigoro si disegna (dashoffset sui path guida della maschera):
     // prima il cammino principale, poi i rami residui, tutto dentro
     // TEMPI.ghirigoro; la copertura chiude la maschera sugli ultimi residui.
+    // Due accorgimenti perché a t=0 il velo sia DAVVERO vuoto:
+    //  - dasharray/dashoffset con 2 unità di margine: getTotalLength può
+    //    stare sotto la lunghezza resa e la differenza spunterebbe subito;
+    //  - ogni guida resta a opacity 0 (CSS) finché il suo tween non parte,
+    //    così nessun residuo del tratto può apparire prima del tempo.
     for (const guida of guide) {
-      const lunghezza = guida.getTotalLength();
+      const lunghezza = guida.getTotalLength() + 2;
       gsap.set(guida, { strokeDasharray: lunghezza, strokeDashoffset: lunghezza });
     }
     if (ghirigoro) tl.set(ghirigoro, { opacity: 1 }, 0);
     if (guide.length > 0) {
+      tl.set(guide[0], { opacity: 1 }, TEMPI.avvio);
       tl.to(
         guide[0],
         { strokeDashoffset: 0, duration: TEMPI.ghirigoro * 0.75, ease: 'power2.inOut' },
         TEMPI.avvio,
       );
-      tl.to(
-        guide.slice(1),
-        {
-          strokeDashoffset: 0,
-          duration: TEMPI.ghirigoro * 0.2,
-          ease: 'power2.out',
-          stagger: 0.06,
-        },
-        TEMPI.avvio + TEMPI.ghirigoro * 0.7,
-      );
+      guide.slice(1).forEach((ramo, i) => {
+        const partenza = TEMPI.avvio + TEMPI.ghirigoro * 0.7 + i * 0.06;
+        tl.set(ramo, { opacity: 1 }, partenza);
+        tl.to(
+          ramo,
+          { strokeDashoffset: 0, duration: TEMPI.ghirigoro * 0.2, ease: 'power2.out' },
+          partenza,
+        );
+      });
     }
     if (copertura) {
       tl.to(copertura, { opacity: 1, duration: 0.25 }, TEMPI.avvio + TEMPI.ghirigoro * 0.85);
@@ -232,6 +237,13 @@ const SOTTORIGA = 'Italia · Destination Weddings';
   }
 
   #intro-velo :global(.logo-firma) {
+    opacity: 0;
+  }
+
+  /* Le guide della maschera partono invisibili: ognuna si accende solo
+     quando il suo tween comincia, così nessun pezzo di tratto (cappucci,
+     code di dashoffset) può comparire prima del tempo. */
+  #intro-velo :global(.velo-guida) {
     opacity: 0;
   }
 
