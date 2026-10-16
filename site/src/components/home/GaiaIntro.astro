@@ -33,7 +33,7 @@ const manifesto = text(settings.home.manifesto, lang);
 const foto = picture(
   getHighlights('chi-sono')[0]?.image ?? settings.about.image,
   lang,
-  '(min-width: 64rem) 50vw, 100vw',
+  '(min-width: 64rem) 36vw, 92vw',
 );
 const paginaChiSono = existsIn('about', lang);
 ---
@@ -46,6 +46,8 @@ const paginaChiSono = existsIn('about', lang);
           foto && (
             <figure class="gaia-figura" data-reveal="maschera">
               <Picture data={foto} cap={false} class="gaia-img" />
+              {/* object-position in alto: il taglio esclude l'angolo in basso a
+                  destra, dove la foto porta il watermark del fotografo. */}
             </figure>
           )
         }
@@ -84,17 +86,22 @@ const paginaChiSono = existsIn('about', lang);
 
 <style>
   .gaia {
+    padding-block: var(--spacing-section);
     background: var(--color-avorio);
   }
 
   .gaia-griglia {
     display: grid;
+    gap: clamp(2rem, 5vw, 5rem);
+    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 80rem);
+    margin-inline: auto;
   }
 
   .gaia-figura {
     margin: 0;
     aspect-ratio: 4 / 5;
     overflow: hidden;
+    border-radius: 3px;
     background: var(--color-beige);
   }
 
@@ -107,10 +114,11 @@ const paginaChiSono = existsIn('about', lang);
 
   .gaia-figura :global(.gaia-img) {
     object-fit: cover;
+    object-position: 50% 12% !important;
   }
 
   .gaia-testo {
-    padding: var(--spacing-section) clamp(1.25rem, 4vw, 3.5rem);
+    padding: 0;
   }
 
   .gaia-titolo {
@@ -141,21 +149,20 @@ const paginaChiSono = existsIn('about', lang);
   }
 
   @media (min-width: 64rem) {
+    /* Foto al massimo 40% della larghezza, colonna di testo piu' larga. */
     .gaia-griglia {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: stretch;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      align-items: center;
     }
 
     .gaia-figura {
-      aspect-ratio: auto;
-      min-height: 100vh;
-      min-height: 100svh;
+      aspect-ratio: 4 / 5;
+      max-height: 78vh;
+      max-height: 78svh;
     }
 
     .gaia-testo {
-      align-self: center;
-      padding-inline: clamp(2.5rem, 6vw, 6rem);
-      max-width: 40rem;
+      max-width: 44rem;
     }
 
     .gaia-citazione {
