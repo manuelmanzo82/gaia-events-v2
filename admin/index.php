@@ -16,13 +16,19 @@ use Gaia\Admin\Controllers\AuthController;
 use Gaia\Admin\Controllers\DashboardController;
 use Gaia\Admin\Controllers\EventsController;
 use Gaia\Admin\Controllers\FaqsController;
+use Gaia\Admin\Controllers\HeroController;
+use Gaia\Admin\Controllers\HighlightsController;
 use Gaia\Admin\Controllers\InquiriesController;
+use Gaia\Admin\Controllers\LocationsController;
+use Gaia\Admin\Controllers\LuoghiController;
 use Gaia\Admin\Controllers\MediaController;
 use Gaia\Admin\Controllers\PagesController;
+use Gaia\Admin\Controllers\PartnersController;
 use Gaia\Admin\Controllers\PostsController;
 use Gaia\Admin\Controllers\ReviewsController;
 use Gaia\Admin\Controllers\ServicesController;
 use Gaia\Admin\Controllers\SettingsController;
+use Gaia\Admin\Controllers\StoriesController;
 use Gaia\Admin\Router;
 use Gaia\Admin\Session;
 
@@ -61,6 +67,11 @@ $resources = [
     'recensioni' => ReviewsController::class,
     'blog' => PostsController::class,
     'faq' => FaqsController::class,
+    'luoghi' => LuoghiController::class,
+    'location' => LocationsController::class,
+    'highlights' => HighlightsController::class,
+    'partner' => PartnersController::class,
+    'storie' => StoriesController::class,
 ];
 
 foreach ($resources as $segment => $controller) {
@@ -77,6 +88,27 @@ $router->get('/eventi/{id}/galleria', [EventsController::class, 'gallery']);
 $router->post('/eventi/{id}/galleria/aggiungi', [EventsController::class, 'galleryAdd']);
 $router->post('/eventi/{id}/galleria/ordina', [EventsController::class, 'gallerySort']);
 $router->post('/eventi/{id}/galleria/{image}/rimuovi', [EventsController::class, 'galleryRemove']);
+
+// Gallerie di luoghi e storie (stesso schema della galleria eventi).
+foreach (['luoghi' => LuoghiController::class, 'storie' => StoriesController::class] as $segment => $controller) {
+    $router->get("/{$segment}/{id}/galleria", [$controller, 'gallery']);
+    $router->post("/{$segment}/{id}/galleria/aggiungi", [$controller, 'galleryAdd']);
+    $router->post("/{$segment}/{id}/galleria/ordina", [$controller, 'gallerySort']);
+    $router->post("/{$segment}/{id}/galleria/{image}/rimuovi", [$controller, 'galleryRemove']);
+}
+
+// Sezioni di un highlight: dove compare e con che ordine.
+$router->get('/highlights/{id}/sezioni', [HighlightsController::class, 'sections']);
+$router->post('/highlights/{id}/sezioni', [HighlightsController::class, 'sectionsSave']);
+
+// Hero delle pagine: testi, video, poster e foto.
+$router->get('/hero', [HeroController::class, 'index']);
+$router->get('/hero/{id}/galleria', [HeroController::class, 'gallery']);
+$router->post('/hero/{id}/galleria/aggiungi', [HeroController::class, 'galleryAdd']);
+$router->post('/hero/{id}/galleria/ordina', [HeroController::class, 'gallerySort']);
+$router->post('/hero/{id}/galleria/{image}/rimuovi', [HeroController::class, 'galleryRemove']);
+$router->get('/hero/{key}', [HeroController::class, 'edit']);
+$router->post('/hero/{key}', [HeroController::class, 'save']);
 
 // Immagini
 $router->get('/immagini', [MediaController::class, 'index']);

@@ -72,6 +72,12 @@
   <a href="<?= e(admin_url()) ?>">Pannello</a>
   <a href="<?= e(admin_url('impostazioni')) ?>">Impostazioni</a>
   <a href="<?= e(admin_url('pagine')) ?>">Pagine</a>
+  <a href="<?= e(admin_url('hero')) ?>">Hero</a>
+  <a href="<?= e(admin_url('luoghi')) ?>">Luoghi</a>
+  <a href="<?= e(admin_url('location')) ?>">Location</a>
+  <a href="<?= e(admin_url('highlights')) ?>">Highlights</a>
+  <a href="<?= e(admin_url('storie')) ?>">Storie</a>
+  <a href="<?= e(admin_url('partner')) ?>">Partner</a>
   <a href="<?= e(admin_url('eventi')) ?>">Eventi</a>
   <a href="<?= e(admin_url('servizi')) ?>">Servizi</a>
   <a href="<?= e(admin_url('recensioni')) ?>">Recensioni</a>
