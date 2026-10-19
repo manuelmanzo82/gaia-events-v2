@@ -19,6 +19,7 @@ use Gaia\Admin\Controllers\FaqsController;
 use Gaia\Admin\Controllers\HeroController;
 use Gaia\Admin\Controllers\HighlightsController;
 use Gaia\Admin\Controllers\InquiriesController;
+use Gaia\Admin\Controllers\InstagramController;
 use Gaia\Admin\Controllers\LocationsController;
 use Gaia\Admin\Controllers\LuoghiController;
 use Gaia\Admin\Controllers\MediaController;
@@ -100,6 +101,14 @@ foreach (['luoghi' => LuoghiController::class, 'storie' => StoriesController::cl
 // Sezioni di un highlight: dove compare e con che ordine.
 $router->get('/highlights/{id}/sezioni', [HighlightsController::class, 'sections']);
 $router->post('/highlights/{id}/sezioni', [HighlightsController::class, 'sectionsSave']);
+
+// Instagram: post caricati a mano (pronti per la sincronizzazione futura).
+$router->get('/instagram', [InstagramController::class, 'index']);
+$router->post('/instagram/carica', [InstagramController::class, 'upload']);
+$router->post('/instagram/ordina', [InstagramController::class, 'sort']);
+$router->post('/instagram/{id}/modifica', [InstagramController::class, 'update']);
+$router->post('/instagram/{id}/visibilita', [InstagramController::class, 'toggle']);
+$router->post('/instagram/{id}/elimina', [InstagramController::class, 'destroy']);
 
 // Hero delle pagine: testi, video, poster e foto.
 $router->get('/hero', [HeroController::class, 'index']);

@@ -78,6 +78,7 @@
   <a href="<?= e(admin_url('highlights')) ?>">Highlights</a>
   <a href="<?= e(admin_url('storie')) ?>">Storie</a>
   <a href="<?= e(admin_url('partner')) ?>">Partner</a>
+  <a href="<?= e(admin_url('instagram')) ?>">Instagram</a>
   <a href="<?= e(admin_url('eventi')) ?>">Eventi</a>
   <a href="<?= e(admin_url('servizi')) ?>">Servizi</a>
   <a href="<?= e(admin_url('recensioni')) ?>">Recensioni</a>
