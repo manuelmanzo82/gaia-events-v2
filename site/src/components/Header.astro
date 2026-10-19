@@ -14,8 +14,8 @@ import LogoGaia from './LogoGaia.astro';
  * transizione morbida. Sopra una foto (sezioni con data-foto) il testo
  * prende un'ombra morbidissima per la leggibilità.
  *
- * Allo scroll il logo si riduce (130 → 64 px su desktop) e resta così;
- * tornando in cima torna grande.
+ * Il logo resta sempre alla misura originale (130 px desktop, 80 px
+ * mobile): allo scroll cambia solo colore, mai dimensione.
  *
  * Menu corto: Chi sono · Servizi · Luoghi · Storie · Blog · Contatti, più
  * Preventivo e lingua; il resto sta nel footer. Su desktop le voci sono
@@ -111,13 +111,6 @@ const preventivo = existsIn('quote', lang);
       if (e.key === 'Escape') imposta(false);
     });
 
-    // Allo scroll il logo si riduce e resta ridotto; in cima torna grande.
-    const SOGLIA = 48;
-    const aggiorna = (): void => {
-      header.classList.toggle('ridotto', window.scrollY > SOGLIA);
-    };
-    window.addEventListener('scroll', aggiorna, { passive: true });
-    aggiorna();
   }
 </script>
 
@@ -212,11 +205,17 @@ const preventivo = existsIn('quote', lang);
     filter: drop-shadow(0 1px 2px rgb(27 22 17 / 0.28)) drop-shadow(0 0 14px rgb(27 22 17 / 0.2));
   }
 
-  /* Dopo lo scroll il logo si riduce e resta così. */
-  .site-header.ridotto {
-    --logo-h: 56px;
-    --logo-h-md: 64px;
-    padding-block: 0.4rem;
+  /* Il logo resta sempre alla misura originale (80 px mobile, 130 px da
+     48rem): allo scroll cambia solo colore. Le pagine interne lasciano in
+     alto lo spazio del header con --altezza-header (BaseLayout). */
+  :global(:root) {
+    --altezza-header: 96px;
+  }
+
+  @media (min-width: 48rem) {
+    :global(:root) {
+      --altezza-header: 146px;
+    }
   }
 
   .brand {
@@ -226,9 +225,7 @@ const preventivo = existsIn('quote', lang);
   }
 
   :global(.site-header .logo-gaia svg) {
-    transition:
-      height 0.45s var(--ease-gaia),
-      filter 0.5s var(--ease-gaia);
+    transition: filter 0.5s var(--ease-gaia);
   }
 
   /* — Voci del menu — */
@@ -361,10 +358,6 @@ const preventivo = existsIn('quote', lang);
   @media (max-width: 79.98rem) {
     .site-header {
       --logo-h: 80px;
-    }
-
-    .site-header.ridotto {
-      --logo-h: 56px;
     }
 
     .menu-toggle {
