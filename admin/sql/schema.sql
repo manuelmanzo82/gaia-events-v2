@@ -638,3 +638,30 @@ CREATE TABLE IF NOT EXISTS `page_hero_images` (
   CONSTRAINT `fk_page_hero_images_hero` FOREIGN KEY (`hero_id`) REFERENCES `page_hero` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_page_hero_images_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Instagram (19/10/2026): post caricati a mano, pronti per la
+-- sincronizzazione via API. Stessa definizione della migrazione
+-- migrations/2026-10-19-instagram-posts.sql (che aggiunge anche le
+-- impostazioni instagram.handle e instagram.numero_post).
+-- ---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `instagram_posts` (
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `media_id`     INT UNSIGNED NOT NULL,
+  `permalink`    VARCHAR(500) DEFAULT NULL,
+  `taken_at`     DATETIME DEFAULT NULL,
+  `tipo`         ENUM('foto','reel','carosello') NOT NULL DEFAULT 'foto',
+  `source`       ENUM('manuale','api') NOT NULL DEFAULT 'manuale',
+  `ig_media_id`  VARCHAR(64) DEFAULT NULL,
+  `nascosto`     TINYINT(1) NOT NULL DEFAULT 0,
+  `note_interne` VARCHAR(500) DEFAULT NULL,
+  `sort_order`   SMALLINT NOT NULL DEFAULT 0,
+  `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_instagram_posts_ig_media_id` (`ig_media_id`),
+  KEY `idx_instagram_posts_visibili` (`nascosto`, `taken_at`, `sort_order`),
+  KEY `fk_instagram_posts_media` (`media_id`),
+  -- Se la foto viene eliminata dalla libreria, il post sparisce con lei.
+  CONSTRAINT `fk_instagram_posts_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
