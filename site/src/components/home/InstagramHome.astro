@@ -1,0 +1,318 @@
+---
+/**
+ * Instagram in home, prima della CTA finale: «Seguici su Instagram» +
+ * @handle, una fascia di foto SFALSATE (4:5 e 1:1 alternate, non la
+ * griglia piatta della v1) e il bottone al profilo.
+ *
+ *  - ≥64rem: la fascia scorre piano in orizzontale in loop (CSS, nessun
+ *    JS), in pausa al passaggio del mouse o col focus dentro; per il loop
+ *    senza giunture la serie è ripetuta una volta, e la copia è nascosta
+ *    agli screen reader e fuori dal tab;
+ *  - sotto i 64rem: carosello a scroll-snap, niente animazione;
+ *  - prefers-reduced-motion: niente scorrimento, griglia ferma.
+ *
+ * Ogni foto apre il post (o il profilo, se il post non ha link) in una
+ * nuova scheda; al passaggio compare una piccola icona Instagram. Foto
+ * lazy con width/height: nessun effetto su LCP e CLS. Nessun post
+ * visibile → la sezione non esiste.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { getInstagram } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const feed = getInstagram();
+const SIZES = '(min-width: 64rem) 18rem, 64vw';
+
+const post = feed.posts
+  .map((p, i) => {
+    const data = picture(p.image, lang, SIZES);
+    if (!data) return null;
+    const href = p.permalink || feed.profileUrl;
+    const etichetta = `${data.alt ? data.alt + ' — ' : ''}${
+      p.permalink ? t('instagram.apriPost') : t('instagram.apriProfilo')
+    } (${t('instagram.nuovaScheda')})`;
+    return { data, href, etichetta, alta: i % 2 === 0 };
+  })
+  .filter((p): p is NonNullable<typeof p> => p !== null && !!p.href);
+
+// Durata del giro completo: ~8 s per foto (circa 34 px/s a 1440), lento.
+const durata = Math.max(post.length * 8, 40);
+---
+
+{
+  post.length > 0 && feed.profileUrl && (
+    <section id="instagram" class="ig" data-theme="light" aria-labelledby="ig-titolo">
+      <header class="ig-testa container-gaia">
+        <h2 id="ig-titolo" class="text-display ig-titolo" data-reveal="righe">
+          {t('instagram.titolo')}
+        </h2>
+        {feed.handle && (
+          <p class="ig-handle" data-reveal="alto">
+            <a class="link-filo" href={feed.profileUrl} target="_blank" rel="noopener me">
+              {feed.handle}
+            </a>
+          </p>
+        )}
+      </header>
+
+      <div class="ig-fascia" style={`--durata: ${durata}s`}>
+        <div class="ig-binario">
+          {[0, 1].map((copia) => (
+            <ul class="ig-serie" aria-hidden={copia === 1 ? 'true' : undefined} data-copia={copia}>
+              {post.map((p) => (
+                <li class:list={['ig-voce', { 'ig-voce--alta': p.alta }]}>
+                  <a
+                    class="ig-link"
+                    href={p.href}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={copia === 0 ? p.etichetta : undefined}
+                    tabindex={copia === 1 ? -1 : undefined}
+                  >
+                    <Picture data={p.data} cap={false} class="ig-img" />
+                    <span class="ig-icona" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <rect x="3" y="3" width="18" height="18" rx="5" />
+                        <circle cx="12" cy="12" r="4.2" />
+                        <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
+                      </svg>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+
+      <p class="ig-azioni container-gaia">
+        <a class="btn" href={feed.profileUrl} target="_blank" rel="noopener me">
+          {t('instagram.cta')}
+        </a>
+      </p>
+    </section>
+  )
+}
+
+<style>
+  .ig {
+    padding-block: var(--spacing-section);
+    background: var(--color-avorio);
+    overflow: hidden;
+  }
+
+  .ig-testa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-bottom: clamp(2rem, 5vh, 3rem);
+  }
+
+  .ig-titolo {
+    margin: 0;
+  }
+
+  .ig-handle {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .ig-handle .link-filo {
+    font-size: 0.9375rem;
+    letter-spacing: 0.1em;
+    text-transform: none;
+  }
+
+  /* — Foto — */
+  .ig-voce {
+    flex: none;
+    width: var(--ig-larghezza);
+    margin-right: var(--ig-spazio);
+    list-style: none;
+  }
+
+  .ig-link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 1 / 1;
+    background: var(--color-beige);
+    color: var(--color-avorio-su-notte);
+  }
+
+  /* Altezze alternate: una 4:5, una 1:1, centrate sulla stessa linea. */
+  .ig-voce--alta .ig-link {
+    aspect-ratio: 4 / 5;
+  }
+
+  .ig-link :global(picture),
+  .ig-link :global(.ig-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ig-link :global(.ig-img) {
+    object-fit: cover;
+    transition: transform 0.9s var(--ease-gaia);
+  }
+
+  .ig-icona {
+    position: absolute;
+    inset: auto 0.7rem 0.7rem auto;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgb(27 22 17 / 0.55);
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.35s var(--ease-gaia),
+      transform 0.35s var(--ease-gaia);
+  }
+
+  .ig-link:hover .ig-icona,
+  .ig-link:focus-visible .ig-icona {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ig-link:hover :global(.ig-img) {
+    transform: scale(1.03);
+  }
+
+  .ig-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 3px;
+  }
+
+  .ig-azioni {
+    margin: clamp(2rem, 5vh, 3rem) auto 0;
+  }
+
+  /* — Mobile: carosello a scroll-snap, niente animazione — */
+  .ig-fascia {
+    --ig-larghezza: 64vw;
+    --ig-spazio: 0.9rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+    scroll-padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  .ig-fascia::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ig-binario,
+  .ig-serie {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ig-binario {
+    width: max-content;
+  }
+
+  .ig-voce {
+    scroll-snap-align: start;
+  }
+
+  /* La copia serve solo al loop del desktop. */
+  .ig-serie[data-copia='1'] {
+    display: none;
+  }
+
+  /* — Desktop: la fascia scorre in loop, in pausa al passaggio — */
+  @media (min-width: 64rem) {
+    .ig-fascia {
+      --ig-larghezza: clamp(13rem, 17vw, 18rem);
+      --ig-spazio: clamp(1.25rem, 2vw, 2rem);
+      overflow: visible;
+      padding-inline: 0;
+      scroll-snap-type: none;
+    }
+
+    .ig-serie[data-copia='1'] {
+      display: flex;
+    }
+
+    /* Due serie identiche (spazio compreso): a -50% il binario torna
+       esattamente al punto di partenza. */
+    .ig-binario {
+      animation: ig-scorri var(--durata, 48s) linear infinite;
+    }
+
+    .ig-fascia:hover .ig-binario,
+    .ig-fascia:focus-within .ig-binario {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes ig-scorri {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* — Movimento ridotto: griglia ferma, niente copia — */
+  @media (prefers-reduced-motion: reduce) {
+    .ig-fascia {
+      overflow: visible;
+      padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+      scroll-snap-type: none;
+    }
+
+    .ig-binario {
+      width: auto;
+      max-width: 80rem;
+      margin-inline: auto;
+      animation: none !important;
+    }
+
+    .ig-serie[data-copia='0'] {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      width: 100%;
+      align-items: center;
+    }
+
+    .ig-serie[data-copia='1'] {
+      display: none !important;
+    }
+
+    .ig-voce {
+      width: auto;
+      margin: 0;
+    }
+
+    .ig-link :global(.ig-img),
+    .ig-icona {
+      transition: none;
+    }
+
+    @media (min-width: 48rem) {
+      .ig-serie[data-copia='0'] {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  }
+</style>

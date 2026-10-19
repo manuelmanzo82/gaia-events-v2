@@ -32,6 +32,11 @@ export const UI = {
   'cta.allEvents': { it: 'Tutti gli eventi', en: 'All events' },
   'cta.readMore': { it: 'Leggi l’articolo', en: 'Read the article' },
   'cta.back': { it: 'Torna indietro', en: 'Go back' },
+  'instagram.titolo': { it: 'Seguici su Instagram', en: 'Follow us on Instagram' },
+  'instagram.cta': { it: 'Seguimi su Instagram', en: 'Follow me on Instagram' },
+  'instagram.apriPost': { it: 'apri il post su Instagram', en: 'open the post on Instagram' },
+  'instagram.apriProfilo': { it: 'apri il profilo Instagram', en: 'open the Instagram profile' },
+  'instagram.nuovaScheda': { it: 'si apre in una nuova scheda', en: 'opens in a new tab' },
   'cta.home': { it: 'Torna alla home', en: 'Back to home' },
 
   'common.breadcrumb': { it: 'Percorso di navigazione', en: 'Breadcrumb' },

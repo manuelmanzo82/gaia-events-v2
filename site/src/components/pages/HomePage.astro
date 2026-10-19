@@ -7,8 +7,9 @@
  *
  * Tutti i testi vengono dal back office; una sezione senza contenuti in
  * questa lingua non viene renderizzata, con la stessa logica di
- * availability.ts usata da menu, sitemap e hreflang. Instagram arriverà
- * più avanti, via API ufficiale.
+ * availability.ts usata da menu, sitemap e hreflang. Instagram: post
+ * caricati dal back office (più avanti anche via API), sezione nascosta
+ * se non ce n'è nessuno visibile.
  */
 import type { Lang } from '../../config/site';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -23,6 +24,7 @@ import GaiaIntro from '../home/GaiaIntro.astro';
 import HeroHome from '../home/HeroHome.astro';
 import HighlightsImpilati from '../home/HighlightsImpilati.astro';
 import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
+import InstagramHome from '../home/InstagramHome.astro';
 import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
 import Recensione from '../home/Recensione.astro';
 import ServiziSplit from '../home/ServiziSplit.astro';
@@ -105,6 +107,8 @@ const section = (key: string) => settings.sections[key];
   <Recensione lang={lang} eyebrow={text(section('reviews')?.title, lang)} />
 
   <DestinationAggancio lang={lang} />
+
+  <InstagramHome lang={lang} />
 
   <CtaFinale lang={lang} settings={settings} />
 </BaseLayout>
