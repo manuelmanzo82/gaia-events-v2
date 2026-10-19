@@ -27,7 +27,7 @@ import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
 import InstagramHome from '../home/InstagramHome.astro';
 import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
 import Recensione from '../home/Recensione.astro';
-import ServiziSplit from '../home/ServiziSplit.astro';
+import ServiziLista from '../home/ServiziLista.astro';
 
 interface Props {
   lang: Lang;
@@ -98,7 +98,7 @@ const section = (key: string) => settings.sections[key];
 
   <LuoghiAnteprima lang={lang} />
 
-  <ServiziSplit
+  <ServiziLista
     lang={lang}
     titolo={text(section('services')?.title, lang)}
     testo={text(section('services')?.text, lang)}
@@ -116,8 +116,8 @@ const section = (key: string) => settings.sections[key];
 <script>
   import { initHomeEffetti } from '../../scripts/home-effetti';
 
-  // Dopo il motion di base (BaseLayout): schede impilate, fascia
-  // orizzontale e sticky split esistono solo da 64rem in su.
+  // Dopo il motion di base (BaseLayout): schede impilate e fascia
+  // orizzontale esistono solo da 64rem in su.
   if (document.fonts?.ready) {
     void document.fonts.ready.then(() => initHomeEffetti());
   } else {

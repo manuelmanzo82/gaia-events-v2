@@ -1,16 +1,14 @@
 /**
  * Effetti di scroll della home (GSAP + ScrollTrigger, Lenis già avviato
- * da motion.ts). Tre pattern, reinterpretati da sarahhaywood.com:
+ * da motion.ts). Due pattern, reinterpretati da sarahhaywood.com:
  *
  *   [data-impila]       schede che si impilano: ogni .scheda è sticky, e
  *                       quella coperta si riduce e si attenua con lo scrub
  *   [data-orizzontale]  sezione agganciata (pin) in cui lo scroll verticale
  *                       fa scorrere il .binario in orizzontale
- *   [data-split]        testo che scorre a sinistra, foto ferma a destra che
- *                       cambia quando il blocco corrispondente entra
  *
- * Tutti e tre esistono SOLO da 64rem in su: sotto, il CSS fa scroll
- * naturale (colonna, carosello con scroll-snap, foto sopra il testo) e qui
+ * Esistono SOLO da 64rem in su: sotto, il CSS fa scroll naturale
+ * (colonna, carosello con scroll-snap) e qui
  * non si registra niente. Con prefers-reduced-motion niente del tutto.
  * Nessuno stato iniziale nascosto: le pagine sono complete senza JS.
  */
@@ -72,30 +70,6 @@ function scorrimentoOrizzontale(): void {
   }
 }
 
-function testoCheScorre(): void {
-  for (const split of document.querySelectorAll<HTMLElement>('[data-split]')) {
-    const blocchi = [...split.querySelectorAll<HTMLElement>('.split-blocco')];
-    const foto = [...split.querySelectorAll<HTMLElement>('.split-foto [data-foto]')];
-    if (blocchi.length === 0 || foto.length === 0) continue;
-
-    const attiva = (indice: number): void => {
-      for (const f of foto) f.classList.toggle('attiva', f.dataset.foto === String(indice));
-    };
-
-    blocchi.forEach((blocco, i) => {
-      ScrollTrigger.create({
-        trigger: blocco,
-        start: 'top 55%',
-        end: 'bottom 55%',
-        onEnter: () => attiva(i),
-        onEnterBack: () => attiva(i),
-      });
-    });
-
-    attiva(0);
-  }
-}
-
 /** Da chiamare una volta, dopo initMotion(). */
 export function initHomeEffetti(): void {
   if (riduciMotion()) return;
@@ -106,7 +80,6 @@ export function initHomeEffetti(): void {
   mm.add(DESKTOP, () => {
     schedeImpilate();
     scorrimentoOrizzontale();
-    testoCheScorre();
   });
 
   // Le foto arrivano con width/height dichiarati, ma il pin orizzontale
