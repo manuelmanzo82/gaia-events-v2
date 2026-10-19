@@ -67,7 +67,7 @@ const limite = schede.length > 0 ? Math.min(...schede.map((s) => s.data.maxWidth
   schede.length > 0 && (
     <section id="highlights" class="impila" data-theme="light" style={`--limite-schede: ${limite}px`}>
       <header class="impila-testa">
-        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        {eyebrow && <p class="eyebrow impila-eyebrow">{eyebrow}</p>}
         {titolo && (
           <h2 class="text-display" data-reveal="righe">
             {titolo}
@@ -104,10 +104,23 @@ const limite = schede.length > 0 ? Math.min(...schede.map((s) => s.data.maxWidth
     background: var(--color-avorio);
   }
 
+  /* Subito dopo la sezione Gaia (stesso fondo avorio) i due margini si
+     sommavano (~280 px): qui ne resta uno, il ritmo delle altre sezioni. */
+  :global(.gaia) + .impila {
+    padding-top: 0;
+  }
+
   /* Eyebrow e titolo allineati al bordo sinistro delle schede. */
   .impila-testa {
     width: var(--larghezza-scheda);
     margin: 0 auto clamp(2rem, 5vh, 3.5rem);
+  }
+
+  /* L'eyebrow globale è inline-flex: in linea prende l'interlinea del
+     corpo e scende di qualche px; qui è un blocco. */
+  .impila-eyebrow {
+    display: flex;
+    margin: 0;
   }
 
   .impila-testa h2 {
