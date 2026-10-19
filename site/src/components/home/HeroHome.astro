@@ -377,13 +377,37 @@ const video = hero?.video ?? null;
   }
 
   /* Velo: scurisce il basso per il testo e l'alto per il header. */
+  /* Velo: in alto per il header, in basso per il testo, e una sfumatura
+     raccolta attorno al blocco di testo (in basso a sinistra), così eyebrow,
+     titolo e sottotitolo restano sopra le soglie di contrasto anche sulle
+     foto con il cielo chiaro, senza scurire tutta la foto. */
   .hero-velo {
     position: absolute;
     inset: 0;
     z-index: 1;
     background:
+      radial-gradient(
+        ellipse 72% 66% at 24% 56%,
+        rgb(27 22 17 / 0.68) 0%,
+        rgb(27 22 17 / 0.52) 50%,
+        rgb(27 22 17 / 0) 100%
+      ),
       linear-gradient(180deg, rgb(27 22 17 / 0.5) 0%, rgb(27 22 17 / 0.18) 22%, transparent 40%),
-      linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.25) 45%, transparent 70%);
+      linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.45) 40%, transparent 72%);
+  }
+
+  @media (max-width: 47.98rem) {
+    .hero-velo {
+      background:
+        radial-gradient(
+          ellipse 120% 64% at 40% 58%,
+          rgb(27 22 17 / 0.68) 0%,
+          rgb(27 22 17 / 0.52) 50%,
+          rgb(27 22 17 / 0) 100%
+        ),
+        linear-gradient(180deg, rgb(27 22 17 / 0.5) 0%, rgb(27 22 17 / 0.18) 22%, transparent 40%),
+        linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.45) 40%, transparent 72%);
+    }
   }
 
   .hero-testo {
@@ -394,7 +418,7 @@ const video = hero?.video ?? null;
   }
 
   .hero-eyebrow {
-    color: var(--color-oro);
+    color: var(--color-avorio-su-notte);
     margin: 0 0 1.25rem;
   }
 

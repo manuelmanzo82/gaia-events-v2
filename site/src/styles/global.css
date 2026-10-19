@@ -218,8 +218,14 @@
     color: var(--color-oro-testo);
   }
 
+  /* Sulle sezioni scure e sulle foto l'oro piccolo non si legge (sopra
+     un cielo chiaro scende sotto 2:1): eyebrow e filetto in avorio. */
   [data-theme='dark'] .eyebrow {
-    color: var(--color-oro);
+    color: var(--color-avorio-su-notte);
+  }
+
+  [data-theme='dark'] .eyebrow::before {
+    opacity: 0.85;
   }
 
   .eyebrow::before {
