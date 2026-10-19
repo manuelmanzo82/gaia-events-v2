@@ -131,6 +131,9 @@ const servizi = getServices()
     let segue = false; // true = insegue il mouse; false = ferma accanto alla riga
 
     const mostra = (indice: number | null): void => {
+      // Il contenitore nasce in display: none (foto lazy mai scaricate su
+      // mobile o finché non serve): si accende alla prima occasione.
+      if (indice !== null) cursore.classList.add('pronto');
       for (const f of foto) f.classList.toggle('attiva', f.dataset.indice === String(indice));
       cursore.classList.toggle('visibile', indice !== null && foto.some((f) => f.dataset.indice === String(indice)));
     };
@@ -347,7 +350,11 @@ const servizi = getServices()
   }
 
   /* — Foto che segue il cursore (solo desktop) — */
+  /* display: none finché non serve: fissa in alto a sinistra conterebbe
+     come «nella finestra» e le sue foto lazy si scaricherebbero subito,
+     anche su mobile dove non si vedono mai. */
   .servizi-cursore {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -363,6 +370,10 @@ const servizi = getServices()
       opacity 0.35s var(--ease-gaia),
       visibility 0s linear 0.35s;
     will-change: transform;
+  }
+
+  .servizi-cursore.pronto {
+    display: block;
   }
 
   .servizi-cursore.visibile {
