@@ -84,6 +84,20 @@ Gmail si nota.
 
 ---
 
+### 8. La frase della sezione «Ciao, sono Gaia» in home (19/10/2026)
+
+In home la citazione lunga («Il mio obiettivo è trasformare la vostra
+visione in realtà, curando ogni dettaglio…») non va più: serve una frase
+corta. Per ora, scritta da noi nel campo `home.manifesto` (Impostazioni →
+home):
+
+- IT: «Io penso a tutto. Voi vivete ogni momento.»
+- EN: «I take care of everything. You live every moment.»
+
+**Da confermare con Gaia**, o da sostituire con una frase sua: è la sua
+voce, deve riconoscerla. La frase lunga resta disponibile per la pagina
+Chi sono.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database
@@ -93,7 +107,7 @@ mostra così come sono.
 
 | Dove | Campo | Bozza EN |
 |---|---|---|
-| Impostazioni → home | `home.manifesto` | My work is to turn your vision into a day that exceeds every expectation — with every detail cared for, and nothing left to chance. |
+| Impostazioni → home | `home.manifesto` | *Sostituita il 19/10, vedi sotto.* |
 | Impostazioni → generale | `about.text` | For more than ten years I have devoted my life to creating dream weddings. My story with events began almost by chance, planning a dear friend's wedding — and from that moment I knew this was my calling. |
 | Servizi → Wedding Planning Completo | titolo / sottotitolo / descrizione / 8 punti | Full Wedding Planning · Full service · A complete service that walks beside you from the first idea to the last dance. I take care of every part of the planning, so you can enjoy your engagement without the stress. |
 | Servizi → Coordinamento del Giorno | titolo / sottotitolo / descrizione / 7 punti | Day-of Coordination · On the day · Everything is planned, and now you want a professional to run the day? This service makes sure it all unfolds exactly as it should, while you savour every moment. |

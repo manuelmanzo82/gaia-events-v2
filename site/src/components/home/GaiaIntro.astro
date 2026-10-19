@@ -98,9 +98,10 @@ const paginaChiSono = existsIn('about', lang);
     margin-inline: auto;
   }
 
-  /* Mobile: foto sopra il testo, in 4:5. La foto (2:3) si taglia in
-     verticale: y 30% la tiene intera su di lei, piedi compresi, e lascia
-     fuori il watermark del fotografo in basso a destra. */
+  /* Foto a formato fisso 4:5 (sopra il testo su mobile, accanto su
+     desktop). La foto (2:3) si taglia in verticale: y 30% la tiene intera
+     e al centro, piedi compresi, e lascia fuori il watermark del
+     fotografo in basso a destra. */
   .gaia-figura {
     position: relative;
     margin: 0;
@@ -110,9 +111,7 @@ const paginaChiSono = existsIn('about', lang);
     background: var(--color-beige);
   }
 
-  /* La foto riempie la figura in assoluto: così non dà altezza propria
-     alla riga della griglia, e su desktop la figura è alta esattamente
-     quanto la colonna di testo. */
+  /* La foto riempie la figura 4:5 in cover. */
   .gaia-figura :global(picture),
   .gaia-figura :global(.gaia-img) {
     position: absolute;
@@ -131,10 +130,8 @@ const paginaChiSono = existsIn('about', lang);
     padding: 0;
   }
 
-  /* La colonna comincia con l'eyebrow e il bordo superiore della foto
-     deve stare su «Chi sono». L'eyebrow globale è inline-flex: in linea
-     eredita l'interlinea del corpo (28 px) e scendeva di 9 px. Qui è un
-     blocco, senza margine sopra. */
+  /* L'eyebrow globale è inline-flex: in linea eredita l'interlinea del
+     corpo (28 px) e scende di 9 px. Qui è un blocco, senza margine sopra. */
   .gaia-testo > .eyebrow {
     display: flex;
     margin-top: 0;
@@ -168,28 +165,16 @@ const paginaChiSono = existsIn('about', lang);
   }
 
   @media (min-width: 64rem) {
-    /* Foto al 40% della larghezza, alta esattamente quanto la colonna di
-       testo (dall'eyebrow a «Scopri di più»): la riga la decide il testo,
-       la figura si stira (stretch) e la foto la riempie in cover. */
+    /* Foto 4:5 al ~48% della larghezza, testo centrato in verticale
+       accanto. Niente stretch: la foto ha il suo formato, non segue
+       l'altezza del testo. */
     .gaia-griglia {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-      align-items: stretch;
-    }
-
-    .gaia-figura {
-      aspect-ratio: auto;
-      height: 100%;
-    }
-
-    /* Qui la colonna è più stretta della foto: si taglia ai lati. x 48%
-       la tiene al centro (il viso è al 48% della foto) e fa uscire il
-       watermark sul bordo destro. */
-    .gaia-figura :global(.gaia-img) {
-      object-position: 48% 30% !important;
+      grid-template-columns: minmax(0, 13fr) minmax(0, 12fr);
+      align-items: center;
     }
 
     .gaia-testo {
-      max-width: 44rem;
+      max-width: 36rem;
     }
 
     .gaia-citazione {
