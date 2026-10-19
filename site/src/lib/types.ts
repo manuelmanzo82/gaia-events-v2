@@ -188,13 +188,21 @@ export interface DestinationWedding extends SeoFields {
   blocks: Block[];
 }
 
-export interface InstagramItem {
-  id: string;
-  type: 'image' | 'video';
+/** Un post Instagram mostrato in home (caricato a mano o, più avanti, via API). */
+export interface InstagramPost {
+  id: number;
   image: Image | null;
-  caption: Localized;
-  permalink: string;
-  postedAt: string;
+  /** Link al post; senza, la foto porta al profilo. */
+  permalink: string | null;
+  takenAt: string;
+  tipo: 'foto' | 'reel' | 'carosello';
+}
+
+/** instagram.json: profilo e ultimi N post visibili, già ordinati. */
+export interface InstagramFeed {
+  handle: string;
+  profileUrl: string;
+  posts: InstagramPost[];
 }
 
 /* ------------------------------------------------------------------ *

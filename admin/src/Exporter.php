@@ -552,20 +552,44 @@ final class Exporter
     // -----------------------------------------------------------------
 
     /** @return list<array<string, mixed>> */
+    /**
+     * Gli ultimi N post visibili (N = instagram.numero_post, default 8),
+     * dal più recente; a parità di data vale l'ordine del back office.
+     * Handle e link al profilo dalle impostazioni. note_interne e source
+     * restano nel back office.
+     *
+     * @return array<string, mixed>
+     */
     public static function instagram(): array
     {
+        $handle = trim((string) (Db::value("SELECT value_it FROM settings WHERE setting_key = 'instagram.handle'") ?? ''));
+        $numero = (int) (Db::value("SELECT value_it FROM settings WHERE setting_key = 'instagram.numero_post'") ?? 8);
+        $numero = $numero > 0 ? min($numero, 24) : 8;
+
+        $nome = ltrim($handle, '@');
         $rows = Db::all(
-            'SELECT * FROM instagram_items WHERE active = 1 ORDER BY sort_order, posted_at DESC',
+            sprintf(
+                'SELECT p.*, m.* , p.id AS post_id
+                 FROM instagram_posts p
+                 JOIN media m ON m.id = p.media_id
+                 WHERE p.nascosto = 0
+                 ORDER BY p.taken_at IS NULL, p.taken_at DESC, p.sort_order, p.id
+                 LIMIT %d',
+                $numero,
+            ),
         );
 
-        return array_map(static fn (array $row): array => [
-            'id' => (string) $row['ig_id'],
-            'type' => $row['media_type'],
-            'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
-            'caption' => self::text($row['caption_it'], $row['caption_en']),
-            'permalink' => $row['permalink'],
-            'postedAt' => self::datetime($row['posted_at']) ?? '',
-        ], $rows);
+        return [
+            'handle' => $nome !== '' ? '@' . $nome : '',
+            'profileUrl' => $nome !== '' ? 'https://www.instagram.com/' . rawurlencode($nome) . '/' : '',
+            'posts' => array_map(static fn (array $row): array => [
+                'id' => (int) $row['post_id'],
+                'image' => self::image($row),
+                'permalink' => $row['permalink'] ?: null,
+                'takenAt' => self::datetime($row['taken_at']) ?? '',
+                'tipo' => (string) $row['tipo'],
+            ], $rows),
+        ];
     }
 
     // -----------------------------------------------------------------

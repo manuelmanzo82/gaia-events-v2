@@ -5,7 +5,7 @@ import type {
   Faq,
   Highlight,
   HighlightSection,
-  InstagramItem,
+  InstagramFeed,
   Localized,
   LocationVenue,
   Luogo,
@@ -199,9 +199,16 @@ export function getDestinationWedding(): DestinationWedding {
   });
 }
 
-export function getInstagramItems(limit?: number): InstagramItem[] {
-  const items = load<InstagramItem[]>('instagram', []);
-  return limit ? items.slice(0, limit) : items;
+/**
+ * Profilo e post Instagram per la home. L'export manda già solo i post
+ * visibili, ordinati e tagliati al numero scelto nel back office; qui si
+ * scartano quelli senza foto. Formato vecchio (array) = nessun post.
+ */
+export function getInstagram(): InstagramFeed {
+  const vuoto: InstagramFeed = { handle: '', profileUrl: '', posts: [] };
+  const dati = load<InstagramFeed | unknown[]>('instagram', vuoto);
+  if (Array.isArray(dati)) return vuoto;
+  return { ...dati, posts: (dati.posts ?? []).filter((post) => post.image !== null) };
 }
 
 /* ------------------------------------------------------------------ *
