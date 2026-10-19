@@ -3,12 +3,21 @@
  * Highlights, prima parte: schede che si impilano con lo scroll, alla
  * Haywood (home-effetti.ts, [data-impila]).
  *
- * Schede rettangolari (16:9 su desktop), larghe ~90% della finestra,
- * angoli a 24 px, foto a tutta scheda (object-fit: cover) e il testo SULLA
- * foto: una frase breve in Cormorant, avorio, centrata, su un velo scuro
- * sfumato. Ogni scheda è sticky un gradino più giù della precedente, così
- * quella sotto resta visibile in alto per una fascia mentre la nuova le
- * scorre sopra, e lo scrub la rimpicciolisce e la scurisce (.scheda-ombra).
+ * Schede rettangolari (tra 16:9 e 2:1 su desktop), angoli a 24 px, foto
+ * a tutta scheda (object-fit: cover) e il testo SULLA foto: una frase
+ * breve in Cormorant, avorio, centrata, su un velo scuro sfumato. Ogni
+ * scheda è sticky un gradino più giù della precedente, sotto il header,
+ * così quella sotto resta visibile in alto per una fascia mentre la nuova
+ * le scorre sopra, e lo scrub la rimpicciolisce e la scurisce
+ * (.scheda-ombra).
+ *
+ * Geometria: una sola larghezza (--larghezza-scheda) per titolo, schede e
+ * foto, centrata con margin-inline: auto — il 90% della finestra, ma mai
+ * oltre il limite (maxWidth) della foto più piccola della pila né oltre
+ * il doppio dell'altezza disponibile. L'altezza è esplicita: con
+ * aspect-ratio + max-height il browser restringeva la foto e la lasciava
+ * allineata a sinistra dentro una scheda più larga (a 1920 px, 450 px
+ * vuoti a destra).
  *
  * Testo: il titolo bilingue dell'highlight; senza, l'alt accorciato alla
  * prima virgola/due punti. Le schede sono foto: dichiarano data-theme="dark"
@@ -48,12 +57,16 @@ const schede = highlights
     return { data, frase, indice: i, numero: String(i + 1).padStart(2, '0') };
   })
   .filter((s): s is NonNullable<typeof s> => s !== null);
+
+// Nessuna scheda più larga della foto più piccola della pila (CLAUDE.md:
+// mai un'immagine oltre il suo limite, nemmeno in cover).
+const limite = schede.length > 0 ? Math.min(...schede.map((s) => s.data.maxWidth)) : 0;
 ---
 
 {
   schede.length > 0 && (
-    <section id="highlights" class="impila" data-theme="light">
-      <header class="impila-testa container-gaia">
+    <section id="highlights" class="impila" data-theme="light" style={`--limite-schede: ${limite}px`}>
+      <header class="impila-testa">
         {eyebrow && <p class="eyebrow">{eyebrow}</p>}
         {titolo && (
           <h2 class="text-display" data-reveal="righe">
@@ -83,12 +96,18 @@ const schede = highlights
 
 <style>
   .impila {
+    /* Margine laterale minimo come nel resto del sito; la larghezza vive
+       in vw (non in %) perché serve anche al calcolo dell'altezza. */
+    --margine-scheda: clamp(1rem, 4vw, 3.5rem);
+    --larghezza-scheda: min(100vw - 2 * var(--margine-scheda), 90vw, var(--limite-schede, 90vw));
     padding-block: var(--spacing-section) 0;
     background: var(--color-avorio);
   }
 
+  /* Eyebrow e titolo allineati al bordo sinistro delle schede. */
   .impila-testa {
-    margin-bottom: clamp(2rem, 5vh, 3.5rem);
+    width: var(--larghezza-scheda);
+    margin: 0 auto clamp(2rem, 5vh, 3.5rem);
   }
 
   .impila-testa h2 {
@@ -102,7 +121,7 @@ const schede = highlights
   }
 
   .scheda {
-    width: min(100% - 2 * clamp(1rem, 4vw, 3.5rem), 90vw);
+    width: var(--larghezza-scheda);
     margin-inline: auto;
     will-change: transform;
     /* Le schede non sono sezioni: niente sfondo dal tema, solo il colore. */
@@ -174,15 +193,29 @@ const schede = highlights
   }
 
   @media (min-width: 64rem) {
+    .impila {
+      /* Altezza disponibile per una scheda: la finestra meno il header,
+         i gradini delle schede sopra (fino a 5) e un respiro in fondo. */
+      --gradino: 1.75rem;
+      --altezza-utile: calc(100svh - var(--altezza-header, 146px) - 0.75rem - 5 * var(--gradino) - 1.5rem);
+      --larghezza-scheda: min(
+        100vw - 2 * var(--margine-scheda),
+        90vw,
+        var(--limite-schede, 90vw),
+        2 * var(--altezza-utile)
+      );
+    }
+
     .impila-pila {
       gap: 0;
     }
 
-    /* Sticky un gradino più giù per ogni scheda: la precedente resta
-       visibile in alto per una fascia mentre la nuova le scorre sopra. */
+    /* Sticky un gradino più giù per ogni scheda, sotto il header: la
+       precedente resta visibile in alto per una fascia mentre la nuova le
+       scorre sopra. */
     .scheda {
       position: sticky;
-      top: calc(2.5vh + var(--i) * 1.75rem);
+      top: calc(var(--altezza-header, 146px) + 0.75rem + var(--i) * var(--gradino));
       margin-bottom: 8vh;
       transform-origin: 50% 0%;
     }
@@ -191,10 +224,12 @@ const schede = highlights
       margin-bottom: 0;
     }
 
+    /* 16:9 finché c'è altezza, poi più bassa fino a 2:1 (la larghezza è
+       già limitata a due volte l'altezza utile). */
     .scheda-figura {
-      aspect-ratio: 16 / 9;
-      max-height: 84vh;
-      max-height: 84svh;
+      aspect-ratio: auto;
+      width: 100%;
+      height: min(var(--larghezza-scheda) * 9 / 16, var(--altezza-utile));
     }
 
     .scheda-testo {
