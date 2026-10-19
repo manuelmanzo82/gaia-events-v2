@@ -46,8 +46,9 @@ const paginaChiSono = existsIn('about', lang);
           foto && (
             <figure class="gaia-figura" data-reveal="maschera">
               <Picture data={foto} cap={false} class="gaia-img" />
-              {/* object-position in alto: il taglio esclude l'angolo in basso a
-                  destra, dove la foto porta il watermark del fotografo. */}
+              {/* Il taglio (object-position nel CSS) è centrato su Gaia ed
+                  esclude l'angolo in basso a destra, dove la foto porta il
+                  watermark del fotografo. */}
             </figure>
           )
         }
@@ -97,7 +98,11 @@ const paginaChiSono = existsIn('about', lang);
     margin-inline: auto;
   }
 
+  /* Mobile: foto sopra il testo, in 4:5. La foto (2:3) si taglia in
+     verticale: y 30% la tiene intera su di lei, piedi compresi, e lascia
+     fuori il watermark del fotografo in basso a destra. */
   .gaia-figura {
+    position: relative;
     margin: 0;
     aspect-ratio: 4 / 5;
     overflow: hidden;
@@ -105,8 +110,13 @@ const paginaChiSono = existsIn('about', lang);
     background: var(--color-beige);
   }
 
+  /* La foto riempie la figura in assoluto: così non dà altezza propria
+     alla riga della griglia, e su desktop la figura è alta esattamente
+     quanto la colonna di testo. */
   .gaia-figura :global(picture),
   .gaia-figura :global(.gaia-img) {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
@@ -114,11 +124,20 @@ const paginaChiSono = existsIn('about', lang);
 
   .gaia-figura :global(.gaia-img) {
     object-fit: cover;
-    object-position: 50% 12% !important;
+    object-position: 50% 30% !important;
   }
 
   .gaia-testo {
     padding: 0;
+  }
+
+  /* La colonna comincia con l'eyebrow e il bordo superiore della foto
+     deve stare su «Chi sono». L'eyebrow globale è inline-flex: in linea
+     eredita l'interlinea del corpo (28 px) e scendeva di 9 px. Qui è un
+     blocco, senza margine sopra. */
+  .gaia-testo > .eyebrow {
+    display: flex;
+    margin-top: 0;
   }
 
   .gaia-titolo {
@@ -149,16 +168,24 @@ const paginaChiSono = existsIn('about', lang);
   }
 
   @media (min-width: 64rem) {
-    /* Foto al massimo 40% della larghezza, colonna di testo piu' larga. */
+    /* Foto al 40% della larghezza, alta esattamente quanto la colonna di
+       testo (dall'eyebrow a «Scopri di più»): la riga la decide il testo,
+       la figura si stira (stretch) e la foto la riempie in cover. */
     .gaia-griglia {
       grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-      align-items: center;
+      align-items: stretch;
     }
 
     .gaia-figura {
-      aspect-ratio: 4 / 5;
-      max-height: 78vh;
-      max-height: 78svh;
+      aspect-ratio: auto;
+      height: 100%;
+    }
+
+    /* Qui la colonna è più stretta della foto: si taglia ai lati. x 48%
+       la tiene al centro (il viso è al 48% della foto) e fa uscire il
+       watermark sul bordo destro. */
+    .gaia-figura :global(.gaia-img) {
+      object-position: 48% 30% !important;
     }
 
     .gaia-testo {
