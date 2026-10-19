@@ -34,9 +34,10 @@ DirectoryIndex index.php
     # Blocco dei file derivati PRIMA di ogni altra cosa.
     #
     # Deve stare in mod_rewrite e non in un <FilesMatch>: le sezioni <If>
-    # (quella della basic auth, in radice) sono valutate per ultime e hanno
-    # la precedenza sull autorizzazione dei <Files>, quindi un "Require all
-    # denied" piu in basso verrebbe scavalcato. [F] di mod_rewrite no.
+    # sono valutate per ultime e hanno la precedenza sull autorizzazione dei
+    # <Files>, quindi un "Require" dichiarato in un <If> del .htaccess in
+    # radice scavalcherebbe il "Require all denied" piu in basso. [F] di
+    # mod_rewrite no, qualunque cosa venga aggiunta dopo.
     #
     # Serve a non servire come TESTO un file che non e piu PHP:
     # config.php.bak-20261014 conterrebbe le credenziali del database.

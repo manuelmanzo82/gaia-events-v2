@@ -371,19 +371,20 @@ deploy punta lì apposta, così il mirror con `--delete` resta confinato.
 
 ### Protezione
 
-Tutto il sito è dietro **basic auth**, dichiarata in `site/public/.htaccess`
-dentro un `<If>` legato al dominio `incognito.work`: lo stesso file vale per
-produzione e staging e sopravvive ai deploy, che lo riscrivono ogni volta.
+**Niente più basic auth (dal 19/10/2026): lo staging è pubblico, solo noindex.**
+Il back office resta protetto dal suo login, `admin/api/export.php` dal bearer
+token.
 
-L'unica eccezione è `admin/api/export.php`, che la GitHub Action deve poter
-chiamare e che si difende da sé col bearer token. L'eccezione sta **nella stessa
-condizione `<If>`**, non in un `<Files>` dentro `admin/api/`: le sezioni `<If>`
-vengono valutate per ultime e hanno la precedenza, quindi un'eccezione
-dichiarata più in basso verrebbe ignorata.
+Il noindex sta in `site/public/.htaccess`, dentro un `<If>` legato al dominio
+`incognito.work` (`X-Robots-Tag: noindex, nofollow, noarchive` su tutto lo
+staging, admin e uploads compresi): lo stesso file vale per produzione e
+staging e sopravvive ai deploy, che lo riscrivono ogni volta. Il
+`robots.txt` con `Disallow: /` e il meta robots li genera invece il build,
+perché lo staging ha un `SITE_URL` diverso da quello di produzione
+(`IS_STAGING` in `site/src/config/site.ts`).
 
-Il file delle password sta **fuori dalla cartella pubblica**, in
-`/kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging`, e deve essere
-**644**: Apache gira come `www-data` e con 640 risponde 500.
+Il vecchio file delle password, `/kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging`,
+è rimasto dov'era, fuori dalla cartella pubblica: non lo usa più nessuno.
 
 ### File derivati: mai serviti
 
@@ -392,10 +393,11 @@ con dentro le credenziali del database. Vale per `.bak`, `.old`, `.orig`,
 `.save`, `.sql`, `.log`, `.env` e per i doppi suffissi tipo `qualcosa.php.altro`.
 
 Il blocco sta in **mod_rewrite** (`RewriteRule ... [F,L]`) e non in un
-`<FilesMatch>`, in entrambi i `.htaccess`. Il motivo è lo stesso incontrato con
-`export.php`: le sezioni `<If>` sono valutate per ultime e hanno la precedenza
-sull'autorizzazione dei `<Files>`, quindi con la basic auth attiva un
-`Require all denied` più in basso **viene scavalcato**. `[F]` di mod_rewrite no.
+`<FilesMatch>`, in entrambi i `.htaccess`: le sezioni `<If>` sono valutate per
+ultime e hanno la precedenza sull'autorizzazione dei `<Files>`, quindi un
+`Require` in un `<If>` (com'era la basic auth dello staging) faceva
+**scavalcare** il `Require all denied` più in basso. `[F]` di mod_rewrite no:
+resta valido qualunque cosa venga aggiunta in futuro.
 
 Per la stessa ragione nessuno script deve lasciare copie accanto all'originale:
 `imposta-token-github.php` scrive la sua in `admin/storage/` e la cancella appena
@@ -431,7 +433,7 @@ la chiave, non combacia mai e ssh continua a chiedere conferma dell'host.
 
 Tutto fuori dalla repo, in `E:\CLAUDE CODE\gaia-staging-config\`:
 `config.php`, `CREDENZIALI-STAGING.txt` (token di export),
-`PASSWORD-BASIC-AUTH.txt`, `PASSWORD-ADMIN-BACKOFFICE.txt` e la chiave SSH in
+`PASSWORD-BASIC-AUTH.txt` (non più in uso), `PASSWORD-ADMIN-BACKOFFICE.txt` e la chiave SSH in
 `ssh/`. **Niente di tutto questo va committato.**
 
 ## Layout sull'hosting
@@ -510,7 +512,8 @@ Fatto:
   CLS 0,014. SEO lì vale 61 solo per il `noindex` dello staging: sul
   build locale, che usa l'URL di produzione, è 100. Misurato con
   `lighthouse@12` nello scratchpad e `CHROME_PATH` sul Chromium di
-  Playwright (mai chrome.exe), header di basic auth via `--extra-headers`.
+  Playwright (mai chrome.exe), header di basic auth via `--extra-headers`
+  (non serve più: dal 19/10 lo staging è senza password).
 - La dissolvenza dell'hero parte solo a intro finita (evento
   `gaia:intro-fine` da `IntroVelo`): altrimenti uscendo dal velo si vedeva
   già la seconda foto a metà crossfade, diversa da quella che si ritrova
@@ -539,7 +542,7 @@ Fatto:
 
 Prossimi passi (fase 3, resta):
 - Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
-  staging (con l'header di basic auth).
+  staging (senza più header di autenticazione).
 - Rimettere `INTRO_SEMPRE = false` prima del lancio.
 - Footer: è ancora quello segnaposto, da disegnare.
 - Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)

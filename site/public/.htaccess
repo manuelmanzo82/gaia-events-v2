@@ -15,16 +15,10 @@ DirectoryIndex index.html
 ErrorDocument 404 /404.html
 
 # ---------------------------------------------------------------------
-# Staging
-#
-# Sul sottodominio di incognito.work il sito non va indicizzato. L'header
-# si attiva da solo in base al dominio, così non serve ricordarsene a mano
-# (il build aggiunge già anche il meta robots, vedi IS_STAGING in
-# site/src/config/site.ts).
+# Staging: vedi il blocco <If> in fondo al file (solo noindex, niente
+# password). robots.txt con «Disallow: /» lo genera il build quando
+# SITE_URL non è quello di produzione (IS_STAGING in src/config/site.ts).
 # ---------------------------------------------------------------------
-<IfModule mod_setenvif.c>
-    SetEnvIf Host "incognito\.work$" STAGING=1
-</IfModule>
 
 # ---------------------------------------------------------------------
 # File derivati: mai serviti
@@ -35,9 +29,10 @@ ErrorDocument 404 /404.html
     # Blocco dei file derivati PRIMA di ogni altra cosa.
     #
     # Deve stare in mod_rewrite e non in un <FilesMatch>: le sezioni <If>
-    # (quella della basic auth, in radice) sono valutate per ultime e hanno
-    # la precedenza sull autorizzazione dei <Files>, quindi un "Require all
-    # denied" piu in basso verrebbe scavalcato. [F] di mod_rewrite no.
+    # sono valutate per ultime e hanno la precedenza sull autorizzazione dei
+    # <Files>, quindi un "Require" dichiarato in un <If> (com'era la basic
+    # auth dello staging) scavalcherebbe il "Require all denied" piu in
+    # basso. [F] di mod_rewrite no, qualunque cosa venga aggiunta dopo.
     #
     # Serve a non servire come TESTO un file che non e piu PHP:
     # config.php.bak-20261014 conterrebbe le credenziali del database.
@@ -53,9 +48,6 @@ ErrorDocument 404 /404.html
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
     Header always set Cross-Origin-Opener-Policy "same-origin"
-
-    # Noindex automatico in staging.
-    Header always set X-Robots-Tag "noindex, nofollow, noarchive" env=STAGING
 
     # HSTS: attivarlo SOLO quando il dominio definitivo è su HTTPS stabile.
     # Una volta inviato, i browser lo ricordano per un anno.
@@ -172,28 +164,20 @@ ErrorDocument 404 /404.html
 </FilesMatch>
 
 # ---------------------------------------------------------------------
-# Protezione con password dello staging
+# Staging: niente password, solo noindex
 #
 # Vale SOLO sui domini incognito.work: in produzione il blocco non viene
 # nemmeno valutato, quindi questo stesso file va bene per entrambi gli
 # ambienti e sopravvive ai deploy, che lo riscrivono ogni volta.
 #
-# Il file delle password sta FUORI dalla cartella pubblica, un livello
-# sopra /gaia-staging, e il nome inizia per .ht così la configurazione
-# globale di Apache lo nega comunque.
-#
-# Unica eccezione: admin/api/export.php, che la GitHub Action deve poter
-# chiamare e che non ha modo di presentare queste credenziali. È già
-# protetto dal suo bearer token: senza, risponde 401 da solo.
-#
-# L'eccezione sta QUI dentro, nella stessa condizione, e non in un
-# <Files> dentro admin/api/: le sezioni <If> vengono valutate per ultime e
-# hanno la precedenza su <Files> e <Directory>, quindi un'eccezione
-# dichiarata più in basso verrebbe semplicemente ignorata.
+# Lo staging è pubblico (la basic auth è stata tolta il 19/10/2026): il
+# back office resta protetto dal suo login ed export.php dal bearer token.
+# Qui resta solo l'header che tiene lo staging fuori dai motori di
+# ricerca, su tutto (pagine, admin/, uploads/). Il build aggiunge anche il
+# meta robots e il robots.txt con «Disallow: /».
 # ---------------------------------------------------------------------
-<If "%{HTTP_HOST} =~ /incognito\.work$/ && %{REQUEST_URI} !~ m#^/admin/api/export\.php$#">
-    AuthType Basic
-    AuthName "Anteprima Gaia Events"
-    AuthUserFile /kunden/homepages/30/d593572430/htdocs/.htpasswd-gaia-staging
-    Require valid-user
+<If "%{HTTP_HOST} =~ /incognito\.work$/">
+    <IfModule mod_headers.c>
+        Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+    </IfModule>
 </If>
