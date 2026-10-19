@@ -68,7 +68,7 @@ Implementato su `design/home` e migrato sullo staging. Decisioni prese in corso 
 6. Chi è Gaia: ritratto + testo breve
 7. Una recensione grande (sezione scura)
 8. Destination wedding (aggancio EN)
-9. Instagram (automatico, più avanti)
+9. Instagram: «Seguici su Instagram» + fascia di foto sfalsate in loop (19/10: post caricati a mano dal back office, sincronizzazione via API più avanti)
 10. CTA finale verso il preventivatore (scura)
 
 ## Da chiedere a Gaia

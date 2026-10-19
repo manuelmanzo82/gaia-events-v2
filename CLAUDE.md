@@ -226,8 +226,11 @@ Mai nel codice, mai nei commit.
 - Le richieste vanno al nostro PHP (`admin/api/quote.php`), non più a Web3Forms,
   e finiscono nel back office.
 
-**Instagram**: feed automatico via API ufficiale, più avanti. Le immagini verranno
-scaricate in `uploads/`, quindi **non serve Instagram nel CSP**.
+**Instagram** (19/10/2026): oggi i post li carica Gaia a mano (back office →
+Instagram, tabella `instagram_posts`, export `instagram.json` con gli ultimi
+`instagram.numero_post` visibili); la sincronizzazione via API è pianificata
+in «Stato e prossimi passi». Le immagini stanno comunque in `uploads/`,
+quindi **non serve Instagram nel CSP**.
 
 ## Design token
 
@@ -482,10 +485,11 @@ Fatto:
   Nessun matrimonio compare sul sito: niente raggruppamento per coppia.
 
 - **Fase 3 — home completa IT/EN** (16/10, rivista lo stesso giorno):
-  header **senza barra** (`Header.astro`: sempre visibile, mai uno sfondo
-  dietro, colore dalla sezione sotto via `theme-observer`, ombra testuale
-  morbida sopra le sezioni con `data-foto`, logo che scende da 130 a
-  64 px allo scroll; menu corto, il resto nel footer), torna-su in basso a
+  header **senza barra** (`Header.astro`: sempre visibile, colore dalla
+  sezione sotto via `theme-observer`, ombra testuale morbida sopra le
+  sezioni con `data-foto`; dal 19/10 logo **fisso** a 130/80 px e una
+  sfumatura morbida nel colore del tema dietro logo e menu — vedi giro 3;
+  menu corto, il resto nel footer), torna-su in basso a
   destra (`TornaSu.astro`, usa `getLenis()`), snippet intro in `BaseLayout`
   (`INTRO_SEMPRE` ancora `true`), footer su notte (`Footer.astro`: logo,
   tagline, Contatti/Esplora/Seguici/Preventivo, riga legale con
@@ -497,8 +501,8 @@ Fatto:
   dell'highlight sulla foto — campo `title_it/en`, senza = alt accorciato;
   solo orizzontali con `maxWidth ≥ LIMITE_SCHEDA` di `lib/home.ts`, max 5;
   tutte le altre nella fascia orizzontale agganciata), luoghi (nascosta finché non ci sono luoghi),
-  servizi in sticky split (foto del servizio, ripiego = highlights sezione
-  «servizi»), recensione (nascosta finché non ce n'è una vera),
+  servizi (dal 19/10 lista editoriale con foto al cursore, vedi giro 3),
+  recensione (nascosta finché non ce n'è una vera),
   destination a tutta larghezza (highlight sezione «destination» + velo),
   CTA finale chiara con foto verticale (highlight sezione «cta», ENUM
   esteso in migrazione). Effetti in `scripts/home-effetti.ts`: solo
@@ -540,7 +544,63 @@ Fatto:
   giusto — il «Pubblica» dello staging punta a `main`, non a
   `design/home`.
 
+- **Giro 3 della home + Instagram** (19/10/2026):
+  - **Menu** a 15 px (tracking 0.14em), Preventivo/English a 14 px, pannello
+    mobile a 22 px; menu in riga da **80rem** (a quella misura servono
+    ~1200 px), sotto il pannello. Il contrasto del menu si misura con lo
+    sfondo reale (header nascosto, 75 percentile dei pixel dietro ogni
+    voce, ombra esclusa): senza fondo era sotto 4.5:1 in 32 posizioni su 48
+    (cieli dell'hero, schede, fascia agganciata), quindi l'header ha una
+    **sfumatura morbida** nel colore del tema (avorio/notte, nessun bordo,
+    svanisce in basso): ora 0 su 46.
+  - **Tema dell'header** (`theme-observer.ts`): non più IntersectionObserver
+    ma la sezione sotto la linea a metà header, misurata a ogni frame di
+    scroll; con sezioni annidate vince la più interna.
+  - **Logo** fisso a 130 px desktop / 80 px mobile, mai ridotto;
+    `--altezza-header` 146 / 96 px.
+  - **Hero**: eyebrow e filetto in avorio sulle sezioni scure; il velo ha una
+    sfumatura raccolta attorno al testo: eyebrow ≥ 5.1:1, titolo ≥ 7.5:1,
+    sottotitolo ≥ 9.9:1 su tutte e 4 le foto, a 1440 e 390.
+  - **Schede impilate**: una sola `--larghezza-scheda` per titolo, schede e
+    foto, centrata (0,0 px di asimmetria a 390/1280/1440/1920 in ogni fase
+    dello scroll), formato 16:9–2:1, agganciate sotto l'header. La
+    larghezza è il 90% della finestra **ma mai oltre il maxWidth della foto
+    più piccola della pila** (oggi 1024 px): con file più grandi (i
+    VD Image senza watermark, per esempio) le schede si allargano da sole.
+  - **Gaia**: foto 4:5 al ~48% (colonne 13:12), testo centrato accanto;
+    citazione corta in `home.manifesto` da confermare (DA-CHIEDERE n. 8).
+  - **Servizi**: `ServiziLista.astro` al posto dello sticky split; foto da
+    `services.media_id` (sullo staging: terrazza sulle colline, violinista,
+    fiori di campo, castello di notte), mai ripetute da altre sezioni.
+  - **Instagram**: `InstagramHome.astro` prima della CTA finale (fascia
+    sfalsata in loop su desktop, scroll-snap su mobile, griglia con
+    movimento ridotto). Sullo staging 8 post di prova con foto della
+    libreria mai usate in home, `note_interne` «esempio Instagram, da
+    sostituire», senza permalink (portano al profilo).
+  - **Attenzione — `schema.sql` indietro**: le migrazioni del 16-17/10
+    (`media.note_interne`, `highlights.title_it/en`, sezione «cta»
+    nell'ENUM, `home.manifesto`, `legal.piva`) non sono mai state riportate
+    in `schema.sql`; `instagram_posts` sì. Da allineare prima di creare il
+    database di produzione da `schema.sql`.
+
 Prossimi passi (fase 3, resta):
+- **Instagram via API (non ancora implementato)**: Instagram API with
+  Instagram Login (account professionale di Gaia, niente pagina Facebook
+  necessaria); app Meta in **modalità sviluppo** con Gaia aggiunta come
+  tester, così non serve la revisione dell'app; token a lunga durata
+  (**60 giorni**) salvato nel back office e **rinnovato in automatico**
+  prima della scadenza (refresh dell'endpoint `refresh_access_token`);
+  una **GitHub Action notturna** chiama un endpoint del back office
+  protetto da token (come `export.php`), che legge i post nuovi, scarica
+  le immagini in `uploads/` passando da ImageService e li inserisce in
+  `instagram_posts` con `source = 'api'` e `ig_media_id` (UNIQUE: niente
+  doppioni); **rebuild del sito solo se sono arrivati post nuovi**
+  (`workflow_dispatch` come il Pubblica); **email a Manuel/Gaia** se il
+  token è scaduto o il rinnovo fallisce. I post caricati a mano restano e
+  si possono sempre nascondere o riordinare.
+- Allineare `schema.sql` alle migrazioni del 16-17/10 (vedi sopra).
+- Tabella `instagram_items` dello schema iniziale, mai usata: DROP insieme
+  a `events`.
 - Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
   staging (senza più header di autenticazione).
 - Rimettere `INTRO_SEMPRE = false` prima del lancio.
