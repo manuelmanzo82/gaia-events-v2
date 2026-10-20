@@ -5,7 +5,9 @@
  * (home-effetti.ts, [data-orizzontale], rif. sarahhaywood.com/weddings/).
  *
  * Desktop: tutte le foto alla STESSA altezza — min(65svh, ALTEZZA_FASCIA)
- * — larghe secondo il loro formato, gap costante, niente didascalie.
+ * — larghe secondo il loro formato (verticali e orizzontali alternate),
+ * gap costante, angoli 16 px, niente didascalie. Ogni tessera dichiara
+ * data-theme="dark": sopra le foto il header è avorio.
  * Una foto che a quell'altezza supererebbe il proprio maxWidth viene
  * esclusa qui, in fase di build (ALTEZZA_FASCIA è anche il tetto in CSS,
  * quindi il controllo vale su qualunque schermo).
@@ -45,7 +47,7 @@ const foto = highlights
     <section class="orizzontale" data-theme="light" data-orizzontale style={`--altezza-fascia: ${ALTEZZA_FASCIA}px`}>
       <ul class="binario" role="list">
         {foto.map((f) => (
-          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`}>
+          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto>
             <Picture data={f.data} cap={false} class="tessera-img" />
           </li>
         ))}
@@ -72,7 +74,7 @@ const foto = highlights
   .tessera {
     flex: 0 0 auto;
     overflow: hidden;
-    border-radius: 3px;
+    border-radius: 16px;
     background: var(--color-beige);
   }
 
