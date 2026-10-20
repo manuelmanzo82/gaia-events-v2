@@ -655,6 +655,36 @@ Fatto:
     `C:\Users\Utente\gaia-giro5\provino-foto.html` (fuori repo), in attesa
     dell'OK di Manuel prima di toccare `highlight_sections`, `services` e
     `page_hero_images`.
+- **Giro 6 — foto per sezione, fascia, Instagram, contrasto** (20/10/2026):
+  - **Foto della home** (sullo staging, da `highlight_sections`, `services`,
+    `page_hero_images`): hero 60, 57, 44; menu visivo 87 Servizi, 38
+    Luoghi, 108 Destination, 3 Storie, 61 Preventivo (prime 5 orizzontali
+    della sezione «home»); fascia 14 foto (66, 39, 10, 100, 58, 59, 33,
+    101, 88, 84, 113, 11, 82, 109: quattro orizzontali alternate); servizi
+    37, 27 (Gaia al tavolo, watermark), 102, 48 (lago); destination 111;
+    CTA 62; Gaia 26. Nessuna foto ripetuta in home. Miniature finali in
+    `C:\Users\Utente\gaia-giro6\foto-finali.html` (fuori repo).
+  - **Fascia**: angoli 16 px, orizzontali e verticali alla stessa altezza;
+    ogni tessera dichiara `data-theme="dark" data-foto`.
+  - **Instagram**: niente icona sopra l'handle (resta nel bottone), 56 px
+    sopra e 136 sotto a desktop (`--spacing-section-sm` / `--spacing-section`),
+    hover solo con `@media (hover: hover)`: zoom 1.05 lento, velo dal basso
+    con icona del tipo e «Vedi su Instagram» (`instagram.vedi`), le altre
+    foto a opacità 0,6; su touch il tap apre il post; reduced-motion: solo
+    il velo. La griglia dichiara `data-theme="dark" data-foto`.
+  - **Contrasto di logo, menu e torna-su** (`theme-observer.ts` riscritto):
+    il tema si decide PER PUNTO, non per riga — `temaInPunto(x, y)` prende
+    l'elemento `[data-theme]` più interno che contiene il punto. Il logo
+    guarda sotto di sé, OGNI voce del menu (link, Preventivo, lingua,
+    hamburger) sotto il proprio centro (`data-tema`/`data-foto` sulla voce),
+    il torna-su il proprio centro. Regola: sopra qualsiasi foto avorio,
+    inchiostro solo sui fondi chiari pieni; ogni blocco con foto dentro una
+    sezione chiara dichiara `data-theme="dark" data-foto` (foto di Gaia,
+    foto della CTA, tessere della fascia, griglia Instagram). Il pin
+    orizzontale muove il binario senza eventi di scroll: `home-effetti.ts`
+    chiama `aggiornaTema()` a ogni frame. Verifica: scansione a passi di
+    60 px, giù e su, a 1440 e 390 (`tema-sweep.js` nello scratchpad): zero
+    voci col colore sbagliato, salvo un frame d'angolo arrotondato.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
