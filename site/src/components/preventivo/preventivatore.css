@@ -533,22 +533,37 @@
   gap: 1.5rem 2rem;
 }
 
-.pv-grazie-foto {
+/* — Fascia foto del passaggio, solo mobile: bassa, angoli 12 px — */
+.pv-fascia {
   position: relative;
-  margin-bottom: 1.75rem;
-  aspect-ratio: 16 / 9;
+  display: none;
+  height: 160px;
+  margin-bottom: 1.25rem;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 12px;
   background: var(--color-beige);
 }
 
-.pv-grazie-foto .pv-immagine {
-  opacity: 1;
-}
+@media (max-width: 63.98rem) {
+  .pv-fascia {
+    display: block;
+  }
 
-@media (min-width: 64rem) {
-  .pv-grazie-foto {
-    display: none;
+  /* Domanda e prime opzioni più vicine alla fascia. */
+  .pv-testa {
+    margin-bottom: 1.25rem;
+  }
+
+  .pv-titolo {
+    font-size: 1.875rem;
+  }
+
+  .pv-corpo {
+    margin-top: 1.25rem;
+  }
+
+  .pv-scheda--grande {
+    padding: 1.1rem 1.25rem;
   }
 }
 

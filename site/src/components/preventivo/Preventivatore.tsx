@@ -17,6 +17,9 @@
  *
  * Foto: su desktop una colonna a sinistra con la foto del passaggio, in
  * dissolvenza incrociata; si caricano solo le foto dei passaggi visitati.
+ * Su mobile (giro 10) la stessa foto in una fascia orizzontale bassa in
+ * cima al passaggio: è nell'HTML iniziale con altezza fissa (niente CLS) e
+ * loading="lazy", così su desktop, dove è nascosta, non si scarica.
  * Su mobile niente foto nei passaggi (resta solo nel ringraziamento):
  * la colonna è nascosta dal CSS e le immagini non vengono montate.
  *
@@ -873,13 +876,17 @@ export default function Preventivatore(props: Props): ReactNode {
       </div>
 
       <div className="pv-modulo">
+        {/* Fascia foto, solo sotto i 64rem (CSS). */}
+        <div className="pv-fascia" aria-hidden="true">
+          {fotoViste.map((k) => {
+            const f = foto[k];
+            if (!f) return null;
+            return <Immagine key={k} foto={f} attiva={k === step} sizes="calc(100vw - 2.5rem)" lazy />;
+          })}
+        </div>
+
         {step === 'grazie' ? (
           <div className="pv-passo pv-grazie">
-            {foto.grazie && (
-              <div className="pv-grazie-foto">
-                <Immagine foto={foto.grazie} attiva sizes="100vw" lazy />
-              </div>
-            )}
             <h2 className="pv-titolo" tabIndex={-1} ref={titolo} id="pv-titolo">
               {t.grazie.titolo(chi)}
             </h2>

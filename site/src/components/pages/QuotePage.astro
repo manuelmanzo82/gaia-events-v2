@@ -226,6 +226,34 @@ const domande = [1, 2, 3]
     padding-bottom: var(--spacing-section);
   }
 
+  /* Mobile: testa compatta, così fascia, domanda e prime opzioni stanno
+     nella prima schermata (390 × 844). */
+  @media (max-width: 63.98rem) {
+    .prev-testa {
+      padding-top: calc(var(--altezza-header, 96px) + 0.5rem);
+      padding-bottom: 1.25rem;
+    }
+
+    .prev-testa .eyebrow {
+      margin-bottom: 0.5rem;
+    }
+
+    .prev-titolo {
+      font-size: 2.25rem;
+      line-height: 1.1;
+    }
+
+    .prev-riga {
+      margin-top: 0.6rem;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .prev-firma {
+      font-size: 1.375rem;
+    }
+  }
+
   /* Dopo l'invio (classe messa dal preventivatore): via la testa, il
      ringraziamento parte subito sotto lo spazio dell'header. */
   :global(html.preventivo-inviato) .prev-testa {
