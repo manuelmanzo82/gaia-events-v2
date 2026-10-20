@@ -2,9 +2,11 @@
  * Il preventivatore: un solo componente bilingue (isola React).
  *
  * Nove passaggi — Evento · Voi · Quando · Dove · Ospiti · Aiuto · Budget ·
- * Contatti · Lettera — poi il ringraziamento. Il riepilogo è una LETTERA
- * generata dalle risposte (testi.ts), modificabile prima dell'invio.
- * Nessun prezzo calcolato, mai.
+ * Contatti · Riepilogo — poi il ringraziamento. Il riepilogo (giro 9, al
+ * posto della lettera) è un elenco etichetta → valore, tutto visibile, con
+ * un «Modifica» per riga che porta al passaggio e poi torna al riepilogo;
+ * sotto, il messaggio libero che si allarga da solo. Nessun prezzo
+ * calcolato, mai.
  *
  * Esperienza: barra sottile con i nomi dei passaggi; Avanti/Indietro;
  * Invio prosegue (è un vero <form>); al cambio di passaggio il focus va
@@ -29,7 +31,6 @@ import {
   PASSAGGI,
   RISPOSTE_VUOTE,
   T,
-  componiLettera,
   coppia,
   etichettaBudget,
   etichettaOspiti,
@@ -38,6 +39,7 @@ import {
   nomeMese,
   nomi,
   riepilogo,
+  righeRiepilogo,
   type Contatto,
   type Lingua,
   type Passaggio,
@@ -138,9 +140,6 @@ function valida(step: Passaggio, r: Risposte, lang: Lingua, haZone: boolean): Re
       if (r.contactPref !== 'email' && !r.phone.trim()) e.phone = t.contatti.erroreTelefono;
       if (!r.privacy) e.privacy = t.contatti.errorePrivacy;
       break;
-    case 'lettera':
-      if (!r.letter.trim()) e.letter = t.lettera.errore;
-      break;
     default:
       break;
   }
@@ -160,12 +159,22 @@ export default function Preventivatore(props: Props): ReactNode {
   const [desktop, setDesktop] = useState(false);
   const [fotoViste, setFotoViste] = useState<Passaggio[]>(['evento']);
   const [caricato, setCaricato] = useState(false);
+  const [daRiepilogo, setDaRiepilogo] = useState(false);
 
   const inizio = useRef<number | null>(null);
   const titolo = useRef<HTMLHeadingElement>(null);
   const radice = useRef<HTMLDivElement>(null);
   const trappola = useRef<HTMLInputElement>(null);
   const primoRender = useRef(true);
+  const messaggio = useRef<HTMLTextAreaElement>(null);
+
+  // Il messaggio del riepilogo si allarga col testo: niente scroll interno.
+  useEffect(() => {
+    const el = messaggio.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight + 2}px`;
+  }, [r.message, step]);
 
   // Ripresa da localStorage (dopo l'idratazione, per non disallineare l'HTML).
   useEffect(() => {
@@ -174,9 +183,10 @@ export default function Preventivatore(props: Props): ReactNode {
       if (grezzo) {
         const s = JSON.parse(grezzo) as Salvato;
         if (s && s.r && s.step && s.step !== 'grazie') {
+          const passo = (PASSAGGI as readonly string[]).includes(s.step) ? s.step : 'riepilogo';
           setR({ ...RISPOSTE_VUOTE, ...s.r });
-          setStep(s.step);
-          setFotoViste([s.step]);
+          setStep(passo);
+          setFotoViste([passo]);
           inizio.current = s.inizio ?? null;
           if (s.step !== 'evento' || s.r.kind) setRipreso(true);
         }
@@ -265,11 +275,27 @@ export default function Preventivatore(props: Props): ReactNode {
     }
     setErrori({});
     setAnnuncio('');
-    const prossimo = PASSAGGI[indice + 1];
-    if (prossimo === 'lettera' && !r.letterEdited) {
-      setR((prima) => ({ ...prima, letter: componiLettera(prima, lang, zone, servizi) }));
+    // Dal riepilogo (o arrivando al riepilogo) si controlla tutto: se una
+    // modifica ha reso incompleto un altro passaggio (es. un altro tipo di
+    // evento), si va lì prima.
+    const prossimo = daRiepilogo ? 'riepilogo' : PASSAGGI[indice + 1];
+    if (prossimo === 'riepilogo') {
+      const mancante = PASSAGGI.slice(0, -1).find((p) => Object.keys(valida(p, r, lang, zone.length > 0)).length > 0);
+      if (mancante && mancante !== step) {
+        setDaRiepilogo(true);
+        setStep(mancante);
+        return;
+      }
+      setDaRiepilogo(false);
     }
     if (prossimo) setStep(prossimo);
+  };
+
+  const modifica = (passo: Passaggio): void => {
+    setErrori({});
+    setAnnuncio('');
+    setDaRiepilogo(true);
+    setStep(passo);
   };
 
   const indietro = (): void => {
@@ -286,6 +312,7 @@ export default function Preventivatore(props: Props): ReactNode {
       /* niente */
     }
     inizio.current = null;
+    setDaRiepilogo(false);
     setR(RISPOSTE_VUOTE);
     setErrori({});
     setAnnuncio('');
@@ -294,12 +321,6 @@ export default function Preventivatore(props: Props): ReactNode {
   };
 
   const invia = async (): Promise<void> => {
-    const e = valida('lettera', r, lang, zone.length > 0);
-    if (Object.keys(e).length > 0) {
-      setErrori(e);
-      setAnnuncio(Object.values(e)[0]);
-      return;
-    }
     setInviando(true);
     setAnnuncio(t.invio);
     try {
@@ -329,7 +350,6 @@ export default function Preventivatore(props: Props): ReactNode {
           budget: r.budget,
           source: r.source,
           message: r.message.trim(),
-          letter: r.letter.trim(),
           privacy: r.privacy,
           elapsed: inizio.current ? Math.round((Date.now() - inizio.current) / 1000) : 0,
           website: trappola.current?.value ?? '',
@@ -338,7 +358,7 @@ export default function Preventivatore(props: Props): ReactNode {
       });
       const dati = (await risposta.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
       if (!risposta.ok || !dati?.ok) {
-        throw new Error(dati?.error || t.lettera.erroreInvio);
+        throw new Error(dati?.error || t.riepilogo.erroreInvio);
       }
       try {
         window.localStorage.removeItem(CHIAVE);
@@ -348,7 +368,7 @@ export default function Preventivatore(props: Props): ReactNode {
       setAnnuncio('');
       setStep('grazie');
     } catch (errore) {
-      const testo = errore instanceof Error && errore.message ? errore.message : t.lettera.erroreInvio;
+      const testo = errore instanceof Error && errore.message ? errore.message : t.riepilogo.erroreInvio;
       setErrori({ invio: testo });
       setAnnuncio(testo);
     } finally {
@@ -359,7 +379,7 @@ export default function Preventivatore(props: Props): ReactNode {
   const onSubmit = (e: { preventDefault(): void }): void => {
     e.preventDefault();
     if (inviando) return;
-    if (step === 'lettera') void invia();
+    if (step === 'riepilogo') void invia();
     else avanti();
   };
 
@@ -764,12 +784,6 @@ export default function Preventivatore(props: Props): ReactNode {
                   ))}
                 </select>
               </div>
-              <div className="pv-campo">
-                <label htmlFor="pv-message">
-                  {t.contatti.messaggio} <span className="pv-facoltativo">({t.facoltativo})</span>
-                </label>
-                <textarea id="pv-message" rows={4} value={r.message} onChange={(e) => aggiorna({ message: e.target.value })} />
-              </div>
               <label className="pv-consenso">
                 <input type="checkbox" checked={r.privacy} onChange={(e) => aggiorna({ privacy: e.target.checked })} {...campo('privacy')} />
                 <span>
@@ -785,37 +799,54 @@ export default function Preventivatore(props: Props): ReactNode {
           ),
         };
 
-      case 'lettera':
+      case 'riepilogo': {
+        const righe = righeRiepilogo(r, lang, zone, servizi);
         return {
-          titolo: t.lettera.titolo,
-          nota: t.lettera.nota,
+          titolo: t.riepilogo.titolo,
+          nota: t.riepilogo.nota,
           corpo: (
-            <div className="pv-campo">
-              <label htmlFor="pv-letter" className="sr-only">
-                {t.lettera.etichetta}
-              </label>
-              <textarea
-                id="pv-letter"
-                className="pv-lettera"
-                rows={14}
-                value={r.letter}
-                onChange={(e) => aggiorna({ letter: e.target.value, letterEdited: true })}
-                {...campo('letter')}
-              />
-              <Errore chiave="letter" />
-              {r.letterEdited && (
-                <button
-                  type="button"
-                  className="pv-link"
-                  onClick={() => setR((prima) => ({ ...prima, letter: componiLettera(prima, lang, zone, servizi), letterEdited: false }))}
-                >
-                  {t.lettera.riscrivi}
-                </button>
-              )}
+            <>
+              <dl className="pv-riepilogo">
+                {righe.map((g) => (
+                  <div className="pv-riepilogo-riga" key={g.chiave}>
+                    <dt>{g.etichetta}</dt>
+                    <dd>
+                      <span className="pv-riepilogo-valore">{g.valore}</span>
+                      {g.dettagli.map((d) => (
+                        <span className="pv-riepilogo-dettaglio" key={d}>
+                          {d}
+                        </span>
+                      ))}
+                    </dd>
+                    <button
+                      type="button"
+                      className="pv-link pv-riepilogo-modifica"
+                      onClick={() => modifica(g.passaggio)}
+                      aria-label={t.riepilogo.modificaVoce(g.etichetta)}
+                    >
+                      {t.riepilogo.modifica}
+                    </button>
+                  </div>
+                ))}
+              </dl>
+              <div className="pv-campo">
+                <label htmlFor="pv-message">
+                  {t.riepilogo.messaggio} <span className="pv-facoltativo">({t.facoltativo})</span>
+                </label>
+                <textarea
+                  id="pv-message"
+                  ref={messaggio}
+                  className="pv-messaggio"
+                  rows={2}
+                  value={r.message}
+                  onChange={(e) => aggiorna({ message: e.target.value })}
+                />
+              </div>
               <Errore chiave="invio" />
-            </div>
+            </>
           ),
         };
+      }
 
       default:
         return { titolo: '', corpo: null };
@@ -914,7 +945,15 @@ export default function Preventivatore(props: Props): ReactNode {
                 </button>
               )}
               <button type="submit" className="btn btn--pieno pv-avanti" disabled={inviando}>
-                {step === 'lettera' ? (inviando ? t.invio : t.invia) : step === 'contatti' ? t.allaLettera : t.avanti}
+                {step === 'riepilogo'
+                  ? inviando
+                    ? t.invio
+                    : t.invia
+                  : daRiepilogo
+                    ? t.tornaRiepilogo
+                    : step === 'contatti'
+                      ? t.alRiepilogo
+                      : t.avanti}
               </button>
               {(ripreso || indice > 0) && (
                 <button type="button" className="pv-link pv-ricomincia" onClick={ricomincia} disabled={inviando}>

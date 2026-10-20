@@ -70,7 +70,12 @@ const zone: Zona[] = getLuoghi().flatMap((regione) => {
 
 const servizi: Servizio[] = getServices()
   .filter((s) => isPublishable(s, lang, SERVICE_FIELDS))
-  .map((s) => ({ slug: s.slug, titolo: text(s.title, lang), sottotitolo: text(s.subtitle, lang) }));
+  .map((s) => ({
+    slug: s.slug,
+    titolo: text(s.title, lang),
+    sottotitolo: text(s.subtitle, lang),
+    inclusi: (s.features?.[lang] ?? []).filter(Boolean),
+  }));
 
 // Una foto per passaggio, dalle impostazioni (colonna da min(42vw, 640px)).
 const CHIAVI: Record<Passaggio, string> = {
@@ -82,7 +87,7 @@ const CHIAVI: Record<Passaggio, string> = {
   aiuto: 'help',
   budget: 'budget',
   contatti: 'contact',
-  lettera: 'letter',
+  riepilogo: 'letter',
   grazie: 'thanks',
 };
 const foto: Partial<Record<Passaggio, Foto | null>> = {};

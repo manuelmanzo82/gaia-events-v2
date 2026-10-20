@@ -52,22 +52,28 @@ $riepilogo = is_array($payload['summary'] ?? null) ? $payload['summary'] : [];
   <p class="flash error">La notifica via mail non è partita: <?= e((string) $row['mail_error']) ?>. La richiesta è comunque salvata qui.</p>
 <?php endif; ?>
 
+<?php if ($riepilogo !== []): ?>
+  <h2>Riepilogo</h2>
+  <table>
+    <?php foreach ($riepilogo as $voce): ?>
+      <?php if (is_array($voce) && isset($voce['label'], $voce['value'])): ?>
+        <tr><th style="width:12rem"><?= e((string) $voce['label']) ?></th><td><?= nl2br(e((string) $voce['value'])) ?></td></tr>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </table>
+<?php endif; ?>
+
 <?php if (!empty($row['letter'])): ?>
   <h2>La lettera</h2>
   <blockquote style="white-space: pre-wrap; font-family: Georgia, serif; font-size: 1.05rem; line-height: 1.6; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-left: 3px solid #7a2e3a; background: #faf8f5"><?= e((string) $row['letter']) ?></blockquote>
 <?php endif; ?>
 
-<h2>Le risposte</h2>
+<h2>Recapiti</h2>
 <table>
-  <tr><th>Email</th><td><a href="mailto:<?= e((string) $row['email']) ?>"><?= e((string) $row['email']) ?></a></td></tr>
+  <tr><th style="width:12rem">Email</th><td><a href="mailto:<?= e((string) $row['email']) ?>"><?= e((string) $row['email']) ?></a></td></tr>
   <?php if (!empty($row['phone'])): ?>
     <tr><th>Telefono</th><td><?= e((string) $row['phone']) ?></td></tr>
   <?php endif; ?>
-  <?php foreach ($riepilogo as $voce): ?>
-    <?php if (is_array($voce) && isset($voce['label'], $voce['value'])): ?>
-      <tr><th><?= e((string) $voce['label']) ?></th><td><?= nl2br(e((string) $voce['value'])) ?></td></tr>
-    <?php endif; ?>
-  <?php endforeach; ?>
   <?php if ($riepilogo === [] && !empty($row['message'])): ?>
     <tr><th>Messaggio</th><td><?= nl2br(e((string) $row['message'])) ?></td></tr>
   <?php endif; ?>

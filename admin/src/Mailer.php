@@ -37,7 +37,7 @@ require_once __DIR__ . '/Lib/PHPMailer/SMTP.php';
 final class Mailer
 {
     /**
-     * @param array{to: string, subject: string, text: string, reply_to?: ?string, reply_to_name?: ?string} $message
+     * @param array{to: string, subject: string, text: string, html?: ?string, reply_to?: ?string, reply_to_name?: ?string} $message
      * @return array{ok: bool, error: ?string}
      */
     public static function send(array $message): array
@@ -75,8 +75,15 @@ final class Mailer
             }
 
             $mail->Subject = $message['subject'];
-            $mail->Body = $message['text'];
-            $mail->isHTML(false);
+            // Con l'HTML il testo resta come alternativa per i client semplici.
+            if (!empty($message['html'])) {
+                $mail->isHTML(true);
+                $mail->Body = (string) $message['html'];
+                $mail->AltBody = $message['text'];
+            } else {
+                $mail->isHTML(false);
+                $mail->Body = $message['text'];
+            }
 
             $mail->send();
 

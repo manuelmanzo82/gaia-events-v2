@@ -1,13 +1,11 @@
 /**
- * Testi del preventivatore (IT/EN in un solo posto), le fasce, le
- * etichette del riepilogo per Gaia e la LETTERA generata dalle risposte.
+ * Testi del preventivatore (IT/EN in un solo posto), le fasce, le righe
+ * del RIEPILOGO (giro 9: al posto della lettera) e il riepilogo per Gaia.
  *
- * La lettera è fatta di frasi complete, una per risposta: una risposta
- * che manca toglie la frase intera, non lascia buchi né frasi
- * sgrammaticate. Registro: matrimonio e unione civile «noi» (i due nomi),
- * festa «io», azienda «noi» con la firma dell'azienda; a Gaia sempre del
- * tu. Le fasce di budget cambiano col tipo di evento (DA-CHIEDERE-A-GAIA
- * n. 9: da confermare con lei).
+ * Il riepilogo è schematico: etichetta → valore, una riga per passaggio,
+ * ognuna col suo «Modifica». Una risposta che manca diventa «Da definire»
+ * o «Non indicato», mai un buco. Le fasce di budget cambiano col tipo di
+ * evento (DA-CHIEDERE-A-GAIA n. 9: da confermare con lei).
  */
 
 export type Lingua = 'it' | 'en';
@@ -16,7 +14,7 @@ export type ModoData = '' | 'giorno' | 'mese' | 'da_definire';
 export type ModoLuogo = '' | 'zone' | 'libero' | 'consigliateci' | 'location';
 export type Contatto = 'email' | 'whatsapp' | 'telefono';
 
-export const PASSAGGI = ['evento', 'voi', 'quando', 'dove', 'ospiti', 'aiuto', 'budget', 'contatti', 'lettera'] as const;
+export const PASSAGGI = ['evento', 'voi', 'quando', 'dove', 'ospiti', 'aiuto', 'budget', 'contatti', 'riepilogo'] as const;
 export type Passaggio = (typeof PASSAGGI)[number] | 'grazie';
 
 export interface Risposte {
@@ -43,8 +41,6 @@ export interface Risposte {
   source: string;
   message: string;
   privacy: boolean;
-  letter: string;
-  letterEdited: boolean;
 }
 
 export const RISPOSTE_VUOTE: Risposte = {
@@ -71,8 +67,6 @@ export const RISPOSTE_VUOTE: Risposte = {
   source: '',
   message: '',
   privacy: false,
-  letter: '',
-  letterEdited: false,
 };
 
 /** Una zona pubblicata in Luoghi, come arriva dal JSON in build. */
@@ -87,6 +81,8 @@ export interface Servizio {
   slug: string;
   titolo: string;
   sottotitolo: string;
+  /** Cosa include (dal back office, «features» del servizio). */
+  inclusi: string[];
 }
 
 export const coppia = (k: TipoEvento | ''): boolean => k === 'matrimonio' || k === 'unione_civile';
@@ -131,14 +127,6 @@ export function etichettaBudget(fascia: string, lang: Lingua): string {
   return `${euro(+a, lang)} – ${euro(+b, lang)}`;
 }
 
-/** La stessa fascia, dentro una frase della lettera. */
-function budgetInFrase(fascia: string, lang: Lingua): string {
-  const [a, b] = fascia.split('-');
-  if (a === 'fino') return lang === 'it' ? `fino a ${euro(+b, lang)}` : `of up to ${euro(+b, lang)}`;
-  if (a === 'oltre') return lang === 'it' ? `oltre ${euro(+b, lang)}` : `of over ${euro(+b, lang)}`;
-  return lang === 'it' ? `tra ${euro(+a, lang)} e ${euro(+b, lang)}` : `between ${euro(+a, lang)} and ${euro(+b, lang)}`;
-}
-
 export function etichettaOspiti(fascia: string, lang: Lingua): string {
   const [a, b] = fascia.split('-');
   if (a === 'fino') return lang === 'it' ? `fino a ${b}` : `up to ${b}`;
@@ -161,11 +149,12 @@ export const nomeMese = (m: number, lang: Lingua): string => MESI[lang][m - 1] ?
 
 export const T = {
   it: {
-    passaggi: ['Evento', 'Voi', 'Quando', 'Dove', 'Ospiti', 'Aiuto', 'Budget', 'Contatti', 'Lettera'],
+    passaggi: ['Evento', 'Voi', 'Quando', 'Dove', 'Ospiti', 'Aiuto', 'Budget', 'Contatti', 'Riepilogo'],
     passaggioDi: (n: number, tot: number) => `Passaggio ${n} di ${tot}`,
     avanti: 'Avanti',
     indietro: 'Indietro',
-    allaLettera: 'Scrivi la lettera',
+    alRiepilogo: 'Vai al riepilogo',
+    tornaRiepilogo: 'Torna al riepilogo',
     invia: 'Invia a Gaia',
     invio: 'Invio in corso…',
     ricomincia: 'Ricomincia',
@@ -266,13 +255,38 @@ export const T = {
       erroreTelefono: 'Per WhatsApp o telefono serve il numero.',
       errorePrivacy: 'Serve il consenso per potervi ricontattare.',
     },
-    lettera: {
-      titolo: 'Ecco la vostra lettera per Gaia',
-      nota: 'Potete cambiarla come volete prima di inviarla.',
-      etichetta: 'La lettera',
-      riscrivi: 'Riscrivila dalle risposte',
-      errore: 'La lettera è vuota.',
+    riepilogo: {
+      titolo: 'Ecco il riepilogo',
+      nota: 'Controllate e inviate a Gaia.',
+      modifica: 'Modifica',
+      modificaVoce: (voce: string) => `Modifica: ${voce}`,
+      messaggio: 'Volete aggiungere qualcosa?',
       erroreInvio: 'Invio non riuscito. Riprovate tra poco, oppure scrivete a Gaia su WhatsApp.',
+      voci: {
+        evento: 'Evento',
+        nomi: 'Nomi',
+        nome: 'Nome',
+        data: 'Data',
+        luogo: 'Luogo',
+        ospiti: 'Ospiti',
+        servizi: 'Servizi',
+        budget: 'Budget',
+        contatto: 'Contatto preferito',
+      },
+      tipi: {
+        matrimonio: 'Matrimonio',
+        unione_civile: 'Unione civile',
+        festa: 'Festa privata',
+        aziendale: 'Evento aziendale',
+      } as Record<TipoEvento, string>,
+      daDefinire: 'Da definire',
+      nonIndicato: 'Non indicato',
+      consiglio: 'Consigliateci voi',
+      location: 'Location',
+      estero: 'Dall’estero',
+      circa: (n: string) => `circa ${n}`,
+      include: 'Include',
+      nonSo: 'Da capire insieme',
     },
     grazie: {
       titolo: (nomi: string) => `Grazie, ${nomi}.`,
@@ -295,11 +309,12 @@ export const T = {
     },
   },
   en: {
-    passaggi: ['Event', 'You', 'When', 'Where', 'Guests', 'Help', 'Budget', 'Contact', 'Letter'],
+    passaggi: ['Event', 'You', 'When', 'Where', 'Guests', 'Help', 'Budget', 'Contact', 'Summary'],
     passaggioDi: (n: number, tot: number) => `Step ${n} of ${tot}`,
     avanti: 'Next',
     indietro: 'Back',
-    allaLettera: 'Write the letter',
+    alRiepilogo: 'Review',
+    tornaRiepilogo: 'Back to the summary',
     invia: 'Send to Gaia',
     invio: 'Sending…',
     ricomincia: 'Start again',
@@ -400,13 +415,38 @@ export const T = {
       erroreTelefono: 'A phone number is needed for WhatsApp or a call.',
       errorePrivacy: 'Your consent is needed so I can get back to you.',
     },
-    lettera: {
-      titolo: 'Here is your letter to Gaia',
-      nota: 'Change it as you like before sending it.',
-      etichetta: 'The letter',
-      riscrivi: 'Rewrite it from your answers',
-      errore: 'The letter is empty.',
+    riepilogo: {
+      titolo: 'Here is your summary',
+      nota: 'Check it and send it to Gaia.',
+      modifica: 'Edit',
+      modificaVoce: (voce: string) => `Edit: ${voce}`,
+      messaggio: 'Anything you would like to add?',
       erroreInvio: 'Sending failed. Please try again shortly, or message Gaia on WhatsApp.',
+      voci: {
+        evento: 'Event',
+        nomi: 'Names',
+        nome: 'Name',
+        data: 'Date',
+        luogo: 'Place',
+        ospiti: 'Guests',
+        servizi: 'Services',
+        budget: 'Budget',
+        contatto: 'Preferred contact',
+      },
+      tipi: {
+        matrimonio: 'Wedding',
+        unione_civile: 'Civil union',
+        festa: 'Private party',
+        aziendale: 'Corporate event',
+      } as Record<TipoEvento, string>,
+      daDefinire: 'To be decided',
+      nonIndicato: 'Not given',
+      consiglio: 'We would love your advice',
+      location: 'Venue',
+      estero: 'Coming from abroad',
+      circa: (n: string) => `around ${n}`,
+      include: 'Includes',
+      nonSo: 'To work out together',
     },
     grazie: {
       titolo: (nomi: string) => `Thank you, ${nomi}.`,
@@ -440,238 +480,96 @@ export function nomi(r: Risposte, lang: Lingua): string {
   return a;
 }
 
-/** Elenco naturale: «a, b e c» / «a, b and c». */
-export function elenco(voci: string[], lang: Lingua, congiunzione?: string): string {
-  if (voci.length <= 1) return voci[0] ?? '';
-  const c = congiunzione ?? (lang === 'it' ? congiungi(voci[voci.length - 1]) : 'and');
-  return `${voci.slice(0, -1).join(', ')} ${c} ${voci[voci.length - 1]}`;
+// ---------------------------------------------------------------------
+// Riepilogo: righe per il modulo (IT/EN) e per Gaia (sempre IT)
+// ---------------------------------------------------------------------
+
+export interface Riga {
+  chiave: string;
+  etichetta: string;
+  valore: string;
+  /** Righe secondarie (cosa include un servizio, la location…). */
+  dettagli: string[];
+  passaggio: Passaggio;
 }
 
-/** Il nome di un servizio dentro una frase: tutto minuscolo, tranne le sigle. */
-const inFrase = (s: string): string =>
-  s
-    .split(' ')
-    .map((parola) => (/^[A-Z0-9]{2,}$/.test(parola) ? parola : parola.toLowerCase()))
-    .join(' ');
+export function righeRiepilogo(r: Risposte, lang: Lingua, zone: Zona[], servizi: Servizio[]): Riga[] {
+  const t = T[lang].riepilogo;
+  const v = t.voci;
+  const righe: Riga[] = [];
+  const riga = (chiave: string, etichetta: string, valore: string, passaggio: Passaggio, dettagli: string[] = []): void => {
+    righe.push({ chiave, etichetta, valore: valore || t.nonIndicato, dettagli: dettagli.filter(Boolean), passaggio });
+  };
 
-// ---------------------------------------------------------------------
-// La lettera
-// ---------------------------------------------------------------------
+  if (r.kind) riga('evento', v.evento, t.tipi[r.kind], 'evento');
 
-export function componiLettera(r: Risposte, lang: Lingua, zone: Zona[], servizi: Servizio[]): string {
-  const it = lang === 'it';
-  const k = r.kind;
-  const noi = k !== 'festa'; // la festa parla in prima persona singolare
   const chi = nomi(r, lang);
-  const paragrafi: string[] = [];
+  riga(
+    'nomi',
+    coppia(r.kind) ? v.nomi : v.nome,
+    r.kind === 'aziendale' && r.company.trim() ? `${chi} — ${r.company.trim()}` : chi,
+    'voi',
+  );
 
-  // 1. Chi, che cosa, quando, dove (zone dall'elenco), quanti.
-  let quando = '';
+  let data = t.daDefinire;
   if (r.dateMode === 'giorno' && r.date) {
     const [y, m, d] = r.date.split('-').map(Number);
-    quando = it ? ` il ${d} ${nomeMese(m, lang)} ${y}` : ` on ${d} ${nomeMese(m, lang)} ${y}`;
+    data = `${d} ${nomeMese(m, lang)} ${y}`;
   } else if (r.dateMode === 'mese' && r.monthM && r.monthY) {
-    quando = it ? ` a ${nomeMese(+r.monthM, lang)} ${r.monthY}` : ` in ${nomeMese(+r.monthM, lang)} ${r.monthY}`;
+    data = `${nomeMese(+r.monthM, lang)} ${r.monthY}`;
+    if (lang === 'it') data = data.charAt(0).toUpperCase() + data.slice(1);
   }
+  riga('data', v.data, data, 'quando');
 
-  let dove = '';
-  if (r.zoneMode === 'zone' && r.zones.length > 0) {
-    const scelte = r.zones.map((slug) => zone.find((z) => z.slug === slug)).filter((z): z is Zona => !!z);
-    if (scelte.length > 0) {
-      dove = it
-        ? ' ' + elenco(scelte.map((z) => `${z.regione ? 'in' : 'a'} ${z.nome}`), lang, 'o')
-        : ` in ${elenco(scelte.map((z) => z.nome), lang, 'or')}`;
-    }
-  }
+  let luogo = '';
+  const dettagliLuogo: string[] = [];
+  if (r.zoneMode === 'zone') luogo = r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s).join(', ');
+  else if (r.zoneMode === 'libero') luogo = r.zoneText.trim();
+  else if (r.zoneMode === 'consigliateci') luogo = t.consiglio;
+  else if (r.zoneMode === 'location') luogo = `${t.location}: ${r.venue.trim()}`;
+  if (r.abroad) dettagliLuogo.push(t.estero);
+  riga('luogo', v.luogo, luogo, 'dove', dettagliLuogo);
 
-  let quanti = '';
-  const persone = it ? (k === 'aziendale' ? 'persone' : 'ospiti') : k === 'aziendale' ? 'people' : 'guests';
-  if (r.guests && Number(r.guests) > 0) {
-    quanti = it ? `, con circa ${Number(r.guests)} ${persone}` : `, with around ${Number(r.guests)} ${persone}`;
-  } else if (r.guestsRange) {
-    const [a, b] = r.guestsRange.split('-');
-    if (a === 'fino') quanti = it ? `, con al massimo ${b} ${persone}` : `, with up to ${b} ${persone}`;
-    else if (a === 'oltre') quanti = it ? `, con più di ${b} ${persone}` : `, with more than ${b} ${persone}`;
-    else quanti = it ? `, con ${a}–${b} ${persone}` : `, with ${a}–${b} ${persone}`;
-  }
+  riga(
+    'ospiti',
+    v.ospiti,
+    r.guests ? t.circa(r.guests) : r.guestsRange ? etichettaOspiti(r.guestsRange, lang) : '',
+    'ospiti',
+  );
 
-  const coda = `${quando}${dove}${quanti}`;
-  let apertura: string;
-  if (it) {
-    if (k === 'matrimonio') apertura = `siamo ${chi} e sogniamo di sposarci${coda}.`;
-    else if (k === 'unione_civile') apertura = `siamo ${chi} e sogniamo la nostra unione civile${coda}.`;
-    else if (k === 'festa') apertura = `sono ${chi} e sto organizzando una festa privata${coda}.`;
-    else apertura = `sono ${chi}${r.company.trim() ? ` di ${r.company.trim()}` : ''} e stiamo organizzando un evento aziendale${coda}.`;
-  } else {
-    if (k === 'matrimonio') apertura = `we are ${chi} and we dream of getting married${coda}.`;
-    else if (k === 'unione_civile') apertura = `we are ${chi} and we dream of our civil union${coda}.`;
-    else if (k === 'festa') apertura = `I'm ${chi} and I'm planning a private party${coda}.`;
-    else apertura = `I'm ${chi}${r.company.trim() ? ` from ${r.company.trim()}` : ''} and we are planning a corporate event${coda}.`;
-  }
-
-  const frasi: string[] = [apertura];
-
-  if (r.dateMode === 'da_definire' || (r.dateMode === 'mese' && !(r.monthM && r.monthY))) {
-    frasi.push(
-      it
-        ? k === 'festa'
-          ? 'Non ho ancora fissato la data.'
-          : k === 'aziendale'
-            ? 'La data è ancora da definire.'
-            : 'Non abbiamo ancora fissato la data.'
-        : k === 'festa'
-          ? "I haven't set the date yet."
-          : k === 'aziendale'
-            ? 'The date is still to be decided.'
-            : "We haven't set the date yet.",
-    );
-  }
-
-  if (r.zoneMode === 'libero' && r.zoneText.trim()) {
-    frasi.push(
-      it
-        ? `Come luogo ${noi ? 'abbiamo' : 'ho'} in mente: ${r.zoneText.trim()}.`
-        : `For the place, ${noi ? 'we have' : 'I have'} in mind: ${r.zoneText.trim()}.`,
-    );
-  } else if (r.zoneMode === 'consigliateci') {
-    frasi.push(
-      it
-        ? `Per il luogo ${noi ? 'ci' : 'mi'} piacerebbe un tuo consiglio.`
-        : `${noi ? 'We' : 'I'} would love your advice on the venue.`,
-    );
-  } else if (r.zoneMode === 'location' && r.venue.trim()) {
-    frasi.push(
-      it
-        ? `${noi ? 'Abbiamo' : 'Ho'} già scelto la location: ${r.venue.trim()}.`
-        : `${noi ? 'We have' : 'I have'} already chosen the venue: ${r.venue.trim()}.`,
-    );
-  }
-
-  if (r.abroad) {
-    frasi.push(
-      it
-        ? k === 'aziendale'
-          ? "Molti ospiti arriveranno dall'estero."
-          : k === 'festa'
-            ? "Arrivo dall'estero."
-            : "Veniamo dall'estero."
-        : k === 'aziendale'
-          ? 'Many guests will be coming from abroad.'
-          : k === 'festa'
-            ? "I'm coming from abroad."
-            : 'We are coming from abroad.',
-    );
-  }
-  paragrafi.push(frasi.join(' '));
-
-  // 2. Aiuto e budget.
-  const aiuto: string[] = [];
-  const scelti = r.services
-    .filter((s) => s !== 'da_definire')
-    .map((slug) => servizi.find((s) => s.slug === slug)?.titolo)
-    .filter((s): s is string => !!s);
-  if (scelti.length > 0) {
-    aiuto.push(
-      it
-        ? `${noi ? 'Ci' : 'Mi'} piacerebbe il tuo aiuto per ${scelti.length > 1 ? 'questi servizi' : 'questo servizio'}: ${elenco(scelti.map(inFrase), lang)}.`
-        : `${noi ? 'We' : 'I'} would love your help with ${elenco(scelti.map(inFrase), lang)}.`,
-    );
-  }
   if (r.services.includes('da_definire')) {
-    aiuto.push(
-      it
-        ? noi
-          ? 'Vorremmo capire insieme a te di che cosa abbiamo bisogno.'
-          : 'Vorrei capire insieme a te di che cosa ho bisogno.'
-        : noi
-          ? "We'd like to work out together what we need."
-          : "I'd like to work out together what I need.",
-    );
-  }
-  if (r.budget === 'parlarne') {
-    aiuto.push(
-      it
-        ? `Del budget ${noi ? 'preferiremmo' : 'preferirei'} parlare a voce.`
-        : `${noi ? "We'd" : "I'd"} rather talk about the budget in person.`,
-    );
-  } else if (r.budget) {
-    aiuto.push(
-      it
-        ? `${noi ? 'Abbiamo' : 'Ho'} in mente un budget ${budgetInFrase(r.budget, lang)}.`
-        : `${noi ? 'We have' : 'I have'} a budget ${budgetInFrase(r.budget, lang)} in mind.`,
-    );
-  }
-  if (aiuto.length > 0) paragrafi.push(aiuto.join(' '));
-
-  // 3. Il messaggio libero, così com'è.
-  if (r.message.trim()) paragrafi.push(r.message.trim());
-
-  // 4. Come ricontattare.
-  const tel = r.phone.trim();
-  if (r.contactPref === 'whatsapp' && tel) {
-    paragrafi.push(
-      it
-        ? `${noi ? 'Preferiamo che ci ricontatti' : 'Preferisco che mi ricontatti'} su WhatsApp, al ${tel}.`
-        : `${noi ? "We'd" : "I'd"} prefer to be contacted on WhatsApp, at ${tel}.`,
-    );
-  } else if (r.contactPref === 'telefono' && tel) {
-    paragrafi.push(it ? `${noi ? 'Preferiamo' : 'Preferisco'} una telefonata, al ${tel}.` : `${noi ? "We'd" : "I'd"} prefer a phone call, at ${tel}.`);
-  } else if (r.email.trim()) {
-    paragrafi.push(
-      it
-        ? `Puoi ${noi ? 'scriverci' : 'scrivermi'} all'indirizzo ${r.email.trim()}.`
-        : `You can write to ${noi ? 'us' : 'me'} at ${r.email.trim()}.`,
+    riga('servizi', v.servizi, t.nonSo, 'aiuto');
+  } else {
+    const scelti = r.services.map((slug) => servizi.find((s) => s.slug === slug)).filter((s): s is Servizio => !!s);
+    riga(
+      'servizi',
+      v.servizi,
+      scelti.map((s) => s.titolo).join(', '),
+      'aiuto',
+      scelti.filter((s) => s.inclusi.length > 0).map((s) => `${s.titolo} — ${t.include.toLowerCase()}: ${s.inclusi.join(' · ')}`),
     );
   }
 
-  const saluto = k === 'aziendale' ? (it ? 'Buongiorno Gaia,' : 'Hello Gaia,') : it ? 'Cara Gaia,' : 'Dear Gaia,';
-  const chiusa = k === 'aziendale' ? (it ? 'Grazie,' : 'Thank you,') : it ? 'A presto,' : 'See you soon,';
-  const firma = k === 'aziendale' && r.company.trim() ? `${chi} — ${r.company.trim()}` : chi;
+  riga('budget', v.budget, r.budget ? etichettaBudget(r.budget, lang) : t.nonIndicato, 'budget');
 
-  return `${saluto}\n${paragrafi.join('\n\n')}\n\n${chiusa}\n${firma}`;
+  const canale = T[lang].contatti.pref[r.contactPref];
+  const recapito = r.contactPref === 'email' ? r.email.trim() : r.phone.trim();
+  const altri: string[] = [];
+  if (r.contactPref !== 'email' && r.email.trim()) altri.push(`Email: ${r.email.trim()}`);
+  if (r.contactPref === 'email' && r.phone.trim()) altri.push(`${T[lang].contatti.telefono}: ${r.phone.trim()}`);
+  riga('contatto', v.contatto, `${canale} · ${recapito}`, 'contatti', altri);
+
+  return righe;
 }
 
-// ---------------------------------------------------------------------
-// Riepilogo per Gaia (sempre in italiano) e messaggio WhatsApp
-// ---------------------------------------------------------------------
-
+/** Il riepilogo per Gaia (email e back office): sempre in italiano. */
 export function riepilogo(r: Risposte, zone: Zona[], servizi: Servizio[]): Array<{ label: string; value: string }> {
-  const righe: Array<{ label: string; value: string }> = [];
-  const add = (label: string, value: string): void => {
-    if (value.trim()) righe.push({ label, value: value.trim() });
-  };
-  const TIPI: Record<TipoEvento, string> = {
-    matrimonio: 'Matrimonio',
-    unione_civile: 'Unione civile',
-    festa: 'Festa privata',
-    aziendale: 'Evento aziendale',
-  };
-  if (r.kind) add('Tipo di evento', TIPI[r.kind]);
-  add('Nome', r.name);
-  if (coppia(r.kind)) add('Partner', r.partner);
-  if (r.kind === 'aziendale') add('Azienda', r.company);
-  if (r.dateMode === 'giorno' && r.date) {
-    const [y, m, d] = r.date.split('-').map(Number);
-    add('Quando', `${d} ${nomeMese(m, 'it')} ${y}`);
-  } else if (r.dateMode === 'mese' && r.monthM && r.monthY) {
-    add('Quando', `${nomeMese(+r.monthM, 'it')} ${r.monthY}`);
-  } else {
-    add('Quando', 'da definire');
-  }
-  if (r.zoneMode === 'zone') add('Dove', r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s).join(', '));
-  if (r.zoneMode === 'libero') add('Dove', r.zoneText);
-  if (r.zoneMode === 'consigliateci') add('Dove', 'chiedono un consiglio');
-  if (r.zoneMode === 'location') add('Dove', `location già scelta: ${r.venue}`);
-  if (r.abroad) add('Dall’estero', 'sì');
-  add('Ospiti', r.guests ? `circa ${r.guests}` : r.guestsRange ? etichettaOspiti(r.guestsRange, 'it') : '');
-  add(
-    'Aiuto',
-    r.services.map((s) => (s === 'da_definire' ? 'non lo sanno ancora' : (servizi.find((x) => x.slug === s)?.titolo ?? s))).join(', '),
-  );
-  add('Budget', r.budget ? etichettaBudget(r.budget, 'it') : 'non indicato');
-  add('Ricontattare via', T.it.contatti.pref[r.contactPref]);
-  if (r.source) add('Come l’hanno conosciuta', T.it.contatti.fonti[r.source] ?? r.source);
-  add('Messaggio', r.message);
+  const righe = righeRiepilogo(r, 'it', zone, servizi).map((g) => ({
+    label: g.etichetta,
+    value: [g.valore, ...g.dettagli].join('\n'),
+  }));
+  if (r.source) righe.push({ label: 'Come l’hanno conosciuta', value: T.it.contatti.fonti[r.source] ?? r.source });
+  if (r.message.trim()) righe.push({ label: 'Messaggio', value: r.message.trim() });
   return righe;
 }
 

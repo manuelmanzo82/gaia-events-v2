@@ -125,10 +125,9 @@ final class Inquiry
         $guestsRange = in_array($in['guestsRange'] ?? '', self::GUEST_RANGES, true) ? (string) $in['guestsRange'] : null;
         $guests = filter_var($in['guests'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 5000]]);
 
+        // Dal giro 9 il modulo manda un riepilogo, non più una lettera: la
+        // colonna `letter` resta per le richieste vecchie.
         $letter = self::str($in['letter'] ?? '', 8000, false);
-        if ($letter === '') {
-            return $errore('La lettera è vuota.', 'The letter is empty.');
-        }
 
         if (self::tooMany($ip, 'quote')) {
             return [
@@ -180,7 +179,7 @@ final class Inquiry
             'budget_range' => self::str($in['budget'] ?? '', 30) ?: null,
             'source' => self::str($in['source'] ?? '', 60) ?: null,
             'message' => self::str($in['message'] ?? '', 5000, false) ?: null,
-            'letter' => $letter,
+            'letter' => $letter !== '' ? $letter : null,
             'privacy_at' => date('Y-m-d H:i:s'),
             'payload' => json_encode($payload, JSON_UNESCAPED_UNICODE),
             'ip' => $ip,
@@ -202,36 +201,38 @@ final class Inquiry
             'telefono' => 'con una telefonata al ' . $phone,
             default => 'via email a ' . $email,
         };
-        $righe = [
-            // In evidenza in cima: come vogliono essere ricontattati.
-            ($plurale ? 'Preferiscono essere contattati ' : 'Contatto preferito: ') . $canale . '.',
-            '',
-            $letter, '', '— — —', '', 'Riepilogo delle risposte:', '',
-        ];
-        foreach ($summary as $riga) {
-            $righe[] = $riga['label'] . ': ' . $riga['value'];
-        }
-        $righe[] = '';
-        $righe[] = 'Rispondendo a questa mail scrivi direttamente a ' . $email . '.';
-        $righe[] = 'Nel back office: ' . self::backOfficeUrl($id);
+        // In evidenza in cima: come vogliono essere ricontattati.
+        $preferenza = ($plurale ? 'Preferiscono essere contattati ' : 'Contatto preferito: ') . $canale . '.';
+        $link = self::backOfficeUrl($id);
 
         $esito = Mailer::send([
             'to' => (string) Config::get('notify_email', ''),
             'subject' => 'Nuova richiesta: ' . $chi . ' — ' . self::KIND_LABELS[$kind] . $quando,
-            'text' => implode("\n", $righe),
+            'text' => implode("\n", [
+                $preferenza,
+                '',
+                self::tabellaTesto($summary),
+                '',
+                'Rispondendo a questa mail scrivi direttamente a ' . $email . '.',
+                'Nel back office: ' . $link,
+            ]),
+            'html' => self::paginaHtml($preferenza, $summary, [
+                'Rispondendo a questa mail scrivi direttamente a ' . $email . '.',
+                '<a href="' . htmlspecialchars($link, ENT_QUOTES) . '">Apri la richiesta nel back office</a>',
+            ]),
             'reply_to' => $email,
             'reply_to_name' => $chi,
         ]);
         self::recordMail($id, $esito);
 
-        // Copia della lettera alla coppia: dietro un'impostazione, spenta.
+        // Copia del riepilogo alla coppia: dietro un'impostazione, spenta.
         if ((string) Db::value("SELECT value_it FROM settings WHERE setting_key = 'quote.sendCopy'") === '1') {
             $copia = Mailer::send([
                 'to' => $email,
-                'subject' => $lang === 'en' ? 'Your letter to Gaia Events' : 'La vostra lettera a Gaia Events',
+                'subject' => $lang === 'en' ? 'Your request to Gaia Events' : 'La vostra richiesta a Gaia Events',
                 'text' => ($lang === 'en'
-                    ? "Thank you! Here is a copy of the letter you sent. Gaia will reply soon.\n\n"
-                    : "Grazie! Ecco una copia della lettera che avete inviato. Gaia vi risponderà presto.\n\n") . $letter,
+                    ? "Thank you! Here is a summary of your request. Gaia will reply soon.\n\n"
+                    : "Grazie! Ecco il riepilogo della vostra richiesta. Gaia vi risponderà presto.\n\n") . self::tabellaTesto($summary),
                 'reply_to' => (string) Config::get('notify_email', ''),
                 'reply_to_name' => 'Gaia Events',
             ]);
@@ -302,6 +303,57 @@ final class Inquiry
     // -----------------------------------------------------------------
     // Utilità
     // -----------------------------------------------------------------
+
+    /**
+     * Il riepilogo come tabella di testo: etichette allineate, i valori su
+     * più righe rientrano sotto la colonna dei valori.
+     *
+     * @param list<array{label: string, value: string}> $righe
+     */
+    private static function tabellaTesto(array $righe): string
+    {
+        $larga = 0;
+        foreach ($righe as $r) {
+            $larga = max($larga, mb_strlen($r['label']));
+        }
+        $out = [];
+        foreach ($righe as $r) {
+            $valori = explode("\n", $r['value']);
+            $out[] = $r['label'] . str_repeat(' ', $larga - mb_strlen($r['label']) + 3) . array_shift($valori);
+            foreach ($valori as $v) {
+                $out[] = str_repeat(' ', $larga + 3) . $v;
+            }
+        }
+
+        return implode("\n", $out);
+    }
+
+    /**
+     * La stessa tabella in HTML, per i client di posta che la mostrano.
+     *
+     * @param list<array{label: string, value: string}> $righe
+     * @param list<string> $coda  righe finali (HTML già sicuro)
+     */
+    private static function paginaHtml(string $preferenza, array $righe, array $coda): string
+    {
+        $e = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        $html = '<div style="font-family:Georgia,serif;color:#262019;max-width:640px">';
+        $html .= '<p style="font-size:17px;margin:0 0 18px;padding:12px 14px;background:#f4efe8;border-left:3px solid #722f37">'
+            . '<strong>' . $e($preferenza) . '</strong></p>';
+        $html .= '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:15px">';
+        foreach ($righe as $r) {
+            $html .= '<tr><td style="padding:9px 16px 9px 0;border-bottom:1px solid #e8e2d9;vertical-align:top;'
+                . 'font-family:Arial,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6f675d;white-space:nowrap">'
+                . $e($r['label']) . '</td><td style="padding:9px 0;border-bottom:1px solid #e8e2d9;vertical-align:top;line-height:1.5">'
+                . nl2br($e($r['value'])) . '</td></tr>';
+        }
+        $html .= '</table>';
+        foreach ($coda as $riga) {
+            $html .= '<p style="font-family:Arial,sans-serif;font-size:13px;color:#6f675d;margin:14px 0 0">' . $riga . '</p>';
+        }
+
+        return $html . '</div>';
+    }
 
     /** @return array{ok: bool, status: int, message: string} */
     private static function ok(): array
