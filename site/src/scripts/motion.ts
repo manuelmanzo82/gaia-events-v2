@@ -17,26 +17,19 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 
+import { impostaLenis, riduciMotion } from './motion-leggero';
+
+export { getLenis, riduciMotion } from './motion-leggero';
+
 const DURATA = 1.1;
 const EASE = 'power3.out';
 
-export function riduciMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 /** Avvia Lenis e lo aggancia al ticker di GSAP. */
-let lenisAttivo: Lenis | null = null;
-
-/** L'istanza di Lenis della pagina, se lo scroll morbido è acceso. */
-export function getLenis(): Lenis | null {
-  return lenisAttivo;
-}
-
 export function initLenis(): Lenis | null {
   if (riduciMotion()) return null;
 
   const lenis = new Lenis({ duration: 1.15 });
-  lenisAttivo = lenis;
+  impostaLenis(lenis);
 
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => {
@@ -47,6 +40,15 @@ export function initLenis(): Lenis | null {
   return lenis;
 }
 
+/**
+ * I reveal partono dopo il load (avviaMotionDopoIlPaint): quel che a quel
+ * punto è già sullo schermo resta com'è, senza sparire e ricomparire.
+ */
+function giaVisibile(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect();
+  return r.top < window.innerHeight && r.bottom > 0;
+}
+
 /** Registra i reveal su tutti gli elementi [data-reveal] della pagina. */
 export function initReveals(): void {
   if (riduciMotion()) return;
@@ -54,6 +56,7 @@ export function initReveals(): void {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-reveal="righe"]')) {
+    if (giaVisibile(el)) continue;
     // aria: 'none' — di default SplitText mette aria-label sul target, ma
     // su un <p> senza ruolo e' vietato (Lighthouse: aria-prohibited-attr);
     // le righe restano testo normale, leggibile dagli screen reader.
@@ -72,6 +75,7 @@ export function initReveals(): void {
   }
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-reveal="maschera"]')) {
+    if (giaVisibile(el)) continue;
     gsap.fromTo(
       el,
       { clipPath: 'inset(100% 0 0 0)' },
@@ -85,6 +89,7 @@ export function initReveals(): void {
   }
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-reveal="alto"]')) {
+    if (giaVisibile(el)) continue;
     // Dentro un [data-reveal-gruppo] i figli partono a cascata, in ordine.
     const gruppo = el.closest<HTMLElement>('[data-reveal-gruppo]');
     const posto = gruppo ? [...gruppo.querySelectorAll('[data-reveal="alto"]')].indexOf(el) : 0;

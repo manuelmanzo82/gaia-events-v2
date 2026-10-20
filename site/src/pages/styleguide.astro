@@ -7,6 +7,7 @@
 import '../styles/global.css';
 import IntroVelo from '../components/IntroVelo.astro';
 import LogoGaia from '../components/LogoGaia.astro';
+import LogoSimbolo from '../components/LogoSimbolo.astro';
 
 const PALETTE_BASE = [
   { nome: 'Avorio', token: 'avorio', hex: '#FAF8F5', uso: 'fondo del sito' },
@@ -74,6 +75,7 @@ const PALETTE_NOTTE = [
   </head>
 
   <body>
+    <LogoSimbolo />
     <IntroVelo />
 
     <header class="sg-header" data-header-theme="light">

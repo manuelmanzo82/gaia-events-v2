@@ -1,0 +1,29 @@
+---
+/**
+ * Il logo definito UNA volta per pagina come <symbol id="logo-gaia">,
+ * in un SVG fuori schermo all'inizio del <body> (BaseLayout). Header e
+ * footer lo richiamano con <use href="#logo-gaia"> (LogoGaia): prima
+ * l'HTML conteneva tre copie da ~30 KB l'una, troppo distanti per
+ * comprimersi tra loro (11 KB compressi per copia). Il velo dell'intro
+ * tiene la sua copia inline, animabile.
+ *
+ * Dentro <use> currentColor e --logo-accento si ereditano dall'elemento
+ * <use>: i temi chiaro/scuro funzionano come prima.
+ */
+import LogoTracciati from './LogoTracciati.astro';
+---
+
+<svg class="logo-simboli" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="logo-gaia" viewBox="0 0 231 152">
+    <LogoTracciati />
+  </symbol>
+</svg>
+
+<style>
+  .logo-simboli {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+</style>

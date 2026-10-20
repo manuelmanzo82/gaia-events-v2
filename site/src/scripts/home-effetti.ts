@@ -20,7 +20,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import { riduciMotion } from './motion';
+import { riduciMotion } from './motion-leggero';
 import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';

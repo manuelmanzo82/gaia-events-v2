@@ -118,13 +118,20 @@ const section = (key: string) => settings.sections[key];
 </BaseLayout>
 
 <script>
-  import { initHomeEffetti } from '../../scripts/home-effetti';
-
-  // Dopo il motion di base (BaseLayout): schede impilate e fascia
-  // orizzontale esistono solo da 64rem in su.
-  if (document.fonts?.ready) {
-    void document.fonts.ready.then(() => initHomeEffetti());
-  } else {
-    initHomeEffetti();
-  }
+  // Dopo il motion di base (BaseLayout, caricato dopo il load): schede
+  // impilate, fascia agganciata e parallasse arrivano con un import
+  // dinamico, così GSAP non pesa sul primo paint.
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/home-effetti').then(({ initHomeEffetti }) => {
+        if (document.fonts?.ready) {
+          void document.fonts.ready.then(() => initHomeEffetti());
+        } else {
+          initHomeEffetti();
+        }
+      });
+    },
+    { once: true },
+  );
 </script>

@@ -50,7 +50,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
 </div>
 
 <script>
-  import { gsap } from 'gsap';
+  // GSAP con un import dinamico (giro 8): il velo è già visibile dal CSS e
+  // il disegno del logo parte appena GSAP è arrivato, senza che la sua
+  // richiesta preceda il primo paint.
+  import type { gsap as Gsap } from 'gsap';
 
   const velo = document.getElementById('intro-velo');
 
@@ -67,6 +70,10 @@ const SOTTORIGA = 'Italia · Destination Weddings';
     // snippet assente): il velo è già nascosto dal CSS, via dal DOM.
     velo.remove();
   } else if (velo) {
+    void import('gsap').then(({ gsap }) => avvia(velo, gsap));
+  }
+
+  function avvia(velo: HTMLElement, gsap: typeof Gsap): void {
     const fine = (): void => {
       ricorda();
       window.removeEventListener('keydown', salta);

@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import IntroVelo from '../components/IntroVelo.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Seo from '../components/Seo.astro';
+import LogoSimbolo from '../components/LogoSimbolo.astro';
 import TornaSu from '../components/TornaSu.astro';
 import WhatsAppFlottante from '../components/WhatsAppFlottante.astro';
 import type { Crumb } from '../lib/jsonld';
@@ -87,7 +88,9 @@ const t = useTranslations(lang);
     {/* Preload dell'elemento LCP e altro di pagina: lo decide chi usa il layout. */}
     <slot name="head" />
 
-    {/* Solo i due variabili principali: corsivo e latin-ext arrivano on demand. */}
+    {/* Un solo font in preload (giro 8): Cormorant, che serve al titolo
+        dell'hero (l'LCP). Montserrat ha un fallback con le metriche
+        corrette e arriva da sé; corsivo e latin-ext on demand. */}
     <link
       rel="preload"
       href="/fonts/cormorant-garamond-var.woff2"
@@ -95,16 +98,10 @@ const t = useTranslations(lang);
       type="font/woff2"
       crossorigin
     />
-    <link
-      rel="preload"
-      href="/fonts/montserrat-var.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
   </head>
 
   <body>
+    <LogoSimbolo />
     {intro && <IntroVelo lang={lang} />}
 
     <a class="skip-link" href="#main">{t('nav.skipToContent')}</a>
@@ -122,10 +119,12 @@ const t = useTranslations(lang);
     <WhatsAppFlottante lang={lang} />
 
     <script>
-      import { initMotion } from '../scripts/motion';
+      import { avviaMotionDopoIlPaint } from '../scripts/motion-leggero';
       import { initThemeObserver } from '../scripts/theme-observer';
 
-      initMotion();
+      // GSAP, Lenis e i reveal arrivano dopo il load: non competono con il
+      // primo paint né con l'LCP (giro 8).
+      avviaMotionDopoIlPaint();
 
       const header = document.querySelector<HTMLElement>('.site-header');
       if (header) initThemeObserver(header);
