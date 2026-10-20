@@ -487,9 +487,9 @@ Fatto:
 - **Fase 3 — home completa IT/EN** (16/10, rivista lo stesso giorno):
   header **senza barra** (`Header.astro`: sempre visibile, colore dalla
   sezione sotto via `theme-observer`, ombra testuale morbida sopra le
-  sezioni con `data-foto`; dal 19/10 logo **fisso** a 130/80 px e una
-  sfumatura morbida nel colore del tema dietro logo e menu — vedi giro 3;
-  menu corto, il resto nel footer), torna-su in basso a
+  sezioni con `data-foto`; dal 19/10 logo **fisso** a 130/80 px; dal 20/10
+  nessuna sfumatura dietro logo e menu, solo il cambio di colore — vedi
+  giro 4; menu corto, il resto nel footer), torna-su in basso a
   destra (`TornaSu.astro`, usa `getLenis()`), snippet intro in `BaseLayout`
   (`INTRO_SEMPRE` ancora `true`), footer su notte (`Footer.astro`: logo,
   tagline, Contatti/Esplora/Seguici/Preventivo, riga legale con
@@ -497,15 +497,15 @@ Fatto:
   hero (foto di `page_hero` in dissolvenza CSS, video desktop
   predisposto), **Gaia** (`GaiaIntro`: highlight «chi-sono» n.1 grande +
   titolo + manifesto come citazione + presentazione breve), highlights
-  (schede impilate alla Haywood, 16:9 con il titolo bilingue
-  dell'highlight sulla foto — campo `title_it/en`, senza = alt accorciato;
-  solo orizzontali con `maxWidth ≥ LIMITE_SCHEDA` di `lib/home.ts`, max 5;
-  tutte le altre nella fascia orizzontale agganciata), luoghi (nascosta finché non ci sono luoghi),
-  servizi (dal 19/10 lista editoriale con foto al cursore, vedi giro 3),
+  (dal 20/10 **menu visivo**: 5 schede grandi impilate, una per area —
+  vedi giro 4; prima schede 16:9 col titolo dell'highlight; tutte le
+  altre foto nella fascia orizzontale agganciata), luoghi (nascosta finché
+  non ci sono luoghi), servizi (dal 20/10 quattro pannelli verticali, vedi
+  giro 4),
   recensione (nascosta finché non ce n'è una vera),
   destination a tutta larghezza (highlight sezione «destination» + velo),
-  CTA finale chiara con foto verticale (highlight sezione «cta», ENUM
-  esteso in migrazione). Effetti in `scripts/home-effetti.ts`: solo
+  CTA finale in due metà con foto a filo bordo (highlight sezione «cta»,
+  ENUM esteso in migrazione; vedi giro 4). Effetti in `scripts/home-effetti.ts`: solo
   ≥64rem, pin/sticky al bordo superiore (il header lì è nascosto), spenti
   con reduced-motion; sotto, scroll naturale e carosello a scroll-snap.
   Tutti i testi dal back office, in sentence case e con il «voi»; in EN i
@@ -582,6 +582,41 @@ Fatto:
     nell'ENUM, `home.manifesto`, `legal.piva`) non sono mai state riportate
     in `schema.sql`; `instagram_posts` sì. Da allineare prima di creare il
     database di produzione da `schema.sql`.
+- **Giro 4 della home, parte A desktop** (20/10/2026, rif.
+  sarahhaywood.com; parte B mobile da proporre e approvare prima):
+  - **Header**: via la sfumatura del giro 3 (scelta di Manuel: «solo cambio
+    colore»), quindi su qualche foto il contrasto del menu può tornare
+    sotto 4.5:1; resta l'ombra testuale sopra le sezioni con `data-foto`.
+    Il torna-su segue già il tema del header.
+  - **CTA dell'hero**: «Contattami» / «Get in touch» (`page_hero` sullo
+    staging + `hero.example.json`), al preventivatore.
+  - **Menu visivo** (`MenuVisivo.astro`, ex `HighlightsImpilati`): 5 schede
+    da ~90vw × ~75svh, raggio 24 px, impilate e agganciate sotto l'header,
+    una per area — Servizi, Luoghi, Destination wedding, Storie, Preventivo
+    (filtro `existsIn`, testi in `ui.ts` `menu.*`) — con la i-esima foto
+    orizzontale della sezione «home» nell'ordine del back office
+    (`SCHEDE_IMPILATE = 5` in `lib/home.ts`). **Eccezione voluta alla regola
+    del maxWidth**: qui le foto superano il proprio limite (90vw), unico
+    posto del sito; `LIMITE_SCHEDA` non esiste più.
+  - **Fascia orizzontale**: foto tutte alla stessa altezza
+    (`min(65svh, ALTEZZA_FASCIA = 702px)`), larghe secondo il formato,
+    niente didascalie; una foto che a quell'altezza supererebbe il suo
+    maxWidth è esclusa in fase di build. Sotto i 64rem carosello 82vw.
+  - **Servizi** (`ServiziPannelli.astro`, ex `ServiziLista`): quattro
+    pannelli affiancati alti 80svh, foto da `services.media_id`, al
+    passaggio/focus il pannello si allarga (flex-grow) e mostra riga e
+    «Scopri»; click a `/servizi/#slug`.
+  - **Instagram** come profilo: intestazione centrata (icona, @handle come
+    h2, «Segui»), griglia 1:1 4×2 (3×2 sotto i 64rem), gap 3 px, hover con
+    velo e icona del tipo (`instagram_posts.tipo`). Via la fascia in loop.
+  - **Discendenti tagliate**: `motion.ts` non usa più `mask: 'lines'` di
+    SplitText (overflow hidden riga per riga): le righe salgono del 60% e
+    sfumano. Mai overflow hidden sul testo.
+  - **CTA finale**: due metà a tutta larghezza (min 90svh), foto a filo
+    bordo a sinistra, a destra su beige titolo, riga, firma «Gaia» in
+    Cormorant corsivo, bottone pieno e link WhatsApp/email da `BUSINESS`.
+  - Nuove chiavi `ui.ts`: `cta.scopri`, `cta.scrivici`, `cta.firma`,
+    `menu.*`, `instagram.segui`; tolta `instagram.cta`.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
