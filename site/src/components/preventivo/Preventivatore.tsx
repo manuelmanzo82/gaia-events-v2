@@ -43,6 +43,8 @@ import {
   nomi,
   riepilogo,
   righeRiepilogo,
+  inclusiDa,
+  SERVIZIO_DESTINATION,
   type Contatto,
   type Lingua,
   type Passaggio,
@@ -615,7 +617,28 @@ export default function Preventivatore(props: Props): ReactNode {
                 </div>
               )}
               <label className="pv-interruttore">
-                <input type="checkbox" role="switch" checked={r.abroad} onChange={(e) => aggiorna({ abroad: e.target.checked })} />
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={r.abroad}
+                  onChange={(e) => {
+                    // «Veniamo dall'estero» preseleziona Destination wedding
+                    // (se c'è e se non hanno scelto «Non lo so ancora»); spento,
+                    // lo toglie solo se l'aveva aggiunto da solo.
+                    const acceso = e.target.checked;
+                    const esiste = servizi.some((s) => s.slug === SERVIZIO_DESTINATION);
+                    let services = r.services;
+                    let destinationAuto = r.destinationAuto;
+                    if (acceso && esiste && !services.includes('da_definire') && !services.includes(SERVIZIO_DESTINATION)) {
+                      services = [...services, SERVIZIO_DESTINATION];
+                      destinationAuto = true;
+                    } else if (!acceso && r.destinationAuto) {
+                      services = services.filter((x) => x !== SERVIZIO_DESTINATION);
+                      destinationAuto = false;
+                    }
+                    aggiorna({ abroad: acceso, services, destinationAuto });
+                  }}
+                />
                 <span className="pv-interruttore-pista" aria-hidden="true" />
                 <span>{t.dove.estero(r.kind)}</span>
               </label>
@@ -660,38 +683,65 @@ export default function Preventivatore(props: Props): ReactNode {
           ),
         };
 
-      case 'aiuto':
+      case 'aiuto': {
+        const inclusi = inclusiDa(r.services, servizi);
         return {
           titolo: t.aiuto.titolo(r.kind, chi),
           nota: t.aiuto.aiuto,
           corpo: (
             <div className="pv-schede" role="group" aria-labelledby="pv-titolo" {...campo('services')}>
-              {servizi.map((s) => (
-                <label key={s.slug} className="pv-scheda">
-                  <input
-                    type="checkbox"
-                    checked={r.services.includes(s.slug)}
-                    onChange={(e) => {
-                      const prima = r.services.filter((x) => x !== 'da_definire');
-                      aggiorna({ services: e.target.checked ? [...prima, s.slug] : prima.filter((x) => x !== s.slug) });
-                    }}
-                  />
-                  <span className="pv-scheda-titolo">{s.titolo}</span>
-                  {s.sottotitolo && <span className="pv-scheda-nota">{s.sottotitolo}</span>}
-                </label>
-              ))}
-              <label className="pv-scheda pv-scheda--lieve">
+              {servizi.map((s) => {
+                const compresoIn = inclusi.get(s.slug);
+                const scelto = r.services.includes(s.slug);
+                return (
+                  <label
+                    key={s.slug}
+                    className={`pv-scheda pv-scheda--spunta${compresoIn ? ' pv-scheda--incluso' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={scelto || !!compresoIn}
+                      disabled={!!compresoIn}
+                      aria-describedby={compresoIn ? `pv-incluso-${s.slug}` : undefined}
+                      onChange={(e) => {
+                        const prima = r.services.filter((x) => x !== 'da_definire');
+                        if (e.target.checked) {
+                          // Chi è compreso nel servizio appena scelto non si conta due volte.
+                          const dentro = s.include ?? [];
+                          aggiorna({ services: [...prima.filter((x) => !dentro.includes(x)), s.slug] });
+                        } else {
+                          aggiorna({
+                            services: prima.filter((x) => x !== s.slug),
+                            destinationAuto: s.slug === SERVIZIO_DESTINATION ? false : r.destinationAuto,
+                          });
+                        }
+                      }}
+                    />
+                    <span className="pv-spunta" aria-hidden="true" />
+                    <span className="pv-scheda-titolo">{s.titolo}</span>
+                    {s.sottotitolo && <span className="pv-scheda-nota">{s.sottotitolo}</span>}
+                    {compresoIn && (
+                      <span className="pv-incluso" id={`pv-incluso-${s.slug}`}>
+                        {t.aiuto.inclusoIn(compresoIn)}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
+              <label className="pv-scheda pv-scheda--spunta pv-scheda--lieve">
                 <input
                   type="checkbox"
                   checked={r.services.includes('da_definire')}
-                  onChange={(e) => aggiorna({ services: e.target.checked ? ['da_definire'] : [] })}
+                  onChange={(e) => aggiorna({ services: e.target.checked ? ['da_definire'] : [], destinationAuto: false })}
                 />
+                <span className="pv-spunta" aria-hidden="true" />
                 <span className="pv-scheda-titolo">{t.aiuto.nonSo}</span>
               </label>
               <Errore chiave="services" />
             </div>
           ),
         };
+      }
 
       case 'budget':
         return {

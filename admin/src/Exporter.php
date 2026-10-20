@@ -336,6 +336,11 @@ final class Exporter
                 'it' => self::jsonList($row['features_it']),
                 'en' => self::jsonList($row['features_en']),
             ],
+            // Slug degli altri servizi compresi in questo.
+            'includes' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) ($row['include_slugs'] ?? '')),
+            ))),
             'icon' => $row['icon'],
             'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
             'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),

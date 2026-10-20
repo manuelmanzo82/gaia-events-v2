@@ -74,7 +74,7 @@ const servizi: Servizio[] = getServices()
     slug: s.slug,
     titolo: text(s.title, lang),
     sottotitolo: text(s.subtitle, lang),
-    inclusi: (s.features?.[lang] ?? []).filter(Boolean),
+    include: s.includes ?? [],
   }));
 
 // Una foto per passaggio, dalle impostazioni (colonna da min(42vw, 640px)).

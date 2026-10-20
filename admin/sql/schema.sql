@@ -181,6 +181,8 @@ CREATE TABLE IF NOT EXISTS `services` (
   -- Elenco di stringhe.
   `features_it`         JSON DEFAULT NULL,
   `features_en`         JSON DEFAULT NULL,
+  -- Slug degli altri servizi compresi in questo (migrazione 2026-10-20-servizi-include.sql).
+  `include_slugs`       VARCHAR(255) DEFAULT NULL,
   `icon`                VARCHAR(60) DEFAULT NULL,
   `media_id`            INT UNSIGNED DEFAULT NULL,
   `meta_title_it`       VARCHAR(255) DEFAULT NULL,

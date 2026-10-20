@@ -133,6 +133,20 @@ impegni suoi verso le coppie:
   candele, bouquet) e vanno sostituite insieme alle altre (vedi le note
   della libreria).
 
+### 10. Che cosa comprende ogni servizio (20/10/2026)
+
+Nel preventivatore, scegliendo «Wedding planning completo», «Coordinamento
+del giorno» e «Design & Styling» si segnano da soli come inclusi e non si
+possono togliere. «Destination wedding» si combina con tutto e si
+preseleziona quando la coppia indica «Veniamo dall'estero». **Da
+confermare con Gaia**: il completo comprende davvero il coordinamento e il
+design? Ci sono altre inclusioni? Si cambia nel back office, Servizi →
+campo «Include (altri servizi)», con gli slug separati da virgola.
+
+Anche i sottotitoli italiani dei servizi sono scritti da noi (prima c'erano
+quelli inglesi): «Servizio completo», «Il giorno dell'evento»,
+«Creatività», «In Italia e nel mondo».
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

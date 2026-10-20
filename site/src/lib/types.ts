@@ -89,6 +89,8 @@ export interface Service extends SeoFields {
   subtitle: Localized;
   description: Localized;
   features: Localized<string[]>;
+  /** Slug degli altri servizi compresi in questo (back office, «Include»). */
+  includes?: string[];
   icon?: string;
   image: Image | null;
   active: boolean;

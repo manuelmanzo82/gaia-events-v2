@@ -34,6 +34,8 @@ export interface Risposte {
   guestsRange: string;
   guests: string;
   services: string[];
+  /** Destination wedding aggiunto da solo con «Veniamo dall'estero». */
+  destinationAuto: boolean;
   budget: string;
   email: string;
   phone: string;
@@ -60,6 +62,7 @@ export const RISPOSTE_VUOTE: Risposte = {
   guestsRange: '',
   guests: '',
   services: [],
+  destinationAuto: false,
   budget: '',
   email: '',
   phone: '',
@@ -81,8 +84,21 @@ export interface Servizio {
   slug: string;
   titolo: string;
   sottotitolo: string;
-  /** Cosa include (dal back office, «features» del servizio). */
-  inclusi: string[];
+  /** Slug degli altri servizi compresi in questo (back office, «Include»). */
+  include: string[];
+}
+
+/** Lo slug del servizio Destination wedding, preselezionato con «Veniamo dall'estero». */
+export const SERVIZIO_DESTINATION = 'destination';
+
+/** I servizi già compresi in quelli scelti: slug → titolo di chi li include. */
+export function inclusiDa(scelti: string[], servizi: Servizio[]): Map<string, string> {
+  const inclusi = new Map<string, string>();
+  for (const slug of scelti) {
+    const s = servizi.find((x) => x.slug === slug);
+    for (const dentro of s?.include ?? []) if (dentro !== slug && !inclusi.has(dentro)) inclusi.set(dentro, s!.titolo);
+  }
+  return inclusi;
 }
 
 export const coppia = (k: TipoEvento | ''): boolean => k === 'matrimonio' || k === 'unione_civile';
@@ -223,6 +239,8 @@ export const T = {
       aiuto: 'Potete sceglierne più di uno.',
       nonSo: 'Non lo so ancora, parliamone',
       errore: 'Scegliete almeno una voce.',
+      incluso: 'Incluso',
+      inclusoIn: (titolo: string) => `Incluso nel ${titolo}`,
     },
     budget: {
       titolo: 'C’è un budget a cui state pensando?',
@@ -285,7 +303,6 @@ export const T = {
       location: 'Location',
       estero: 'Dall’estero',
       circa: (n: string) => `circa ${n}`,
-      include: 'Include',
       nonSo: 'Da capire insieme',
     },
     grazie: {
@@ -383,6 +400,8 @@ export const T = {
       aiuto: 'You can choose more than one.',
       nonSo: "I'm not sure yet, let's talk",
       errore: 'Please choose at least one.',
+      incluso: 'Included',
+      inclusoIn: (titolo: string) => `Included in ${titolo}`,
     },
     budget: {
       titolo: 'Do you have a budget in mind?',
@@ -445,7 +464,6 @@ export const T = {
       location: 'Venue',
       estero: 'Coming from abroad',
       circa: (n: string) => `around ${n}`,
-      include: 'Includes',
       nonSo: 'To work out together',
     },
     grazie: {
@@ -537,25 +555,12 @@ export function righeRiepilogo(r: Risposte, lang: Lingua, zone: Zona[], servizi:
     'ospiti',
   );
 
+  // Solo i titoli dei servizi scelti (giro 10), senza cosa includono.
   if (r.services.includes('da_definire')) {
     riga('servizi', v.servizi, t.nonSo, 'aiuto');
   } else {
-    const scelti = r.services.map((slug) => servizi.find((s) => s.slug === slug)).filter((s): s is Servizio => !!s);
-    riga(
-      'servizi',
-      v.servizi,
-      scelti.map((s) => s.titolo).join(', '),
-      'aiuto',
-      // Con un solo servizio il titolo è già il valore: il dettaglio dice
-      // solo cosa include.
-      scelti
-        .filter((s) => s.inclusi.length > 0)
-        .map((s) =>
-          scelti.length === 1
-            ? `${t.include}: ${s.inclusi.join(' · ')}`
-            : `${s.titolo} — ${t.include.toLowerCase()}: ${s.inclusi.join(' · ')}`,
-        ),
-    );
+    const titoli = r.services.map((slug) => servizi.find((s) => s.slug === slug)?.titolo).filter((x): x is string => !!x);
+    riga('servizi', v.servizi, titoli.join(', '), 'aiuto');
   }
 
   riga('budget', v.budget, r.budget ? etichettaBudget(r.budget, lang) : t.nonIndicato, 'budget');

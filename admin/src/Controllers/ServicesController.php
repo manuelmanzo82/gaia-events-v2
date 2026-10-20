@@ -34,6 +34,12 @@ final class ServicesController extends ResourceController
                 'bilingual' => true,
                 'help' => 'Una voce per riga.',
             ],
+            'include_slugs' => [
+                'label' => 'Include (altri servizi)',
+                'type' => 'text',
+                'rules' => 'max:255',
+                'help' => 'Slug dei servizi compresi in questo, separati da virgola (es. coordinamento,design): nel preventivatore si segnano da soli come «Incluso».',
+            ],
             'icon' => ['label' => 'Icona', 'type' => 'text'],
             'media_id' => ['label' => 'Immagine', 'type' => 'media'],
             'meta_title' => ['label' => 'Meta title', 'type' => 'text', 'bilingual' => true],
