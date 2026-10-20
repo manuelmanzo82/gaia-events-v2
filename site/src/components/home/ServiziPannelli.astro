@@ -1,0 +1,307 @@
+---
+/**
+ * Servizi: quattro pannelli verticali affiancati a tutta altezza (~80vh),
+ * ognuno con la foto del servizio in cover, numero e titolo grandi su un
+ * velo scuro. Al passaggio del mouse o al focus il pannello si allarga
+ * (flex-grow) e compaiono una riga di descrizione e «Scopri»; gli altri si
+ * restringono. Ogni pannello porta alla pagina Servizi, all'ancora del
+ * servizio. Titolo della sezione sopra («Come posso aiutarvi»).
+ *
+ * Foto: solo quella del servizio (services.media_id), nessun ripiego sugli
+ * highlights (erano foto di altre sezioni). Un servizio senza foto ha il
+ * pannello su fondo notte. Senza servizi pubblicabili in questa lingua la
+ * sezione non esiste.
+ *
+ * Sotto i 64rem: pannelli impilati in colonna, 4:5, con descrizione sempre
+ * visibile. prefers-reduced-motion: niente allargamento, descrizione
+ * sempre visibile.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { SERVICE_FIELDS, existsIn } from '../../lib/availability';
+import { getServices, isPublishable, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo?: string;
+  testo?: string;
+}
+
+const { lang, titolo, testo } = Astro.props;
+const t = useTranslations(lang);
+
+const paginaServizi = existsIn('services', lang);
+
+const servizi = getServices()
+  .filter((s) => isPublishable(s, lang, SERVICE_FIELDS))
+  .map((servizio, i) => ({
+    servizio,
+    numero: String(i + 1).padStart(2, '0'),
+    href: paginaServizi ? `${path('services', lang)}#${servizio.slug}` : null,
+    // Pannello stretto ~22vw, allargato ~44vw: il srcset copre entrambi.
+    foto: picture(servizio.image, lang, '(min-width: 64rem) 44vw, 92vw'),
+  }));
+---
+
+{
+  servizi.length > 0 && (
+    <section id="servizi" class="servizi" data-theme="light">
+      <header class="servizi-testa container-gaia">
+        {titolo && (
+          <h2 class="text-display" data-reveal="righe">
+            {titolo}
+          </h2>
+        )}
+        {testo && <p class="text-lead text-velato">{testo}</p>}
+      </header>
+
+      <ul class="pannelli" role="list">
+        {servizi.map(({ servizio, numero, href, foto }) => {
+          const Pannello = href ? 'a' : 'div';
+          return (
+            <li class="pannello" data-theme="dark" data-foto>
+              <Pannello class="pannello-link" href={href ?? undefined}>
+                {foto && <Picture data={foto} cap={false} class="pannello-img" />}
+                <span class="pannello-velo" aria-hidden="true" />
+                <span class="pannello-testo">
+                  <span class="pannello-numero" aria-hidden="true">
+                    N° {numero}
+                  </span>
+                  <span class="font-display pannello-titolo">{text(servizio.title, lang)}</span>
+                  <span class="pannello-dettaglio">
+                    <span class="pannello-riga">{text(servizio.description, lang)}</span>
+                    {href && (
+                      <span class="pannello-scopri">
+                        {t('cta.scopri')} <span aria-hidden="true">→</span>
+                      </span>
+                    )}
+                  </span>
+                </span>
+              </Pannello>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .servizi {
+    padding-block: var(--spacing-section);
+    background: var(--color-avorio);
+  }
+
+  .servizi-testa {
+    margin-bottom: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .servizi-testa h2 {
+    margin: 0 0 1rem;
+  }
+
+  .servizi-testa p {
+    margin: 0;
+    max-width: 38rem;
+  }
+
+  .pannelli {
+    display: grid;
+    gap: 1rem;
+    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 80rem);
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pannello {
+    background: transparent;
+  }
+
+  .pannello-link {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  .pannello-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .pannello-link :global(picture),
+  .pannello-link :global(.pannello-img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pannello-link :global(.pannello-img) {
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-gaia);
+  }
+
+  .pannello-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+    transition: opacity 0.5s var(--ease-gaia);
+  }
+
+  .pannello-testo {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: grid;
+    gap: 0.5rem;
+    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.5rem, 4vh, 2.5rem);
+  }
+
+  .pannello-numero {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-caption);
+    letter-spacing: 0.08em;
+  }
+
+  .pannello-titolo {
+    font-size: var(--text-display);
+    font-weight: 320;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .pannello-dettaglio {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Una o due righe: il testo completo sta nella pagina Servizi. */
+  .pannello-riga {
+    display: -webkit-box;
+    max-width: 32rem;
+    overflow: hidden;
+    font-size: 1rem;
+    line-height: 1.55;
+    opacity: 0.9;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .pannello-scopri {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* — Desktop: affiancati a tutta altezza, si allargano al passaggio — */
+  @media (min-width: 64rem) {
+    .pannelli {
+      display: flex;
+      gap: 0.75rem;
+      height: min(80svh, 56rem);
+    }
+
+    .pannello {
+      flex: 1 1 0;
+      min-width: 0;
+      transition: flex-grow 0.7s var(--ease-gaia);
+    }
+
+    .pannello-link {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    /* Chiuso: solo numero e titolo; la descrizione è ripiegata. */
+    .pannello-dettaglio {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 0.6s var(--ease-gaia),
+        opacity 0.45s var(--ease-gaia);
+    }
+
+    .pannello-dettaglio > * {
+      min-height: 0;
+    }
+
+    .pannello-riga {
+      max-width: 26rem;
+    }
+
+    .pannello:hover,
+    .pannello:focus-within {
+      flex-grow: 2.4;
+    }
+
+    .pannello:hover .pannello-dettaglio,
+    .pannello:focus-within .pannello-dettaglio {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      transition-delay: 0.15s;
+    }
+
+    .pannello:hover :global(.pannello-img),
+    .pannello:focus-within :global(.pannello-img) {
+      transform: scale(1.04);
+    }
+
+    /* Finché nessuno è aperto, i titoli restano leggibili anche stretti. */
+    .pannello-titolo {
+      font-size: var(--text-title);
+    }
+
+    .pannello:hover .pannello-titolo,
+    .pannello:focus-within .pannello-titolo {
+      font-size: var(--text-display);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pannello,
+    .pannello-dettaglio,
+    .pannello-velo,
+    .pannello-link :global(.pannello-img) {
+      transition: none;
+    }
+
+    .pannello:hover,
+    .pannello:focus-within {
+      flex-grow: 1;
+    }
+
+    .pannello:hover :global(.pannello-img),
+    .pannello:focus-within :global(.pannello-img) {
+      transform: none;
+    }
+
+    @media (min-width: 64rem) {
+      .pannello-dettaglio {
+        grid-template-rows: 1fr;
+        opacity: 1;
+      }
+
+      .pannello-titolo {
+        font-size: var(--text-title);
+      }
+    }
+  }
+</style>

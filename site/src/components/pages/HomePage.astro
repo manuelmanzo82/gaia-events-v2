@@ -27,7 +27,7 @@ import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
 import InstagramHome from '../home/InstagramHome.astro';
 import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
 import Recensione from '../home/Recensione.astro';
-import ServiziLista from '../home/ServiziLista.astro';
+import ServiziPannelli from '../home/ServiziPannelli.astro';
 
 interface Props {
   lang: Lang;
@@ -97,7 +97,7 @@ const section = (key: string) => settings.sections[key];
 
   <LuoghiAnteprima lang={lang} />
 
-  <ServiziLista
+  <ServiziPannelli
     lang={lang}
     titolo={text(section('services')?.title, lang)}
     testo={text(section('services')?.text, lang)}
