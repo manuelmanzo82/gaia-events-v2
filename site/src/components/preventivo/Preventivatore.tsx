@@ -228,8 +228,9 @@ export default function Preventivatore(props: Props): ReactNode {
     if (el) {
       const top = el.getBoundingClientRect().top;
       const header = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header') || '96', 10);
-      if (top < header || top > window.innerHeight * 0.5) {
-        const y = window.scrollY + top - header - 16;
+      // La linea di avanzamento resta sempre sotto l'header, con aria.
+      if (top < header + 16 || top > window.innerHeight * 0.5) {
+        const y = window.scrollY + top - header - 32;
         const riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         window.scrollTo({ top: y, behavior: riduci ? 'auto' : 'smooth' });
       }
@@ -888,23 +889,6 @@ export default function Preventivatore(props: Props): ReactNode {
               <div className="pv-progresso" aria-hidden="true">
                 <span style={{ transform: `scaleX(${(indice + 1) / PASSAGGI.length})` }} />
               </div>
-              <div className="pv-tappe-riga">
-                <ol className="pv-tappe" aria-hidden="true">
-                  {t.passaggi.map((nome, i) => (
-                    <li key={nome} className={i === indice ? 'corrente' : i < indice ? 'fatta' : ''}>
-                      {nome}
-                    </li>
-                  ))}
-                </ol>
-                <p className="pv-tappa-mobile" aria-hidden="true">
-                  {indice + 1} / {PASSAGGI.length} · {t.passaggi[indice]}
-                </p>
-                {(ripreso || indice > 0) && (
-                  <button type="button" className="pv-link pv-ricomincia" onClick={ricomincia}>
-                    {t.ricomincia}
-                  </button>
-                )}
-              </div>
             </div>
 
             {ripreso && indice > 0 && <p className="pv-ripreso">{t.ripreso}</p>}
@@ -932,6 +916,11 @@ export default function Preventivatore(props: Props): ReactNode {
               <button type="submit" className="btn btn--pieno pv-avanti" disabled={inviando}>
                 {step === 'lettera' ? (inviando ? t.invio : t.invia) : step === 'contatti' ? t.allaLettera : t.avanti}
               </button>
+              {(ripreso || indice > 0) && (
+                <button type="button" className="pv-link pv-ricomincia" onClick={ricomincia} disabled={inviando}>
+                  {t.ricomincia}
+                </button>
+              )}
             </div>
 
             <p className="sr-only" aria-live="polite" role="status">
