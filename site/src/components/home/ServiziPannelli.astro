@@ -62,7 +62,7 @@ const servizi = getServices()
         {servizi.map(({ servizio, numero, href, foto }) => {
           const Pannello = href ? 'a' : 'div';
           return (
-            <li class="pannello" data-theme="dark" data-foto data-reveal="alto">
+            <li class="pannello" data-theme="dark" data-foto data-luce data-reveal="alto">
               <Pannello class="pannello-link" href={href ?? undefined}>
                 {foto && <Picture data={foto} cap={false} class="pannello-img" />}
                 <span class="pannello-velo" aria-hidden="true" />

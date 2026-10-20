@@ -24,6 +24,8 @@
  * scroll costa nulla.
  */
 
+import { SOGLIA_INCHIOSTRO, luminanzaSotto } from './luminosita';
+
 interface Tema {
   tema: 'dark' | 'light';
   foto: '0' | '1';
@@ -37,20 +39,81 @@ export function aggiornaTema(): void {
   programma();
 }
 
-/** Tema dell'elemento più interno che contiene il punto (x, y) del viewport. */
-export function temaInPunto(x: number, y: number): Tema | null {
+/** L'elemento [data-theme] più interno che contiene il punto, oppure null. */
+function piuInterno(x: number, y: number, rett: DOMRect[]): HTMLElement | null {
   let sotto: HTMLElement | null = null;
-  for (const el of elementi) {
-    const r = el.getBoundingClientRect();
+  for (let i = 0; i < elementi.length; i++) {
+    const r = rett[i];
     // Rettangolo vuoto = elemento nascosto (display: none): non conta.
     if (r.height === 0 || r.width === 0) continue;
-    if (r.top <= y && r.bottom > y && r.left <= x && r.right > x) sotto = el;
+    if (r.top <= y && r.bottom > y && r.left <= x && r.right > x) sotto = elementi[i];
   }
-  if (!sotto) return null;
-  return {
-    tema: sotto.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-    foto: sotto.hasAttribute('data-foto') ? '1' : '0',
-  };
+  return sotto;
+}
+
+const lin = (c: number): number => {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+};
+
+/** Luminanza del primo fondo pieno risalendo da `el` (avorio se non ce n'è). */
+function luminanzaFondo(el: HTMLElement): number {
+  for (let n: HTMLElement | null = el; n; n = n.parentElement) {
+    const bg = getComputedStyle(n).backgroundColor;
+    const m = bg.match(/[\d.]+/g);
+    if (!m) continue;
+    // color-mix() torna come «color(srgb 0.95 0.94 0.92 / a)», in scala 0..1.
+    const scala = bg.startsWith('color(') ? 255 : 1;
+    const alfa = m.length > 3 ? parseFloat(m[3]) : 1;
+    if (alfa > 0.5) {
+      const [r, g, b] = m.slice(0, 3).map((v) => Number(v) * scala);
+      return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    }
+  }
+  return 0.9;
+}
+
+/**
+ * Tema per il rettangolo di un elemento (logo, voce del menu, flottante):
+ * una griglia di punti su tutto il rettangolo; in ogni punto la luminanza
+ * reale — i pixel della foto (con il suo velo) dove c'è una foto
+ * dichiarata data-luce, il colore di fondo altrove — poi la media. Sopra
+ * la soglia vince l'inchiostro, sotto l'avorio: il colore con il contrasto
+ * migliore anche quando l'elemento sta a cavallo tra foto e fondo chiaro.
+ */
+export function temaInRett(r: { left: number; top: number; width: number; height: number }): Tema | null {
+  const rett = elementi.map((e) => e.getBoundingClientRect());
+  const colonne = Math.min(5, Math.max(2, Math.round(r.width / 40)));
+  const righe = r.height > 60 ? 3 : 2;
+  let somma = 0;
+  let n = 0;
+  let suFoto = false;
+  let trovato = false;
+  for (let i = 0; i < colonne; i++) {
+    for (let j = 0; j < righe; j++) {
+      const x = r.left + ((i + 0.5) / colonne) * r.width;
+      const y = r.top + ((j + 0.5) / righe) * r.height;
+      const el = piuInterno(x, y, rett);
+      if (!el) continue;
+      trovato = true;
+      let l: number | null = null;
+      if (el.hasAttribute('data-luce')) {
+        l = luminanzaSotto(el, { left: x - 3, right: x + 3, top: y - 3, bottom: y + 3 });
+        suFoto = true;
+      }
+      if (l === null) l = el.getAttribute('data-theme') === 'dark' ? 0.02 : luminanzaFondo(el);
+      somma += l;
+      n++;
+    }
+  }
+  if (!trovato || n === 0) return null;
+  const media = somma / n;
+  return media > SOGLIA_INCHIOSTRO ? { tema: 'light', foto: '0' } : { tema: 'dark', foto: suFoto ? '1' : '0' };
+}
+
+/** Tema nel punto (x, y): un rettangolo minimo attorno al punto. */
+export function temaInPunto(x: number, y: number, largo = 8, alto = 8): Tema | null {
+  return temaInRett({ left: x - largo / 2, top: y - alto / 2, width: largo, height: alto });
 }
 
 function imposta(el: HTMLElement, nome: string, valore: string): void {
@@ -85,7 +148,8 @@ export function initThemeObserver(header: HTMLElement): void {
     const bottone = toggle && toggle.getBoundingClientRect().width > 0 ? toggle : menu;
     const xMenu = bottone ? centro(bottone, box.right - 80) : box.right - 80;
 
-    const lato = temaInPunto(xLogo, linea);
+    const rLogo = brand?.getBoundingClientRect();
+    const lato = rLogo && rLogo.width > 0 ? temaInRett(rLogo) : temaInPunto(xLogo, linea);
     if (lato) {
       imposta(header, 'data-header-theme', lato.tema);
       imposta(header, 'data-header-foto', lato.foto);
@@ -100,7 +164,7 @@ export function initThemeObserver(header: HTMLElement): void {
     for (const voce of voci) {
       const r = voce.getBoundingClientRect();
       if (r.width === 0) continue;
-      const sotto = temaInPunto(r.left + r.width / 2, linea) ?? latoMenu;
+      const sotto = temaInRett(r) ?? latoMenu;
       if (!sotto) continue;
       imposta(voce, 'data-tema', sotto.tema);
       imposta(voce, 'data-foto', sotto.foto);
@@ -119,6 +183,12 @@ export function initThemeObserver(header: HTMLElement): void {
   window.addEventListener('resize', programma, { passive: true });
   window.addEventListener('load', programma);
   if ('ResizeObserver' in window) new ResizeObserver(programma).observe(header);
+
+  // Le foto senza velo vanno misurate: appena una (lazy) arriva, si rimisura.
+  for (const el of elementi) {
+    if (!el.hasAttribute('data-luce')) continue;
+    for (const img of el.querySelectorAll('img')) img.addEventListener('load', programma);
+  }
 
   aggiorna();
 }

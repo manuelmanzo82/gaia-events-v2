@@ -1,7 +1,7 @@
 /**
  * Bottoni flottanti in basso a destra (torna-su, WhatsApp): la parte in
  * comune. Il colore lo decide ciò che il bottone ha sotto il proprio
- * centro (temaInPunto di theme-observer.ts): avorio sopra le foto e le
+ * rettangolo (temaInRett di theme-observer.ts): avorio sopra le foto e le
  * sezioni scure, inchiostro sui fondi chiari.
  *
  * Visibilità, per opzione:
@@ -12,7 +12,7 @@
  *  - dopoIntro: se l'intro a velo è attiva, compare solo alla sua fine
  *    (evento gaia:intro-fine, con una rete di sicurezza a 9 s).
  */
-import { temaInPunto } from './theme-observer';
+import { temaInRett } from './theme-observer';
 
 interface Opzioni {
   dopoHero?: boolean;
@@ -38,7 +38,7 @@ export function initFlottante(el: HTMLElement, opzioni: Opzioni = {}): void {
     const dopoHero = !opzioni.dopoHero || window.scrollY > window.innerHeight;
     el.classList.toggle('visibile', introFinita && dopoHero);
     const r = (opzioni.punto ?? el).getBoundingClientRect();
-    const sotto = temaInPunto(r.left + r.width / 2, r.top + r.height / 2);
+    const sotto = temaInRett(r);
     el.dataset.tema = sotto?.tema ?? header?.dataset.headerTheme ?? 'light';
   };
 

@@ -78,8 +78,7 @@ const video = hero?.video ?? null;
   data-n-foto={immagini.length}
   data-video-mp4={video ? uploadUrl(video.mp4) : undefined}
   data-video-webm={video?.webm ? uploadUrl(video.webm) : undefined}
-  style={`--ciclo: ${ciclo}s; --per-foto: ${PER_FOTO}s`}
->
+  style={`--ciclo: ${ciclo}s; --per-foto: ${PER_FOTO}s`} data-luce>
   <div class="hero-foto" aria-hidden="true" data-parallasse="0 14">
     {
       prima && (

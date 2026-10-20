@@ -68,7 +68,7 @@ const foto = highlights
       )}
       <ul class="binario" role="list">
         {foto.map((f) => (
-          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto>
+          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto data-luce>
             <Picture data={f.data} cap={false} class="tessera-img" />
           </li>
         ))}

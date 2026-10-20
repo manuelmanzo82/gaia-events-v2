@@ -83,7 +83,7 @@ const schede = AREE.filter((area) => existsIn(area.key, lang))
 
       <div class="impila-pila" data-impila>
         {schede.map((s) => (
-          <article class="scheda" style={`--i: ${s.indice}`} data-theme="dark" data-foto>
+          <article class="scheda" style={`--i: ${s.indice}`} data-theme="dark" data-foto data-luce>
             <a class="scheda-link" href={s.href}>
               <figure class="scheda-figura">
                 <Picture data={s.data} cap={false} class="scheda-img" />
