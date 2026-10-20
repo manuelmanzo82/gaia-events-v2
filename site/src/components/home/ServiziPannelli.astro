@@ -13,8 +13,8 @@
  * sezione non esiste.
  *
  * Sotto i 64rem: pannelli impilati in colonna, 4:5, con descrizione sempre
- * visibile. prefers-reduced-motion: niente allargamento, descrizione
- * sempre visibile.
+ * visibile e intera; entrano a cascata (data-reveal-gruppo di motion.ts).
+ * prefers-reduced-motion: niente allargamento, descrizione sempre visibile.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -58,11 +58,11 @@ const servizi = getServices()
         {testo && <p class="text-lead text-velato">{testo}</p>}
       </header>
 
-      <ul class="pannelli" role="list">
+      <ul class="pannelli" role="list" data-reveal-gruppo>
         {servizi.map(({ servizio, numero, href, foto }) => {
           const Pannello = href ? 'a' : 'div';
           return (
-            <li class="pannello" data-theme="dark" data-foto>
+            <li class="pannello" data-theme="dark" data-foto data-reveal="alto">
               <Pannello class="pannello-link" href={href ?? undefined}>
                 {foto && <Picture data={foto} cap={false} class="pannello-img" />}
                 <span class="pannello-velo" aria-hidden="true" />
@@ -208,6 +208,21 @@ const servizi = getServices()
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+
+  /* — Mobile: descrizione intera, titolo a 36 px — */
+  @media (max-width: 63.98rem) {
+    .pannello-riga {
+      display: block;
+      overflow: visible;
+      font-size: 1.0625rem;
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+    }
+
+    .pannello-titolo {
+      font-size: 2.25rem;
+    }
   }
 
   /* — Desktop: affiancati a tutta altezza, si allargano al passaggio — */

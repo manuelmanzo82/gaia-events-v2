@@ -85,11 +85,15 @@ export function initReveals(): void {
   }
 
   for (const el of document.querySelectorAll<HTMLElement>('[data-reveal="alto"]')) {
+    // Dentro un [data-reveal-gruppo] i figli partono a cascata, in ordine.
+    const gruppo = el.closest<HTMLElement>('[data-reveal-gruppo]');
+    const posto = gruppo ? [...gruppo.querySelectorAll('[data-reveal="alto"]')].indexOf(el) : 0;
     gsap.from(el, {
       y: 36,
       opacity: 0,
       duration: DURATA,
       ease: EASE,
+      delay: Math.max(posto, 0) * 0.12,
       scrollTrigger: { trigger: el, start: 'top 88%', once: true },
     });
   }
