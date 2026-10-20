@@ -39,6 +39,8 @@ INSERT INTO `settings` (`setting_key`, `group_name`, `label`, `field_type`, `val
 ('sections.services.text',   'home',     'Sezione servizi — testo',   'textarea', 'Dalla consulenza iniziale al coordinamento del giorno.', 'From the first consultation to day-of coordination.', 21),
 ('sections.portfolio.title', 'home',     'Sezione portfolio — titolo','text',     'Eventi realizzati', 'Selected events', 30),
 ('sections.portfolio.text',  'home',     'Sezione portfolio — testo', 'textarea', 'Ogni evento è una storia diversa.', 'Every event is a different story.', 31),
+('sections.moments.text',    'home',     'Fascia foto in home — eyebrow', 'text',  'Istanti', 'Moments', 32),
+('sections.moments.title',   'home',     'Fascia foto in home — titolo',  'text',  'Frammenti di giorni felici', 'Fragments of happy days', 33),
 ('sections.reviews.title',   'home',     'Sezione recensioni — titolo','text',    'Dicono di me', 'Kind words', 40),
 ('sections.reviews.text',    'home',     'Sezione recensioni — testo','textarea', NULL, NULL, 41),
 ('sections.instagram.title', 'home',     'Sezione Instagram — titolo','text',     'Su Instagram', 'On Instagram', 50),

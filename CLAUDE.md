@@ -702,6 +702,15 @@ Fatto:
     reduced-motion), barra di avanzamento 2 px bordeaux e «Scorri →»
     (`fascia.scorri`) che sparisce al primo scroll dell'utente.
   - **Instagram su mobile**: 3 × 3 (primi 9 post).
+  - **Ritocchi** (20/10, sera): il WhatsApp flottante è il solo fumetto
+    con la cornetta a linea sottile (svg 44 px, stroke 0.6 su viewBox 24 ≈
+    1 px), senza cerchio; la pillola col bordo compare all'hover/focus.
+    Sopra la fascia un titolo piccolo allineato al bordo sinistro delle
+    foto: `sections.moments.text` (eyebrow «Istanti») e
+    `sections.moments.title` («Frammenti di giorni felici»), migrazione
+    `2026-10-20-fascia-testi.sql` applicata sullo staging e righe anche
+    in `seed.example.sql`. A desktop la sezione agganciata è ora lei a
+    essere alta 100svh (griglia: titolo + binario centrato nel resto).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with

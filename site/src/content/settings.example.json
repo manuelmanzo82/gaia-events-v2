@@ -63,6 +63,16 @@
         "en": "Services, places, stories and quote"
       }
     },
+    "moments": {
+      "title": {
+        "it": "Frammenti di giorni felici",
+        "en": "Fragments of happy days"
+      },
+      "text": {
+        "it": "Istanti",
+        "en": "Moments"
+      }
+    },
     "reviews": {
       "title": {
         "it": "Dicono di me",

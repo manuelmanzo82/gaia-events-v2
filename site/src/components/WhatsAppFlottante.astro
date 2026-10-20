@@ -3,15 +3,17 @@ import { BUSINESS, type Lang } from '../config/site';
 import { useTranslations } from '../i18n';
 
 /**
- * WhatsApp flottante (giro 7): tondo sottile da 44 px con l'icona, in
- * basso a destra, nello stesso stile del torna-su, che sta sopra di lui
- * (gap 12 px). Colore come logo e menu (scripts/flottanti.ts): avorio
- * sopra le foto e le sezioni scure, inchiostro sui fondi chiari. Compare
- * dopo l'hero, sparisce mentre il footer è in vista.
+ * WhatsApp flottante (giro 7): il fumetto con la cornetta di WhatsApp a
+ * linea sottile, monocromatico, alto 44 px come il cerchio del torna-su e
+ * con lo stesso spessore di tratto (~1 px), senza cerchio attorno, in
+ * basso a destra; il torna-su sta sopra di lui (gap 12 px). Colore come
+ * logo e menu (scripts/flottanti.ts): avorio sopra le foto e le sezioni
+ * scure, inchiostro sui fondi chiari. Compare dopo l'hero, sparisce mentre
+ * il footer è in vista.
  *
- * Desktop, con un puntatore vero: al passaggio o al focus si allarga in
- * una pillola «Scrivimi su WhatsApp». Mobile: solo il tondo. Link wa.me al
- * numero di site.ts con il messaggio precompilato. Con
+ * Desktop, con un puntatore vero: al passaggio o al focus compare la
+ * pillola con il bordo e «Scrivimi su WhatsApp». Mobile: solo l'icona.
+ * Link wa.me al numero di site.ts con il messaggio precompilato. Con
  * prefers-reduced-motion nessuna animazione: compare e basta.
  */
 interface Props {
@@ -34,7 +36,7 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
   hidden
 >
   <span class="wa-icona" aria-hidden="true">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
       <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
     </svg>
@@ -56,10 +58,10 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
     bottom: clamp(1rem, 3vw, 2rem);
     z-index: 40;
     display: grid;
-    grid-template-columns: 42px 0fr;
+    grid-template-columns: 44px 0fr;
     align-items: center;
     height: 44px;
-    border: 1px solid currentColor;
+    border: 1px solid transparent;
     border-radius: 999px;
     background: transparent;
     color: var(--color-inchiostro);
@@ -71,6 +73,7 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
       opacity 0.45s var(--ease-gaia),
       transform 0.45s var(--ease-gaia),
       color 0.5s var(--ease-gaia),
+      border-color 0.5s var(--ease-gaia),
       grid-template-columns 0.5s var(--ease-gaia),
       padding 0.5s var(--ease-gaia),
       visibility 0s linear 0.45s;
@@ -106,8 +109,12 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
   .wa-icona {
     display: grid;
     place-items: center;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .wa-icona svg {
+    display: block;
   }
 
   .wa-testo {
@@ -126,8 +133,9 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
   @media (hover: hover) and (min-width: 64rem) {
     .wa-flottante:hover,
     .wa-flottante:focus-visible {
-      grid-template-columns: 42px 1fr;
+      grid-template-columns: 44px 1fr;
       padding-right: 1.1rem;
+      border-color: currentColor;
     }
 
     .wa-flottante:hover .wa-testo,

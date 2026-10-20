@@ -93,7 +93,12 @@ const section = (key: string) => settings.sections[key];
     eyebrow={text(section('portfolio')?.text, lang)}
     titolo={text(section('portfolio')?.title, lang)}
   />
-  <HighlightsOrizzontali lang={lang} highlights={orizzontali} />
+  <HighlightsOrizzontali
+    lang={lang}
+    highlights={orizzontali}
+    eyebrow={text(section('moments')?.text, lang)}
+    titolo={text(section('moments')?.title, lang)}
+  />
 
   <LuoghiAnteprima lang={lang} />
 

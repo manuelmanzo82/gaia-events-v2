@@ -7,7 +7,9 @@
  * Desktop: tutte le foto alla STESSA altezza — min(65svh, ALTEZZA_FASCIA)
  * — larghe secondo il loro formato (verticali e orizzontali alternate),
  * gap costante, angoli 16 px, niente didascalie. Ogni tessera dichiara
- * data-theme="dark": sopra le foto il header è avorio.
+ * data-theme="dark": sopra le foto il header è avorio. Sopra le foto,
+ * allineato al loro bordo sinistro, un titolo piccolo (eyebrow + titolo,
+ * da settings.sections.moments).
  * Una foto che a quell'altezza supererebbe il proprio maxWidth viene
  * esclusa qui, in fase di build (ALTEZZA_FASCIA è anche il tetto in CSS,
  * quindi il controllo vale su qualunque schermo).
@@ -30,9 +32,11 @@ import Picture from '../Picture.astro';
 interface Props {
   lang: Lang;
   highlights: Highlight[];
+  eyebrow?: string;
+  titolo?: string;
 }
 
-const { lang, highlights } = Astro.props;
+const { lang, highlights, eyebrow, titolo } = Astro.props;
 const t = useTranslations(lang);
 
 const SIZES = '(min-width: 64rem) 48vw, 82vw';
@@ -52,6 +56,16 @@ const foto = highlights
 {
   foto.length > 0 && (
     <section class="orizzontale" data-theme="light" data-orizzontale style={`--altezza-fascia: ${ALTEZZA_FASCIA}px`}>
+      {(eyebrow || titolo) && (
+        <header class="fascia-testa">
+          {eyebrow && <p class="eyebrow fascia-eyebrow">{eyebrow}</p>}
+          {titolo && (
+            <h2 class="fascia-titolo" data-reveal="righe">
+              {titolo}
+            </h2>
+          )}
+        </header>
+      )}
       <ul class="binario" role="list">
         {foto.map((f) => (
           <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto>
@@ -149,6 +163,23 @@ const foto = highlights
     background: color-mix(in srgb, var(--color-beige) 38%, var(--color-avorio));
     padding-block: var(--spacing-section-sm);
     overflow: hidden;
+  }
+
+  /* Titolo piccolo sopra le foto, allineato al loro bordo sinistro. */
+  .fascia-testa {
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem) 1.25rem;
+  }
+
+  .fascia-eyebrow {
+    display: flex;
+    margin: 0 0 0.6rem;
+  }
+
+  .fascia-titolo {
+    margin: 0;
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: 340;
   }
 
   .binario {
@@ -254,17 +285,25 @@ const foto = highlights
     }
   }
 
-  /* — Desktop: fascia alta quanto lo schermo, il binario lo muove GSAP — */
+  /* — Desktop: sezione alta quanto lo schermo (è lei a essere agganciata),
+     titolo in alto sotto lo spazio del header, foto centrate nel resto;
+     il binario lo muove GSAP — */
   @media (min-width: 64rem) {
     .orizzontale {
       --altezza-foto: min(65svh, var(--altezza-fascia));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: 100vh;
+      height: 100svh;
       padding-block: 0;
+    }
+
+    .fascia-testa {
+      padding-top: calc(var(--altezza-header, 146px) + 0.5rem);
     }
 
     .binario {
       align-items: center;
-      height: 100vh;
-      height: 100svh;
       width: max-content;
       padding-inline: clamp(1.25rem, 4vw, 3.5rem) 12vw;
       will-change: transform;
@@ -278,11 +317,20 @@ const foto = highlights
   }
 
   @media (prefers-reduced-motion: reduce) and (min-width: 64rem) {
-    .binario {
+    .orizzontale {
+      display: block;
       height: auto;
+      padding-block: var(--spacing-section-sm);
+    }
+
+    .fascia-testa {
+      padding-top: 0;
+    }
+
+    .binario {
       width: auto;
       flex-wrap: wrap;
-      padding-block: var(--spacing-section-sm);
+      padding-block: 0 var(--spacing-section-sm);
     }
   }
 </style>
