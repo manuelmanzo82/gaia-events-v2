@@ -13,9 +13,15 @@
  * quindi il controllo vale su qualunque schermo).
  *
  * Sotto i 64rem nessun pin: carosello a scorrimento libero con scroll-snap,
- * puro CSS, tessere tutte 4:5 (giro 5) larghe 82vw.
+ * tessere tutte 4:5 larghe 78vw, così la successiva sporge dal bordo
+ * destro. Giro 7: la prima volta che la sezione entra nello schermo una
+ * sola spinta d'invito (60 px a sinistra e ritorno, 0,8 s, una volta per
+ * visita via sessionStorage, mai con reduced-motion); sotto le foto una
+ * barra sottile di avanzamento che si riempie scorrendo e l'etichetta
+ * «Scorri →», che sparisce al primo scroll dell'utente.
  */
 import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
 import type { Highlight } from '../../lib/content';
 import { ALTEZZA_FASCIA } from '../../lib/home';
 import { picture } from '../../lib/images';
@@ -27,6 +33,7 @@ interface Props {
 }
 
 const { lang, highlights } = Astro.props;
+const t = useTranslations(lang);
 
 const SIZES = '(min-width: 64rem) 48vw, 82vw';
 
@@ -52,9 +59,90 @@ const foto = highlights
           </li>
         ))}
       </ul>
+
+      {/* Solo sotto i 64rem: avanzamento e invito a scorrere. */}
+      <div class="fascia-guida container-gaia" aria-hidden="true">
+        <span class="fascia-barra"><span class="fascia-barra-pieno" /></span>
+        <span class="fascia-scorri">
+          {t('fascia.scorri')} <span>→</span>
+        </span>
+      </div>
     </section>
   )
 }
+
+<script>
+  import { riduciMotion } from '../../scripts/motion';
+
+  const MOBILE = window.matchMedia('(max-width: 63.98rem)');
+  const CHIAVE = 'gaia-fascia-spinta';
+
+  for (const sezione of document.querySelectorAll<HTMLElement>('[data-orizzontale]')) {
+    const binario = sezione.querySelector<HTMLElement>('.binario');
+    const pieno = sezione.querySelector<HTMLElement>('.fascia-barra-pieno');
+    const etichetta = sezione.querySelector<HTMLElement>('.fascia-scorri');
+    if (!binario || !pieno) continue;
+
+    let spintaInCorso = false;
+
+    // Barra di avanzamento; al primo scroll dell'utente via l'etichetta.
+    const aggiorna = (): void => {
+      const corsa = binario.scrollWidth - binario.clientWidth;
+      pieno.style.transform = `scaleX(${corsa > 0 ? Math.min(binario.scrollLeft / corsa, 1) : 0})`;
+      if (!spintaInCorso && binario.scrollLeft > 2 && etichetta) etichetta.classList.add('via');
+    };
+    binario.addEventListener('scroll', aggiorna, { passive: true });
+    aggiorna();
+
+    // Spinta d'invito: una volta per visita, solo su mobile, mai con
+    // reduced-motion. 60 px a sinistra e ritorno in 0,8 s.
+    const giaFatta = (): boolean => {
+      try {
+        return sessionStorage.getItem(CHIAVE) === '1';
+      } catch {
+        return false;
+      }
+    };
+    const spingi = (): void => {
+      spintaInCorso = true;
+      try {
+        sessionStorage.setItem(CHIAVE, '1');
+      } catch {
+        /* niente storage, pazienza */
+      }
+      // Lo scroll-snap riporterebbe subito il binario sul punto di
+      // aggancio: spento per la durata della spinta.
+      binario.style.scrollSnapType = 'none';
+      const durata = 800;
+      const inizio = performance.now();
+      const passo = (ora: number): void => {
+        const t = Math.min((ora - inizio) / durata, 1);
+        // Andata e ritorno con una curva morbida (seno).
+        binario.scrollLeft = Math.sin(t * Math.PI) * 60;
+        if (t < 1) {
+          requestAnimationFrame(passo);
+        } else {
+          binario.scrollLeft = 0;
+          binario.style.scrollSnapType = '';
+          spintaInCorso = false;
+        }
+      };
+      requestAnimationFrame(passo);
+    };
+
+    if (MOBILE.matches && !riduciMotion() && !giaFatta() && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (voci) => {
+          if (!voci.some((v) => v.isIntersecting)) return;
+          io.disconnect();
+          window.setTimeout(spingi, 350);
+        },
+        { threshold: 0.5 },
+      );
+      io.observe(binario);
+    }
+  }
+</script>
 
 <style>
   .orizzontale {
@@ -104,9 +192,65 @@ const foto = highlights
     }
 
     .tessera {
-      width: min(82vw, var(--limite));
+      width: min(78vw, var(--limite));
       aspect-ratio: 4 / 5;
       scroll-snap-align: start;
+    }
+
+    /* Barra di avanzamento e «Scorri →» sotto le foto. */
+    .fascia-guida {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .fascia-barra {
+      flex: 1 1 auto;
+      height: 2px;
+      overflow: hidden;
+      border-radius: 1px;
+      background: color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+    }
+
+    .fascia-barra-pieno {
+      display: block;
+      height: 100%;
+      background: var(--color-bordeaux);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.15s linear;
+    }
+
+    .fascia-scorri {
+      flex: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-grigio-caldo);
+      transition: opacity 0.4s var(--ease-gaia);
+    }
+
+    .fascia-scorri.via {
+      opacity: 0;
+    }
+  }
+
+  .fascia-guida {
+    display: none;
+  }
+
+  @media (max-width: 63.98rem) {
+    .fascia-guida {
+      display: flex;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fascia-barra-pieno,
+    .fascia-scorri {
+      transition: none;
     }
   }
 
