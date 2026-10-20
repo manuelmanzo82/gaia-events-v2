@@ -151,7 +151,7 @@ const emailHref = `mailto:${BUSINESS.email}`;
 
   .cta-firma {
     margin: 1.75rem 0 0;
-    font-size: clamp(2rem, 1.5rem + 1.6vw, 3rem);
+    font-size: clamp(2.25rem, 1.5rem + 1.6vw, 3rem);
     font-style: italic;
     font-weight: 400;
     line-height: 1.2;
@@ -204,6 +204,19 @@ const emailHref = `mailto:${BUSINESS.email}`;
 
   .cta-contatti svg {
     flex: none;
+  }
+
+  /* — Mobile: testo con 56 px sopra e sotto; link in colonna, così la
+     freccia «torna su» (in basso a destra) non copre mai niente. — */
+  @media (max-width: 63.98rem) {
+    .cta-meta {
+      padding-block: 3.5rem;
+    }
+
+    .cta-contatti {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
   }
 
   /* — Desktop: due metà, foto alta quanto la sezione — */
