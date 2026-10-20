@@ -276,10 +276,21 @@ export const T = {
     },
     grazie: {
       titolo: (nomi: string) => `Grazie, ${nomi}.`,
-      testo: (ore: number, via: string) =>
-        `La vostra lettera è arrivata. Gaia la leggerà con calma e vi risponderà entro ${ore} ore, ${via}. Nel frattempo, se vi va, potete scriverle subito.`,
-      via: { email: 'via email', whatsapp: 'su WhatsApp', telefono: 'al telefono' } as Record<Contatto, string>,
+      /** Il testo segue il canale scelto e cita il recapito indicato. */
+      testo: (ore: number, canale: Contatto, recapito: string, tu: boolean) => {
+        const via =
+          canale === 'whatsapp'
+            ? `su WhatsApp al ${recapito}`
+            : canale === 'telefono'
+              ? `con una telefonata al ${recapito}`
+              : `via email a ${recapito}`;
+        return tu
+          ? `La tua richiesta è arrivata. Gaia la leggerà con calma e ti risponderà entro ${ore} ore ${via}.`
+          : `La vostra richiesta è arrivata. Gaia la leggerà con calma e vi risponderà entro ${ore} ore ${via}.`;
+      },
+      intanto: (tu: boolean) => (tu ? 'Nel frattempo, se ti va, puoi scriverle subito.' : 'Nel frattempo, se vi va, potete scriverle subito.'),
       whatsapp: 'Scrivi a Gaia su WhatsApp',
+      whatsappDiscreto: 'Oppure scrivi a Gaia su WhatsApp',
       home: 'Torna alla home',
     },
   },
@@ -399,10 +410,19 @@ export const T = {
     },
     grazie: {
       titolo: (nomi: string) => `Thank you, ${nomi}.`,
-      testo: (ore: number, via: string) =>
-        `Your letter has arrived. Gaia will read it carefully and reply within ${ore} hours, ${via}. In the meantime, if you like, you can message her right away.`,
-      via: { email: 'by email', whatsapp: 'on WhatsApp', telefono: 'by phone' } as Record<Contatto, string>,
+      /** The text follows the chosen channel and quotes the contact given. */
+      testo: (ore: number, canale: Contatto, recapito: string, _tu: boolean) => {
+        const via =
+          canale === 'whatsapp'
+            ? `on WhatsApp at ${recapito}`
+            : canale === 'telefono'
+              ? `with a phone call at ${recapito}`
+              : `by email at ${recapito}`;
+        return `Your request has arrived. Gaia will read it carefully and get back to you within ${ore} hours ${via}.`;
+      },
+      intanto: (_tu: boolean) => 'In the meantime, if you like, you can message her right away.',
       whatsapp: 'Message Gaia on WhatsApp',
+      whatsappDiscreto: 'Or message Gaia on WhatsApp',
       home: 'Back to home',
     },
   },

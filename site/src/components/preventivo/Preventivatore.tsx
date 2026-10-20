@@ -213,6 +213,16 @@ export default function Preventivatore(props: Props): ReactNode {
       primoRender.current = false;
       return;
     }
+    // Dopo l'invio la testa della pagina si toglie (classe su <html>, CSS in
+    // QuotePage) e la vista torna in cima: il ringraziamento sta subito
+    // sotto lo spazio dell'header, senza titoli che ci passano sotto.
+    if (step === 'grazie') {
+      document.documentElement.classList.add('preventivo-inviato');
+      const riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: riduci ? 'auto' : 'smooth' });
+      titolo.current?.focus({ preventScroll: true });
+      return;
+    }
     setFotoViste((viste) => (viste.includes(step) ? viste : [...viste, step]));
     const el = radice.current;
     if (el) {
@@ -840,15 +850,34 @@ export default function Preventivatore(props: Props): ReactNode {
             <h2 className="pv-titolo" tabIndex={-1} ref={titolo} id="pv-titolo">
               {t.grazie.titolo(chi)}
             </h2>
-            <p className="pv-testo">{t.grazie.testo(props.oreRisposta, t.grazie.via[r.contactPref])}</p>
-            <div className="pv-azioni pv-azioni--grazie">
-              <a className="btn btn--pieno" href={waHref} target="_blank" rel="noopener">
-                {t.grazie.whatsapp}
-              </a>
-              <a className="link-filo" href={props.homeHref}>
-                {t.grazie.home}
-              </a>
-            </div>
+            <p className="pv-testo">
+              {t.grazie.testo(
+                props.oreRisposta,
+                r.contactPref,
+                r.contactPref === 'email' ? r.email.trim() : r.phone.trim(),
+                r.kind === 'festa',
+              )}
+              {r.contactPref === 'whatsapp' && <> {t.grazie.intanto(r.kind === 'festa')}</>}
+            </p>
+            {r.contactPref === 'whatsapp' ? (
+              <div className="pv-azioni pv-azioni--grazie">
+                <a className="btn btn--pieno" href={waHref} target="_blank" rel="noopener">
+                  {t.grazie.whatsapp}
+                </a>
+                <a className="link-filo" href={props.homeHref}>
+                  {t.grazie.home}
+                </a>
+              </div>
+            ) : (
+              <div className="pv-azioni pv-azioni--grazie">
+                <a className="btn" href={props.homeHref}>
+                  {t.grazie.home}
+                </a>
+                <a className="pv-link" href={waHref} target="_blank" rel="noopener">
+                  {t.grazie.whatsappDiscreto}
+                </a>
+              </div>
+            )}
           </div>
         ) : (
           <form className="pv-form" onSubmit={onSubmit} noValidate>

@@ -196,7 +196,18 @@ final class Inquiry
             default => '',
         };
 
-        $righe = [$letter, '', '— — —', '', 'Riepilogo delle risposte:', ''];
+        $plurale = $kind !== 'festa';
+        $canale = match ($contactPref) {
+            'whatsapp' => 'su WhatsApp al ' . $phone,
+            'telefono' => 'con una telefonata al ' . $phone,
+            default => 'via email a ' . $email,
+        };
+        $righe = [
+            // In evidenza in cima: come vogliono essere ricontattati.
+            ($plurale ? 'Preferiscono essere contattati ' : 'Contatto preferito: ') . $canale . '.',
+            '',
+            $letter, '', '— — —', '', 'Riepilogo delle risposte:', '',
+        ];
         foreach ($summary as $riga) {
             $righe[] = $riga['label'] . ': ' . $riga['value'];
         }

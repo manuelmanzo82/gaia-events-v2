@@ -215,6 +215,16 @@ const domande = [1, 2, 3]
     padding-bottom: var(--spacing-section);
   }
 
+  /* Dopo l'invio (classe messa dal preventivatore): via la testa, il
+     ringraziamento parte subito sotto lo spazio dell'header. */
+  :global(html.preventivo-inviato) .prev-testa {
+    display: none;
+  }
+
+  :global(html.preventivo-inviato) .prev-modulo {
+    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 5vh, 3rem));
+  }
+
   .prev-rassicura {
     padding-block: var(--spacing-section-sm);
     border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
