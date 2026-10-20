@@ -49,8 +49,10 @@ const rotta: RouteKey | null =
     : existsIn('quote', lang)
       ? 'quote'
       : null;
+// Etichetta della CTA: dal back office (page_hero, poi impostazioni);
+// senza, «Contattami» / «Get in touch» — porta comunque al preventivo.
 const ctaLabel =
-  text(hero?.cta.label, lang) || text(settings.hero.ctaLabel, lang) || t('cta.quote');
+  text(hero?.cta.label, lang) || text(settings.hero.ctaLabel, lang) || t('cta.contact');
 
 // Foto: quelle di page_hero, in ordine; fallback all'immagine hero delle
 // impostazioni. Tutte a 100vw (è una fascia a tutta larghezza, cover).

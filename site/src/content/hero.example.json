@@ -6,7 +6,7 @@
       "en": "Placeholder: the real title and subtitle come from the back office."
     },
     "cta": {
-      "label": { "it": "Raccontaci il vostro giorno", "en": "Tell us about your day" },
+      "label": { "it": "Contattami", "en": "Get in touch" },
       "route": "quote"
     },
     "video": null,
