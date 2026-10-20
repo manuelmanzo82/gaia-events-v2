@@ -227,6 +227,7 @@ export default function Preventivatore(props: Props): ReactNode {
     // QuotePage) e la vista torna in cima: il ringraziamento sta subito
     // sotto lo spazio dell'header, senza titoli che ci passano sotto.
     if (step === 'grazie') {
+      setFotoViste((viste) => (viste.includes('grazie') ? viste : [...viste, 'grazie']));
       document.documentElement.classList.add('preventivo-inviato');
       const riduci = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({ top: 0, behavior: riduci ? 'auto' : 'smooth' });

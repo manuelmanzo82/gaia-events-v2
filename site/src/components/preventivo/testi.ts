@@ -546,7 +546,15 @@ export function righeRiepilogo(r: Risposte, lang: Lingua, zone: Zona[], servizi:
       v.servizi,
       scelti.map((s) => s.titolo).join(', '),
       'aiuto',
-      scelti.filter((s) => s.inclusi.length > 0).map((s) => `${s.titolo} — ${t.include.toLowerCase()}: ${s.inclusi.join(' · ')}`),
+      // Con un solo servizio il titolo è già il valore: il dettaglio dice
+      // solo cosa include.
+      scelti
+        .filter((s) => s.inclusi.length > 0)
+        .map((s) =>
+          scelti.length === 1
+            ? `${t.include}: ${s.inclusi.join(' · ')}`
+            : `${s.titolo} — ${t.include.toLowerCase()}: ${s.inclusi.join(' · ')}`,
+        ),
     );
   }
 
