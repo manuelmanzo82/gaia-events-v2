@@ -1,5 +1,5 @@
 ---
-import type { Lang } from '../config/site';
+import { BUSINESS, type Lang } from '../config/site';
 import { useTranslations, type UIKey } from '../i18n';
 import { path, type RouteKey } from '../i18n/routes';
 import { existsIn } from '../lib/availability';
@@ -68,8 +68,8 @@ const preventivo = existsIn('quote', lang);
   <nav id="menu-principale" class="menu" aria-label={t('nav.menu')}>
     <ul class="menu-voci">
       {
-        voci.map((voce) => (
-          <li>
+        voci.map((voce, i) => (
+          <li style={`--n: ${i}`}>
             <a
               href={path(voce.key, lang)}
               aria-current={routeKey === voce.key ? 'page' : undefined}
@@ -91,6 +91,29 @@ const preventivo = existsIn('quote', lang);
       }
       <LangSwitcher lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
     </div>
+
+    {/* Solo nel pannello mobile (sotto gli 80rem): due contatti in fondo. */}
+    <ul class="menu-contatti" role="list">
+      <li>
+        <a href={`https://wa.me/${BUSINESS.whatsapp}`} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
+            <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+      </li>
+      <li>
+        <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+            <circle cx="12" cy="12" r="4.4" />
+            <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+          <span>Instagram</span>
+        </a>
+      </li>
+    </ul>
   </nav>
 </header>
 
@@ -299,6 +322,10 @@ const preventivo = existsIn('quote', lang);
     transform: translateY(-3px) rotate(-45deg);
   }
 
+  .menu-contatti {
+    display: none;
+  }
+
   @media (min-width: 80rem) {
     .menu {
       display: flex;
@@ -316,15 +343,20 @@ const preventivo = existsIn('quote', lang);
       display: inline-flex;
     }
 
+    /* Pannello a tutto schermo (giro 5): voci in Cormorant a 34 px con il
+       numero piccolo a sinistra, Preventivo come bottone pieno a tutta
+       larghezza, English sotto, WhatsApp e Instagram in fondo. Apertura
+       in dissolvenza, voci a cascata. */
     .menu {
       position: fixed;
       inset: 0;
       z-index: -1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: 2.5rem;
-      padding: 6rem clamp(1.25rem, 6vw, 3rem) 3rem;
+      justify-content: flex-end;
+      gap: 2rem;
+      padding: calc(var(--altezza-header, 96px) + 1rem) 1.25rem 2rem;
+      overflow-y: auto;
       background: var(--color-avorio);
       color: var(--color-inchiostro);
       text-shadow: none;
@@ -353,27 +385,109 @@ const preventivo = existsIn('quote', lang);
 
     .menu-voci {
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0;
+      margin-top: auto;
+    }
+
+    .menu-voci li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.9rem;
+      opacity: 0;
+      transform: translateY(14px);
+      transition:
+        opacity 0.5s var(--ease-gaia),
+        transform 0.5s var(--ease-gaia);
+    }
+
+    .menu-aperto .menu-voci li {
+      opacity: 1;
+      transform: none;
+      transition-delay: calc(0.08s + var(--n, 0) * 0.05s);
+    }
+
+    .menu-voci li::before {
+      content: '0' counter(voce);
+      counter-increment: voce;
+      flex: none;
+      width: 1.6rem;
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 0.875rem;
+      letter-spacing: 0.06em;
+      color: var(--color-oro-testo);
+    }
+
+    .menu-voci {
+      counter-reset: voce;
     }
 
     .menu-voci a {
-      display: inline-block;
-      padding: 0.5rem 0;
-      font-size: 1.375rem;
-      letter-spacing: 0.12em;
+      display: flex;
+      align-items: center;
+      min-height: 60px;
+      font-family: var(--font-display);
+      font-size: 2.125rem;
+      font-weight: 340;
+      letter-spacing: 0;
+      text-transform: none;
     }
 
-    .menu-cta {
-      font-size: 1rem;
-    }
-
-    :global(.site-header .lang-switcher) {
-      font-size: 1rem;
+    .menu-voci a::after {
+      display: none;
     }
 
     .menu-coda {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.25rem;
+    }
+
+    .menu-cta {
+      min-height: 52px;
+      font-size: 0.875rem;
+      background: var(--color-bordeaux);
+      border-color: var(--color-bordeaux);
+      color: var(--color-avorio) !important;
+    }
+
+    :global(.site-header .lang-switcher) {
+      font-size: 0.875rem;
+      text-align: center;
+    }
+
+    :global(.site-header .lang-switcher a) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .menu-contatti {
+      display: flex;
       flex-wrap: wrap;
-      gap: 1.5rem;
+      gap: 0.5rem 2rem;
+      margin: 0;
+      padding: 1.25rem 0 0;
+      border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+      list-style: none;
+    }
+
+    .menu-contatti a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-height: 44px;
+      font-size: 0.9375rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+  }
+
+  @media (max-width: 79.98rem) and (prefers-reduced-motion: reduce) {
+    .menu-voci li {
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
   }
 

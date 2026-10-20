@@ -41,6 +41,16 @@ const t = useTranslations(lang);
     window.addEventListener('scroll', aggiorna, { passive: true });
     aggiorna();
 
+    // Sul footer (bottone «Richiedi un preventivo» e link a destra) la
+    // freccia si toglie di mezzo: mai sopra un bottone.
+    const footer = document.querySelector('footer');
+    if (footer && 'IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([voce]) => bottone.classList.toggle('coperto', !!voce?.isIntersecting),
+        { threshold: 0 },
+      ).observe(footer);
+    }
+
     // Il tema cambia anche senza scroll (osservatore del header).
     if (header) {
       new MutationObserver(() => {
@@ -90,6 +100,22 @@ const t = useTranslations(lang);
     transform: translateY(0);
     visibility: visible;
     transition-delay: 0s;
+  }
+
+  .torna-su.coperto {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Mobile: 40 px, 16 px dal bordo (area di tocco 44 con l'outline). */
+  @media (max-width: 63.98rem) {
+    .torna-su {
+      right: 1rem;
+      bottom: 1rem;
+      width: 40px;
+      height: 40px;
+    }
   }
 
   .torna-su:hover,
