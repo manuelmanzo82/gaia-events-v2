@@ -1,13 +1,30 @@
 ---
-import type { Lang } from '../../config/site';
+/**
+ * Pagina Preventivo (/preventivo/ ↔ /en/wedding-estimate/), corta e nello
+ * stile della home, con il preventivatore al centro:
+ *
+ *  1. testa: sovratitolo, titolo breve, una riga di Gaia con la firma in
+ *     corsivo;
+ *  2. il preventivatore (isola React, components/preventivo/), a schermo
+ *     diviso da 64rem;
+ *  3. tre rassicurazioni e tre domande frequenti.
+ *
+ * Tutti i testi e le foto dei passaggi dalle impostazioni del gruppo
+ * «preventivo» del back office (settings.quote.*). Le zone arrivano da
+ * Luoghi (solo quelle pubblicate), i servizi da Servizi: niente scritto a
+ * mano. Senza luoghi pubblicati il passaggio «Dove» mostra un campo libero.
+ */
+import { BUSINESS, ENDPOINTS, type Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPage, text } from '../../lib/content';
-import { existsIn, langsFor } from '../../lib/availability';
+import { getLuoghi, getPage, getServices, getSettings, isPublishable, text } from '../../lib/content';
+import { existsIn, langsFor, SERVICE_FIELDS } from '../../lib/availability';
+import { picture } from '../../lib/images';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
-import PlaceholderSection from '../PlaceholderSection.astro';
+import Preventivatore, { type Foto } from '../preventivo/Preventivatore';
+import type { Passaggio, Servizio, Zona } from '../preventivo/testi';
 
 interface Props {
   lang: Lang;
@@ -18,42 +35,279 @@ const t = useTranslations(lang);
 
 const page = getPage('quote');
 const langs = langsFor('quote');
+const settings = getSettings();
+const q = settings.quote;
 
-const title = text(page?.title, lang) || t('nav.quote');
+const titolo = text(q?.title, lang) || text(page?.title, lang) || t('nav.quote');
 
 const meta = buildMeta({
   lang,
   routeKey: 'quote',
-  title,
-  description: text(page?.intro, lang),
+  title: text(page?.title, lang) || titolo,
+  description: text(page?.intro, lang) || text(q?.line, lang),
   seo: page ?? undefined,
   availableLangs: langs,
 });
 
 const crumbs = [
   { name: t('nav.home'), href: path('home', lang) },
-  { name: title, href: path('quote', lang) },
+  { name: titolo, href: path('quote', lang) },
 ];
+
+// Zone: regioni e loro zone pubblicate, nell'ordine del back office.
+const zone: Zona[] = getLuoghi().flatMap((regione) => {
+  const voci: Zona[] = [];
+  const nome = text(regione.nome, lang);
+  const slug = text(regione.slug, lang) || text(regione.slug, 'it');
+  if (nome && slug) voci.push({ slug, nome, regione: regione.tipo === 'regione' });
+  for (const z of regione.zone ?? []) {
+    const n = text(z.nome, lang);
+    const s = text(z.slug, lang) || text(z.slug, 'it');
+    if (n && s) voci.push({ slug: s, nome: n, regione: z.tipo === 'regione' });
+  }
+  return voci;
+});
+
+const servizi: Servizio[] = getServices()
+  .filter((s) => isPublishable(s, lang, SERVICE_FIELDS))
+  .map((s) => ({ slug: s.slug, titolo: text(s.title, lang), sottotitolo: text(s.subtitle, lang) }));
+
+// Una foto per passaggio, dalle impostazioni (colonna da min(42vw, 640px)).
+const CHIAVI: Record<Passaggio, string> = {
+  evento: 'event',
+  voi: 'names',
+  quando: 'when',
+  dove: 'where',
+  ospiti: 'guests',
+  aiuto: 'help',
+  budget: 'budget',
+  contatti: 'contact',
+  lettera: 'letter',
+  grazie: 'thanks',
+};
+const foto: Partial<Record<Passaggio, Foto | null>> = {};
+for (const [passo, chiave] of Object.entries(CHIAVI) as Array<[Passaggio, string]>) {
+  const dati = picture(q?.photos?.[chiave] ?? null, lang, 'min(42vw, 640px)');
+  foto[passo] = dati
+    ? {
+        sources: dati.sources,
+        src: dati.src,
+        width: dati.width,
+        height: dati.height,
+        alt: dati.alt,
+        objectPosition: dati.objectPosition,
+      }
+    : null;
+}
+
+const oreRisposta = Number(text(q?.replyHours, 'it')) || 48;
+
+const rassicurazioni = [1, 2, 3]
+  .map((n) => {
+    const a = q?.[`assurance${n}` as 'assurance1'];
+    return { titolo: text(a?.title, lang), testo: text(a?.text, lang) };
+  })
+  .filter((r) => r.titolo);
+
+const domande = [1, 2, 3]
+  .map((n) => {
+    const f = q?.[`faq${n}` as 'faq1'];
+    return { domanda: text(f?.question, lang), risposta: text(f?.answer, lang) };
+  })
+  .filter((d) => d.domanda && d.risposta);
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="quote"
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={[breadcrumbs(crumbs)]}
-  crumbs={crumbs}
->
-  <h1>{title}</h1>
-  {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
+<BaseLayout lang={lang} routeKey="quote" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} largo>
+  <section class="prev-testa container-gaia" data-theme="light">
+    {text(q?.eyebrow, lang) && <p class="eyebrow">{text(q?.eyebrow, lang)}</p>}
+    <h1 class="text-display prev-titolo">{titolo}</h1>
+    {
+      text(q?.line, lang) && (
+        <p class="prev-riga">
+          <span>«{text(q?.line, lang)}»</span>
+          {text(q?.signature, lang) && <span class="font-display prev-firma">{text(q?.signature, lang)}</span>}
+        </p>
+      )
+    }
+  </section>
 
-  <PlaceholderSection lang={lang} id="quote-form">
-    <p>
-      Qui andrà il preventivatore: <strong>un unico componente React bilingue</strong>,
-      senza prezzi automatici, che invia a <code>admin/api/quote.php</code>.
-      La v1 aveva due versioni quasi identiche, circa 1.200 righe in tutto.
-    </p>
-  </PlaceholderSection>
+  <section class="prev-modulo container-gaia" data-theme="light" aria-label={titolo}>
+    <Preventivatore
+      client:load
+      lang={lang}
+      zone={zone}
+      servizi={servizi}
+      foto={foto}
+      endpoint={ENDPOINTS.quote}
+      privacyHref={path('privacy', lang)}
+      homeHref={path('home', lang)}
+      whatsapp={BUSINESS.whatsapp}
+      oreRisposta={oreRisposta}
+    />
+  </section>
 
-  {existsIn('contact', lang) && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
+  {
+    rassicurazioni.length > 0 && (
+      <section class="prev-rassicura container-gaia" data-theme="light">
+        <ul role="list">
+          {rassicurazioni.map((r) => (
+            <li>
+              <h2 class="font-display">{r.titolo}</h2>
+              {r.testo && <p>{r.testo}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    domande.length > 0 && (
+      <section class="prev-faq container-gaia" data-theme="light">
+        {domande.map((d) => (
+          <details>
+            <summary class="font-display">{d.domanda}</summary>
+            <p>{d.risposta}</p>
+          </details>
+        ))}
+      </section>
+    )
+  }
+
+  {existsIn('contact', lang) && <p class="prev-contatti container-gaia"><a class="link-filo" href={path('contact', lang)}>{t('cta.contact')}</a></p>}
 </BaseLayout>
+
+<style>
+  .prev-testa {
+    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 5vh, 3.5rem));
+    padding-bottom: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .prev-testa .eyebrow {
+    display: flex;
+    margin: 0 0 0.9rem;
+  }
+
+  .prev-titolo {
+    max-width: 18ch;
+    margin: 0;
+  }
+
+  .prev-riga {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    max-width: 40rem;
+    margin: 1.25rem 0 0;
+    font-size: var(--text-lead);
+    line-height: 1.5;
+    color: var(--color-grigio-caldo);
+  }
+
+  .prev-firma {
+    font-size: 1.75rem;
+    font-style: italic;
+    color: var(--color-bordeaux);
+  }
+
+  .prev-modulo {
+    padding-bottom: var(--spacing-section);
+  }
+
+  .prev-rassicura {
+    padding-block: var(--spacing-section-sm);
+    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
+  }
+
+  .prev-rassicura ul {
+    display: grid;
+    gap: 1.75rem 3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .prev-rassicura ul {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .prev-rassicura h2 {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: 340;
+  }
+
+  .prev-rassicura p {
+    margin: 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .prev-faq {
+    padding-bottom: var(--spacing-section);
+    max-width: 52rem;
+  }
+
+  .prev-faq details {
+    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
+  }
+
+  .prev-faq details:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
+  }
+
+  .prev-faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 44px;
+    padding: 1.1rem 0;
+    font-size: 1.375rem;
+    line-height: 1.3;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .prev-faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prev-faq summary::after {
+    content: '+';
+    flex: none;
+    font-family: var(--font-sans);
+    font-size: 1.25rem;
+    color: var(--color-bordeaux);
+    transition: transform 0.3s var(--ease-gaia);
+  }
+
+  .prev-faq details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .prev-faq summary:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .prev-faq details p {
+    max-width: 44rem;
+    margin: 0 0 1.25rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .prev-contatti {
+    padding-bottom: var(--spacing-section);
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prev-faq summary::after {
+      transition: none;
+    }
+  }
+</style>

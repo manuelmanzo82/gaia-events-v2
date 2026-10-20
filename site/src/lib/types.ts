@@ -63,6 +63,23 @@ export interface Settings extends SeoFields {
   legal: { piva: Localized };
   about: { title: Localized; text: Localized; image: Image | null };
   contact: { title: Localized; text: Localized; address: Localized };
+  /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
+  quote?: {
+    eyebrow?: Localized;
+    title?: Localized;
+    line?: Localized;
+    signature?: Localized;
+    replyHours?: Localized;
+    assurance1?: { title?: Localized; text?: Localized };
+    assurance2?: { title?: Localized; text?: Localized };
+    assurance3?: { title?: Localized; text?: Localized };
+    faq1?: { question?: Localized; answer?: Localized };
+    faq2?: { question?: Localized; answer?: Localized };
+    faq3?: { question?: Localized; answer?: Localized };
+    /** Foto per passaggio: event, names, when, where, guests, help, budget, contact, letter, thanks. */
+    photos?: Record<string, Image | null>;
+    sendCopy?: Localized;
+  };
 }
 
 export interface Service extends SeoFields {
