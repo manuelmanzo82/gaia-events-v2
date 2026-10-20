@@ -4,11 +4,11 @@ import { useTranslations } from '../i18n';
 
 /**
  * Torna su: cerchio sottile con una freccia, in basso a destra, SOPRA il
- * WhatsApp flottante (gap 12 px). Compare dopo una schermata di scroll e
+ * WhatsApp flottante (gap 12 px), che invece è sempre visibile: la
+ * freccia compare dopo una schermata di scroll, sparisce sul footer e
  * porta in cima con lo scroll morbido di Lenis (o con quello nativo se
  * Lenis non c'è). Comparsa, footer e colore (avorio sopra le foto,
- * inchiostro sui fondi chiari) in scripts/flottanti.ts, in comune col
- * WhatsApp.
+ * inchiostro sui fondi chiari) in scripts/flottanti.ts.
  * Con prefers-reduced-motion niente animazione di comparsa né di scroll.
  */
 interface Props {
@@ -33,7 +33,7 @@ const t = useTranslations(lang);
   const bottone = document.querySelector<HTMLButtonElement>('.torna-su');
 
   if (bottone) {
-    initFlottante(bottone);
+    initFlottante(bottone, { dopoHero: true, viaSulFooter: true, dopoIntro: true });
 
     bottone.addEventListener('click', () => {
       const lenis = getLenis();
