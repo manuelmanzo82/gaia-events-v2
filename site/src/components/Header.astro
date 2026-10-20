@@ -8,7 +8,9 @@ import LogoGaia from './LogoGaia.astro';
 
 /**
  * Header senza barra: logo e menu stanno sempre sulla pagina, mai uno
- * sfondo dietro, né in cima né dopo lo scroll. Il colore lo decide la
+ * sfondo né una sfumatura dietro, né in cima né dopo lo scroll (giro 4:
+ * la sfumatura del giro 3 è stata tolta su richiesta; resta solo il cambio
+ * di colore e, sulle foto, l'ombra sottile del testo). Il colore lo decide la
  * sezione sotto (data-header-theme, da scripts/theme-observer.ts: avorio
  * su hero, sezioni scure e foto; inchiostro su quelle chiare), con
  * transizione morbida. Sopra una foto (sezioni con data-foto) il testo
@@ -144,56 +146,6 @@ const preventivo = existsIn('quote', lang);
 
   .site-header[data-header-theme='dark'] {
     color: var(--color-avorio-su-notte);
-  }
-
-  /* Sfumatura dietro logo e menu, nel colore del tema: niente barra (nessun
-     bordo, svanisce verso il basso), ma garantisce il contrasto del menu
-     (≥ 4.5:1) anche sopra foto chiare, schede e fasce agganciate, dove
-     prima il testo finiva su cieli bianchi o mezzo su foto e mezzo su
-     avorio. Due strati che si scambiano l'opacità, perché un gradiente
-     non si anima. */
-  .site-header::before,
-  .site-header::after {
-    content: '';
-    position: absolute;
-    inset: 0 0 -2.5rem;
-    z-index: -1;
-    pointer-events: none;
-    transition: opacity 0.5s var(--ease-gaia);
-  }
-
-  .site-header::before {
-    background: linear-gradient(
-      180deg,
-      rgb(250 248 245 / 0.94) 0%,
-      rgb(250 248 245 / 0.86) 62%,
-      rgb(250 248 245 / 0) 100%
-    );
-    opacity: 1;
-  }
-
-  .site-header::after {
-    background: linear-gradient(
-      180deg,
-      rgb(27 22 17 / 0.7) 0%,
-      rgb(27 22 17 / 0.58) 62%,
-      rgb(27 22 17 / 0) 100%
-    );
-    opacity: 0;
-  }
-
-  .site-header[data-header-theme='dark']::before {
-    opacity: 0;
-  }
-
-  .site-header[data-header-theme='dark']::after {
-    opacity: 1;
-  }
-
-  /* Pannello mobile aperto: il pannello avorio fa già da fondo. */
-  .site-header.menu-aperto::before,
-  .site-header.menu-aperto::after {
-    opacity: 0;
   }
 
   /* Sopra una foto: ombra testuale morbidissima, quasi invisibile. */
