@@ -12,7 +12,11 @@
  * Desktop: schede ~90vw × ~75vh centrate, angoli 24 px, sticky un gradino
  * più giù della precedente sotto il header, così quella sotto resta
  * visibile in alto mentre la nuova le scorre sopra; lo scrub la riduce e
- * la scurisce (.scheda-ombra). Sotto i 64rem colonna di schede 4:5.
+ * la scurisce (.scheda-ombra). Sotto i 64rem (giro 5) schede 4:5 con
+ * sticky semplice in CSS, senza GSAP: ogni scheda si ferma sotto il
+ * header e la successiva le sale sopra; il titolo della sezione ha sotto
+ * di sé un margine pari al header, così al primo frame dello snap è già
+ * fuori dallo schermo e il logo non lo copre.
  *
  * Nota sul limite delle foto: a 90vw la scheda supera il maxWidth delle
  * foto da 1024 px (scelta del giro 4: la larghezza conta più della regola
@@ -243,6 +247,44 @@ const schede = AREE.filter((area) => existsIn(area.key, lang))
     background: var(--color-notte);
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* — Mobile e tablet: pila sticky in CSS, raggio 16 px — */
+  @media (max-width: 63.98rem) {
+    .impila {
+      --gradino: 0.5rem;
+    }
+
+    .impila-testa {
+      margin-bottom: calc(var(--altezza-header, 96px) + 0.5rem);
+    }
+
+    .impila-pila {
+      gap: 0;
+    }
+
+    .scheda {
+      position: sticky;
+      top: calc(var(--altezza-header, 96px) + 0.5rem + var(--i) * var(--gradino));
+      margin-bottom: 1.25rem;
+    }
+
+    .scheda:last-child {
+      margin-bottom: 0;
+    }
+
+    .scheda-link,
+    .scheda-figura {
+      border-radius: 16px;
+    }
+
+    .scheda-titolo {
+      font-size: 2.5rem;
+    }
+
+    .scheda-riga {
+      font-size: 1.0625rem;
+    }
   }
 
   @media (min-width: 64rem) {
