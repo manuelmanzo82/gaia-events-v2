@@ -12,6 +12,7 @@ import IntroVelo from '../components/IntroVelo.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Seo from '../components/Seo.astro';
 import TornaSu from '../components/TornaSu.astro';
+import WhatsAppFlottante from '../components/WhatsAppFlottante.astro';
 import type { Crumb } from '../lib/jsonld';
 
 interface Props {
@@ -118,6 +119,7 @@ const t = useTranslations(lang);
     <Footer lang={lang} routeKey={routeKey} slug={slug} availableLangs={availableLangs} />
 
     <TornaSu lang={lang} />
+    <WhatsAppFlottante lang={lang} />
 
     <script>
       import { initMotion } from '../scripts/motion';

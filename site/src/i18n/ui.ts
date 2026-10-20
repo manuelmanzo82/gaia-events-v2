@@ -28,6 +28,11 @@ export const UI = {
   'cta.quote': { it: 'Richiedi un preventivo', en: 'Request a quote' },
   'cta.contact': { it: 'Contattami', en: 'Get in touch' },
   'cta.whatsapp': { it: 'Scrivimi su WhatsApp', en: 'Message me on WhatsApp' },
+  'whatsapp.messaggio': {
+    it: 'Ciao Gaia, vorrei informazioni per il nostro matrimonio',
+    en: "Hi Gaia, I'd like some information about our wedding",
+  },
+  'fascia.scorri': { it: 'Scorri', en: 'Swipe' },
   'cta.discover': { it: 'Scopri di più', en: 'Discover more' },
   'cta.scopri': { it: 'Scopri', en: 'Discover' },
   'cta.scrivici': { it: 'Scrivici', en: 'Write to us' },

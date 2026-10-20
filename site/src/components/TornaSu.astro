@@ -3,11 +3,12 @@ import type { Lang } from '../config/site';
 import { useTranslations } from '../i18n';
 
 /**
- * Torna su: cerchio sottile con una freccia, in basso a destra. Compare
- * dopo una schermata di scroll e porta in cima con lo scroll morbido di
- * Lenis (o con quello nativo se Lenis non c'è). Il colore lo decide quello
- * che il bottone ha sotto il proprio centro (temaInPunto di
- * theme-observer.ts): avorio sopra le foto, inchiostro sui fondi chiari.
+ * Torna su: cerchio sottile con una freccia, in basso a destra, SOPRA il
+ * WhatsApp flottante (gap 12 px). Compare dopo una schermata di scroll e
+ * porta in cima con lo scroll morbido di Lenis (o con quello nativo se
+ * Lenis non c'è). Comparsa, footer e colore (avorio sopra le foto,
+ * inchiostro sui fondi chiari) in scripts/flottanti.ts, in comune col
+ * WhatsApp.
  * Con prefers-reduced-motion niente animazione di comparsa né di scroll.
  */
 interface Props {
@@ -26,36 +27,13 @@ const t = useTranslations(lang);
 </button>
 
 <script>
+  import { initFlottante } from '../scripts/flottanti';
   import { getLenis, riduciMotion } from '../scripts/motion';
-  import { temaInPunto } from '../scripts/theme-observer';
 
   const bottone = document.querySelector<HTMLButtonElement>('.torna-su');
-  const header = document.querySelector<HTMLElement>('.site-header');
 
   if (bottone) {
-    // Visibile dopo una schermata di scroll; colore da ciò che ha sotto.
-    const aggiorna = (): void => {
-      const visibile = window.scrollY > window.innerHeight;
-      bottone.hidden = false;
-      bottone.classList.toggle('visibile', visibile);
-      const r = bottone.getBoundingClientRect();
-      const sotto = temaInPunto(r.left + r.width / 2, r.top + r.height / 2);
-      bottone.dataset.tema = sotto?.tema ?? header?.dataset.headerTheme ?? 'light';
-    };
-    window.addEventListener('scroll', aggiorna, { passive: true });
-    window.addEventListener('resize', aggiorna, { passive: true });
-    window.addEventListener('load', aggiorna);
-    aggiorna();
-
-    // Sul footer (bottone «Richiedi un preventivo» e link a destra) la
-    // freccia si toglie di mezzo: mai sopra un bottone.
-    const footer = document.querySelector('footer');
-    if (footer && 'IntersectionObserver' in window) {
-      new IntersectionObserver(
-        ([voce]) => bottone.classList.toggle('coperto', !!voce?.isIntersecting),
-        { threshold: 0 },
-      ).observe(footer);
-    }
+    initFlottante(bottone);
 
     bottone.addEventListener('click', () => {
       const lenis = getLenis();
@@ -72,7 +50,7 @@ const t = useTranslations(lang);
   .torna-su {
     position: fixed;
     right: clamp(1rem, 3vw, 2rem);
-    bottom: clamp(1rem, 3vw, 2rem);
+    bottom: calc(clamp(1rem, 3vw, 2rem) + 44px + 12px);
     z-index: 40;
     display: inline-flex;
     align-items: center;
@@ -107,11 +85,11 @@ const t = useTranslations(lang);
     pointer-events: none;
   }
 
-  /* Mobile: 40 px, 16 px dal bordo (area di tocco 44 con l'outline). */
+  /* Mobile: 40 px, 16 px dal bordo, sopra il WhatsApp (44 px + 12). */
   @media (max-width: 63.98rem) {
     .torna-su {
       right: 1rem;
-      bottom: 1rem;
+      bottom: calc(1rem + 44px + 12px);
       width: 40px;
       height: 40px;
     }

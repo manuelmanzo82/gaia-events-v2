@@ -1,0 +1,154 @@
+---
+import { BUSINESS, type Lang } from '../config/site';
+import { useTranslations } from '../i18n';
+
+/**
+ * WhatsApp flottante (giro 7): tondo sottile da 44 px con l'icona, in
+ * basso a destra, nello stesso stile del torna-su, che sta sopra di lui
+ * (gap 12 px). Colore come logo e menu (scripts/flottanti.ts): avorio
+ * sopra le foto e le sezioni scure, inchiostro sui fondi chiari. Compare
+ * dopo l'hero, sparisce mentre il footer è in vista.
+ *
+ * Desktop, con un puntatore vero: al passaggio o al focus si allarga in
+ * una pillola «Scrivimi su WhatsApp». Mobile: solo il tondo. Link wa.me al
+ * numero di site.ts con il messaggio precompilato. Con
+ * prefers-reduced-motion nessuna animazione: compare e basta.
+ */
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('whatsapp.messaggio'))}`;
+---
+
+<a
+  class="wa-flottante"
+  href={href}
+  target="_blank"
+  rel="noopener"
+  aria-label={t('cta.whatsapp')}
+  data-tema="light"
+  hidden
+>
+  <span class="wa-icona" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
+      <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
+    </svg>
+  </span>
+  <span class="wa-testo" aria-hidden="true">{t('cta.whatsapp')}</span>
+</a>
+
+<script>
+  import { initFlottante } from '../scripts/flottanti';
+
+  const bottone = document.querySelector<HTMLElement>('.wa-flottante');
+  if (bottone) initFlottante(bottone);
+</script>
+
+<style>
+  .wa-flottante {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vw, 2rem);
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 42px 0fr;
+    align-items: center;
+    height: 44px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-inchiostro);
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: hidden;
+    transition:
+      opacity 0.45s var(--ease-gaia),
+      transform 0.45s var(--ease-gaia),
+      color 0.5s var(--ease-gaia),
+      grid-template-columns 0.5s var(--ease-gaia),
+      padding 0.5s var(--ease-gaia),
+      visibility 0s linear 0.45s;
+  }
+
+  .wa-flottante.visibile {
+    opacity: 0.85;
+    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .wa-flottante.visibile:hover,
+  .wa-flottante.visibile:focus-visible {
+    opacity: 1;
+  }
+
+  .wa-flottante.coperto {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .wa-flottante:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  .wa-flottante[data-tema='dark'] {
+    color: var(--color-avorio-su-notte);
+  }
+
+  .wa-icona {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+  }
+
+  .wa-testo {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-gaia);
+  }
+
+  /* Desktop con puntatore: pillola con il testo al passaggio o al focus. */
+  @media (hover: hover) and (min-width: 64rem) {
+    .wa-flottante:hover,
+    .wa-flottante:focus-visible {
+      grid-template-columns: 42px 1fr;
+      padding-right: 1.1rem;
+    }
+
+    .wa-flottante:hover .wa-testo,
+    .wa-flottante:focus-visible .wa-testo {
+      opacity: 1;
+      transition-delay: 0.15s;
+    }
+  }
+
+  @media (max-width: 63.98rem) {
+    .wa-flottante {
+      right: 1rem;
+      bottom: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa-flottante,
+    .wa-testo {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
