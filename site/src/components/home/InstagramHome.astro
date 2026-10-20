@@ -1,20 +1,19 @@
 ---
 /**
- * Instagram in home, prima della CTA finale: «Seguici su Instagram» +
- * @handle, una fascia di foto SFALSATE (4:5 e 1:1 alternate, non la
- * griglia piatta della v1) e il bottone al profilo.
+ * Instagram in home, prima della CTA finale, con l'aspetto di un profilo
+ * Instagram (giro 4):
  *
- *  - ≥64rem: la fascia scorre piano in orizzontale in loop (CSS, nessun
- *    JS), in pausa al passaggio del mouse o col focus dentro; per il loop
- *    senza giunture la serie è ripetuta una volta, e la copia è nascosta
- *    agli screen reader e fuori dal tab;
- *  - sotto i 64rem: carosello a scroll-snap, niente animazione;
- *  - prefers-reduced-motion: niente scorrimento, griglia ferma.
+ *  - intestazione CENTRATA: icona Instagram, @handle (è il titolo della
+ *    sezione), bottone «Segui» (ghost, al profilo);
+ *  - griglia di QUADRATI uguali 1:1 con gap sottile: 4 colonne × 2 righe
+ *    da 64rem (8 post), 3 colonne × 2 righe sotto (6 post, gli altri due
+ *    nascosti via CSS);
+ *  - al passaggio del mouse o al focus: velo leggero e, al centro, l'icona
+ *    del tipo di post (foto, reel, carosello), come su Instagram.
  *
  * Ogni foto apre il post (o il profilo, se il post non ha link) in una
- * nuova scheda; al passaggio compare una piccola icona Instagram. Foto
- * lazy con width/height: nessun effetto su LCP e CLS. Nessun post
- * visibile → la sezione non esiste.
+ * nuova scheda. Foto lazy con width/height: nessun effetto su LCP e CLS.
+ * Nessun post visibile → la sezione non esiste.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -30,75 +29,76 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const feed = getInstagram();
-const SIZES = '(min-width: 64rem) 18rem, 64vw';
+const POST_MAX = 8;
+// Quadrato: ~15rem a desktop (griglia da 60rem su 4 colonne), un terzo
+// dello schermo sotto.
+const SIZES = '(min-width: 64rem) 15rem, 33vw';
 
 const post = feed.posts
-  .map((p, i) => {
+  .slice(0, POST_MAX)
+  .map((p) => {
     const data = picture(p.image, lang, SIZES);
     if (!data) return null;
     const href = p.permalink || feed.profileUrl;
     const etichetta = `${data.alt ? data.alt + ' — ' : ''}${
       p.permalink ? t('instagram.apriPost') : t('instagram.apriProfilo')
     } (${t('instagram.nuovaScheda')})`;
-    return { data, href, etichetta, alta: i % 2 === 0 };
+    return { data, href, etichetta, tipo: p.tipo };
   })
   .filter((p): p is NonNullable<typeof p> => p !== null && !!p.href);
-
-// Durata del giro completo: ~8 s per foto (circa 34 px/s a 1440), lento.
-const durata = Math.max(post.length * 8, 40);
 ---
 
 {
   post.length > 0 && feed.profileUrl && (
     <section id="instagram" class="ig" data-theme="light" aria-labelledby="ig-titolo">
-      <header class="ig-testa container-gaia">
-        <h2 id="ig-titolo" class="text-display ig-titolo" data-reveal="righe">
-          {t('instagram.titolo')}
+      <header class="ig-testa container-gaia" data-reveal="alto">
+        <span class="ig-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+            <circle cx="12" cy="12" r="4.4" />
+            <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <h2 id="ig-titolo" class="ig-handle">
+          <a href={feed.profileUrl} target="_blank" rel="noopener me">
+            <span class="sr-only">{t('instagram.titolo')}: </span>
+            {feed.handle || 'Instagram'}
+          </a>
         </h2>
-        {feed.handle && (
-          <p class="ig-handle" data-reveal="alto">
-            <a class="link-filo" href={feed.profileUrl} target="_blank" rel="noopener me">
-              {feed.handle}
-            </a>
-          </p>
-        )}
+        <a class="btn ig-segui" href={feed.profileUrl} target="_blank" rel="noopener me">
+          {t('instagram.segui')}
+        </a>
       </header>
 
-      <div class="ig-fascia" style={`--durata: ${durata}s`}>
-        <div class="ig-binario">
-          {[0, 1].map((copia) => (
-            <ul class="ig-serie" aria-hidden={copia === 1 ? 'true' : undefined} data-copia={copia}>
-              {post.map((p) => (
-                <li class:list={['ig-voce', { 'ig-voce--alta': p.alta }]}>
-                  <a
-                    class="ig-link"
-                    href={p.href}
-                    target="_blank"
-                    rel="noopener"
-                    aria-label={copia === 0 ? p.etichetta : undefined}
-                    tabindex={copia === 1 ? -1 : undefined}
-                  >
-                    <Picture data={p.data} cap={false} class="ig-img" />
-                    <span class="ig-icona" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <rect x="3" y="3" width="18" height="18" rx="5" />
-                        <circle cx="12" cy="12" r="4.2" />
-                        <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
-                      </svg>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
-      </div>
-
-      <p class="ig-azioni container-gaia">
-        <a class="btn" href={feed.profileUrl} target="_blank" rel="noopener me">
-          {t('instagram.cta')}
-        </a>
-      </p>
+      <ul class="ig-griglia" role="list">
+        {post.map((p) => (
+          <li class="ig-voce">
+            <a class="ig-link" href={p.href} target="_blank" rel="noopener" aria-label={p.etichetta}>
+              <Picture data={p.data} cap={false} class="ig-img" />
+              <span class="ig-velo" aria-hidden="true">
+                {p.tipo === 'reel' ? (
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                    <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+                    <path d="M2.5 8h19M8 2.5l3 5.5M14 2.5l3 5.5" />
+                    <path d="M10 11.5v6l5-3z" fill="currentColor" stroke="none" />
+                  </svg>
+                ) : p.tipo === 'carosello' ? (
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                    <rect x="7" y="7" width="14.5" height="14.5" rx="3.5" />
+                    <path d="M17 4.5A2.5 2.5 0 0 0 14.5 2.5h-9A3 3 0 0 0 2.5 5.5v9A2.5 2.5 0 0 0 4.5 17" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                    <rect x="2.5" y="2.5" width="19" height="19" rx="4" />
+                    <path d="M2.5 16.5l5.5-5.5 4.5 4.5 3-3 6 6" />
+                    <circle cx="16" cy="8" r="1.6" fill="currentColor" stroke="none" />
+                  </svg>
+                )}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -107,54 +107,81 @@ const durata = Math.max(post.length * 8, 40);
   .ig {
     padding-block: var(--spacing-section);
     background: var(--color-avorio);
-    overflow: hidden;
   }
 
+  /* — Intestazione da profilo, tutta centrata — */
   .ig-testa {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 2rem;
-    margin-bottom: clamp(2rem, 5vh, 3rem);
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    margin-bottom: clamp(1.75rem, 4vh, 2.5rem);
+    text-align: center;
   }
 
-  .ig-titolo {
-    margin: 0;
+  .ig-logo {
+    display: block;
+    color: var(--color-inchiostro);
   }
 
+  .ig-logo svg {
+    display: block;
+  }
+
+  /* Il titolo è l'handle: niente overflow hidden, line-height ampio
+     perché le discendenti (g, p) restino intere. */
   .ig-handle {
     margin: 0;
-    font-size: 1rem;
+    padding-block: 0.1em;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 320;
+    line-height: 1.3;
+    letter-spacing: 0;
   }
 
-  .ig-handle .link-filo {
-    font-size: 0.9375rem;
-    letter-spacing: 0.1em;
-    text-transform: none;
+  .ig-handle a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.35s var(--ease-gaia);
   }
 
-  /* — Foto — */
-  .ig-voce {
-    flex: none;
-    width: var(--ig-larghezza);
-    margin-right: var(--ig-spazio);
+  .ig-handle a:hover {
+    color: var(--color-bordeaux);
+  }
+
+  .ig-handle a:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .ig-segui {
+    min-width: 9rem;
+    padding-block: 0.8rem;
+  }
+
+  /* — Griglia di quadrati — */
+  .ig-griglia {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 60rem);
+    margin: 0 auto;
+    padding: 0;
     list-style: none;
+  }
+
+  /* Sotto i 64rem: 3 × 2, i post oltre il sesto non si vedono. */
+  .ig-voce:nth-child(n + 7) {
+    display: none;
   }
 
   .ig-link {
     position: relative;
     display: block;
     overflow: hidden;
-    border-radius: 4px;
     aspect-ratio: 1 / 1;
     background: var(--color-beige);
     color: var(--color-avorio-su-notte);
-  }
-
-  /* Altezze alternate: una 4:5, una 1:1, centrate sulla stessa linea. */
-  .ig-voce--alta .ig-link {
-    aspect-ratio: 4 / 5;
   }
 
   .ig-link :global(picture),
@@ -169,26 +196,24 @@ const durata = Math.max(post.length * 8, 40);
     transition: transform 0.9s var(--ease-gaia);
   }
 
-  .ig-icona {
+  /* Velo leggero con l'icona del tipo di post al centro. */
+  .ig-velo {
     position: absolute;
-    inset: auto 0.7rem 0.7rem auto;
+    inset: 0;
     display: grid;
     place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    background: rgb(27 22 17 / 0.55);
+    background: rgb(27 22 17 / 0.28);
     opacity: 0;
-    transform: translateY(4px);
-    transition:
-      opacity 0.35s var(--ease-gaia),
-      transform 0.35s var(--ease-gaia);
+    transition: opacity 0.35s var(--ease-gaia);
   }
 
-  .ig-link:hover .ig-icona,
-  .ig-link:focus-visible .ig-icona {
+  .ig-velo svg {
+    filter: drop-shadow(0 1px 6px rgb(27 22 17 / 0.4));
+  }
+
+  .ig-link:hover .ig-velo,
+  .ig-link:focus-visible .ig-velo {
     opacity: 1;
-    transform: none;
   }
 
   .ig-link:hover :global(.ig-img) {
@@ -198,121 +223,28 @@ const durata = Math.max(post.length * 8, 40);
   .ig-link:focus-visible {
     outline: 2px solid var(--color-bordeaux);
     outline-offset: 3px;
+    z-index: 1;
   }
 
-  .ig-azioni {
-    margin: clamp(2rem, 5vh, 3rem) auto 0;
-  }
-
-  /* — Mobile: carosello a scroll-snap, niente animazione — */
-  .ig-fascia {
-    --ig-larghezza: 64vw;
-    --ig-spazio: 0.9rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
-    scroll-padding-inline: clamp(1.25rem, 4vw, 3.5rem);
-  }
-
-  .ig-fascia::-webkit-scrollbar {
-    display: none;
-  }
-
-  .ig-binario,
-  .ig-serie {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-  }
-
-  .ig-binario {
-    width: max-content;
-  }
-
-  .ig-voce {
-    scroll-snap-align: start;
-  }
-
-  /* La copia serve solo al loop del desktop. */
-  .ig-serie[data-copia='1'] {
-    display: none;
-  }
-
-  /* — Desktop: la fascia scorre in loop, in pausa al passaggio — */
   @media (min-width: 64rem) {
-    .ig-fascia {
-      --ig-larghezza: clamp(13rem, 17vw, 18rem);
-      --ig-spazio: clamp(1.25rem, 2vw, 2rem);
-      overflow: visible;
-      padding-inline: 0;
-      scroll-snap-type: none;
+    .ig-griglia {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .ig-serie[data-copia='1'] {
-      display: flex;
-    }
-
-    /* Due serie identiche (spazio compreso): a -50% il binario torna
-       esattamente al punto di partenza. */
-    .ig-binario {
-      animation: ig-scorri var(--durata, 48s) linear infinite;
-    }
-
-    .ig-fascia:hover .ig-binario,
-    .ig-fascia:focus-within .ig-binario {
-      animation-play-state: paused;
+    .ig-voce:nth-child(n + 7) {
+      display: block;
     }
   }
 
-  @keyframes ig-scorri {
-    to {
-      transform: translateX(-50%);
-    }
-  }
-
-  /* — Movimento ridotto: griglia ferma, niente copia — */
   @media (prefers-reduced-motion: reduce) {
-    .ig-fascia {
-      overflow: visible;
-      padding-inline: clamp(1.25rem, 4vw, 3.5rem);
-      scroll-snap-type: none;
-    }
-
-    .ig-binario {
-      width: auto;
-      max-width: 80rem;
-      margin-inline: auto;
-      animation: none !important;
-    }
-
-    .ig-serie[data-copia='0'] {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-      width: 100%;
-      align-items: center;
-    }
-
-    .ig-serie[data-copia='1'] {
-      display: none !important;
-    }
-
-    .ig-voce {
-      width: auto;
-      margin: 0;
-    }
-
     .ig-link :global(.ig-img),
-    .ig-icona {
+    .ig-velo,
+    .ig-handle a {
       transition: none;
     }
 
-    @media (min-width: 48rem) {
-      .ig-serie[data-copia='0'] {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
+    .ig-link:hover :global(.ig-img) {
+      transform: none;
     }
   }
 </style>

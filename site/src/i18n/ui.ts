@@ -43,7 +43,6 @@ export const UI = {
   'cta.readMore': { it: 'Leggi l’articolo', en: 'Read the article' },
   'cta.back': { it: 'Torna indietro', en: 'Go back' },
   'instagram.titolo': { it: 'Seguici su Instagram', en: 'Follow us on Instagram' },
-  'instagram.cta': { it: 'Seguimi su Instagram', en: 'Follow me on Instagram' },
   'instagram.apriPost': { it: 'apri il post su Instagram', en: 'open the post on Instagram' },
   'instagram.apriProfilo': { it: 'apri il profilo Instagram', en: 'open the Instagram profile' },
   'instagram.nuovaScheda': { it: 'si apre in una nuova scheda', en: 'opens in a new tab' },

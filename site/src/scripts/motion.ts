@@ -57,9 +57,12 @@ export function initReveals(): void {
     // aria: 'none' — di default SplitText mette aria-label sul target, ma
     // su un <p> senza ruolo e' vietato (Lighthouse: aria-prohibited-attr);
     // le righe restano testo normale, leggibile dagli screen reader.
-    const split = SplitText.create(el, { type: 'lines', mask: 'lines', aria: 'none' });
+    // Niente mask: 'lines' (overflow hidden riga per riga) perché tagliava
+    // le discendenti dei titoli (la «g» di «Seguici»): le righe salgono e
+    // sfumano, senza ritaglio.
+    const split = SplitText.create(el, { type: 'lines', aria: 'none' });
     gsap.from(split.lines, {
-      yPercent: 110,
+      yPercent: 60,
       opacity: 0,
       duration: DURATA,
       ease: EASE,
