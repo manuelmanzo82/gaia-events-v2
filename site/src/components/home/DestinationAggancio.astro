@@ -7,7 +7,10 @@
  *
  * La foto è una fascia con object-fit: cover: il cap del <Picture> è
  * spento perché la larghezza visibile non corrisponde ai pixel richiesti
- * (come per l'hero).
+ * (come per l'hero). Sotto i 64rem (giro 5) la sezione è 4:5 a tutta
+ * larghezza con il testo in basso e una leggera parallasse della foto
+ * (home-effetti.ts, [data-parallasse]: la figura sborda del 6% sopra e
+ * sotto per avere margine di movimento).
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -37,7 +40,7 @@ const foto = picture(getHighlights('destination')[0]?.image ?? dw.hero, lang, '1
     <section id="destination" class="destination" data-theme="dark" data-foto>
       {
         foto && (
-          <figure class="destination-figura" aria-hidden="true">
+          <figure class="destination-figura" aria-hidden="true" data-parallasse="-5 5">
             <Picture data={foto} cap={false} class="destination-img" />
           </figure>
         )
@@ -130,6 +133,33 @@ const foto = picture(getHighlights('destination')[0]?.image ?? dw.hero, lang, '1
 
   .destination-coda {
     margin: 2.5rem 0 0;
+  }
+
+  @media (max-width: 63.98rem) {
+    .destination {
+      min-height: 0;
+      aspect-ratio: 4 / 5;
+      align-content: end;
+    }
+
+    .destination-figura {
+      inset: -6% 0;
+      will-change: transform;
+    }
+
+    .destination-interno {
+      padding-block: 3rem 2.5rem;
+    }
+
+    .destination-titolo {
+      font-size: var(--text-display);
+      line-height: var(--text-display--line-height);
+      margin-bottom: 1rem;
+    }
+
+    .destination-coda {
+      margin-top: 1.75rem;
+    }
   }
 
   @media (min-width: 64rem) {
