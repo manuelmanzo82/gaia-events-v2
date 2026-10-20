@@ -5,8 +5,9 @@ import { useTranslations } from '../i18n';
 /**
  * Torna su: cerchio sottile con una freccia, in basso a destra. Compare
  * dopo una schermata di scroll e porta in cima con lo scroll morbido di
- * Lenis (o con quello nativo se Lenis non c'è). Il colore segue il tema
- * del header (data-header-theme), così sta bene su chiaro e su scuro.
+ * Lenis (o con quello nativo se Lenis non c'è). Il colore lo decide quello
+ * che il bottone ha sotto il proprio centro (temaInPunto di
+ * theme-observer.ts): avorio sopra le foto, inchiostro sui fondi chiari.
  * Con prefers-reduced-motion niente animazione di comparsa né di scroll.
  */
 interface Props {
@@ -26,19 +27,24 @@ const t = useTranslations(lang);
 
 <script>
   import { getLenis, riduciMotion } from '../scripts/motion';
+  import { temaInPunto } from '../scripts/theme-observer';
 
   const bottone = document.querySelector<HTMLButtonElement>('.torna-su');
   const header = document.querySelector<HTMLElement>('.site-header');
 
   if (bottone) {
-    // Visibile dopo una schermata di scroll.
+    // Visibile dopo una schermata di scroll; colore da ciò che ha sotto.
     const aggiorna = (): void => {
       const visibile = window.scrollY > window.innerHeight;
       bottone.hidden = false;
       bottone.classList.toggle('visibile', visibile);
-      if (header) bottone.dataset.tema = header.dataset.headerTheme ?? 'light';
+      const r = bottone.getBoundingClientRect();
+      const sotto = temaInPunto(r.left + r.width / 2, r.top + r.height / 2);
+      bottone.dataset.tema = sotto?.tema ?? header?.dataset.headerTheme ?? 'light';
     };
     window.addEventListener('scroll', aggiorna, { passive: true });
+    window.addEventListener('resize', aggiorna, { passive: true });
+    window.addEventListener('load', aggiorna);
     aggiorna();
 
     // Sul footer (bottone «Richiedi un preventivo» e link a destra) la
@@ -49,13 +55,6 @@ const t = useTranslations(lang);
         ([voce]) => bottone.classList.toggle('coperto', !!voce?.isIntersecting),
         { threshold: 0 },
       ).observe(footer);
-    }
-
-    // Il tema cambia anche senza scroll (osservatore del header).
-    if (header) {
-      new MutationObserver(() => {
-        bottone.dataset.tema = header.dataset.headerTheme ?? 'light';
-      }).observe(header, { attributes: true, attributeFilter: ['data-header-theme'] });
     }
 
     bottone.addEventListener('click', () => {

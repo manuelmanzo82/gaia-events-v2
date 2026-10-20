@@ -21,6 +21,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { riduciMotion } from './motion';
+import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';
 const MOBILE = '(max-width: 63.98rem)';
@@ -63,6 +64,9 @@ function scorrimentoOrizzontale(): void {
     gsap.to(binario, {
       x: () => -distanza(),
       ease: 'none',
+      // Il binario scorre sotto il header senza eventi di scroll (scrub
+      // con ritardo): il tema di logo e voci va rimisurato a ogni frame.
+      onUpdate: aggiornaTema,
       scrollTrigger: {
         trigger: sezione,
         start: 'top top',
