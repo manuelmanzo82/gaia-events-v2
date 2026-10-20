@@ -115,9 +115,18 @@ final class Inquiry
         // Dove
         $zoneMode = in_array($in['zoneMode'] ?? '', ['zone', 'libero', 'consigliateci', 'location'], true)
             ? (string) $in['zoneMode'] : null;
+        // Città o zona: le zone scelte, oppure il testo libero (con qualunque
+        // scelta: anche con la location o con «consigliateci»).
         $zones = self::strList($in['zones'] ?? [], 12, 120);
-        if ($zoneMode === 'libero' && self::str($in['zoneText'] ?? '', 120) !== '') {
-            $zones = [self::str($in['zoneText'], 120)];
+        $zoneText = self::str($in['zoneText'] ?? '', 120);
+        if ($zones === [] && $zoneText !== '') {
+            $zones = [$zoneText];
+        }
+        if ($zoneMode === 'location' && self::str($in['venue'] ?? '', 190) === '') {
+            return $errore('Manca il nome della location.', 'The name of the venue is missing.');
+        }
+        if (($zoneMode === 'zone' || $zoneMode === 'libero') && $zones === []) {
+            return $errore('Manca la città o la zona.', 'The city or area is missing.');
         }
         $venue = self::str($in['venue'] ?? '', 190);
 

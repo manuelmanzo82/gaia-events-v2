@@ -44,6 +44,8 @@ import {
   riepilogo,
   righeRiepilogo,
   inclusiDa,
+  cittaZona,
+  modoLuogo,
   SERVIZIO_DESTINATION,
   type Contatto,
   type Lingua,
@@ -117,17 +119,14 @@ function valida(step: Passaggio, r: Risposte, lang: Lingua, haZone: boolean): Re
       else if (r.dateMode === 'giorno' && (!r.date || r.date < oggiIso())) e.date = t.quando.erroreData;
       else if (r.dateMode === 'mese' && (!r.monthM || !r.monthY)) e.month = t.quando.erroreMese;
       break;
-    case 'dove':
-      if (r.zoneMode === 'location' && !r.venue.trim()) e.venue = t.dove.erroreLocation;
-      else if (
-        !r.zoneMode ||
-        (r.zoneMode === 'zone' && r.zones.length === 0) ||
-        (r.zoneMode === 'libero' && !r.zoneText.trim())
-      ) {
-        e.zone = t.dove.errore;
-      }
-      void haZone;
+    case 'dove': {
+      // Location → nome obbligatorio; consiglio → niente di obbligatorio;
+      // nessuna delle due → città o zona obbligatoria.
+      const modo = modoLuogo(r.zoneMode);
+      if (modo === 'location' && !r.venue.trim()) e.venue = t.dove.erroreLocation;
+      if (modo === '' && r.zones.length === 0 && !r.zoneText.trim()) e.zone = haZone ? t.dove.erroreZone : t.dove.errore;
       break;
+    }
     case 'ospiti':
       if (r.guests) {
         const n = Number(r.guests);
@@ -189,7 +188,7 @@ export default function Preventivatore(props: Props): ReactNode {
         const s = JSON.parse(grezzo) as Salvato;
         if (s && s.r && s.step && s.step !== 'grazie') {
           const passo = (PASSAGGI as readonly string[]).includes(s.step) ? s.step : 'riepilogo';
-          setR({ ...RISPOSTE_VUOTE, ...s.r });
+          setR({ ...RISPOSTE_VUOTE, ...s.r, zoneMode: modoLuogo(s.r.zoneMode ?? '') });
           setStep(passo);
           setFotoViste([passo]);
           inizio.current = s.inizio ?? null;
@@ -262,6 +261,7 @@ export default function Preventivatore(props: Props): ReactNode {
       const resto = { ...prima };
       for (const k of Object.keys(parziale)) delete resto[k];
       if ('zones' in parziale || 'zoneMode' in parziale || 'zoneText' in parziale) delete resto.zone;
+      if ('zoneMode' in parziale) delete resto.venue;
       if ('guestsRange' in parziale) delete resto.guests;
       if ('monthM' in parziale || 'monthY' in parziale) delete resto.month;
       if ('name' in parziale) delete resto.cname;
@@ -272,11 +272,37 @@ export default function Preventivatore(props: Props): ReactNode {
   const indice = step === 'grazie' ? PASSAGGI.length : PASSAGGI.indexOf(step);
   const chi = nomi(r, lang) || (lang === 'it' ? 'Voi' : 'You');
 
+  /** Porta il focus sul campo del primo errore (dopo il rendering). */
+  const focusErrore = (e: Record<string, string>): void => {
+    const ID: Record<string, string> = {
+      name: 'pv-name',
+      partner: 'pv-partner',
+      company: 'pv-company',
+      date: 'pv-date',
+      month: 'pv-month',
+      venue: 'pv-venue',
+      zone: 'pv-zonetext',
+      guests: 'pv-guests',
+      cname: 'pv-cname',
+      email: 'pv-email',
+      phone: 'pv-phone',
+      privacy: 'pv-privacy',
+    };
+    const chiave = Object.keys(e)[0];
+    window.setTimeout(() => {
+      const el =
+        (ID[chiave] && document.getElementById(ID[chiave])) ||
+        document.querySelector<HTMLElement>(`[aria-describedby="pv-err-${chiave}"] input, [aria-describedby="pv-err-${chiave}"]`);
+      (el as HTMLElement | null)?.focus();
+    }, 0);
+  };
+
   const avanti = (): void => {
     const e = valida(step, r, lang, zone.length > 0);
     if (Object.keys(e).length > 0) {
       setErrori(e);
       setAnnuncio(Object.values(e)[0]);
+      focusErrore(e);
       return;
     }
     setErrori({});
@@ -345,10 +371,11 @@ export default function Preventivatore(props: Props): ReactNode {
           dateMode: r.dateMode,
           date: r.dateMode === 'giorno' ? r.date : '',
           month: r.dateMode === 'mese' && r.monthY && r.monthM ? `${r.monthY}-${r.monthM}` : '',
-          zoneMode: r.zoneMode,
-          zones: r.zoneMode === 'zone' ? r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s) : [],
-          zoneText: r.zoneMode === 'libero' ? r.zoneText.trim() : '',
-          venue: r.zoneMode === 'location' ? r.venue.trim() : '',
+          // zoneMode per il server: la scelta, oppure da dove viene la città.
+          zoneMode: modoLuogo(r.zoneMode) || (r.zones.length > 0 ? 'zone' : 'libero'),
+          zones: r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s),
+          zoneText: r.zones.length > 0 ? '' : r.zoneText.trim(),
+          venue: modoLuogo(r.zoneMode) === 'location' ? r.venue.trim() : '',
           abroad: r.abroad,
           guestsRange: r.guests ? '' : r.guestsRange,
           guests: r.guests ? Number(r.guests) : null,
@@ -561,59 +588,87 @@ export default function Preventivatore(props: Props): ReactNode {
           nota: zone.length > 0 ? t.dove.zoneAiuto : undefined,
           corpo: (
             <>
+              {/* Le due scelte si escludono a vicenda. */}
+              <div className="pv-pillole pv-pillole--altre" role="radiogroup" aria-label={t.dove.titolo(r.kind)}>
+                {(['consigliateci', 'location'] as const).map((m) => (
+                  <label className="pv-pillola" key={m}>
+                    <input
+                      type="checkbox"
+                      checked={modoLuogo(r.zoneMode) === m}
+                      onChange={(e) => aggiorna({ zoneMode: e.target.checked ? m : '' })}
+                    />
+                    <span>{m === 'consigliateci' ? t.dove.consigliateci : t.dove.location}</span>
+                  </label>
+                ))}
+              </div>
+              {modoLuogo(r.zoneMode) === 'location' && (
+                <div className="pv-campo">
+                  <label htmlFor="pv-venue">{t.dove.nomeLocation}</label>
+                  <input
+                    id="pv-venue"
+                    type="text"
+                    required
+                    value={r.venue}
+                    onChange={(e) => aggiorna({ venue: e.target.value })}
+                    {...campo('venue')}
+                  />
+                  <Errore chiave="venue" />
+                </div>
+              )}
               {zone.length > 0 ? (
-                <div className="pv-pillole" role="group" aria-labelledby="pv-titolo" {...campo('zone')}>
-                  {zone.map((z) => (
-                    <label key={z.slug} className="pv-pillola">
-                      <input
-                        type="checkbox"
-                        checked={r.zoneMode === 'zone' && r.zones.includes(z.slug)}
-                        onChange={(e) => {
-                          const prima = r.zoneMode === 'zone' ? r.zones : [];
-                          const zones = e.target.checked ? [...prima, z.slug] : prima.filter((s) => s !== z.slug);
-                          aggiorna({ zones, zoneMode: zones.length > 0 ? 'zone' : '' });
-                        }}
-                      />
-                      <span>{z.nome}</span>
-                    </label>
-                  ))}
+                <div className="pv-campo">
+                  <span className="pv-etichetta" id="pv-zone-titolo">
+                    {modoLuogo(r.zoneMode) === 'location'
+                      ? t.dove.liberoLocation
+                      : modoLuogo(r.zoneMode) === 'consigliateci'
+                        ? t.dove.liberoConsiglio
+                        : t.dove.libero}
+                    {modoLuogo(r.zoneMode) !== '' && (
+                      <span className="pv-facoltativo">
+                        {' '}
+                        ({modoLuogo(r.zoneMode) === 'location' ? t.dove.consigliata : t.facoltativo})
+                      </span>
+                    )}
+                  </span>
+                  <div className="pv-pillole" role="group" aria-labelledby="pv-zone-titolo" {...campo('zone')}>
+                    {zone.map((z) => (
+                      <label key={z.slug} className="pv-pillola">
+                        <input
+                          type="checkbox"
+                          checked={r.zones.includes(z.slug)}
+                          onChange={(e) =>
+                            aggiorna({ zones: e.target.checked ? [...r.zones, z.slug] : r.zones.filter((s) => s !== z.slug) })
+                          }
+                        />
+                        <span>{z.nome}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <Errore chiave="zone" />
                 </div>
               ) : (
                 <div className="pv-campo">
-                  <label htmlFor="pv-zonetext">{t.dove.libero}</label>
+                  <label htmlFor="pv-zonetext">
+                    {modoLuogo(r.zoneMode) === 'location'
+                      ? t.dove.liberoLocation
+                      : modoLuogo(r.zoneMode) === 'consigliateci'
+                        ? t.dove.liberoConsiglio
+                        : t.dove.libero}
+                    {modoLuogo(r.zoneMode) !== '' && (
+                      <span className="pv-facoltativo">
+                        {' '}
+                        ({modoLuogo(r.zoneMode) === 'location' ? t.dove.consigliata : t.facoltativo})
+                      </span>
+                    )}
+                  </label>
                   <input
                     id="pv-zonetext"
                     type="text"
-                    value={r.zoneMode === 'libero' ? r.zoneText : ''}
-                    onChange={(e) => aggiorna({ zoneText: e.target.value, zoneMode: e.target.value.trim() ? 'libero' : '' })}
+                    value={r.zoneText}
+                    onChange={(e) => aggiorna({ zoneText: e.target.value })}
                     {...campo('zone')}
                   />
-                </div>
-              )}
-              <div className="pv-pillole pv-pillole--altre">
-                <label className="pv-pillola">
-                  <input
-                    type="checkbox"
-                    checked={r.zoneMode === 'consigliateci'}
-                    onChange={(e) => aggiorna({ zoneMode: e.target.checked ? 'consigliateci' : '', zones: [] })}
-                  />
-                  <span>{t.dove.consigliateci}</span>
-                </label>
-                <label className="pv-pillola">
-                  <input
-                    type="checkbox"
-                    checked={r.zoneMode === 'location'}
-                    onChange={(e) => aggiorna({ zoneMode: e.target.checked ? 'location' : '', zones: [] })}
-                  />
-                  <span>{t.dove.location}</span>
-                </label>
-              </div>
-              <Errore chiave="zone" />
-              {r.zoneMode === 'location' && (
-                <div className="pv-campo">
-                  <label htmlFor="pv-venue">{t.dove.nomeLocation}</label>
-                  <input id="pv-venue" type="text" value={r.venue} onChange={(e) => aggiorna({ venue: e.target.value })} {...campo('venue')} />
-                  <Errore chiave="venue" />
+                  <Errore chiave="zone" />
                 </div>
               )}
               <label className="pv-interruttore">
@@ -839,7 +894,7 @@ export default function Preventivatore(props: Props): ReactNode {
                 </select>
               </div>
               <label className="pv-consenso">
-                <input type="checkbox" checked={r.privacy} onChange={(e) => aggiorna({ privacy: e.target.checked })} {...campo('privacy')} />
+                <input id="pv-privacy" type="checkbox" checked={r.privacy} onChange={(e) => aggiorna({ privacy: e.target.checked })} {...campo('privacy')} />
                 <span>
                   {t.contatti.privacyPrima}
                   <a href={props.privacyHref} target="_blank" rel="noopener">

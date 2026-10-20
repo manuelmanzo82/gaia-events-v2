@@ -11,7 +11,17 @@
 export type Lingua = 'it' | 'en';
 export type TipoEvento = 'matrimonio' | 'unione_civile' | 'festa' | 'aziendale';
 export type ModoData = '' | 'giorno' | 'mese' | 'da_definire';
-export type ModoLuogo = '' | 'zone' | 'libero' | 'consigliateci' | 'location';
+/** La scelta del passaggio Dove (giro 10): città/zona è sempre a parte. */
+export type ModoLuogo = '' | 'consigliateci' | 'location';
+
+/** Vecchi salvataggi avevano anche 'zone' e 'libero': diventano «nessuna scelta». */
+export const modoLuogo = (m: string): ModoLuogo => (m === 'consigliateci' || m === 'location' ? m : '');
+
+/** Città o zona indicate: le zone scelte (nomi) o il testo libero. */
+export function cittaZona(r: Risposte, zone: Zona[]): string {
+  if (r.zones.length > 0) return r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s).join(', ');
+  return r.zoneText.trim();
+}
 export type Contatto = 'email' | 'whatsapp' | 'telefono';
 
 export const PASSAGGI = ['evento', 'voi', 'quando', 'dove', 'ospiti', 'aiuto', 'budget', 'contatti', 'riepilogo'] as const;
@@ -220,11 +230,15 @@ export const T = {
       titolo: (k: TipoEvento | '') => (coppia(k) ? 'Dove vi piacerebbe sposarvi?' : 'Dove si svolgerà?'),
       zoneAiuto: 'Potete sceglierne più di una.',
       libero: 'Città o zona che avete in mente',
+      liberoLocation: 'Città o zona della location',
+      liberoConsiglio: 'Città o zona, se avete già un’idea',
+      consigliata: 'consigliata',
       consigliateci: 'Consigliateci voi',
       location: 'Abbiamo già la location',
-      nomeLocation: 'Come si chiama?',
+      nomeLocation: 'Nome della location',
       estero: (k: TipoEvento | '') => (k === 'aziendale' ? "Gli ospiti arrivano dall'estero" : "Veniamo dall'estero"),
-      errore: 'Scegliete una zona, scrivetela, oppure chiedete un consiglio.',
+      errore: 'Scrivete una città o una zona, oppure scegliete «Consigliateci voi».',
+      erroreZone: 'Scegliete almeno una zona, oppure «Consigliateci voi».',
       erroreLocation: 'Scrivete il nome della location.',
     },
     ospiti: {
@@ -299,8 +313,9 @@ export const T = {
       } as Record<TipoEvento, string>,
       daDefinire: 'Da definire',
       nonIndicato: 'Non indicato',
-      consiglio: 'Consigliateci voi',
+      consiglio: 'Da consigliare',
       location: 'Location',
+      zona: 'Zona',
       estero: 'Dall’estero',
       circa: (n: string) => `circa ${n}`,
       nonSo: 'Da capire insieme',
@@ -381,11 +396,15 @@ export const T = {
       titolo: (k: TipoEvento | '') => (coppia(k) ? 'Where would you love to get married?' : 'Where will it take place?'),
       zoneAiuto: 'You can choose more than one.',
       libero: 'City or area you have in mind',
+      liberoLocation: 'City or area of the venue',
+      liberoConsiglio: 'City or area, if you already have an idea',
+      consigliata: 'recommended',
       consigliateci: 'We would love your advice',
       location: 'We already have a venue',
-      nomeLocation: "What's it called?",
+      nomeLocation: 'Name of the venue',
       estero: (k: TipoEvento | '') => (k === 'aziendale' ? 'Guests are coming from abroad' : 'We are coming from abroad'),
-      errore: 'Choose an area, write one, or ask for advice.',
+      errore: 'Write a city or an area, or choose «We would love your advice».',
+      erroreZone: 'Choose at least one area, or «We would love your advice».',
       erroreLocation: 'Please write the name of the venue.',
     },
     ospiti: {
@@ -460,8 +479,9 @@ export const T = {
       } as Record<TipoEvento, string>,
       daDefinire: 'To be decided',
       nonIndicato: 'Not given',
-      consiglio: 'We would love your advice',
+      consiglio: 'To be advised',
       location: 'Venue',
+      zona: 'Area',
       estero: 'Coming from abroad',
       circa: (n: string) => `around ${n}`,
       nonSo: 'To work out together',
@@ -541,10 +561,12 @@ export function righeRiepilogo(r: Risposte, lang: Lingua, zone: Zona[], servizi:
 
   let luogo = '';
   const dettagliLuogo: string[] = [];
-  if (r.zoneMode === 'zone') luogo = r.zones.map((s) => zone.find((z) => z.slug === s)?.nome ?? s).join(', ');
-  else if (r.zoneMode === 'libero') luogo = r.zoneText.trim();
-  else if (r.zoneMode === 'consigliateci') luogo = t.consiglio;
-  else if (r.zoneMode === 'location') luogo = `${t.location}: ${r.venue.trim()}`;
+  // «Location: nome, città» · «Zona: …» · «Da consigliare» (con la zona, se c'è).
+  const dove = cittaZona(r, zone);
+  const modo = modoLuogo(r.zoneMode);
+  if (modo === 'location') luogo = `${t.location}: ${[r.venue.trim(), dove].filter(Boolean).join(', ')}`;
+  else if (modo === 'consigliateci') luogo = dove ? `${t.consiglio} · ${t.zona.toLowerCase()}: ${dove}` : t.consiglio;
+  else if (dove) luogo = `${t.zona}: ${dove}`;
   if (r.abroad) dettagliLuogo.push(t.estero);
   riga('luogo', v.luogo, luogo, 'dove', dettagliLuogo);
 
