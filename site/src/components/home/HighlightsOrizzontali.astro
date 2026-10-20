@@ -1,57 +1,52 @@
 ---
 /**
- * Highlights, seconda parte: le foto restanti della sezione "home" in una
+ * Highlights, seconda parte: le foto restanti della sezione «home» in una
  * fascia che si aggancia e scorre in orizzontale con lo scroll verticale
  * (home-effetti.ts, [data-orizzontale], rif. sarahhaywood.com/weddings/).
  *
- * Sotto i 64rem nessun pin: carosello a scorrimento libero con
- * scroll-snap, puro CSS. Ogni foto è alta quanto la fascia e larga quanto
- * il suo rapporto, mai oltre il proprio maxWidth.
+ * Desktop: tutte le foto alla STESSA altezza — min(65svh, ALTEZZA_FASCIA)
+ * — larghe secondo il loro formato, gap costante, niente didascalie.
+ * Una foto che a quell'altezza supererebbe il proprio maxWidth viene
+ * esclusa qui, in fase di build (ALTEZZA_FASCIA è anche il tetto in CSS,
+ * quindi il controllo vale su qualunque schermo).
+ *
+ * Sotto i 64rem nessun pin: carosello a scorrimento libero con scroll-snap,
+ * puro CSS.
  */
 import type { Lang } from '../../config/site';
 import type { Highlight } from '../../lib/content';
+import { ALTEZZA_FASCIA } from '../../lib/home';
 import { picture } from '../../lib/images';
 import Picture from '../Picture.astro';
 
 interface Props {
   lang: Lang;
   highlights: Highlight[];
-  /** Da quale numero continua la numerazione delle schede. */
-  da?: number;
 }
 
-const { lang, highlights, da = 1 } = Astro.props;
+const { lang, highlights } = Astro.props;
 
-// Larghezza resa: ~ altezza della fascia × rapporto; per il srcset basta
-// una stima prudente.
 const SIZES = '(min-width: 64rem) 48vw, 82vw';
 
 const foto = highlights
-  .map((h, i) => {
+  .map((h) => {
     const data = picture(h.image, lang, SIZES);
     if (!data || !h.image) return null;
-    return {
-      data,
-      rapporto: `${h.image.width} / ${h.image.height}`,
-      numero: String(da + i).padStart(2, '0'),
-    };
+    const rapporto = h.image.width / h.image.height;
+    // Larghezza resa all'altezza di riferimento: oltre il limite, fuori.
+    if (Math.ceil(ALTEZZA_FASCIA * rapporto) > data.maxWidth) return null;
+    return { data, rapporto: `${h.image.width} / ${h.image.height}`, limite: data.maxWidth };
   })
   .filter((f): f is NonNullable<typeof f> => f !== null);
 ---
 
 {
   foto.length > 0 && (
-    <section class="orizzontale" data-theme="light" data-orizzontale>
+    <section class="orizzontale" data-theme="light" data-orizzontale style={`--altezza-fascia: ${ALTEZZA_FASCIA}px`}>
       <ul class="binario" role="list">
         {foto.map((f) => (
-          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.data.maxWidth}px`}>
-            <figure class="tessera-figura">
-              <Picture data={f.data} class="tessera-img" />
-              <figcaption class="tessera-testo">
-                <span class="numero">N° {f.numero}</span>
-                <span class="didascalia">{f.data.alt}</span>
-              </figcaption>
-            </figure>
+          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`}>
+            <Picture data={f.data} cap={false} class="tessera-img" />
           </li>
         ))}
       </ul>
@@ -68,7 +63,7 @@ const foto = highlights
 
   .binario {
     display: flex;
-    gap: clamp(1rem, 3vw, 2.5rem);
+    gap: clamp(1rem, 2vw, 1.75rem);
     margin: 0;
     padding: 0 clamp(1.25rem, 4vw, 3.5rem);
     list-style: none;
@@ -76,35 +71,20 @@ const foto = highlights
 
   .tessera {
     flex: 0 0 auto;
-  }
-
-  .tessera-figura {
-    display: grid;
-    gap: 0.75rem;
-    margin: 0;
-  }
-
-  .tessera-figura :global(picture) {
-    display: block;
-  }
-
-  .tessera-figura :global(.tessera-img) {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 2px;
+    overflow: hidden;
+    border-radius: 3px;
     background: var(--color-beige);
   }
 
-  .tessera-testo {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
+  .tessera :global(picture),
+  .tessera :global(.tessera-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
-  .tessera-testo .numero {
-    flex: 0 0 auto;
-    white-space: nowrap;
+  .tessera :global(.tessera-img) {
+    object-fit: cover;
   }
 
   /* — Mobile: carosello libero con scroll-snap, niente JS — */
@@ -123,6 +103,7 @@ const foto = highlights
 
     .tessera {
       width: min(82vw, var(--limite));
+      aspect-ratio: var(--rapporto);
       scroll-snap-align: start;
     }
   }
@@ -130,6 +111,7 @@ const foto = highlights
   /* — Desktop: fascia alta quanto lo schermo, il binario lo muove GSAP — */
   @media (min-width: 64rem) {
     .orizzontale {
+      --altezza-foto: min(65svh, var(--altezza-fascia));
       padding-block: 0;
     }
 
@@ -142,9 +124,10 @@ const foto = highlights
       will-change: transform;
     }
 
-    /* Altezza fissa, larghezza dal rapporto, mai oltre il limite della foto. */
+    /* Stessa altezza per tutte, larghezza dal formato. */
     .tessera {
-      width: min(calc((100svh - 14rem) * var(--rapporto)), var(--limite), 70vw);
+      height: var(--altezza-foto);
+      width: calc(var(--altezza-foto) * var(--rapporto));
     }
   }
 
