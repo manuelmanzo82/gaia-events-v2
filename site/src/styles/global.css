@@ -70,6 +70,16 @@
     color-scheme: light;
   }
 
+  /* — Mobile e tablet (giro 5): ritmo verticale più stretto (72 px tra le
+     sezioni, 56 nelle più leggere), corpo a 17 px, eyebrow a 12 px. — */
+  @media (max-width: 63.98rem) {
+    :root {
+      --spacing-section: 4.5rem;
+      --spacing-section-sm: 3.5rem;
+      --text-eyebrow: 0.75rem;
+    }
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
@@ -84,6 +94,12 @@
     line-height: 1.75;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  @media (max-width: 63.98rem) {
+    body {
+      font-size: 1.0625rem;
+    }
   }
 
   h1,
