@@ -685,6 +685,23 @@ Fatto:
     chiama `aggiornaTema()` a ogni frame. Verifica: scansione a passi di
     60 px, giù e su, a 1440 e 390 (`tema-sweep.js` nello scratchpad): zero
     voci col colore sbagliato, salvo un frame d'angolo arrotondato.
+- **Giro 7 — WhatsApp flottante, fascia mobile, Instagram 3×3** (20/10/2026,
+  home desktop approvata da Manuel):
+  - **WhatsApp flottante** (`WhatsAppFlottante.astro`, in `BaseLayout` con
+    il torna-su): tondo 44 px in basso a destra, torna-su 12 px sopra
+    (`bottom: base + 44 + 12`). Logica comune in `scripts/flottanti.ts`:
+    compare dopo una schermata (cioè dopo l'hero), classe `coperto` mentre
+    il footer è in vista, colore dal punto sotto il proprio centro
+    (`temaInPunto`). Desktop con puntatore: pillola «Scrivimi su WhatsApp»
+    (`grid-template-columns 42px 0fr → 1fr`). Link wa.me al numero di
+    `BUSINESS.whatsapp` con `whatsapp.messaggio` precompilato (IT/EN).
+  - **Fascia su mobile**: tessere 78vw (la successiva sporge ~50 px),
+    spinta d'invito una volta per visita (`sessionStorage`
+    `gaia-fascia-spinta`, 60 px e ritorno in 0,8 s, scroll-snap spento
+    durante la spinta altrimenti riaggancia subito a 0, mai con
+    reduced-motion), barra di avanzamento 2 px bordeaux e «Scorri →»
+    (`fascia.scorri`) che sparisce al primo scroll dell'utente.
+  - **Instagram su mobile**: 3 × 3 (primi 9 post).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
