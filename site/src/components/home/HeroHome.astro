@@ -80,7 +80,7 @@ const video = hero?.video ?? null;
   data-video-webm={video?.webm ? uploadUrl(video.webm) : undefined}
   style={`--ciclo: ${ciclo}s; --per-foto: ${PER_FOTO}s`}
 >
-  <div class="hero-foto" aria-hidden="true">
+  <div class="hero-foto" aria-hidden="true" data-parallasse="0 14">
     {
       prima && (
         <Picture
@@ -487,6 +487,31 @@ const video = hero?.video ?? null;
   @media (max-width: 40rem) {
     .hero-scorri {
       display: none;
+    }
+  }
+
+  /* — Mobile (giro 5): testo in basso con 20 px di margine, titolo a 48 px
+     sotto i 360 px; la foto ha una leggera parallasse (home-effetti.ts,
+     [data-parallasse]) che muove il contenitore, non l'immagine, per non
+     toccare lo zoom della dissolvenza. — */
+  @media (max-width: 63.98rem) {
+    .hero-testo {
+      padding-block: clamp(7rem, 16vh, 9rem) clamp(3rem, 7vh, 4.5rem);
+    }
+
+    .hero-foto {
+      will-change: transform;
+    }
+
+    /* L'eyebrow sta su una riga sola anche a 360 px. */
+    .hero-eyebrow {
+      letter-spacing: 0.16em;
+    }
+  }
+
+  @media (max-width: 22.5rem) {
+    .hero-titolo {
+      font-size: 3rem;
     }
   }
 

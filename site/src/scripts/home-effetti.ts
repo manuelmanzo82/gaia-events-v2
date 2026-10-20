@@ -8,9 +8,14 @@
  *                       fa scorrere il .binario in orizzontale
  *
  * Esistono SOLO da 64rem in su: sotto, il CSS fa scroll naturale
- * (colonna, carosello con scroll-snap) e qui
- * non si registra niente. Con prefers-reduced-motion niente del tutto.
- * Nessuno stato iniziale nascosto: le pagine sono complete senza JS.
+ * (colonna, pila sticky, carosello con scroll-snap). Sotto i 64rem c'è
+ * invece (giro 5) una parallasse leggera, solo transform:
+ *
+ *   [data-parallasse="da a"]  l'elemento scorre da yPercent `da` a `a`
+ *                             mentre la sua sezione attraversa lo schermo
+ *
+ * Con prefers-reduced-motion niente del tutto. Nessuno stato iniziale
+ * nascosto: le pagine sono complete senza JS.
  */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,6 +23,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { riduciMotion } from './motion';
 
 const DESKTOP = '(min-width: 64rem)';
+const MOBILE = '(max-width: 63.98rem)';
 
 function schedeImpilate(): void {
   for (const pila of document.querySelectorAll<HTMLElement>('[data-impila]')) {
@@ -70,6 +76,29 @@ function scorrimentoOrizzontale(): void {
   }
 }
 
+function parallasse(): void {
+  for (const el of document.querySelectorAll<HTMLElement>('[data-parallasse]')) {
+    const [da, a] = (el.dataset.parallasse ?? '0 10').split(/\s+/).map(Number);
+    const sezione = el.closest<HTMLElement>('section') ?? el;
+    // L'hero parte già in cima: il suo tratto è solo l'uscita verso l'alto.
+    const inCima = sezione.getBoundingClientRect().top + window.scrollY < 1;
+    gsap.fromTo(
+      el,
+      { yPercent: da },
+      {
+        yPercent: a,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sezione,
+          start: inCima ? 'top top' : 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        },
+      },
+    );
+  }
+}
+
 /** Da chiamare una volta, dopo initMotion(). */
 export function initHomeEffetti(): void {
   if (riduciMotion()) return;
@@ -80,6 +109,9 @@ export function initHomeEffetti(): void {
   mm.add(DESKTOP, () => {
     schedeImpilate();
     scorrimentoOrizzontale();
+  });
+  mm.add(MOBILE, () => {
+    parallasse();
   });
 
   // Le foto arrivano con width/height dichiarati, ma il pin orizzontale
