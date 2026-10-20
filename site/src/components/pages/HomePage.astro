@@ -17,12 +17,12 @@ import { getHero, getHighlights, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { localBusiness, webSite } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
-import { LIMITE_SCHEDA, SCHEDE_IMPILATE } from '../../lib/home';
+import { SCHEDE_IMPILATE } from '../../lib/home';
 import CtaFinale from '../home/CtaFinale.astro';
 import DestinationAggancio from '../home/DestinationAggancio.astro';
 import GaiaIntro from '../home/GaiaIntro.astro';
 import HeroHome from '../home/HeroHome.astro';
-import HighlightsImpilati from '../home/HighlightsImpilati.astro';
+import MenuVisivo from '../home/MenuVisivo.astro';
 import HighlightsOrizzontali from '../home/HighlightsOrizzontali.astro';
 import InstagramHome from '../home/InstagramHome.astro';
 import LuoghiAnteprima from '../home/LuoghiAnteprima.astro';
@@ -38,16 +38,15 @@ const { lang } = Astro.props;
 const settings = getSettings();
 const hero = getHero('home');
 
-// Highlights della home: nelle schede impilate entrano solo orizzontali
-// che reggono la larghezza della scheda (object-fit: cover non deve mai
-// superare il maxWidth della foto), nell'ordine del back office; tutte le
-// altre, verticali comprese, vanno nella fascia orizzontale.
+// Highlights della home: le prime 5 orizzontali, nell'ordine del back
+// office, fanno da foto alle schede del menu visivo (90vw: qui si accetta
+// di superare il maxWidth, vedi MenuVisivo); tutte le altre, verticali
+// comprese, vanno nella fascia orizzontale, che da sola esclude quelle
+// che non reggono la sua altezza.
 const highlights = getHighlights('home');
-const reggeLaScheda = (h: (typeof highlights)[number]): boolean =>
-  !!h.image &&
-  h.image.width > h.image.height &&
-  (h.image.maxWidth ?? Math.floor(h.image.width / 2)) >= LIMITE_SCHEDA;
-const impilati = highlights.filter(reggeLaScheda).slice(0, SCHEDE_IMPILATE);
+const impilati = highlights
+  .filter((h) => !!h.image && h.image.width > h.image.height)
+  .slice(0, SCHEDE_IMPILATE);
 const orizzontali = highlights.filter((h) => !impilati.includes(h));
 
 // OG image e JSON-LD: la prima foto dell'hero, se c'è.
@@ -88,13 +87,13 @@ const section = (key: string) => settings.sections[key];
 
   <GaiaIntro lang={lang} settings={settings} />
 
-  <HighlightsImpilati
+  <MenuVisivo
     lang={lang}
     highlights={impilati}
     eyebrow={text(section('portfolio')?.text, lang)}
     titolo={text(section('portfolio')?.title, lang)}
   />
-  <HighlightsOrizzontali lang={lang} highlights={orizzontali} da={impilati.length + 1} />
+  <HighlightsOrizzontali lang={lang} highlights={orizzontali} />
 
   <LuoghiAnteprima lang={lang} />
 
