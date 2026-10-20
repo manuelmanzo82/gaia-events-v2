@@ -16,7 +16,7 @@
  * Foto: su desktop una colonna a sinistra con la foto del passaggio, in
  * dissolvenza incrociata; si caricano solo le foto dei passaggi visitati.
  * Su mobile niente foto nei passaggi (resta solo nel ringraziamento):
- * la colonna non viene nemmeno montata, quindi non scarica nulla.
+ * la colonna è nascosta dal CSS e le immagini non vengono montate.
  *
  * Invio: JSON a admin/api/quote.php, con il campo trappola `website`, i
  * secondi di compilazione (antispam) e il riepilogo in italiano per Gaia.
@@ -816,16 +816,18 @@ export default function Preventivatore(props: Props): ReactNode {
 
   return (
     <div className={`pv${step === 'grazie' ? ' pv--grazie' : ''}`} ref={radice}>
-      {desktop && (
-        <div className="pv-foto" data-theme="dark" data-foto aria-hidden="true">
-          {fotoViste.map((k) => {
+      {/* La colonna c'è sempre nell'HTML (niente spostamenti all'idratazione)
+          e il CSS la nasconde sotto i 64rem; le immagini si montano solo su
+          desktop, quindi su mobile non si scarica niente. */}
+      <div className="pv-foto" data-theme="dark" data-foto aria-hidden="true">
+        {desktop &&
+          fotoViste.map((k) => {
             const f = foto[k];
             if (!f) return null;
             return <Immagine key={k} foto={f} attiva={k === step} sizes="min(42vw, 640px)" />;
           })}
-          {!fotoAttiva && <div className="pv-foto-vuota" />}
-        </div>
-      )}
+        {desktop && !fotoAttiva && <div className="pv-foto-vuota" />}
+      </div>
 
       <div className="pv-modulo">
         {step === 'grazie' ? (

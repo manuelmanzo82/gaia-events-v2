@@ -17,6 +17,16 @@
 
 /* — Foto del passaggio (solo desktop) — */
 .pv-foto {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .pv-foto {
+    display: block;
+  }
+}
+
+.pv-foto {
   position: sticky;
   top: calc(var(--altezza-header, 146px) + 1rem);
   height: min(100svh - var(--altezza-header, 146px) - 3rem, 46rem);
@@ -85,11 +95,12 @@
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-grigio-caldo) 70%, transparent);
+  /* Passaggi futuri: grigio caldo (≈ 5:1 sull'avorio); fatti: inchiostro. */
+  color: var(--color-grigio-caldo);
 }
 
 .pv-tappe .fatta {
-  color: var(--color-grigio-caldo);
+  color: var(--color-inchiostro);
 }
 
 .pv-tappe .corrente {
