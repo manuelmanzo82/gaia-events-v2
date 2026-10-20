@@ -711,6 +711,43 @@ Fatto:
     `2026-10-20-fascia-testi.sql` applicata sullo staging e righe anche
     in `seed.example.sql`. A desktop la sezione agganciata è ora lei a
     essere alta 100svh (griglia: titolo + binario centrato nel resto).
+- **Giro 8 — WhatsApp, prestazioni, preventivatore** (20/10/2026):
+  - **WhatsApp flottante**: glifo ufficiale in SVG quadrato con viewBox
+    allargato (glifo 39 px in 44, 35 in 40 su mobile, centro allineato
+    al torna-su), sempre visibile dal caricamento al footer (dopo l'intro
+    se attiva); il torna-su compare dopo l'hero, 12 px sopra.
+    `scripts/flottanti.ts` ha le opzioni dopoHero, viaSulFooter, dopoIntro,
+    punto.
+  - **LCP**: l'intro NON era la causa (misurato con e senza: identico).
+    Logo definito una volta come `<symbol id="logo-gaia">` (LogoSimbolo
+    all'inizio del body, tracciati in LogoTracciati, LogoGaia usa `<use>`;
+    il velo tiene la copia animabile): HTML della home da 47 a 36 KB
+    compressi. GSAP/Lenis/reveal con import dinamico dopo il load
+    (`motion-leggero.ts`: avviaMotionDopoIlPaint → evento
+    `gaia:motion-pronta`; riduciMotion e getLenis da qui, mai da motion.ts
+    nei componenti, altrimenti GSAP torna nel bundle iniziale). Un solo
+    font in preload (Cormorant). Home mobile: LCP 1,7 s, 100.
+  - **Posta**: su IONOS `mail()` passa da un account SMTP del pannello e
+    fallisce (535). Si usa `src/Mailer.php` (PHPMailer 7.1.1 copiato in
+    `src/Lib/PHPMailer`, LGPL; la cartella si chiama Lib perché `vendor/`
+    è nel .gitignore) con la chiave `smtp` di config.php. Sullo staging il
+    blocco c'è (smtp.ionos.it, 587, noreply@incognito.work) con la
+    password VUOTA, da scrivere a mano (riga ~115). Produzione:
+    smtps.aruba.it 465 ssl, noreply@gaiaevents.it (la posta di
+    gaiaevents.it è su Aruba: da IONOS lo SPF fallirebbe). Se l'invio
+    fallisce la richiesta resta salvata con `mail_error`.
+  - **Preventivatore**: isola React `components/preventivo/`
+    (Preventivatore.tsx, testi.ts con IT/EN e la lettera,
+    preventivatore.css), pagina `QuotePage.astro`, impostazioni del
+    gruppo «preventivo» (`settings.quote.*`, migrazione
+    `2026-10-20-preventivatore.sql`, anche la foto di ogni passaggio).
+    Endpoint `admin/api/quote.php` → `Inquiry::receiveQuote` (trappola,
+    8 s minimi, 3/ora per IP). Richieste nel back office con stati nuova ·
+    contattata · chiusa. Copia alla coppia dietro `quote.sendCopy` (0).
+    Fasce di budget per tipo di evento e promesse della pagina: da
+    confermare con Gaia (DA-CHIEDERE-A-GAIA n. 9). Senza luoghi pubblicati
+    il passaggio «Dove» mostra un campo libero.
+  - Preventivo su staging: desktop 100, mobile 97 (IT ed EN), CLS 0.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
@@ -733,6 +770,8 @@ Prossimi passi (fase 3, resta):
 - Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
   staging (senza più header di autenticazione).
 - Rimettere `INTRO_SEMPRE = false` prima del lancio.
+- Scrivere la password SMTP in config.php (staging: noreply@incognito.work;
+  produzione: noreply@gaiaevents.it su Aruba) e provare una richiesta vera.
 - Footer: è ancora quello segnaposto, da disegnare.
 - Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)
   sono ancora segnaposto.
