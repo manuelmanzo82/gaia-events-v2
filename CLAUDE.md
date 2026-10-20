@@ -748,6 +748,14 @@ Fatto:
     confermare con Gaia (DA-CHIEDERE-A-GAIA n. 9). Senza luoghi pubblicati
     il passaggio «Dove» mostra un campo libero.
   - Preventivo su staging: desktop 100, mobile 97 (IT ed EN), CLS 0.
+- **Giro 10** (20/10/2026):
+  - **Hero della home**: via gli sposi fronte contro fronte (#57) e la
+    cerimonia sul prato col mare (#60), su richiesta di Manuel. Galleria:
+    sposa sul prato al lago al crepuscolo (#48, prima, quindi LCP e OG),
+    tendone sulle colline (#44), pittore sotto l'albero sul lago (#49);
+    tutte tier hero, tutte con watermark VD Image da sostituire. Il
+    pannello Destination wedding dei servizi passa dalla #48 alla terrazza
+    sui tetti di Roma al tramonto (#53).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
