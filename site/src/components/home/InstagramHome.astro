@@ -8,7 +8,7 @@
  *  - griglia A TUTTA LARGHEZZA, da bordo a bordo senza contenitore, di
  *    foto 4:5 (come il profilo) con gap di 2 px: 6 colonne da 64rem
  *    (2 righe = 12 post), 4 da 48rem, 3 sotto, dove si vedono solo i
- *    primi 6; la griglia dichiara data-theme="dark": sopra le foto il
+ *    primi 9 (3 × 3); la griglia dichiara data-theme="dark": sopra le foto il
  *    header è avorio;
  *  - hover (solo con un puntatore vero, @media (hover: hover)): zoom lento
  *    della foto, velo che sale dal basso con l'icona del tipo di post e
@@ -166,8 +166,8 @@ const post = feed.posts
     list-style: none;
   }
 
-  /* Sotto i 48rem: 3 × 2, i post oltre il sesto non si vedono. */
-  .ig-voce:nth-child(n + 7) {
+  /* Sotto i 48rem: 3 × 3, i post oltre il nono non si vedono. */
+  .ig-voce:nth-child(n + 10) {
     display: none;
   }
 
@@ -265,7 +265,7 @@ const post = feed.posts
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .ig-voce:nth-child(n + 7) {
+    .ig-voce:nth-child(n + 10) {
       display: block;
     }
   }
