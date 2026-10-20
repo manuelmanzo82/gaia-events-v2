@@ -39,6 +39,7 @@ export const UI = {
   'menu.stories': { it: 'Matrimoni raccontati per intero', en: 'Weddings told in full' },
   'menu.quote': { it: 'Un preventivo su misura, senza impegno', en: 'A tailored quote, no strings attached' },
   'instagram.segui': { it: 'Segui', en: 'Follow' },
+  'instagram.cta': { it: 'Seguimi su Instagram', en: 'Follow me on Instagram' },
   'cta.allEvents': { it: 'Tutti gli eventi', en: 'All events' },
   'cta.readMore': { it: 'Leggi l’articolo', en: 'Read the article' },
   'cta.back': { it: 'Torna indietro', en: 'Go back' },

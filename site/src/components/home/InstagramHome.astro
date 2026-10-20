@@ -1,16 +1,18 @@
 ---
 /**
  * Instagram in home, prima della CTA finale, con l'aspetto di un profilo
- * Instagram (giro 4):
+ * Instagram (giro 4, ritoccata nel giro 5):
  *
  *  - intestazione CENTRATA: icona Instagram, @handle (è il titolo della
- *    sezione), bottone «Segui» (ghost, al profilo);
- *  - griglia di QUADRATI uguali 1:1 con gap sottile: 4 colonne × 2 righe
- *    da 64rem (8 post), 3 colonne × 2 righe sotto (6 post, gli altri due
- *    nascosti via CSS);
+ *    sezione), bottone «Seguimi su Instagram» con l'icona dentro;
+ *  - griglia A TUTTA LARGHEZZA, da bordo a bordo senza contenitore, di
+ *    foto 4:5 (come il profilo) con gap di 2 px: 6 colonne da 64rem
+ *    (2 righe = 12 post), 4 da 48rem, 3 sotto, dove si vedono solo i
+ *    primi 6;
  *  - al passaggio del mouse o al focus: velo leggero e, al centro, l'icona
  *    del tipo di post (foto, reel, carosello), come su Instagram.
  *
+ * Il numero di post lo decide il back office (instagram.numero_post, 12).
  * Ogni foto apre il post (o il profilo, se il post non ha link) in una
  * nuova scheda. Foto lazy con width/height: nessun effetto su LCP e CLS.
  * Nessun post visibile → la sezione non esiste.
@@ -29,13 +31,10 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const feed = getInstagram();
-const POST_MAX = 8;
-// Quadrato: ~15rem a desktop (griglia da 60rem su 4 colonne), un terzo
-// dello schermo sotto.
-const SIZES = '(min-width: 64rem) 15rem, 33vw';
+// Una colonna su 6 a desktop, su 4 a tablet, su 3 sotto.
+const SIZES = '(min-width: 64rem) 17vw, (min-width: 48rem) 25vw, 34vw';
 
 const post = feed.posts
-  .slice(0, POST_MAX)
   .map((p) => {
     const data = picture(p.image, lang, SIZES);
     if (!data) return null;
@@ -66,7 +65,12 @@ const post = feed.posts
           </a>
         </h2>
         <a class="btn ig-segui" href={feed.profileUrl} target="_blank" rel="noopener me">
-          {t('instagram.segui')}
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+            <circle cx="12" cy="12" r="4.4" />
+            <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+          {t('instagram.cta')}
         </a>
       </header>
 
@@ -105,7 +109,7 @@ const post = feed.posts
 
 <style>
   .ig {
-    padding-block: var(--spacing-section);
+    padding-block: var(--spacing-section) 0;
     background: var(--color-avorio);
   }
 
@@ -155,22 +159,25 @@ const post = feed.posts
   }
 
   .ig-segui {
-    min-width: 9rem;
+    gap: 0.7rem;
     padding-block: 0.8rem;
   }
 
-  /* — Griglia di quadrati — */
+  .ig-segui svg {
+    flex: none;
+  }
+
+  /* — Griglia 4:5 da bordo a bordo — */
   .ig-griglia {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3px;
-    width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 60rem);
-    margin: 0 auto;
+    gap: 2px;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* Sotto i 64rem: 3 × 2, i post oltre il sesto non si vedono. */
+  /* Sotto i 48rem: 3 × 2, i post oltre il sesto non si vedono. */
   .ig-voce:nth-child(n + 7) {
     display: none;
   }
@@ -179,7 +186,7 @@ const post = feed.posts
     position: relative;
     display: block;
     overflow: hidden;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 5;
     background: var(--color-beige);
     color: var(--color-avorio-su-notte);
   }
@@ -222,17 +229,23 @@ const post = feed.posts
 
   .ig-link:focus-visible {
     outline: 2px solid var(--color-bordeaux);
-    outline-offset: 3px;
+    outline-offset: -3px;
     z-index: 1;
   }
 
-  @media (min-width: 64rem) {
+  @media (min-width: 48rem) {
     .ig-griglia {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .ig-voce:nth-child(n + 7) {
       display: block;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .ig-griglia {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 
