@@ -1,21 +1,25 @@
 ---
 /**
  * Instagram in home, prima della CTA finale, con l'aspetto di un profilo
- * Instagram (giro 4, ritoccata nel giro 5):
+ * Instagram (giro 4, ritoccata nei giri 5 e 6):
  *
- *  - intestazione CENTRATA: icona Instagram, @handle (è il titolo della
- *    sezione), bottone «Seguimi su Instagram» con l'icona dentro;
+ *  - intestazione CENTRATA: @handle (è il titolo della sezione) e bottone
+ *    «Seguimi su Instagram» con l'icona dentro;
  *  - griglia A TUTTA LARGHEZZA, da bordo a bordo senza contenitore, di
  *    foto 4:5 (come il profilo) con gap di 2 px: 6 colonne da 64rem
  *    (2 righe = 12 post), 4 da 48rem, 3 sotto, dove si vedono solo i
- *    primi 6;
- *  - al passaggio del mouse o al focus: velo leggero e, al centro, l'icona
- *    del tipo di post (foto, reel, carosello), come su Instagram.
+ *    primi 6; la griglia dichiara data-theme="dark": sopra le foto il
+ *    header è avorio;
+ *  - hover (solo con un puntatore vero, @media (hover: hover)): zoom lento
+ *    della foto, velo che sale dal basso con l'icona del tipo di post e
+ *    «Vedi su Instagram», le altre foto leggermente attenuate; stesso
+ *    stato al focus da tastiera. Su touch niente hover: il tap apre il
+ *    post. Con prefers-reduced-motion solo il velo, senza zoom.
  *
- * Il numero di post lo decide il back office (instagram.numero_post, 12).
- * Ogni foto apre il post (o il profilo, se il post non ha link) in una
- * nuova scheda. Foto lazy con width/height: nessun effetto su LCP e CLS.
- * Nessun post visibile → la sezione non esiste.
+ * Spazi: meno aria sopra (dopo Destination), più aria sotto, verso la
+ * CTA finale. Il numero di post lo decide il back office
+ * (instagram.numero_post, 12). Foto lazy con width/height: nessun
+ * effetto su LCP e CLS. Nessun post visibile → la sezione non esiste.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -51,13 +55,6 @@ const post = feed.posts
   post.length > 0 && feed.profileUrl && (
     <section id="instagram" class="ig" data-theme="light" aria-labelledby="ig-titolo">
       <header class="ig-testa container-gaia" data-reveal="alto">
-        <span class="ig-logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
-            <circle cx="12" cy="12" r="4.4" />
-            <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
-          </svg>
-        </span>
         <h2 id="ig-titolo" class="ig-handle">
           <a href={feed.profileUrl} target="_blank" rel="noopener me">
             <span class="sr-only">{t('instagram.titolo')}: </span>
@@ -74,30 +71,31 @@ const post = feed.posts
         </a>
       </header>
 
-      <ul class="ig-griglia" role="list">
+      <ul class="ig-griglia" role="list" data-theme="dark" data-foto>
         {post.map((p) => (
           <li class="ig-voce">
             <a class="ig-link" href={p.href} target="_blank" rel="noopener" aria-label={p.etichetta}>
               <Picture data={p.data} cap={false} class="ig-img" />
               <span class="ig-velo" aria-hidden="true">
                 {p.tipo === 'reel' ? (
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
                     <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
                     <path d="M2.5 8h19M8 2.5l3 5.5M14 2.5l3 5.5" />
                     <path d="M10 11.5v6l5-3z" fill="currentColor" stroke="none" />
                   </svg>
                 ) : p.tipo === 'carosello' ? (
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
                     <rect x="7" y="7" width="14.5" height="14.5" rx="3.5" />
                     <path d="M17 4.5A2.5 2.5 0 0 0 14.5 2.5h-9A3 3 0 0 0 2.5 5.5v9A2.5 2.5 0 0 0 4.5 17" />
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
                     <rect x="2.5" y="2.5" width="19" height="19" rx="4" />
                     <path d="M2.5 16.5l5.5-5.5 4.5 4.5 3-3 6 6" />
                     <circle cx="16" cy="8" r="1.6" fill="currentColor" stroke="none" />
                   </svg>
                 )}
+                <span class="ig-vedi">{t('instagram.vedi')}</span>
               </span>
             </a>
           </li>
@@ -109,7 +107,7 @@ const post = feed.posts
 
 <style>
   .ig {
-    padding-block: var(--spacing-section) 0;
+    padding-block: var(--spacing-section-sm) var(--spacing-section);
     background: var(--color-avorio);
   }
 
@@ -117,18 +115,9 @@ const post = feed.posts
   .ig-testa {
     display: grid;
     justify-items: center;
-    gap: 0.9rem;
+    gap: 1rem;
     margin-bottom: clamp(1.75rem, 4vh, 2.5rem);
     text-align: center;
-  }
-
-  .ig-logo {
-    display: block;
-    color: var(--color-inchiostro);
-  }
-
-  .ig-logo svg {
-    display: block;
   }
 
   /* Il titolo è l'handle: niente overflow hidden, line-height ampio
@@ -200,37 +189,75 @@ const post = feed.posts
 
   .ig-link :global(.ig-img) {
     object-fit: cover;
-    transition: transform 0.9s var(--ease-gaia);
   }
 
-  /* Velo leggero con l'icona del tipo di post al centro. */
+  /* Velo dal basso con l'icona del tipo e «Vedi su Instagram»: nascosto
+     finché non c'è hover o focus (solo con un puntatore vero). */
   .ig-velo {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
-    background: rgb(27 22 17 / 0.28);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: linear-gradient(0deg, rgb(27 22 17 / 0.72) 0%, rgb(27 22 17 / 0.3) 55%, rgb(27 22 17 / 0) 100%);
     opacity: 0;
-    transition: opacity 0.35s var(--ease-gaia);
+    text-align: center;
   }
 
   .ig-velo svg {
     filter: drop-shadow(0 1px 6px rgb(27 22 17 / 0.4));
   }
 
-  .ig-link:hover .ig-velo,
+  .ig-vedi {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ig-link:focus-visible {
+    outline: 2px solid var(--color-avorio-su-notte);
+    outline-offset: -3px;
+    z-index: 1;
+  }
+
   .ig-link:focus-visible .ig-velo {
     opacity: 1;
   }
 
-  .ig-link:hover :global(.ig-img) {
-    transform: scale(1.03);
-  }
+  /* — Hover solo con un puntatore vero: zoom lento, velo che sale, le
+     altre foto si attenuano. Su touch il tap apre il post e basta. — */
+  @media (hover: hover) {
+    .ig-link :global(.ig-img) {
+      transition:
+        transform 1.4s var(--ease-gaia),
+        opacity 0.6s var(--ease-gaia);
+    }
 
-  .ig-link:focus-visible {
-    outline: 2px solid var(--color-bordeaux);
-    outline-offset: -3px;
-    z-index: 1;
+    .ig-velo {
+      transform: translateY(18%);
+      transition:
+        opacity 0.45s var(--ease-gaia),
+        transform 0.6s var(--ease-gaia);
+    }
+
+    .ig-link:hover :global(.ig-img),
+    .ig-link:focus-visible :global(.ig-img) {
+      transform: scale(1.05);
+    }
+
+    .ig-link:hover .ig-velo,
+    .ig-link:focus-visible .ig-velo {
+      opacity: 1;
+      transform: none;
+    }
+
+    .ig-griglia:hover .ig-link:not(:hover) :global(.ig-img) {
+      opacity: 0.6;
+    }
   }
 
   @media (min-width: 48rem) {
@@ -249,6 +276,7 @@ const post = feed.posts
     }
   }
 
+  /* — Movimento ridotto: solo il velo, senza zoom né attenuazione — */
   @media (prefers-reduced-motion: reduce) {
     .ig-link :global(.ig-img),
     .ig-velo,
@@ -256,8 +284,17 @@ const post = feed.posts
       transition: none;
     }
 
-    .ig-link:hover :global(.ig-img) {
+    .ig-velo {
       transform: none;
+    }
+
+    .ig-link:hover :global(.ig-img),
+    .ig-link:focus-visible :global(.ig-img) {
+      transform: none;
+    }
+
+    .ig-griglia:hover .ig-link:not(:hover) :global(.ig-img) {
+      opacity: 1;
     }
   }
 </style>
