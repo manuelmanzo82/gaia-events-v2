@@ -617,6 +617,44 @@ Fatto:
     Cormorant corsivo, bottone pieno e link WhatsApp/email da `BUSINESS`.
   - Nuove chiavi `ui.ts`: `cta.scopri`, `cta.scrivici`, `cta.firma`,
     `menu.*`, `instagram.segui`; tolta `instagram.cta`.
+- **Giro 5 — mobile (parte B) e ritocchi Instagram** (20/10/2026):
+  - **Regole trasversali** sotto i 64rem (`global.css`): `--spacing-section`
+    72 px, `--spacing-section-sm` 56 px, corpo 17 px, eyebrow 12 px,
+    margini laterali 20 px, tap ≥ 44 px. Un formato per sezione: hero
+    100svh, Gaia 4:5, schede 4:5, fascia 4:5 (82vw, scroll-snap), servizi
+    4:5 in colonna, Instagram 3 colonne, CTA foto 4:5 poi testo.
+  - **Effetti leggeri solo sotto i 64rem** (`home-effetti.ts`,
+    `[data-parallasse="da a"]`, yPercent in scrub, solo transform): hero
+    (contenitore delle foto 0 → 14, lo zoom della dissolvenza resta) e
+    destination (figura -5 → 5 che sborda del 6%). Menu visivo: pila
+    **sticky in CSS** senza GSAP, un gradino di 8 px per scheda; il titolo
+    della sezione ha sotto un margine pari a `--altezza-header`, così al
+    primo frame dello snap è fuori schermo e il logo non lo copre.
+    `data-reveal-gruppo` ora esiste davvero in `motion.ts` (ritardo 0,12 s
+    per figlio). Tutto spento con prefers-reduced-motion.
+  - **Menu mobile** (`Header.astro`, sotto gli 80rem): voci Cormorant 34 px
+    alte 60 px con numero, Preventivo pieno a tutta larghezza, English,
+    WhatsApp e Instagram in fondo; dissolvenza e cascata in CSS.
+  - **Torna-su**: 40 px sotto i 64rem e **nascosto mentre il footer è in
+    vista** (IntersectionObserver, classe `coperto`); nella CTA finale i
+    link sono in colonna così non finisce mai sopra un bottone.
+  - **Intro**: logo a 112 px sul velo mobile (`.velo-scena { --logo-h }`).
+  - **Menu visivo, testi**: `sections.portfolio.title/text` sono ora
+    «Scoprite di più» / «Servizi, luoghi, storie e preventivo» (IT) e
+    «Explore» / «Services, places, stories and quote» (EN), staging e
+    `settings.example.json`.
+  - **Instagram**: griglia a tutta larghezza senza contenitore, gap 2 px,
+    foto 4:5, 6 colonne da 64rem (12 post), 4 da 48rem, 3 sotto (primi 6);
+    bottone «Seguimi su Instagram» con icona. `instagram.numero_post` = 12
+    sullo staging, 4 post di prova in più (media 115, 114, 110, 89).
+  - **Dati sullo staging senza migrazione**: gli script temporanei vanno
+    in `admin/bin/`, si lanciano con `php8.3 -q ... < /dev/null` e si
+    cancellano subito; `export-content.php --out=` è relativo a `bin/`.
+    Prima un `dump-sicurezza.php`, cancellato a fine lavoro.
+  - **Foto per sezione (parte 3)**: provino in
+    `C:\Users\Utente\gaia-giro5\provino-foto.html` (fuori repo), in attesa
+    dell'OK di Manuel prima di toccare `highlight_sections`, `services` e
+    `page_hero_images`.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
