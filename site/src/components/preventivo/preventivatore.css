@@ -566,6 +566,17 @@
   .pv-avanti {
     flex: 1 1 auto;
   }
+
+  /* «Ricomincia» su una riga sua, sotto i bottoni. */
+  .pv-azioni:has(.pv-ricomincia) {
+    flex-wrap: wrap;
+  }
+
+  .pv-ricomincia {
+    flex: 1 0 100%;
+    order: 3;
+    text-align: right;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
