@@ -19,7 +19,7 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getLuoghi, getPage, getServices, getSettings, isPublishable, text } from '../../lib/content';
-import { existsIn, langsFor, SERVICE_FIELDS } from '../../lib/availability';
+import { langsFor, SERVICE_FIELDS } from '../../lib/availability';
 import { picture } from '../../lib/images';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
@@ -174,7 +174,13 @@ const domande = [1, 2, 3]
     )
   }
 
-  {existsIn('contact', lang) && <p class="prev-contatti container-gaia"><a class="link-filo" href={path('contact', lang)}>{t('cta.contact')}</a></p>}
+  {/* Chiusura: chi preferisce scrivere subito. */}
+  <p class="prev-contatti container-gaia">
+    <span>{lang === 'it' ? 'Preferite scrivermi?' : 'Rather write to me?'}</span>
+    <a class="link-filo" href={`https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('whatsapp.messaggio'))}`} target="_blank" rel="noopener">WhatsApp</a>
+    <span aria-hidden="true">·</span>
+    <a class="link-filo" href={`mailto:${BUSINESS.email}`}>Email</a>
+  </p>
 </BaseLayout>
 
 <style>
@@ -312,8 +318,22 @@ const domande = [1, 2, 3]
   }
 
   .prev-contatti {
-    padding-bottom: var(--spacing-section);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.4rem 0.9rem;
     margin: 0;
+    padding-bottom: var(--spacing-section);
+    font-size: 1.0625rem;
+    color: var(--color-grigio-caldo);
+    text-align: center;
+  }
+
+  .prev-contatti .link-filo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
   @media (prefers-reduced-motion: reduce) {
