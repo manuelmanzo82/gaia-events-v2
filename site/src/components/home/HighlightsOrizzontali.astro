@@ -11,7 +11,7 @@
  * quindi il controllo vale su qualunque schermo).
  *
  * Sotto i 64rem nessun pin: carosello a scorrimento libero con scroll-snap,
- * puro CSS.
+ * puro CSS, tessere tutte 4:5 (giro 5) larghe 82vw.
  */
 import type { Lang } from '../../config/site';
 import type { Highlight } from '../../lib/content';
@@ -103,7 +103,7 @@ const foto = highlights
 
     .tessera {
       width: min(82vw, var(--limite));
-      aspect-ratio: var(--rapporto);
+      aspect-ratio: 4 / 5;
       scroll-snap-align: start;
     }
   }
