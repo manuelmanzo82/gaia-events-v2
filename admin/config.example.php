@@ -77,9 +77,31 @@ return [
     // Dove arrivano le richieste di preventivo e i messaggi dal sito.
     'notify_email' => 'gaiacrognale@gmail.com',
 
-    // Mittente delle notifiche: deve stare sul dominio dell'hosting,
-    // altrimenti finisce in spam.
-    'mail_from' => 'no-reply@gaiaevents.it',
+    // Mittente di riserva: usato solo se manca smtp.from.
+    'mail_from' => 'noreply@gaiaevents.it',
+
+    // Invio della posta via SMTP autenticato (src/Mailer.php). Su IONOS
+    // mail() di PHP non spedisce senza un account impostato nel pannello,
+    // quindi si usa sempre l'SMTP di una casella vera sul dominio del
+    // mittente (SPF e DKIM allineati).
+    //
+    //   staging     smtp.ionos.it · 587 · tls · noreply@incognito.work
+    //   produzione  smtps.aruba.it · 465 · ssl · noreply@gaiaevents.it
+    //               (al passaggio di dominio: la posta di gaiaevents.it è
+    //               su Aruba)
+    //
+    // La password la scrive a mano chi gestisce il server, direttamente in
+    // config.php: mai in repo, mai in chat. Senza password nessun invio, e
+    // la richiesta resta comunque salvata nel back office con l'errore.
+    'smtp' => [
+        'host' => 'smtps.aruba.it',
+        'port' => 465,
+        'secure' => 'ssl',
+        'username' => 'noreply@gaiaevents.it',
+        'password' => '',
+        'from' => 'noreply@gaiaevents.it',
+        'from_name' => 'Gaia Events',
+    ],
 
     // ------------------------------------------------------------------
     // Immagini

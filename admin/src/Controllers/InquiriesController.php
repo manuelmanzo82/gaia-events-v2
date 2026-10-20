@@ -11,30 +11,41 @@ use Gaia\Admin\Session;
 use Gaia\Admin\View;
 
 /**
- * Richieste di preventivo e messaggi dai contatti.
+ * Richieste dal preventivatore e messaggi dai contatti.
+ *
+ * Stati: nuova · contattata · chiusa (new, contacted, closed). Aprire una
+ * richiesta non ne cambia lo stato: lo decide Gaia.
  *
  * Contengono dati personali: niente export, niente dump in repo.
  */
 final class InquiriesController
 {
+    public const STATI = ['new' => 'nuova', 'contacted' => 'contattata', 'closed' => 'chiusa'];
+
     public function index(array $params = []): void
     {
         Auth::requireLogin();
 
         $status = (string) ($_GET['stato'] ?? '');
-        $allowed = ['new', 'read', 'answered', 'archived'];
 
-        $rows = in_array($status, $allowed, true)
+        $rows = array_key_exists($status, self::STATI)
             ? Db::all(
-                'SELECT * FROM inquiries WHERE status = ? ORDER BY created_at DESC LIMIT 200',
+                'SELECT * FROM inquiries WHERE status = ? ORDER BY created_at DESC LIMIT 300',
                 [$status],
             )
-            : Db::all('SELECT * FROM inquiries ORDER BY created_at DESC LIMIT 200');
+            : Db::all('SELECT * FROM inquiries ORDER BY created_at DESC LIMIT 300');
+
+        $conteggi = [];
+        foreach (Db::all('SELECT status, COUNT(*) AS n FROM inquiries GROUP BY status') as $r) {
+            $conteggi[(string) $r['status']] = (int) $r['n'];
+        }
 
         View::render('inquiries/index', [
             'title' => 'Richieste',
             'rows' => $rows,
             'status' => $status,
+            'stati' => self::STATI,
+            'conteggi' => $conteggi,
         ]);
     }
 
@@ -55,12 +66,6 @@ final class InquiriesController
             return;
         }
 
-        // Aprirla la marca come letta.
-        if ($row['status'] === 'new') {
-            Db::update('inquiries', $id, ['status' => 'read']);
-            $row['status'] = 'read';
-        }
-
         $payload = [];
         if (is_string($row['payload']) && $row['payload'] !== '') {
             $decoded = json_decode((string) $row['payload'], true);
@@ -71,6 +76,7 @@ final class InquiriesController
             'title' => 'Richiesta #' . $id,
             'row' => $row,
             'payload' => $payload,
+            'stati' => self::STATI,
         ]);
     }
 
@@ -82,7 +88,7 @@ final class InquiriesController
         $id = (int) ($params['id'] ?? 0);
         $status = (string) ($_POST['status'] ?? '');
 
-        if (!in_array($status, ['new', 'read', 'answered', 'archived'], true)) {
+        if (!array_key_exists($status, self::STATI)) {
             redirect('richieste/' . $id);
         }
 

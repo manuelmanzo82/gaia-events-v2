@@ -36,6 +36,11 @@
                 </option>
               <?php endforeach; ?>
             </select>
+          <?php elseif ($row['field_type'] === 'boolean'): ?>
+            <select name="value_it[<?= $id ?>]">
+              <option value="0"<?= (string) $row['value_it'] !== '1' ? ' selected' : '' ?>>No</option>
+              <option value="1"<?= (string) $row['value_it'] === '1' ? ' selected' : '' ?>>Sì</option>
+            </select>
           <?php elseif (in_array($row['field_type'], ['textarea', 'html'], true)): ?>
             <div class="pair">
               <div><span>Italiano</span>
