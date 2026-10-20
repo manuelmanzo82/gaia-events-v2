@@ -8,7 +8,8 @@ import { useTranslations } from '../i18n';
  *
  * Icona: SVG quadrato 44 × 44 con preserveAspectRatio="xMidYMid meet" e
  * il viewBox allargato attorno al glifo da 24 unità, così il glifo misura
- * ~28 px al centro del quadrato. Dimensioni fisse anche in CSS (flex:
+ * 39 px al centro del quadrato: la stessa grandezza visiva del cerchio
+ * del torna-su, con il centro sulla stessa verticale. Dimensioni fisse anche in CSS (flex:
  * none, niente max-width): nessuno stretch, nemmeno mentre la pillola si
  * allarga. Il glifo ufficiale è una forma piena (l'anello del fumetto e la
  * cornetta): non ha tratti, quindi non c'è stroke da scalare.
@@ -35,9 +36,9 @@ const t = useTranslations(lang);
 
 const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('whatsapp.messaggio'))}`;
 
-// Glifo da 24 unità reso a 28 px in un quadrato da 44: viewBox di
-// 24 × 44 / 28 unità, centrato.
-const LATO = (24 * 44) / 28;
+// Glifo da 24 unità reso a 39 px in un quadrato da 44 (come il cerchio
+// del torna-su): viewBox di 24 × 44 / 39 unità, centrato.
+const LATO = (24 * 44) / 39;
 const MARGINE = (LATO - 24) / 2;
 const viewBox = `${-MARGINE} ${-MARGINE} ${LATO} ${LATO}`;
 ---
@@ -175,10 +176,20 @@ const viewBox = `${-MARGINE} ${-MARGINE} ${LATO} ${LATO}`;
     }
   }
 
+  /* Mobile: 40 px come il torna-su (glifo ~35 px, stessa proporzione),
+     stessi 16 px dal bordo: i due centri sono sulla stessa verticale. */
   @media (max-width: 63.98rem) {
     .wa-flottante {
       right: 1rem;
       bottom: 1rem;
+      grid-template-columns: 40px 0fr;
+      height: 40px;
+    }
+
+    .wa-icona,
+    .wa-icona svg {
+      width: 40px;
+      height: 40px;
     }
   }
 
