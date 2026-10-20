@@ -1,12 +1,18 @@
 ---
 /**
- * CTA finale su fondo chiaro: tipografia grande, una foto verticale
- * accanto (il primo highlight della sezione «cta») e il bottone in
- * bordeaux pieno come unico accento. Testi da settings.sections.cta;
- * destinazione il preventivatore, o i contatti se in questa lingua il
- * preventivo non esiste.
+ * CTA finale (giro 4): due metà a tutta larghezza, rif. sarahhaywood.com.
+ *
+ *  - a sinistra la foto A FILO BORDO (il primo highlight della sezione
+ *    «cta»), senza margini, alta quanto la sezione;
+ *  - a destra, su beige: titolo grande, una riga, la firma «Gaia» in
+ *    Cormorant corsivo, il bottone bordeaux al preventivatore (o ai
+ *    contatti, se in questa lingua il preventivo non esiste) e due link
+ *    discreti con icona, WhatsApp ed email.
+ *
+ * Sotto i 64rem: foto 4:5 a tutta larghezza, poi il testo. Testi da
+ * settings.sections.cta; contatti da BUSINESS.
  */
-import type { Lang } from '../../config/site';
+import { BUSINESS, type Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import { existsIn } from '../../lib/availability';
@@ -29,36 +35,61 @@ const testo = text(sezione?.text, lang);
 const destinazione = existsIn('quote', lang) ? 'quote' : existsIn('contact', lang) ? 'contact' : null;
 const etichetta = destinazione === 'quote' ? t('cta.quote') : t('cta.contact');
 
-const foto = picture(getHighlights('cta')[0]?.image ?? null, lang, '(min-width: 64rem) 36vw, 92vw');
+// Metà schermo a desktop, tutta la larghezza sotto.
+const foto = picture(getHighlights('cta')[0]?.image ?? null, lang, '(min-width: 64rem) 50vw, 100vw');
+
+const whatsappHref = `https://wa.me/${BUSINESS.whatsapp}`;
+const emailHref = `mailto:${BUSINESS.email}`;
 ---
 
 {
   titolo && destinazione && (
-    <section id="cta" class="cta-finale" data-theme="light">
-      <div class="container-gaia cta-griglia">
+    <section id="cta" class:list={['cta-finale', { 'cta-finale--senza-foto': !foto }]} data-theme="light">
+      {foto && (
+        <figure class="cta-figura">
+          <Picture data={foto} cap={false} class="cta-img" />
+        </figure>
+      )}
+
+      <div class="cta-meta">
         <div class="cta-testo">
-          <h2 class="text-display-xl cta-titolo" data-reveal="righe">
+          <h2 class="font-display cta-titolo" data-reveal="righe">
             {titolo}
           </h2>
           {testo && (
-            <p class="text-lead cta-paragrafo" data-reveal="alto">
+            <p class="text-lead cta-riga" data-reveal="alto">
               {testo}
             </p>
           )}
+          <p class="font-display cta-firma" data-reveal="alto" aria-hidden="true">
+            {t('cta.firma')}
+          </p>
           <p class="cta-coda" data-reveal="alto">
             <a class="btn btn--pieno" href={path(destinazione, lang)}>
               {etichetta}
             </a>
           </p>
+          <ul class="cta-contatti" role="list" data-reveal="alto">
+            <li>
+              <a href={whatsappHref} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
+                  <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
+                </svg>
+                <span>WhatsApp</span>
+              </a>
+            </li>
+            <li>
+              <a href={emailHref}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2.5" y="5" width="19" height="14" rx="2" />
+                  <path d="M3 6l9 7 9-7" />
+                </svg>
+                <span>{BUSINESS.email}</span>
+              </a>
+            </li>
+          </ul>
         </div>
-
-        {
-          foto && (
-            <figure class="cta-figura" data-reveal="maschera">
-              <Picture data={foto} class="cta-img" />
-            </figure>
-          )
-        }
       </div>
     </section>
   )
@@ -66,52 +97,140 @@ const foto = picture(getHighlights('cta')[0]?.image ?? null, lang, '(min-width: 
 
 <style>
   .cta-finale {
-    padding-block: var(--spacing-section);
-    background: color-mix(in srgb, var(--color-beige) 38%, var(--color-avorio));
-  }
-
-  .cta-griglia {
     display: grid;
-    gap: clamp(2rem, 5vw, 5rem);
-    align-items: center;
+    background: var(--color-beige);
   }
 
-  .cta-titolo {
-    max-width: 14ch;
-    margin: 0;
-  }
-
-  .cta-paragrafo {
-    max-width: 30rem;
-    margin: 1.75rem 0 0;
-    color: var(--color-grigio-caldo);
-  }
-
-  .cta-coda {
-    margin: 2.5rem 0 0;
-  }
-
+  /* — Foto a filo bordo — */
   .cta-figura {
+    position: relative;
     margin: 0;
-    border-radius: 3px;
+    aspect-ratio: 4 / 5;
     overflow: hidden;
+    background: color-mix(in srgb, var(--color-beige) 60%, var(--color-notte));
+  }
+
+  .cta-figura :global(picture),
+  .cta-figura :global(.cta-img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .cta-figura :global(.cta-img) {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin-inline: auto;
+    object-fit: cover;
   }
 
+  /* — Metà di testo — */
+  .cta-meta {
+    display: grid;
+    align-content: center;
+    padding: clamp(3rem, 8vh, 5rem) clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  .cta-testo {
+    max-width: 34rem;
+  }
+
+  .cta-titolo {
+    margin: 0;
+    font-size: clamp(2.5rem, 1.75rem + 3.4vw, 5.25rem);
+    font-weight: 320;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .cta-riga {
+    max-width: 28rem;
+    margin: 1.5rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .cta-firma {
+    margin: 1.75rem 0 0;
+    font-size: clamp(2rem, 1.5rem + 1.6vw, 3rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-bordeaux);
+  }
+
+  .cta-coda {
+    margin: 2rem 0 0;
+  }
+
+  /* Due link discreti con icona, in riga. */
+  .cta-contatti {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cta-contatti a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    letter-spacing: 0.02em;
+    color: var(--color-inchiostro);
+    text-decoration: none;
+    transition: color 0.35s var(--ease-gaia);
+  }
+
+  .cta-contatti a span {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    transition: border-color 0.35s var(--ease-gaia);
+  }
+
+  .cta-contatti a:hover {
+    color: var(--color-bordeaux);
+  }
+
+  .cta-contatti a:hover span {
+    border-color: currentColor;
+  }
+
+  .cta-contatti a:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .cta-contatti svg {
+    flex: none;
+  }
+
+  /* — Desktop: due metà, foto alta quanto la sezione — */
   @media (min-width: 64rem) {
-    .cta-griglia {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    .cta-finale {
+      grid-template-columns: 1fr 1fr;
+      min-height: min(90svh, 56rem);
+    }
+
+    .cta-finale--senza-foto {
+      grid-template-columns: 1fr;
     }
 
     .cta-figura {
-      justify-self: end;
-      max-width: 26rem;
+      aspect-ratio: auto;
+      height: 100%;
+    }
+
+    .cta-meta {
+      padding: clamp(3rem, 8vh, 6rem) clamp(2.5rem, 6vw, 7rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta-contatti a,
+    .cta-contatti a span {
+      transition: none;
     }
   }
 </style>
