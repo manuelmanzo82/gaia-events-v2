@@ -756,6 +756,16 @@ Fatto:
     tutte tier hero, tutte con watermark VD Image da sostituire. Il
     pannello Destination wedding dei servizi passa dalla #48 alla terrazza
     sui tetti di Roma al tramonto (#53).
+  - **Preventivatore**: su mobile fascia foto 160 px in cima a ogni
+    passaggio (nell'HTML iniziale, lazy, nascosta da 64rem: su desktop non
+    si scarica); servizi con inclusioni dal back office (Servizi →
+    «Include», colonna `include_slugs`, export `includes`; il completo
+    include coordinamento e design, da confermare: DA-CHIEDERE n. 10),
+    Destination preselezionato con «Veniamo dall'estero», «Non lo so»
+    esclusivo; riepilogo con i soli titoli dei servizi; Dove: `zoneMode` è
+    solo la scelta ('' | consigliateci | location), città/zona sempre a
+    parte (location → nome obbligatorio; nessuna scelta → città
+    obbligatoria). Focus sul primo campo in errore in ogni passaggio.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
