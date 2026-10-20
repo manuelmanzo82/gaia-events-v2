@@ -1,0 +1,562 @@
+/*
+ * Preventivatore: schermo diviso da 64rem (foto a sinistra, domanda a
+ * destra), una colonna sola sotto. Token del design system (global.css).
+ */
+
+.pv {
+  display: grid;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .pv {
+    grid-template-columns: minmax(0, min(42vw, 640px)) minmax(0, 1fr);
+  }
+}
+
+/* — Foto del passaggio (solo desktop) — */
+.pv-foto {
+  position: sticky;
+  top: calc(var(--altezza-header, 146px) + 1rem);
+  height: min(100svh - var(--altezza-header, 146px) - 3rem, 46rem);
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-beige);
+}
+
+.pv-immagine {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-gaia);
+}
+
+.pv-immagine.attiva {
+  opacity: 1;
+}
+
+.pv-immagine img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* — Il modulo — */
+.pv-modulo {
+  min-width: 0;
+  max-width: 40rem;
+}
+
+.pv-form {
+  display: grid;
+  gap: 0;
+}
+
+.pv-testa {
+  position: relative;
+  margin-bottom: clamp(1.75rem, 4vh, 2.5rem);
+}
+
+.pv-progresso {
+  height: 2px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
+}
+
+.pv-progresso span {
+  display: block;
+  height: 100%;
+  background: var(--color-bordeaux);
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-gaia);
+}
+
+.pv-tappe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-grigio-caldo) 70%, transparent);
+}
+
+.pv-tappe .fatta {
+  color: var(--color-grigio-caldo);
+}
+
+.pv-tappe .corrente {
+  color: var(--color-bordeaux);
+}
+
+.pv-tappa-mobile {
+  display: none;
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-bordeaux);
+}
+
+/* Nomi dei passaggi e «Ricomincia» sulla stessa riga, mai sovrapposti. */
+.pv-tappe-riga {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pv-tappe-riga .pv-tappe,
+.pv-tappe-riga .pv-tappa-mobile {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pv-ricomincia {
+  flex: none;
+  min-height: 0;
+  margin-top: 0.6rem;
+  line-height: 1.6;
+}
+
+.pv-ripreso {
+  margin: -1rem 0 1.5rem;
+  font-size: 0.9375rem;
+  color: var(--color-grigio-caldo);
+}
+
+.pv-passo {
+  animation: pv-entra 0.55s var(--ease-gaia) both;
+}
+
+@keyframes pv-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.pv-titolo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+  font-weight: 320;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  outline: none;
+}
+
+.pv-titolo:focus-visible {
+  outline: 2px solid var(--color-bordeaux);
+  outline-offset: 6px;
+}
+
+.pv-nota {
+  margin: 0.75rem 0 0;
+  color: var(--color-grigio-caldo);
+}
+
+.pv-corpo {
+  margin-top: clamp(1.5rem, 3vh, 2rem);
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* — Schede (scelta grande) — */
+.pv-schede {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+}
+
+.pv-schede--evento .pv-scheda--grande {
+  grid-column: 1 / -1;
+}
+
+.pv-scheda,
+.pv-pillola {
+  position: relative;
+  cursor: pointer;
+}
+
+.pv-scheda input,
+.pv-pillola input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.pv-scheda {
+  display: grid;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-inchiostro) 18%, transparent);
+  border-radius: 4px;
+  background: var(--color-bianco-caldo);
+  transition:
+    border-color 0.3s var(--ease-gaia),
+    background-color 0.3s var(--ease-gaia),
+    box-shadow 0.3s var(--ease-gaia);
+}
+
+.pv-scheda:hover {
+  border-color: color-mix(in srgb, var(--color-bordeaux) 55%, transparent);
+}
+
+.pv-scheda:has(input:checked) {
+  border-color: var(--color-bordeaux);
+  box-shadow: inset 0 0 0 1px var(--color-bordeaux);
+  background: color-mix(in srgb, var(--color-bordeaux) 5%, var(--color-bianco-caldo));
+}
+
+.pv-scheda:has(input:focus-visible),
+.pv-pillola:has(input:focus-visible) {
+  outline: 2px solid var(--color-bordeaux);
+  outline-offset: 3px;
+}
+
+.pv-scheda-titolo {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.2;
+}
+
+.pv-scheda--grande {
+  padding: 1.5rem 1.5rem;
+}
+
+.pv-scheda--grande .pv-scheda-titolo {
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+}
+
+.pv-scheda--lieve {
+  background: transparent;
+  border-style: dashed;
+}
+
+.pv-scheda-nota {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--color-grigio-caldo);
+}
+
+/* — Pillole (scelte brevi) — */
+.pv-pillole {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pv-pillola span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--color-inchiostro) 22%, transparent);
+  border-radius: 999px;
+  background: var(--color-bianco-caldo);
+  font-size: 0.9375rem;
+  transition:
+    border-color 0.3s var(--ease-gaia),
+    background-color 0.3s var(--ease-gaia),
+    color 0.3s var(--ease-gaia);
+}
+
+.pv-pillola:hover span {
+  border-color: var(--color-bordeaux);
+}
+
+.pv-pillola:has(input:checked) span {
+  border-color: var(--color-bordeaux);
+  background: var(--color-bordeaux);
+  color: var(--color-avorio);
+}
+
+.pv-pillola--lieve span {
+  border-style: dashed;
+}
+
+/* — Campi — */
+.pv-campi {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.pv-riga {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+  .pv-riga {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pv-riga > .pv-errore {
+    grid-column: 1 / -1;
+  }
+}
+
+.pv-campo {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pv-campo--corto {
+  max-width: 20rem;
+}
+
+.pv-campo label,
+.pv-etichetta {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-inchiostro);
+}
+
+.pv-facoltativo {
+  font-weight: 400;
+  color: var(--color-grigio-caldo);
+}
+
+.pv-campo input,
+.pv-campo select,
+.pv-campo textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--color-inchiostro) 25%, transparent);
+  border-radius: 3px;
+  background: var(--color-bianco-caldo);
+  color: var(--color-inchiostro);
+  font: inherit;
+  font-size: 1.0625rem;
+}
+
+.pv-campo textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.pv-campo input:focus-visible,
+.pv-campo select:focus-visible,
+.pv-campo textarea:focus-visible {
+  outline: 2px solid var(--color-bordeaux);
+  outline-offset: 1px;
+  border-color: var(--color-bordeaux);
+}
+
+.pv-campo [aria-invalid='true'] {
+  border-color: var(--color-bordeaux);
+}
+
+/* La lettera in Cormorant, come una lettera vera. */
+.pv-campo .pv-lettera {
+  min-height: 22rem;
+  padding: 1.25rem 1.4rem;
+  font-family: var(--font-display);
+  font-size: 1.3125rem;
+  line-height: 1.5;
+}
+
+.pv-errore {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-bordeaux);
+}
+
+/* — Interruttore «dall'estero» e consenso — */
+.pv-interruttore,
+.pv-consenso {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.pv-interruttore input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.pv-interruttore-pista {
+  position: relative;
+  flex: none;
+  width: 2.5rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-inchiostro) 22%, transparent);
+  transition: background-color 0.3s var(--ease-gaia);
+}
+
+.pv-interruttore-pista::after {
+  content: '';
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--color-bianco-caldo);
+  transition: transform 0.3s var(--ease-gaia);
+}
+
+.pv-interruttore input:checked + .pv-interruttore-pista {
+  background: var(--color-bordeaux);
+}
+
+.pv-interruttore input:checked + .pv-interruttore-pista::after {
+  transform: translateX(1.1rem);
+}
+
+.pv-interruttore input:focus-visible + .pv-interruttore-pista {
+  outline: 2px solid var(--color-bordeaux);
+  outline-offset: 3px;
+}
+
+.pv-consenso {
+  align-items: flex-start;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.pv-consenso input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.15rem;
+  accent-color: var(--color-bordeaux);
+}
+
+.pv-consenso a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* — Azioni — */
+.pv-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: clamp(2rem, 4vh, 2.75rem);
+}
+
+.pv-avanti {
+  min-height: 48px;
+}
+
+.pv-indietro {
+  min-height: 48px;
+}
+
+.pv-link {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: var(--color-grigio-caldo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pv-link:hover {
+  color: var(--color-bordeaux);
+}
+
+.pv-trappola {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* — Ringraziamento — */
+.pv-grazie .pv-testo {
+  max-width: 34rem;
+  margin: 1.25rem 0 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-grigio-caldo);
+}
+
+.pv-azioni--grazie {
+  gap: 1.5rem 2rem;
+}
+
+.pv-grazie-foto {
+  position: relative;
+  margin-bottom: 1.75rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-beige);
+}
+
+.pv-grazie-foto .pv-immagine {
+  opacity: 1;
+}
+
+@media (min-width: 64rem) {
+  .pv-grazie-foto {
+    display: none;
+  }
+}
+
+/* — Mobile — */
+@media (max-width: 63.98rem) {
+  .pv-tappe {
+    display: none;
+  }
+
+  .pv-tappa-mobile {
+    display: block;
+  }
+
+  .pv-azioni {
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+  }
+
+  .pv-azioni .btn {
+    padding-inline: 1.1rem;
+  }
+
+  .pv-avanti {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-passo {
+    animation: none;
+  }
+
+  .pv-immagine,
+  .pv-progresso span,
+  .pv-scheda,
+  .pv-pillola span,
+  .pv-interruttore-pista,
+  .pv-interruttore-pista::after {
+    transition: none;
+  }
+}
