@@ -98,6 +98,41 @@ home):
 voce, deve riconoscerla. La frase lunga resta disponibile per la pagina
 Chi sono.
 
+---
+
+### 9. Il preventivatore: promesse, fasce e domande (20/10/2026)
+
+Testi scritti da noi per la pagina Preventivo, tutti modificabili in
+Impostazioni → preventivo (IT/EN). **Da confermare con Gaia**, perché sono
+impegni suoi verso le coppie:
+
+- **«Risposta entro 48 ore»** — «Leggo ogni richiesta di persona e vi
+  rispondo entro due giorni.» Le ore sono anche un'impostazione
+  (`quote.replyHours`) e compaiono nel ringraziamento dopo l'invio.
+- **«Primo colloquio gratuito»** — «Ci conosciamo a Roma o in
+  videochiamata, senza costi.» È davvero gratuito? Anche fuori Roma?
+- **«Nessun impegno»** — «Inviare la richiesta non vi vincola a nulla.»
+- **Tre domande frequenti**: «Quanto costa il primo incontro?» (niente) ·
+  «Lavori anche fuori Roma?» (sì, in tutta Italia e con chi arriva
+  dall'estero) · «Con quanto anticipo conviene scriverti?» (12–18 mesi per
+  un matrimonio, ma non è mai troppo tardi).
+- **Fasce di budget**, sempre con «Preferiamo parlarne», e mai un prezzo
+  calcolato:
+  - matrimonio e unione civile: fino a 20.000 € · 20.000–40.000 € ·
+    40.000–70.000 € · 70.000–100.000 € · oltre 100.000 €;
+  - festa privata: fino a 5.000 € · 5.000–10.000 € · 10.000–20.000 € ·
+    20.000–40.000 € · oltre 40.000 €;
+  - evento aziendale: fino a 10.000 € · 10.000–25.000 € · 25.000–50.000 € ·
+    50.000–100.000 € · oltre 100.000 €.
+- **«Come mi avete conosciuta?»**: Instagram · Google · Passaparola · A un
+  matrimonio · Da una location o un fornitore · ChatGPT o un'altra AI ·
+  Altro. Ne manca qualcuna che conta per lei (Matrimonio.com, una fiera)?
+- **Copia della lettera alla coppia**: c'è, ma è spenta
+  (`quote.sendCopy` = 0). La vuole?
+- **Foto dei passaggi**: tre hanno il watermark VD Image (Gaia al tavolo,
+  candele, bouquet) e vanno sostituite insieme alle altre (vedi le note
+  della libreria).
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

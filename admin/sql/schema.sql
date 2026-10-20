@@ -340,24 +340,45 @@ CREATE TABLE IF NOT EXISTS `faqs` (
 -- committato in repo.
 -- ---------------------------------------------------------------------
 
+-- Colonne del preventivatore dalla migrazione 2026-10-20-preventivatore.sql.
 CREATE TABLE IF NOT EXISTS `inquiries` (
-  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `type`       ENUM('quote','contact') NOT NULL DEFAULT 'quote',
-  `lang`       ENUM('it','en') NOT NULL DEFAULT 'it',
-  `name`       VARCHAR(160) NOT NULL,
-  `email`      VARCHAR(190) NOT NULL,
-  `phone`      VARCHAR(60) DEFAULT NULL,
-  `event_date` DATE DEFAULT NULL,
-  `event_type` VARCHAR(120) DEFAULT NULL,
-  `guests`     SMALLINT UNSIGNED DEFAULT NULL,
-  `message`    TEXT DEFAULT NULL,
-  -- Risposte del preventivatore oltre ai campi fissi.
-  `payload`    JSON DEFAULT NULL,
-  `ip`         VARCHAR(45) DEFAULT NULL,
-  `user_agent` VARCHAR(255) DEFAULT NULL,
-  `status`     ENUM('new','read','answered','archived') NOT NULL DEFAULT 'new',
-  `notes`      TEXT DEFAULT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `type`           ENUM('quote','contact') NOT NULL DEFAULT 'quote',
+  `lang`           ENUM('it','en') NOT NULL DEFAULT 'it',
+  `event_kind`     ENUM('matrimonio','unione_civile','festa','aziendale') DEFAULT NULL,
+  `name`           VARCHAR(160) NOT NULL,
+  `partner_name`   VARCHAR(160) DEFAULT NULL,
+  `company`        VARCHAR(160) DEFAULT NULL,
+  `email`          VARCHAR(190) NOT NULL,
+  `phone`          VARCHAR(60) DEFAULT NULL,
+  `contact_pref`   ENUM('email','whatsapp','telefono') DEFAULT NULL,
+  `event_date`     DATE DEFAULT NULL,
+  `date_precision` ENUM('giorno','mese','da_definire') DEFAULT NULL,
+  `event_type`     VARCHAR(120) DEFAULT NULL,
+  `zone_mode`      ENUM('zone','libero','consigliateci','location') DEFAULT NULL,
+  `zones`          JSON DEFAULT NULL,
+  `venue_name`     VARCHAR(190) DEFAULT NULL,
+  `from_abroad`    TINYINT(1) NOT NULL DEFAULT 0,
+  `guests`         SMALLINT UNSIGNED DEFAULT NULL,
+  `guests_range`   VARCHAR(20) DEFAULT NULL,
+  `services`       JSON DEFAULT NULL,
+  `budget_range`   VARCHAR(30) DEFAULT NULL,
+  `source`         VARCHAR(60) DEFAULT NULL,
+  `message`        TEXT DEFAULT NULL,
+  -- La lettera del preventivatore così come è stata inviata.
+  `letter`         TEXT DEFAULT NULL,
+  `privacy_at`     DATETIME DEFAULT NULL,
+  -- Tutte le risposte grezze del preventivatore, con le etichette mostrate.
+  `payload`        JSON DEFAULT NULL,
+  `ip`             VARCHAR(45) DEFAULT NULL,
+  `user_agent`     VARCHAR(255) DEFAULT NULL,
+  -- nuova · contattata · chiusa
+  `status`         ENUM('new','contacted','closed') NOT NULL DEFAULT 'new',
+  `notes`          TEXT DEFAULT NULL,
+  -- Esito della mail di notifica: la richiesta resta salvata anche se fallisce.
+  `mail_sent_at`   DATETIME DEFAULT NULL,
+  `mail_error`     VARCHAR(255) DEFAULT NULL,
+  `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_inquiries_status` (`status`, `created_at`),
   KEY `idx_inquiries_type` (`type`, `created_at`)
