@@ -74,15 +74,15 @@ ON DUPLICATE KEY UPDATE `setting_key` = `setting_key`;
 INSERT INTO `settings` (`setting_key`, `group_name`, `label`, `field_type`, `value_it`, `value_en`, `sort_order`)
 SELECT v.k, 'preventivo', v.l, 'media', (SELECT CAST(m.id AS CHAR) FROM `media` m WHERE m.path = v.p), NULL, v.o
 FROM (
-  SELECT 'quote.photos.event'    AS k, 'Foto — tipo di evento'  AS l, 'foto/altare-cerimonia-candele.jpg'       AS p, 30 AS o UNION ALL
+  SELECT 'quote.photos.event'    AS k, 'Foto — tipo di evento'  AS l, 'foto/giardino-pini-tavoli-sera.jpg'       AS p, 30 AS o UNION ALL
   SELECT 'quote.photos.names',         'Foto — voi',                  'foto/brindisi-sposi-tramonto.jpg',            31 UNION ALL
-  SELECT 'quote.photos.when',          'Foto — quando',               'foto/tavolo-lungo-gipsofila-candele.jpg',     32 UNION ALL
-  SELECT 'quote.photos.where',         'Foto — dove',                 'foto/banchetto-edificio-storico.jpg',         33 UNION ALL
-  SELECT 'quote.photos.guests',        'Foto — ospiti',               'foto/sedie-cerimonia-fiori.jpg',              34 UNION ALL
+  SELECT 'quote.photos.when',          'Foto — quando',               'foto/torta-albero-luci-sospese.jpg',     32 UNION ALL
+  SELECT 'quote.photos.where',         'Foto — dove',                 'foto/tavolo-terrazza-tetti-tramonto.jpg',    33 UNION ALL
+  SELECT 'quote.photos.guests',        'Foto — ospiti',               'foto/banchetto-edificio-storico.jpg',         34 UNION ALL
   SELECT 'quote.photos.help',          'Foto — aiuto',                'foto/planner-sistema-tavolo.jpg',             35 UNION ALL
-  SELECT 'quote.photos.budget',        'Foto — budget',               'foto/candele-vasetti-fiori.jpg',              36 UNION ALL
-  SELECT 'quote.photos.contact',       'Foto — contatti',             'foto/bouquet-sposa-dettaglio.jpg',            37 UNION ALL
-  SELECT 'quote.photos.letter',        'Foto — lettera',              'foto/cestino-segnaposto-candele.jpg',         38 UNION ALL
-  SELECT 'quote.photos.thanks',        'Foto — ringraziamento',       'foto/composizione-sgabello-drappo.jpg',       39
+  SELECT 'quote.photos.budget',        'Foto — budget',               'foto/sala-dipinti-tavoli-rotondi.jpg',              36 UNION ALL
+  SELECT 'quote.photos.contact',       'Foto — contatti',             'foto/musicisti-violino-chitarra.jpg',            37 UNION ALL
+  SELECT 'quote.photos.letter',        'Foto — lettera',              'foto/tableau-tessuto-ospiti.jpg',         38 UNION ALL
+  SELECT 'quote.photos.thanks',        'Foto — ringraziamento',       'foto/tavolo-lungo-candele-calici.jpg',       39
 ) AS v
 ON DUPLICATE KEY UPDATE `setting_key` = `setting_key`;
