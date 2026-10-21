@@ -103,7 +103,7 @@ const linkGrandi = (
   ] as const
 )
   .filter((l) => (l.key === 'stories' ? inMenu(l.key, lang) : existsIn(l.key, lang)))
-  .map((l) => ({ href: path(l.key, lang), etichetta: l.etichetta, foto: picture(l.foto, lang, '(min-width: 64rem) 46vw, 92vw') }));
+  .map((l) => ({ href: path(l.key, lang), etichetta: l.etichetta, foto: picture(l.foto, lang, '(min-width: 64rem) 48vw, 92vw') }));
 
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).

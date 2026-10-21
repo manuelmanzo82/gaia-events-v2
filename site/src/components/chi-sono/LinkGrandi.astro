@@ -1,12 +1,15 @@
 ---
 /**
  * Chi sono — 8. Due card grandi affiancate (rif. sarahhaywood.com/about,
- * WEDDINGS / PARTIES): «I miei eventi» e «Servizi», foto piena con angoli
- * arrotondati, titolo grande in Cormorant sovrapposto in basso; al
- * passaggio un leggero zoom della foto e il velo che si attenua; entrata
- * in scroll sfalsata (data-reveal-gruppo di motion.ts). Su mobile una
- * sopra l'altra. Una card sola (es. senza eventi nella lingua) va a tutta
- * larghezza.
+ * WEDDINGS / PARTIES): «I miei eventi» e «Servizi». Stessa larghezza del
+ * contenitore delle card della home (bordo clamp(1.25rem, 4vw, 3.5rem)),
+ * al 50% l'una con lo spazio tra le due; alte circa 80vh su desktop
+ * (proporzione vicina al quadrato); foto piena con angoli arrotondati,
+ * titolo grande in Cormorant in basso e centrato; al passaggio un leggero
+ * zoom della foto e il velo che si attenua; entrata in scroll sfalsata
+ * (data-reveal-gruppo di motion.ts). Su mobile una sopra l'altra a
+ * larghezza piena, 4:5. Una card sola (es. senza eventi nella lingua):
+ * piena larghezza, 21:9.
  */
 import type { PictureData } from '../../lib/images';
 import Picture from '../Picture.astro';
@@ -21,7 +24,7 @@ const { link } = Astro.props;
 {
   link.length > 0 && (
     <section class="link-grandi" data-theme="light">
-      <ul class:list={['container-gaia', 'carte', { 'carte--una': link.length === 1 }]} role="list" data-reveal-gruppo>
+      <ul class:list={['carte', { 'carte--una': link.length === 1 }]} role="list" data-reveal-gruppo>
         {link.map((l) => (
           <li class="carta-voce" data-reveal="alto">
             <a href={l.href} class="carta" data-theme="dark" data-foto>
@@ -41,11 +44,13 @@ const { link } = Astro.props;
     padding-block: var(--spacing-section);
   }
 
+  /* Stesso contenitore delle card della home. */
   .carte {
     display: grid;
     gap: 1rem;
-    margin: 0;
-    padding-block: 0;
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    margin: 0 auto;
+    padding: 0;
     list-style: none;
   }
 
@@ -87,19 +92,21 @@ const { link } = Astro.props;
     z-index: 1;
     background:
       linear-gradient(180deg, rgb(0 0 0 / 0.45) 0%, rgb(0 0 0 / 0.25) 120px, rgb(0 0 0 / 0) 240px),
-      linear-gradient(0deg, rgb(27 22 17 / 0.75) 0%, rgb(27 22 17 / 0.3) 45%, rgb(27 22 17 / 0.1) 100%);
+      linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.35) 40%, rgb(27 22 17 / 0.1) 100%);
     transition: opacity 0.6s var(--ease-gaia);
   }
 
+  /* Titolo in basso, centrato. */
   .carta-titolo {
     position: absolute;
     inset: auto 0 0 0;
     z-index: 2;
-    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.25rem, 3vh, 2.25rem);
-    font-size: var(--text-display);
+    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.5rem, 4vh, 3rem);
+    font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
     font-weight: 320;
     line-height: 1.05;
     letter-spacing: -0.01em;
+    text-align: center;
     text-wrap: balance;
   }
 
@@ -110,7 +117,7 @@ const { link } = Astro.props;
 
   .carta:hover .carta-velo,
   .carta:focus-visible .carta-velo {
-    opacity: 0.72;
+    opacity: 0.7;
   }
 
   @media (min-width: 64rem) {
@@ -119,21 +126,24 @@ const { link } = Astro.props;
       gap: 1.25rem;
     }
 
+    /* Circa 80vh, vicina al quadrato. */
     .carta {
-      aspect-ratio: 4 / 3;
+      aspect-ratio: auto;
+      height: min(80svh, 56rem);
     }
 
     .carta-titolo {
-      font-size: var(--text-display-xl);
+      font-size: clamp(3.5rem, 2rem + 4vw, 7rem);
       line-height: 1;
     }
 
-    /* Una card sola: tutta la larghezza, più bassa. */
+    /* Una card sola: piena larghezza, 21:9. */
     .carte--una {
       grid-template-columns: minmax(0, 1fr);
     }
 
     .carte--una .carta {
+      height: auto;
       aspect-ratio: 21 / 9;
     }
   }
