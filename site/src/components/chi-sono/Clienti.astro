@@ -1,0 +1,74 @@
+---
+/**
+ * Chi sono — 7. Hanno scelto Gaia: la striscia dei loghi dall'entità
+ * Clienti, solo se ce ne sono (stesso disegno della pagina Dicono di me).
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { picture } from '../../lib/images';
+import type { Client } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  clienti: Client[];
+}
+
+const { lang, clienti } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  clienti.length > 0 && (
+    <section class="clienti" data-theme="light" aria-labelledby="clienti-titolo">
+      <div class="container-gaia">
+        <h2 id="clienti-titolo" class="eyebrow" data-reveal="alto">
+          {t('reviews.clienti')}
+        </h2>
+        <ul class="clienti-loghi" role="list" data-reveal="alto">
+          {clienti.map((c) => {
+            const logo = picture(c.logo, lang, '160px');
+            return <li>{logo ? <Picture data={logo} class="clienti-logo" /> : <span class="clienti-nome">{c.name}</span>}</li>;
+          })}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .clienti {
+    padding-block: var(--spacing-section-sm);
+    background: var(--color-beige);
+    text-align: center;
+  }
+
+  .clienti .eyebrow {
+    justify-content: center;
+  }
+
+  .clienti-loghi {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem clamp(2rem, 5vw, 4.5rem);
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .clienti-loghi :global(.clienti-logo) {
+    height: clamp(28px, 4vw, 44px);
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+    opacity: 0.8;
+  }
+
+  .clienti-nome {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+  }
+</style>

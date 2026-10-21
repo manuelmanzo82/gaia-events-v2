@@ -23,12 +23,13 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { langsFor } from '../../lib/availability';
-import { getHighlights, getPage, getPress, getSettings, text } from '../../lib/content';
+import { getClients, getHighlights, getPage, getPress, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
 import Citazione from '../chi-sono/Citazione.astro';
+import Clienti from '../chi-sono/Clienti.astro';
 import Numeri from '../chi-sono/Numeri.astro';
 import Percorso from '../chi-sono/Percorso.astro';
 import Valori from '../chi-sono/Valori.astro';
@@ -135,6 +136,8 @@ const jsonLd = [
   <Valori titolo={text(valoriBlocco?.title, lang)} valori={valori} foto={fotoValori} />
 
   <Citazione lang={lang} citazione={citazione} foto={fotoCitazione} stampa={stampa} />
+
+  <Clienti lang={lang} clienti={getClients()} />
 </BaseLayout>
 
 <script>
