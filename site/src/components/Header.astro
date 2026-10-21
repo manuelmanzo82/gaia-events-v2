@@ -3,6 +3,7 @@ import { BUSINESS, type Lang } from '../config/site';
 import { useTranslations, type UIKey } from '../i18n';
 import { path, type RouteKey } from '../i18n/routes';
 import { existsIn } from '../lib/availability';
+import Icona from './Icona.astro';
 import LangSwitcher from './LangSwitcher.astro';
 import LogoGaia from './LogoGaia.astro';
 
@@ -93,18 +94,12 @@ const preventivo = existsIn('quote', lang);
       <ul class="menu-social" role="list">
         <li>
           <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
-              <circle cx="12" cy="12" r="4.4" />
-              <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
-            </svg>
+            <Icona nome="instagram" dimensione={18} />
           </a>
         </li>
         <li>
           <a href={BUSINESS.facebookUrl} rel="noopener me" target="_blank" aria-label="Facebook">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
-              <path d="M14 8.5V6.8c0-.9.5-1.3 1.3-1.3H17V2.5h-2.5C11.7 2.5 10.5 4.3 10.5 7v1.5H8V12h2.5v9.5H14V12h2.6l.4-3.5H14z" />
-            </svg>
+            <Icona nome="facebook" dimensione={18} />
           </a>
         </li>
       </ul>
@@ -115,26 +110,17 @@ const preventivo = existsIn('quote', lang);
     <ul class="menu-contatti" role="list">
       <li>
         <a href={`https://wa.me/${BUSINESS.whatsapp}`} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')} title={t('cta.whatsapp')}>
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
-            <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
-          </svg>
+          <Icona nome="whatsapp" />
         </a>
       </li>
       <li>
         <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank" aria-label="Instagram" title="Instagram">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
-            <circle cx="12" cy="12" r="4.4" />
-            <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
-          </svg>
+          <Icona nome="instagram" />
         </a>
       </li>
       <li>
         <a href={BUSINESS.facebookUrl} rel="noopener me" target="_blank" aria-label="Facebook" title="Facebook">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 8.5V6.8c0-.9.5-1.3 1.3-1.3H17V2.5h-2.5C11.7 2.5 10.5 4.3 10.5 7v1.5H8V12h2.5v9.5H14V12h2.6l.4-3.5H14z" />
-          </svg>
+          <Icona nome="facebook" />
         </a>
       </li>
     </ul>
@@ -423,6 +409,12 @@ const preventivo = existsIn('quote', lang);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     cursor: pointer;
+  }
+
+  /* Il contorno di focus solo da tastiera (:focus-visible, regola
+     globale): al tocco il bottone prende il focus ma non mostra nulla. */
+  .menu-toggle:focus:not(:focus-visible) {
+    outline: none;
   }
 
   .menu-toggle-linee {
