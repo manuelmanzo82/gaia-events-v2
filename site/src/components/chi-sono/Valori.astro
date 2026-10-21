@@ -1,0 +1,198 @@
+---
+/**
+ * Chi sono — 5. Come lavoro (avorio): i valori del blocco «values» in
+ * sticky split. A sinistra i valori scorrono (numero, titolo, riga); a
+ * destra una colonna sticky con le foto di Gaia al lavoro (highlights
+ * «chi-sono» dopo la prima, che è l'apertura) che cambiano in dissolvenza
+ * quando il valore corrispondente entra al centro dello schermo
+ * (IntersectionObserver qui sotto, niente GSAP). Con reduced-motion il
+ * cambio è istantaneo; su mobile tutto impilato, una foto sola in testa.
+ */
+import type { PictureData } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  titolo: string;
+  valori: Array<{ titolo: string; testo: string }>;
+  foto: PictureData[];
+}
+
+const { titolo, valori, foto } = Astro.props;
+---
+
+{
+  valori.length > 0 && (
+    <section class="valori" data-theme="light" aria-labelledby="valori-titolo">
+      <div class="container-gaia valori-griglia">
+        <div class="valori-testo">
+          <h2 id="valori-titolo" class="eyebrow" data-reveal="alto">
+            {titolo}
+          </h2>
+          <ol class="valori-lista" role="list">
+            {valori.map((v, i) => (
+              <li class="valore" data-valore={i} data-reveal="alto">
+                <p class="valore-numero numero" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </p>
+                <h3 class="font-display valore-titolo">{v.titolo}</h3>
+                {v.testo && <p class="text-lead valore-testo">{v.testo}</p>}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {foto.length > 0 && (
+          <div class="valori-foto" aria-hidden="true">
+            <div class="valori-sticky">
+              {foto.map((f, i) => (
+                <figure class:list={['valori-figura', { attiva: i === 0 }]} data-foto-indice={i}>
+                  <Picture data={f} cap={false} class="valori-img" />
+                </figure>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Il valore al centro dello schermo accende la foto i % n.
+  for (const sezione of document.querySelectorAll<HTMLElement>('.valori')) {
+    const figure = [...sezione.querySelectorAll<HTMLElement>('.valori-figura')];
+    const valori = [...sezione.querySelectorAll<HTMLElement>('.valore')];
+    if (figure.length < 2 || valori.length === 0 || !('IntersectionObserver' in window)) continue;
+
+    const accendi = (i: number): void => {
+      const scelta = i % figure.length;
+      figure.forEach((f, k) => f.classList.toggle('attiva', k === scelta));
+    };
+    const io = new IntersectionObserver(
+      (voci) => {
+        for (const voce of voci) {
+          if (voce.isIntersecting) accendi(Number((voce.target as HTMLElement).dataset.valore ?? 0));
+        }
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
+    );
+    for (const v of valori) io.observe(v);
+  }
+</script>
+
+<style>
+  .valori {
+    padding-block: var(--spacing-section);
+  }
+
+  .valori-griglia {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .valori-testo .eyebrow {
+    margin: 0 0 1.5rem;
+  }
+
+  .valori-lista {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 4rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .valore-numero {
+    margin: 0 0 0.5rem;
+  }
+
+  .valore-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .valore-testo {
+    max-width: 30rem;
+    margin: 0.75rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* Mobile: una foto sola, in testa, 4:5. */
+  .valori-foto {
+    order: -1;
+  }
+
+  .valori-sticky {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4 / 5;
+  }
+
+  .valori-figura {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 0.9s var(--ease-gaia);
+  }
+
+  .valori-figura.attiva {
+    opacity: 1;
+  }
+
+  .valori-figura :global(.valori-img) {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  @media (max-width: 63.98rem) {
+    .valori-figura:not(:first-child) {
+      display: none;
+    }
+  }
+
+  /* Desktop: testo a sinistra, foto sticky a destra. */
+  @media (min-width: 64rem) {
+    .valori-griglia {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: start;
+    }
+
+    /* La colonna deve essere alta quanto la riga, altrimenti lo sticky
+       non ha spazio in cui restare fermo. */
+    .valori-foto {
+      order: 0;
+      align-self: stretch;
+    }
+
+    .valori-lista {
+      gap: 0;
+    }
+
+    .valore {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 70vh;
+    }
+
+    .valori-sticky {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) * 0.6);
+      height: calc(100vh - var(--altezza-header, 146px) * 0.6 - 2rem);
+      aspect-ratio: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .valori-figura {
+      transition: none;
+    }
+  }
+</style>

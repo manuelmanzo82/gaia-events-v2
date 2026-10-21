@@ -30,6 +30,7 @@ import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
 import Numeri from '../chi-sono/Numeri.astro';
 import Percorso from '../chi-sono/Percorso.astro';
+import Valori from '../chi-sono/Valori.astro';
 import Voce from '../chi-sono/Voce.astro';
 
 interface Props {
@@ -70,6 +71,17 @@ const timeline = blocco('timeline');
 const tappe = (timeline?.items ?? [])
   .map((i) => ({ anno: i.label ?? '', titolo: text(i.title, lang), testo: text(i.text, lang), image: i.image ?? null }))
   .filter((i) => i.titolo);
+const valoriBlocco = blocco('values');
+const valori = (valoriBlocco?.items ?? [])
+  .map((i) => ({ titolo: text(i.title, lang), testo: text(i.text, lang) }))
+  .filter((i) => i.titolo);
+
+// Foto di Gaia al lavoro per «Come lavoro»: gli highlight «chi-sono» dopo
+// il primo (l'apertura), solo quelli abbastanza larghi per la colonna.
+const fotoValori = getHighlights('chi-sono')
+  .slice(1)
+  .map((h) => picture(h.image, lang, '(min-width: 64rem) 42vw, 100vw'))
+  .filter((p): p is NonNullable<typeof p> => p !== null && p.maxWidth >= 480);
 
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).
@@ -112,6 +124,8 @@ const jsonLd = [
   <Numeri numeri={numeri} />
 
   <Percorso lang={lang} titolo={text(timeline?.title, lang)} tappe={tappe} />
+
+  <Valori titolo={text(valoriBlocco?.title, lang)} valori={valori} foto={fotoValori} />
 </BaseLayout>
 
 <script>
