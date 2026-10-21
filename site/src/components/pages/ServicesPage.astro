@@ -27,6 +27,7 @@ import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../servizi/Apertura.astro';
 import Confronto from '../servizi/Confronto.astro';
+import Filosofia from '../servizi/Filosofia.astro';
 
 interface Props {
   lang: Lang;
@@ -58,6 +59,10 @@ const indice = servizi.map((s, i) => ({
   titolo: text(s.title, lang),
 }));
 
+// Blocchi della pagina (page_sections): intro, process, cta.
+const blocco = (kind: string) => (page?.blocks ?? []).find((b) => b.kind === kind) ?? null;
+const intro = blocco('intro');
+
 const meta = buildMeta({
   lang,
   routeKey: 'services',
@@ -84,6 +89,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
   }
 
   <Apertura eyebrow={titoloPagina} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={indice} />
+
+  <Filosofia titolo={text(intro?.title, lang)} testo={text(intro?.text, lang)} />
 
   <Confronto
     lang={lang}

@@ -1,0 +1,52 @@
+---
+/**
+ * Servizi — 2. Filosofia (avorio): il blocco «intro» della pagina,
+ * «quanto affidarmi»: una frase grande e due righe, centrate.
+ */
+interface Props {
+  titolo: string;
+  testo: string;
+}
+
+const { titolo, testo } = Astro.props;
+---
+
+{
+  (titolo || testo) && (
+    <section class="sv-filosofia container-gaia" data-theme="light">
+      {titolo && (
+        <h2 class="font-display sv-filosofia-titolo" data-reveal="righe">
+          {titolo}
+        </h2>
+      )}
+      {testo && (
+        <p class="text-lead sv-filosofia-testo" data-reveal="alto">
+          {testo}
+        </p>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .sv-filosofia {
+    padding-block: var(--spacing-section);
+    text-align: center;
+  }
+
+  .sv-filosofia-titolo {
+    max-width: 22ch;
+    margin: 0 auto;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .sv-filosofia-testo {
+    max-width: 38rem;
+    margin: 1.5rem auto 0;
+    color: var(--color-grigio-caldo);
+    text-wrap: pretty;
+  }
+</style>
