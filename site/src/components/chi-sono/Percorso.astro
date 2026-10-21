@@ -42,7 +42,10 @@ const { lang, titolo, tappe } = Astro.props;
           </div>
           <ol class="binario percorso-binario" role="list">
             {tappe.map((t, i) => {
-              const foto = picture(t.image, lang, '(min-width: 64rem) 26vw, 80vw');
+              // Misura reale resa: la cornice è min(40vw, 62svh) e la foto è
+              // ingrandita ×1,22 per la parallasse (su mobile la cornice è
+              // ~80vw, quindi ~100vw).
+              const foto = picture(t.image, lang, '(min-width: 64rem) min(49vw, 76vh), 100vw');
               return (
                 <li class:list={['tappa', { attiva: i === 0 }]} data-tappa={i}>
                   <p class="font-display tappa-anno" aria-hidden={t.anno ? undefined : 'true'}>
@@ -132,15 +135,17 @@ const { lang, titolo, tappe } = Astro.props;
     background: var(--color-oro);
   }
 
-  /* Anno: pieno sulla tappa attiva, in contorno sulle altre. */
+  /* Anno: pieno sulla tappa attiva; sulle altre oro al 18% con un
+     contorno di 1,5 px (il solo filo da 1 px a quella misura, su fondo
+     scuro, si leggeva male e sembrava spezzato). */
   .tappa-anno {
     margin: 0 0 0.75rem;
     font-size: clamp(3.5rem, 2.5rem + 5vw, 7rem);
     line-height: 0.95;
     font-weight: 300;
     font-variant-numeric: lining-nums;
-    color: transparent;
-    -webkit-text-stroke: 1px color-mix(in srgb, var(--color-oro) 60%, transparent);
+    color: color-mix(in srgb, var(--color-oro) 18%, transparent);
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-oro) 45%, transparent);
     transition:
       color 0.6s var(--ease-gaia),
       -webkit-text-stroke-color 0.6s var(--ease-gaia);
