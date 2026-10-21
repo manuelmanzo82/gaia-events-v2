@@ -5,6 +5,17 @@ ricevute. Tenere aggiornato: è il registro di cosa è stato deciso e perché.
 
 ---
 
+## Da confermare subito (21/10/2026)
+
+**Le date e i numeri della timeline di «Chi sono»** vengono dalla v1
+(Sanity) e non sono mai stati verificati con Gaia: **2014** (il primo
+matrimonio per un'amica), **2016** (prima collaborazione corporate),
+**2018** (destination wedding), **2022** (150+ eventi). Il «150+» in
+particolare è un numero che compare sul sito: se non è vero oggi, va
+cambiato. Le foto delle quattro tappe le abbiamo scelte noi dalla
+libreria (navata di gipsofila, serra di sera, castello sul mare,
+scalinata della villa): si cambiano nel blocco «timeline» della pagina.
+
 ## Risolte
 
 ### 1. Le recensioni di Sanity sono vere o scritte per la demo?

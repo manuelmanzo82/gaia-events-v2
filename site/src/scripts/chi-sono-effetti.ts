@@ -1,31 +1,34 @@
 /**
  * Effetti di scroll della pagina Chi sono (GSAP + ScrollTrigger, Lenis
- * già avviato da motion.ts). Ogni sezione ha il suo pattern, dichiarato
- * nel markup con un data attribute:
+ * già avviato da motion.ts). Ogni sezione dichiara il suo pattern nel
+ * markup con un data attribute:
  *
- *   [data-parallasse="da a"]  la foto scorre da yPercent `da` a `a`
+ *   [data-parallasse="da a"]  l'elemento scorre da yPercent `da` a `a`
  *                             mentre la sua sezione attraversa lo schermo
- *   [data-parole]             testo rivelato parola per parola allo scroll
- *                             (opacità 0,15 → 1, SplitText + scrub)
  *   [data-contatore="150+"]   numero che conta da 0 al valore al primo
- *                             ingresso (prefisso/suffisso non numerici
- *                             restano com'erano)
- *   [data-orizzontale]        sezione agganciata (pin) in cui lo scroll
- *                             verticale fa scorrere il .binario in
- *                             orizzontale (solo ≥64rem, come in home)
+ *                             ingresso (prefisso/suffisso restano)
+ *   [data-timeline]           il percorso: da 64rem sezione agganciata con
+ *                             il .binario in orizzontale, filetto oro che
+ *                             si disegna, anno attivo pieno, foto in
+ *                             parallasse; sotto, la linea verticale si
+ *                             riempie con lo scroll e le tappe si accendono
+ *   [data-valori]             le fasce dei valori: da 64rem sezione
+ *                             agganciata, la fascia attiva segue lo scroll
+ *                             (e l'hover la apre); sotto, si apre quella al
+ *                             centro dello schermo (nel componente)
  *
- * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale.
- * Con prefers-reduced-motion niente del tutto: le pagine sono complete
- * senza JS (nessuno stato iniziale nascosto nel CSS).
+ * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale. Con
+ * prefers-reduced-motion niente del tutto: le pagine sono complete senza
+ * JS (nessuno stato iniziale nascosto nel CSS).
  */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 
 import { riduciMotion } from './motion-leggero';
 import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';
+const MOBILE = '(max-width: 63.98rem)';
 
 function parallasse(): void {
   for (const el of document.querySelectorAll<HTMLElement>('[data-parallasse]')) {
@@ -42,33 +45,6 @@ function parallasse(): void {
           trigger: sezione,
           start: inCima ? 'top top' : 'top bottom',
           end: 'bottom top',
-          scrub: true,
-        },
-      },
-    );
-  }
-}
-
-function parolePerParola(): void {
-  for (const el of document.querySelectorAll<HTMLElement>('[data-parole]')) {
-    // aria: 'none' come in motion.ts (niente aria-label sui <p>).
-    const split = SplitText.create(el, { type: 'words', wordsClass: 'parola', aria: 'none' });
-    // Lo stato attenuato (0,15) si applica solo quando il testo entra dal
-    // basso (immediateRender: false, trigger dal bordo inferiore): al
-    // caricamento le parole sono piene, così il contrasto misurato da
-    // Lighthouse/axe è quello vero e non c'è nessun lampo visibile.
-    gsap.fromTo(
-      split.words,
-      { opacity: 0.15 },
-      {
-        opacity: 1,
-        ease: 'none',
-        stagger: 0.04,
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: el,
-          start: 'top bottom',
-          end: 'bottom 50%',
           scrub: true,
         },
       },
@@ -100,25 +76,150 @@ function contatori(): void {
   }
 }
 
-function scorrimentoOrizzontale(): void {
-  for (const sezione of document.querySelectorAll<HTMLElement>('[data-orizzontale]')) {
+/** Accende la tappa i (anno pieno, punto pieno) e spegne le altre. */
+function accendiTappa(tappe: HTMLElement[], i: number): void {
+  tappe.forEach((t, k) => t.classList.toggle('attiva', k === i));
+}
+
+function timelineDesktop(): void {
+  for (const sezione of document.querySelectorAll<HTMLElement>('[data-timeline]')) {
     const binario = sezione.querySelector<HTMLElement>('.binario');
-    if (!binario) continue;
+    const filo = sezione.querySelector<HTMLElement>('.percorso-filo');
+    const pieno = sezione.querySelector<HTMLElement>('.percorso-filo-pieno');
+    const tappe = [...sezione.querySelectorAll<HTMLElement>('.tappa')];
+    if (!binario || tappe.length === 0) continue;
+
     const distanza = (): number => Math.max(binario.scrollWidth - sezione.clientWidth, 0);
     if (distanza() === 0) continue;
-    gsap.to(binario, {
+
+    // Il filetto è largo quanto il binario e si muove con lui.
+    if (filo) filo.style.width = `${binario.scrollWidth}px`;
+
+    const scorrimento = gsap.to([binario, filo].filter(Boolean), {
       x: () => -distanza(),
       ease: 'none',
-      onUpdate: aggiornaTema,
       scrollTrigger: {
         trigger: sezione,
         start: 'top top',
-        end: () => `+=${distanza()}`,
+        // Il tratto di scroll è più lungo della distanza percorsa: lo
+        // scorrimento resta lento e si legge ogni tappa.
+        end: () => `+=${Math.round(distanza() * 1.8)}`,
         pin: true,
         scrub: 0.6,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          aggiornaTema();
+          // Filetto che si disegna e anno attivo: entrambi dal progresso.
+          if (pieno) pieno.style.transform = `scaleX(${Math.min(1, 0.12 + self.progress * 0.92)})`;
+          accendiTappa(tappe, Math.min(tappe.length - 1, Math.round(self.progress * (tappe.length - 1))));
+        },
       },
+    });
+
+    // Parallasse orizzontale di ogni foto dentro la sua cornice, legata
+    // allo scorrimento del binario (containerAnimation).
+    for (const tappa of tappe) {
+      const img = tappa.querySelector<HTMLElement>('.tappa-img');
+      if (!img) continue;
+      gsap.fromTo(
+        img,
+        { xPercent: -5 },
+        {
+          xPercent: 5,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: tappa,
+            containerAnimation: scorrimento,
+            start: 'left right',
+            end: 'right left',
+            scrub: true,
+          },
+        },
+      );
+    }
+  }
+}
+
+function timelineMobile(): void {
+  for (const sezione of document.querySelectorAll<HTMLElement>('[data-timeline]')) {
+    const pieno = sezione.querySelector<HTMLElement>('.percorso-filo-pieno');
+    const tappe = [...sezione.querySelectorAll<HTMLElement>('.tappa')];
+    if (pieno) {
+      gsap.fromTo(
+        pieno,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: 'none',
+          scrollTrigger: { trigger: sezione, start: 'top 70%', end: 'bottom 70%', scrub: true },
+        },
+      );
+    }
+    // La tappa che passa il centro dello schermo si accende.
+    for (const [i, tappa] of tappe.entries()) {
+      ScrollTrigger.create({
+        trigger: tappa,
+        start: 'top 60%',
+        end: 'bottom 40%',
+        onEnter: () => accendiTappa(tappe, i),
+        onEnterBack: () => accendiTappa(tappe, i),
+      });
+      const img = tappa.querySelector<HTMLElement>('.tappa-img');
+      if (img) {
+        gsap.fromTo(
+          img,
+          { yPercent: -5 },
+          {
+            yPercent: 5,
+            ease: 'none',
+            scrollTrigger: { trigger: tappa, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        );
+      }
+    }
+  }
+}
+
+/** Apre la fascia i e chiude le altre. */
+function apriFascia(fasce: HTMLElement[], i: number): void {
+  fasce.forEach((f, k) => f.classList.toggle('attiva', k === i));
+}
+
+function valoriDesktop(): void {
+  for (const sezione of document.querySelectorAll<HTMLElement>('[data-valori]')) {
+    const fasce = [...sezione.querySelectorAll<HTMLElement>('.fascia')];
+    if (fasce.length < 2) continue;
+    let dalloScroll = 0;
+    let sopra: number | null = null;
+
+    ScrollTrigger.create({
+      trigger: sezione,
+      start: 'top top',
+      end: () => `+=${fasce.length * 45}%`,
+      pin: true,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        dalloScroll = Math.min(fasce.length - 1, Math.floor(self.progress * fasce.length));
+        if (sopra === null) apriFascia(fasce, dalloScroll);
+      },
+    });
+
+    // L'hover (o il focus) apre la fascia; uscendo torna a quella dello scroll.
+    for (const [i, fascia] of fasce.entries()) {
+      fascia.addEventListener('mouseenter', () => {
+        sopra = i;
+        apriFascia(fasce, i);
+      });
+      fascia.addEventListener('focusin', () => {
+        sopra = i;
+        apriFascia(fasce, i);
+      });
+    }
+    sezione.addEventListener('mouseleave', () => {
+      sopra = null;
+      apriFascia(fasce, dalloScroll);
     });
   }
 }
@@ -127,19 +228,22 @@ function scorrimentoOrizzontale(): void {
 export function initChiSonoEffetti(): void {
   if (riduciMotion()) return;
 
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger);
+
+  // La classe dice al CSS che pin e scrub ci sono: senza (JS spento,
+  // reduced-motion) la striscia del percorso scorre a mano.
+  document.documentElement.classList.add('motion-attivo');
 
   parallasse();
-  parolePerParola();
   contatori();
-
-  // La classe dice al CSS che il pin c'è: senza (JS spento, reduced-motion)
-  // il binario del percorso scorre a mano.
-  document.documentElement.classList.add('motion-attivo');
 
   const mm = gsap.matchMedia();
   mm.add(DESKTOP, () => {
-    scorrimentoOrizzontale();
+    timelineDesktop();
+    valoriDesktop();
+  });
+  mm.add(MOBILE, () => {
+    timelineMobile();
   });
 
   window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });

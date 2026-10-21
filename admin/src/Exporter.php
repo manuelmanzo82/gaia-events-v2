@@ -535,6 +535,11 @@ final class Exporter
                     $item['label'] = $label;
                 }
 
+                // Foto della voce (id in media, chiave `media` di items_it):
+                // le tappe del percorso e i valori di Chi sono.
+                $media = $itemsIt[$index]['media'] ?? null;
+                $item['image'] = is_numeric($media) ? self::image(self::mediaById((int) $media)) : null;
+
                 $items[] = $item;
             }
 
