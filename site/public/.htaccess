@@ -37,6 +37,19 @@ ErrorDocument 404 /404.html
     # Serve a non servire come TESTO un file che non e piu PHP:
     # config.php.bak-20261014 conterrebbe le credenziali del database.
     RewriteRule "(^|/)\.env|\.bak|\.php\.|\.(sql|log|orig|old|save|ini|sh)$" - [F,L]
+
+    # Rinomine del giro 11, 301 permanenti: Blog → Magazine, Storie →
+    # Matrimoni (EN: Stories → Weddings), Reviews → Kind words. Valgono
+    # per l'indice e per ogni dettaglio; lo slug dell'articolo resta.
+    RewriteRule ^blog/?$ /magazine/ [R=301,L]
+    RewriteRule ^blog/(.+)$ /magazine/$1 [R=301,L]
+    RewriteRule ^en/blog/?$ /en/magazine/ [R=301,L]
+    RewriteRule ^en/blog/(.+)$ /en/magazine/$1 [R=301,L]
+    RewriteRule ^storie/?$ /matrimoni/ [R=301,L]
+    RewriteRule ^storie/(.+)$ /matrimoni/$1 [R=301,L]
+    RewriteRule ^en/stories/?$ /en/weddings/ [R=301,L]
+    RewriteRule ^en/stories/(.+)$ /en/weddings/$1 [R=301,L]
+    RewriteRule ^en/reviews/?$ /en/kind-words/ [R=301,L]
 </IfModule>
 
 # ---------------------------------------------------------------------

@@ -22,7 +22,7 @@ final class StoriesController extends ResourceController
 
     protected function title(): string
     {
-        return 'Storie';
+        return 'Matrimoni';
     }
 
     protected function pivotTable(): string

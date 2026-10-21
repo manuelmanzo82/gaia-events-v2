@@ -25,7 +25,7 @@ final class PagesController
         'services' => 'Servizi (introduzione)',
         'portfolio' => 'Portfolio (introduzione)',
         'reviews' => 'Dicono di me (introduzione)',
-        'blog' => 'Blog (introduzione)',
+        'blog' => 'Magazine (introduzione)',
         'faq' => 'FAQ (introduzione)',
         'quote' => 'Preventivo (introduzione)',
         'contact' => 'Contatti',

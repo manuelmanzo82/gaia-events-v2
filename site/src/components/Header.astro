@@ -2,7 +2,7 @@
 import { BUSINESS, type Lang } from '../config/site';
 import { useTranslations, type UIKey } from '../i18n';
 import { path, type RouteKey } from '../i18n/routes';
-import { existsIn } from '../lib/availability';
+import { existsIn, inMenu } from '../lib/availability';
 import Icona from './Icona.astro';
 import LangSwitcher from './LangSwitcher.astro';
 import LogoGaia from './LogoGaia.astro';
@@ -23,8 +23,9 @@ import LogoGaia from './LogoGaia.astro';
  * Menu (giro 11): Chi sono · Servizi · Luoghi · Matrimoni · Dicono di me ·
  * Magazine, più Preventivo e lingua. Contatti, Partner e FAQ stanno nel
  * footer. Su desktop le voci sono in riga; sotto gli 80rem un pulsante
- * apre un pannello a tutto schermo. Le voci sono filtrate con existsIn():
- * niente link a pagine che in questa lingua non esistono.
+ * apre un pannello a tutto schermo. Le voci sono filtrate con inMenu():
+ * niente link a pagine che in questa lingua non esistono, e Matrimoni
+ * solo con almeno due matrimoni pubblicati.
  */
 interface Props {
   lang: Lang;
@@ -45,7 +46,7 @@ const VOCI: Array<{ key: RouteKey; label: UIKey }> = [
   { key: 'blog', label: 'nav.blog' },
 ];
 
-const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
+const voci = VOCI.filter((voce) => inMenu(voce.key, lang));
 const preventivo = existsIn('quote', lang);
 ---
 

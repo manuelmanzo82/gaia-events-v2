@@ -9,8 +9,10 @@ export const ROUTES = {
   about: { it: 'chi-sono', en: 'about' },
   services: { it: 'servizi', en: 'services' },
   portfolio: { it: 'portfolio', en: 'portfolio' },
-  reviews: { it: 'dicono-di-me', en: 'reviews' },
-  blog: { it: 'blog', en: 'blog' },
+  reviews: { it: 'dicono-di-me', en: 'kind-words' },
+  // Giro 11: Blog → Magazine e Storie → Matrimoni (301 dai vecchi percorsi
+  // nel .htaccess). Le chiavi restano: sono nomi interni, non URL.
+  blog: { it: 'magazine', en: 'magazine' },
   faq: { it: 'faq', en: 'faq' },
   quote: { it: 'preventivo', en: 'wedding-estimate' },
   contact: { it: 'contatti', en: 'contact' },
@@ -18,7 +20,7 @@ export const ROUTES = {
   privacy: { it: 'privacy', en: 'privacy' },
   cookie: { it: 'cookie', en: 'cookie' },
   places: { it: 'luoghi', en: 'destinations' },
-  stories: { it: 'storie', en: 'stories' },
+  stories: { it: 'matrimoni', en: 'weddings' },
   partners: { it: 'partner', en: 'partners' },
 } as const satisfies Record<string, Record<Lang, string>>;
 

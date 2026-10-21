@@ -181,7 +181,7 @@ export function getPosts(): Post[] {
   return load<Post[]>('posts', []).filter(isActive).sort(byDateDesc);
 }
 
-/** Lo slug degli articoli è bilingue: /blog/titolo-it ↔ /en/blog/title-en */
+/** Lo slug degli articoli è bilingue: /magazine/titolo-it ↔ /en/magazine/title-en */
 export function getPostBySlug(slug: string, lang: Lang): Post | null {
   return getPosts().find((post) => pick(post.slug, lang) === slug) ?? null;
 }

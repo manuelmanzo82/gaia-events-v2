@@ -30,7 +30,7 @@ import type { Event, Faq, Luogo, Post, Review, Service, Story } from './types';
  *     lingua solo se ha almeno un elemento tradotto in quella lingua.
  *
  * Il secondo punto evita le pagine indice vuote: finché nessun articolo ha la
- * versione inglese, /en/blog/ non viene generata. Si riaccende da sola appena
+ * versione inglese, /en/magazine/ non viene generata. Si riaccende da sola appena
  * arriva la prima traduzione, senza toccare il codice.
  */
 
@@ -133,4 +133,18 @@ function withDefault(langs: Lang[]): Lang[] {
 /** Scorciatoia leggibile per le rotte dinamiche. */
 export function existsIn(key: RouteKey, lang: Lang): boolean {
   return langsFor(key).includes(lang);
+}
+
+/**
+ * La voce sta nel menu principale? Come existsIn, con una regola in più
+ * (giro 11): «Matrimoni» compare solo con almeno due matrimoni pubblicati
+ * in quella lingua — uno solo fa indice povero. La pagina esiste comunque
+ * (footer, sitemap, link dalla home).
+ */
+export function inMenu(key: RouteKey, lang: Lang): boolean {
+  if (!existsIn(key, lang)) return false;
+  if (key === 'stories') {
+    return getStories().filter((item) => isPublishable(item, lang, STORY_FIELDS)).length >= 2;
+  }
+  return true;
 }

@@ -18,7 +18,7 @@ final class PostsController extends ResourceController
 
     protected function title(): string
     {
-        return 'Blog';
+        return 'Magazine';
     }
 
     protected function orderBy(): string
