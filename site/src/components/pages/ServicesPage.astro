@@ -21,14 +21,15 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SERVICE_FIELDS, STORY_FIELDS, existsIn, inMenu, langsFor } from '../../lib/availability';
-import { getHero, getPage, getServices, getSettings, getStories, isPublishable, text } from '../../lib/content';
+import { getFaqs, getHero, getPage, getServices, getSettings, getStories, isPublishable, text } from '../../lib/content';
 import { picture } from '../../lib/images';
-import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
+import { breadcrumbs, faqPage, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../servizi/Apertura.astro';
 import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
 import Destination from '../servizi/Destination.astro';
+import Domande from '../servizi/Domande.astro';
 import Metodo from '../servizi/Metodo.astro';
 import NonSoloMatrimoni from '../servizi/NonSoloMatrimoni.astro';
 import Partner from '../servizi/Partner.astro';
@@ -97,6 +98,12 @@ const linkOltre = inMenu('stories', lang) && tipiPubblicati.has('festa')
       ? { href: path('quote', lang), etichetta: t('cta.quote') }
       : null;
 
+// Domande frequenti: gruppo «servizi», attive, con domanda e risposta in
+// questa lingua (le EN mancano ancora: in inglese la sezione non c'è).
+const domande = getFaqs()
+  .filter((f) => f.active && f.group === 'servizi' && text(f.question, lang) && text(f.answer, lang))
+  .sort((a, b) => a.order - b.order);
+
 const meta = buildMeta({
   lang,
   routeKey: 'services',
@@ -112,7 +119,7 @@ const crumbs = [
   { name: titoloPagina, href: path('services', lang) },
 ];
 
-const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item, lang))];
+const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item, lang)), faqPage(domande, lang)];
 ---
 
 <BaseLayout lang={lang} routeKey="services" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
@@ -146,6 +153,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
     foto={picture(oltre?.image ?? null, lang, '(min-width: 64rem) min(36vw, 480px), 92vw')}
     link={linkOltre}
   />
+
+  <Domande lang={lang} titolo={text(settings.servizi?.faq?.title, lang) || t('nav.faq')} domande={domande} />
 </BaseLayout>
 
 <script>

@@ -99,6 +99,7 @@ export const UI = {
   'servizi.cosaInclude': { it: 'Cosa include', en: 'What’s included' },
   'servizi.indice': { it: 'I servizi', en: 'The services' },
   'servizi.tuttiPartner': { it: 'Tutti i partner', en: 'All partners' },
+  'servizi.tutteFaq': { it: 'Tutte le domande', en: 'All questions' },
   'servizi.vediFeste': { it: 'Guarda le feste', en: 'See the parties' },
   'servizi.vediAziendali': { it: 'Guarda gli eventi aziendali', en: 'See the corporate events' },
   'partner.cat.location': { it: 'Location', en: 'Venues' },

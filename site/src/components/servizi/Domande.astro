@@ -1,0 +1,170 @@
+---
+/**
+ * Servizi — 8. Domande frequenti: le FAQ del gruppo «servizi» tradotte in
+ * questa lingua (domanda e risposta), a fisarmonica con <details>: si
+ * aprono anche senza JS e restano leggibili dai motori. Il JSON-LD
+ * FAQPage lo costruisce ServicesPage con le stesse voci.
+ * Desktop: titolo a sinistra (con il link a tutte le FAQ se la pagina
+ * esiste), domande a destra. Mobile: impilato.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { text } from '../../lib/content';
+import type { Faq } from '../../lib/types';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  domande: Faq[];
+}
+
+const { lang, titolo, domande } = Astro.props;
+const t = useTranslations(lang);
+const tutte = existsIn('faq', lang);
+---
+
+{
+  domande.length > 0 && (
+    <section class="sv-domande" data-theme="light" aria-labelledby="titolo-domande">
+      <div class="sv-domande-griglia">
+        <div class="sv-domande-testa">
+          <h2 id="titolo-domande" class="font-display sv-domande-titolo" data-reveal="righe">
+            {titolo}
+          </h2>
+          {tutte && (
+            <p class="sv-domande-tutte">
+              <a class="link-filo" href={path('faq', lang)}>
+                {t('servizi.tutteFaq')}
+              </a>
+            </p>
+          )}
+        </div>
+
+        <div class="sv-domande-elenco">
+          {domande.map((d) => (
+            <details class="sv-domanda">
+              <summary>
+                <span class="sv-domanda-testo">{text(d.question, lang)}</span>
+                <span class="sv-domanda-segno" aria-hidden="true" />
+              </summary>
+              <p class="sv-risposta">{text(d.answer, lang)}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .sv-domande {
+    padding-block: var(--spacing-section);
+  }
+
+  .sv-domande-griglia {
+    display: grid;
+    gap: 2rem;
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .sv-domande-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .sv-domande-tutte {
+    margin: 1.25rem 0 0;
+  }
+
+  .sv-domande-elenco {
+    border-top: 1px solid var(--color-beige);
+  }
+
+  .sv-domanda {
+    border-bottom: 1px solid var(--color-beige);
+  }
+
+  .sv-domanda summary {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding-block: 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    line-height: 1.3;
+  }
+
+  .sv-domanda summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sv-domanda summary:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  /* Più che diventa meno: due filetti, quello verticale ruota. */
+  .sv-domanda-segno {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .sv-domanda-segno::before,
+  .sv-domanda-segno::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-bordeaux);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .sv-domanda-segno::after {
+    transform: rotate(90deg);
+  }
+
+  .sv-domanda[open] .sv-domanda-segno::after {
+    transform: rotate(0deg);
+  }
+
+  .sv-risposta {
+    max-width: 40rem;
+    margin: 0;
+    padding: 0 2.5rem 1.5rem 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  @media (min-width: 64rem) {
+    .sv-domande-griglia {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: start;
+    }
+
+    .sv-domande-testa {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 2rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sv-domanda-segno::before,
+    .sv-domanda-segno::after {
+      transition: none;
+    }
+  }
+</style>
