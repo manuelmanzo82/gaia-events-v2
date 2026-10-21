@@ -18,8 +18,11 @@
  * Foto: su desktop una colonna a sinistra con la foto del passaggio, in
  * dissolvenza incrociata; si caricano solo le foto dei passaggi visitati.
  * Su mobile (giro 10) la stessa foto in una fascia orizzontale bassa in
- * cima al passaggio: è nell'HTML iniziale con altezza fissa (niente CLS) e
- * loading="lazy", così su desktop, dove è nascosta, non si scarica.
+ * cima al passaggio: è nell'HTML iniziale con altezza fissa (niente CLS),
+ * con le sorgenti valide solo sotto i 64rem (<source media>) e un
+ * segnaposto vuoto come src, così su mobile parte subito (è l'LCP) e su
+ * desktop, dove è nascosta, non si scarica. Variante da 480w: per una
+ * fascia alta 160 px basta (sizes 270px).
  * Su mobile niente foto nei passaggi (resta solo nel ringraziamento):
  * la colonna è nascosta dal CSS e le immagini non vengono montate.
  *
@@ -986,7 +989,7 @@ export default function Preventivatore(props: Props): ReactNode {
           {fotoViste.map((k) => {
             const f = foto[k];
             if (!f) return null;
-            return <Immagine key={k} foto={f} attiva={k === step} sizes="calc(100vw - 2.5rem)" lazy />;
+            return <Immagine key={k} foto={f} attiva={k === step} sizes="270px" soloMobile />;
           })}
         </div>
 
@@ -1085,14 +1088,30 @@ export default function Preventivatore(props: Props): ReactNode {
   );
 }
 
-function Immagine({ foto, attiva, sizes, lazy = false }: { foto: Foto; attiva: boolean; sizes: string; lazy?: boolean }): ReactNode {
+/** Gif trasparente da 1 px: la src della fascia su desktop, dove non serve nulla. */
+const VUOTA = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const MOBILE = '(max-width: 63.98rem)';
+
+function Immagine({
+  foto,
+  attiva,
+  sizes,
+  lazy = false,
+  soloMobile = false,
+}: {
+  foto: Foto;
+  attiva: boolean;
+  sizes: string;
+  lazy?: boolean;
+  soloMobile?: boolean;
+}): ReactNode {
   return (
     <picture className={`pv-immagine${attiva ? ' attiva' : ''}`}>
       {foto.sources.map((s) => (
-        <source key={s.type} type={s.type} srcSet={s.srcset} sizes={sizes} />
+        <source key={s.type} type={s.type} srcSet={s.srcset} sizes={sizes} media={soloMobile ? MOBILE : undefined} />
       ))}
       <img
-        src={foto.src}
+        src={soloMobile ? VUOTA : foto.src}
         width={foto.width}
         height={foto.height}
         alt=""
