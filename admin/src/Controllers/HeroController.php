@@ -32,7 +32,7 @@ final class HeroController
         'services' => 'Servizi',
         'destinationWedding' => 'Destination wedding',
         'places' => 'Luoghi',
-        'stories' => 'Matrimoni',
+        'stories' => 'I miei eventi',
     ];
 
     private const MAX_VIDEO_BYTES = 8 * 1024 * 1024;

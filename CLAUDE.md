@@ -829,17 +829,19 @@ Fatto:
     ingombro), usato in header, footer e CTA; il tondo flottante ha il
     suo SVG a 44 con lo stesso tratto. Il toggle Menu/Chiudi mostra il
     contorno solo con :focus-visible.
-  - **Menu**: Chi sono · Servizi · Luoghi · Matrimoni · Dicono di me ·
-    Magazine + Preventivo (EN: About · Services · Destinations · Weddings
+  - **Menu**: Chi sono · Servizi · Luoghi · I miei eventi · Dicono di me ·
+    Magazine + Preventivo (EN: About · Services · Destinations · My events
     · Kind words · Magazine + Enquire). Filtrato con `inMenu()`
-    (availability.ts): come existsIn, ma Matrimoni solo con ≥ 2 matrimoni
-    pubblicati nella lingua. Contatti, Partner e FAQ solo nel footer.
+    (availability.ts), oggi = existsIn (la regola «≥ 2» è stata tolta:
+    basta un evento pubblicato). Contatti, Partner e FAQ solo nel footer.
   - **Rinomine** (routes.ts, le chiavi restano): blog → `/magazine/` ↔
-    `/en/magazine/`, stories → `/matrimoni/` ↔ `/en/weddings/`, reviews
-    EN → `/en/kind-words/`. File in `pages/` rinominati di conseguenza.
-    301 dai vecchi percorsi nel `.htaccess` (anche EN, indice e
-    dettaglio). Back office: sezioni «Magazine» e «Matrimoni» (URL admin
-    invariati), titolo della pagina indice via migrazione.
+    `/en/magazine/`, stories → `/eventi/` ↔ `/en/events/` («I miei
+    eventi» / «My events»), reviews EN → `/en/kind-words/`. File in
+    `pages/` rinominati di conseguenza. 301 dai vecchi percorsi nel
+    `.htaccess` (anche EN, indice e dettaglio; anche da matrimoni/weddings,
+    vissuti poche ore). Back office: sezioni «Magazine» e «I miei eventi»
+    (URL admin invariati: `/blog`, `/storie`), titolo della pagina indice
+    via migrazione.
   - **Dicono di me** (`ReviewsPage.astro`): tre blocchi — recensioni vere
     (fondo notte), Stampa (tabella `press`, export `stampa.json`), Hanno
     scelto Gaia (tabella `clients`, export `clienti.json`) — ognuno solo

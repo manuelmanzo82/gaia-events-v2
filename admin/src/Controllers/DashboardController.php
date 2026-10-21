@@ -27,7 +27,7 @@ final class DashboardController
                 'Stampa' => $this->count('press'),
                 'Clienti' => $this->count('clients'),
                 'Magazine' => $this->count('posts'),
-                'Matrimoni' => $this->count('stories'),
+                'I miei eventi' => $this->count('stories'),
                 'FAQ' => $this->count('faqs'),
                 'Immagini' => $this->count('media'),
             ],

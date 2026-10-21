@@ -149,15 +149,10 @@ export function existsIn(key: RouteKey, lang: Lang): boolean {
 }
 
 /**
- * La voce sta nel menu principale? Come existsIn, con una regola in più
- * (giro 11): «Matrimoni» compare solo con almeno due matrimoni pubblicati
- * in quella lingua — uno solo fa indice povero. La pagina esiste comunque
- * (footer, sitemap, link dalla home).
+ * La voce sta nel menu principale? Oggi coincide con existsIn (la regola
+ * «almeno due eventi» del giro 11 è stata tolta: basta uno pubblicato);
+ * resta il punto unico dove aggiungere regole solo di menu.
  */
 export function inMenu(key: RouteKey, lang: Lang): boolean {
-  if (!existsIn(key, lang)) return false;
-  if (key === 'stories') {
-    return getStories().filter((item) => isPublishable(item, lang, STORY_FIELDS)).length >= 2;
-  }
-  return true;
+  return existsIn(key, lang);
 }

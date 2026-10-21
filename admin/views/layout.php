@@ -76,7 +76,7 @@
   <a href="<?= e(admin_url('luoghi')) ?>">Luoghi</a>
   <a href="<?= e(admin_url('location')) ?>">Location</a>
   <a href="<?= e(admin_url('highlights')) ?>">Highlights</a>
-  <a href="<?= e(admin_url('storie')) ?>">Matrimoni</a>
+  <a href="<?= e(admin_url('storie')) ?>">I miei eventi</a>
   <a href="<?= e(admin_url('partner')) ?>">Partner</a>
   <a href="<?= e(admin_url('instagram')) ?>">Instagram</a>
   <a href="<?= e(admin_url('eventi')) ?>">Eventi</a>
