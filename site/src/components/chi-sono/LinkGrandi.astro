@@ -1,0 +1,185 @@
+---
+/**
+ * Chi sono — 8. Due link enormi (avorio): «I miei eventi» e «Servizi»,
+ * solo se esistono nella lingua. Da 64rem ogni link è una riga a tutta
+ * larghezza in display-xl; al passaggio del mouse (o al focus) compare la
+ * sua foto a destra. Sotto, due card con la foto 16:9 e l'etichetta.
+ */
+import type { PictureData } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  link: Array<{ href: string; etichetta: string; foto: PictureData | null }>;
+}
+
+const { link } = Astro.props;
+---
+
+{
+  link.length > 0 && (
+    <section class="link-grandi" data-theme="light">
+      <ul class="container-gaia link-lista" role="list">
+        {link.map((l) => (
+          <li class="link-voce" data-reveal="alto">
+            <a href={l.href} class="link-grande">
+              <span class="font-display link-etichetta">{l.etichetta}</span>
+              <span class="link-freccia" aria-hidden="true">→</span>
+              {l.foto && (
+                <span class="link-foto" aria-hidden="true">
+                  <Picture data={l.foto} class="link-img" />
+                </span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .link-grandi {
+    padding-block: var(--spacing-section);
+  }
+
+  .link-lista {
+    display: grid;
+    gap: 1.5rem;
+    margin: 0;
+    padding-block: 0;
+    list-style: none;
+  }
+
+  /* Mobile: card con foto 16:9 e, sotto, l'etichetta. */
+  .link-grande {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .link-foto {
+    order: -1;
+  }
+
+  .link-foto {
+    display: block;
+    overflow: hidden;
+    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+  }
+
+  .link-foto :global(.link-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none !important;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease-gaia);
+  }
+
+  .link-etichetta {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: var(--text-display);
+    line-height: 1.1;
+    font-weight: 400;
+  }
+
+  .link-freccia {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .link-lista {
+      gap: 0;
+    }
+
+    .link-voce {
+      border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 16%, transparent);
+    }
+
+    .link-voce:last-child {
+      border-bottom: 1px solid color-mix(in srgb, var(--color-inchiostro) 16%, transparent);
+    }
+
+    .link-grande {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      padding-block: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    .link-foto {
+      order: 0;
+    }
+
+    .link-etichetta {
+      margin: 0;
+      font-size: var(--text-display-xl);
+      line-height: var(--text-display-xl--line-height);
+      transition:
+        transform 0.6s var(--ease-gaia),
+        color 0.4s var(--ease-gaia);
+    }
+
+    .link-freccia {
+      display: block;
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--color-bordeaux);
+      opacity: 0;
+      transform: translateX(-12px);
+      transition:
+        opacity 0.4s var(--ease-gaia),
+        transform 0.6s var(--ease-gaia);
+    }
+
+    /* La foto compare a destra, sopra la riga, al passaggio. */
+    .link-foto {
+      position: absolute;
+      top: 50%;
+      right: 12%;
+      z-index: 1;
+      width: 26vw;
+      max-width: 26rem;
+      aspect-ratio: 4 / 3;
+      border-radius: 16px;
+      opacity: 0;
+      transform: translateY(-50%) rotate(-2deg) scale(0.96);
+      pointer-events: none;
+      transition:
+        opacity 0.5s var(--ease-gaia),
+        transform 0.8s var(--ease-gaia);
+    }
+
+    .link-grande:hover .link-foto,
+    .link-grande:focus-visible .link-foto {
+      opacity: 1;
+      transform: translateY(-50%) rotate(0deg) scale(1);
+    }
+
+    .link-grande:hover .link-etichetta,
+    .link-grande:focus-visible .link-etichetta {
+      transform: translateX(0.5rem);
+      color: var(--color-bordeaux);
+    }
+
+    .link-grande:hover .link-freccia,
+    .link-grande:focus-visible .link-freccia {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link-etichetta,
+    .link-freccia,
+    .link-foto,
+    .link-foto :global(.link-img) {
+      transition: none;
+    }
+  }
+</style>

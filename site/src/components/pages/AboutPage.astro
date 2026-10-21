@@ -22,7 +22,7 @@ import { BUSINESS, type Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { langsFor } from '../../lib/availability';
+import { existsIn, langsFor } from '../../lib/availability';
 import { getClients, getHighlights, getPage, getPress, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
@@ -30,6 +30,7 @@ import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
 import Citazione from '../chi-sono/Citazione.astro';
 import Clienti from '../chi-sono/Clienti.astro';
+import LinkGrandi from '../chi-sono/LinkGrandi.astro';
 import Numeri from '../chi-sono/Numeri.astro';
 import Percorso from '../chi-sono/Percorso.astro';
 import Valori from '../chi-sono/Valori.astro';
@@ -91,6 +92,16 @@ const fotoCitazione = picture(settings.about?.photos?.quote ?? null, lang, '100v
 const primaStampa = getPress().find((p) => text(p.excerpt, lang));
 const stampa = primaStampa ? { estratto: text(primaStampa.excerpt, lang), testata: primaStampa.outlet, url: primaStampa.url } : null;
 
+// Due link enormi, solo verso pagine che esistono in questa lingua.
+const linkGrandi = (
+  [
+    { key: 'stories' as const, etichetta: t('nav.stories'), foto: settings.about?.photos?.events ?? null },
+    { key: 'services' as const, etichetta: t('nav.services'), foto: settings.about?.photos?.services ?? null },
+  ] as const
+)
+  .filter((l) => existsIn(l.key, lang))
+  .map((l) => ({ href: path(l.key, lang), etichetta: l.etichetta, foto: picture(l.foto, lang, '(min-width: 64rem) 26vw, 100vw') }));
+
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).
 const fotoApertura = picture(getHighlights('chi-sono')[0]?.image ?? settings.about.image, lang, '100vw');
@@ -138,6 +149,8 @@ const jsonLd = [
   <Citazione lang={lang} citazione={citazione} foto={fotoCitazione} stampa={stampa} />
 
   <Clienti lang={lang} clienti={getClients()} />
+
+  <LinkGrandi link={linkGrandi} />
 </BaseLayout>
 
 <script>
