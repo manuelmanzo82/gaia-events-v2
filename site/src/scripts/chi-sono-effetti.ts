@@ -53,6 +53,10 @@ function parolePerParola(): void {
   for (const el of document.querySelectorAll<HTMLElement>('[data-parole]')) {
     // aria: 'none' come in motion.ts (niente aria-label sui <p>).
     const split = SplitText.create(el, { type: 'words', wordsClass: 'parola', aria: 'none' });
+    // Lo stato attenuato (0,15) si applica solo quando il testo entra dal
+    // basso (immediateRender: false, trigger dal bordo inferiore): al
+    // caricamento le parole sono piene, così il contrasto misurato da
+    // Lighthouse/axe è quello vero e non c'è nessun lampo visibile.
     gsap.fromTo(
       split.words,
       { opacity: 0.15 },
@@ -60,10 +64,11 @@ function parolePerParola(): void {
         opacity: 1,
         ease: 'none',
         stagger: 0.04,
+        immediateRender: false,
         scrollTrigger: {
           trigger: el,
-          start: 'top 78%',
-          end: 'bottom 45%',
+          start: 'top bottom',
+          end: 'bottom 50%',
           scrub: true,
         },
       },

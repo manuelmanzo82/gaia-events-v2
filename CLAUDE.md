@@ -888,6 +888,41 @@ Fatto:
     `media` (il legame era solo in event_images). I seed storici in
     `admin/sql/seed-*.sql` citano ancora `events`: non vanno più
     eseguiti così come sono.
+- **Fase 4.2 — pagina Chi sono** (21/10/2026, rif. sarahhaywood.com/about):
+  `AboutPage.astro` + componenti in `components/chi-sono/`, una sezione
+  per file, ognuna viva solo con i suoi contenuti:
+  1. `Apertura` — primo highlight «chi-sono» a 100svh (sotto 48rem
+     `object-position: 38% 30%` forzato per tenere fuori il watermark VD:
+     da togliere con il ritratto vero), nome, tagline + «dal ANNO»
+     (`about.since`);
+  2. `Voce` — primi due paragrafi del body in grande, SplitText per
+     parola e scrub (`[data-parole]`), terzo paragrafo in lead, firma;
+  3. `Numeri` — `about.stats.1-4` (valore + etichetta), contatori
+     `[data-contatore]`; vuoti sullo staging → sezione assente;
+  4. `Percorso` — blocco «timeline»: ≥64rem striscia `[data-orizzontale]`
+     con pin (classe `html.motion-attivo` dice al CSS che il pin c'è;
+     senza, overflow a mano), sotto timeline verticale;
+  5. `Valori` — blocco «values» in sticky split, foto = highlight
+     «chi-sono» dal secondo in poi con `maxWidth ≥ 480`, crossfade via
+     IntersectionObserver; la colonna foto ha `align-self: stretch`
+     (altrimenti lo sticky non ha spazio);
+  6. `Citazione` — blockquote del body su `about.photos.quote`, corpo
+     contenuto (4 righe a 1440, 5 a 390), parallasse; se una voce Stampa
+     ha l'estratto nella lingua prende il suo posto;
+  7. `Clienti` — loghi dall'entità Clienti; 8. `LinkGrandi` — I miei
+     eventi / Servizi con `about.photos.events/services` al passaggio;
+  9. `CtaFinale` della home riusata.
+  Testi: `pages.about` (body spezzato con regex in paragrafi e
+  blockquote), blocchi, `settings.about.*`, tagline. Migrazione
+  `2026-10-21-chi-sono.sql` (gruppo impostazioni «chi sono», meta
+  title/description IT/EN in bozza). JSON-LD `aboutPage()` + `person()`
+  (`jsonld.ts`, `#gaia`, worksFor → LocalBusiness) + breadcrumb.
+  Effetti in `scripts/chi-sono-effetti.ts` dopo `gaia:motion-pronta`,
+  pin/scrub solo ≥64rem, tutto spento con reduced-motion. Mancano i
+  numeri, l'anno, le foto delle tappe (DA-CHIEDERE n. 13, priorità alta).
+  Verifica: `chisono-shots.js`, `*-motion.js`, `pagina-shots.js` nello
+  scratchpad; per vedere Numeri e Clienti servono dati di prova nei JSON
+  gitignorati, poi si rimette l'export dello staging.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
