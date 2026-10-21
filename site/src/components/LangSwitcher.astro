@@ -34,7 +34,7 @@ const targets = LANGS.filter((candidate) => candidate !== lang).map((candidate) 
       : (switchLang(Astro.url.pathname, candidate) ?? path(routeKey, candidate))
     : path('home', candidate);
 
-  return { lang: candidate, href, tradotta, label: LANG_NAME[candidate] };
+  return { lang: candidate, href, tradotta, label: candidate.toUpperCase(), nome: LANG_NAME[candidate] };
 });
 ---
 
@@ -42,11 +42,11 @@ const targets = LANGS.filter((candidate) => candidate !== lang).map((candidate) 
   {
     targets.map((target) =>
       target.tradotta ? (
-        <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate">
+        <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate" aria-label={target.nome} title={target.nome}>
           {target.label}
         </a>
       ) : (
-        <a href={target.href} lang={target.lang}>
+        <a href={target.href} lang={target.lang} aria-label={target.nome} title={target.nome}>
           {target.label}
         </a>
       ),
