@@ -804,7 +804,8 @@ Fatto:
   - **Preventivatore**: titolo con focus programmatico ma senza contorno;
     ospiti come campo di testo numerico senza spinner, largo come gli altri.
 - **Giro 11 — ritocchi mobile** (21/10/2026):
-  - **Header mobile** (sotto 64rem): scendendo si nasconde (`nascosto`,
+  - **Header mobile** (sotto 64rem) — SUPERATO il 21/10 sera, vedi «Header
+    mobile sempre visibile» più sotto. Prima: scendendo si nascondeva (`nascosto`,
     translateY(-100%)), risalendo torna con fondo pieno (`pieno`: avorio, o
     notte sul tema scuro; niente ombra, sfumatura `::before` e drop-shadow
     del logo spente); sotto 24 px di scroll torna trasparente; a menu
@@ -980,6 +981,17 @@ Fatto:
     calcola le schede. La fisarmonica dei valori (`[data-valori]`) non
     esiste più. Foto dei valori: niente ospiti né nomi leggibili (il menù
     della mise en place mostrava i nomi degli sposi a 1920).
+- **Header mobile sempre visibile** (21/10/2026, tutte le pagine, sotto
+  64rem): niente più `nascosto`. In cima trasparente con il colore unico
+  della sezione; oltre 24 px di scroll classe `pieno` (torna trasparente
+  sotto 8 px: isteresi per lo scroll elastico di iOS) = barra da 60 px,
+  logo `--logo-h`/`--logo-h-md` a 44 px, fondo avorio o notte dal tema.
+  `padding-top` con `env(safe-area-inset-top)` (oggi 0: niente
+  viewport-fit=cover). Gli sticky mobili stanno sotto `--altezza-header`
+  (96), più della barra piena. **Causa del logo che spariva**: la regola
+  `.pieno::before, .pieno .logo-gaia svg { opacity: 0 }` del giro 11
+  spegneva anche il logo; l'opacità 0 va solo su `::before`. Verifica:
+  `header-mobile.js` nello scratchpad.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with

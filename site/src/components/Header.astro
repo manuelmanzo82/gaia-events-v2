@@ -142,26 +142,24 @@ const preventivo = existsIn('quote', lang);
 
     toggle.addEventListener('click', () => imposta(!aperto));
 
-    // Mobile: scendendo il header si nasconde, salendo ricompare con un
-    // fondo pieno nel colore della sezione (avorio o notte); in cima alla
-    // pagina torna senza fondo. Desktop invariato.
+    // Mobile: il header è sempre visibile. In cima alla pagina è
+    // trasparente (colore unico della sezione, come su desktop); appena si
+    // scorre diventa una barra piena da 60 px (avorio o notte secondo la
+    // sezione) con il logo più piccolo. Isteresi 24/8 px: lo scroll
+    // elastico di iOS in cima (scrollY negativo o che rimbalza) non la fa
+    // lampeggiare. Desktop invariato.
     const mobile = window.matchMedia('(max-width: 63.98rem)');
-    let ultimo = window.scrollY;
     let inAttesa = false;
     const aggiornaScorrimento = (): void => {
       inAttesa = false;
       const y = window.scrollY;
       if (!mobile.matches || aperto) {
-        header.classList.remove('nascosto', 'pieno');
-      } else if (y < 24) {
-        header.classList.remove('nascosto', 'pieno');
-      } else if (y > ultimo + 4) {
-        header.classList.add('nascosto', 'pieno');
-      } else if (y < ultimo - 4) {
-        header.classList.remove('nascosto');
+        header.classList.remove('pieno');
+      } else if (y > 24) {
         header.classList.add('pieno');
+      } else if (y < 8) {
+        header.classList.remove('pieno');
       }
-      ultimo = y;
     };
     window.addEventListener(
       'scroll',
@@ -172,6 +170,10 @@ const preventivo = existsIn('quote', lang);
       },
       { passive: true },
     );
+    // Anche al caricamento (una pagina ricaricata a metà parte già piena)
+    // e quando il menu si chiude (aperto toglie la barra piena).
+    aggiornaScorrimento();
+    toggle.addEventListener('click', aggiornaScorrimento);
     mobile.addEventListener('change', aggiornaScorrimento);
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') imposta(false);
@@ -461,21 +463,30 @@ const preventivo = existsIn('quote', lang);
     }
   }
 
-  /* Mobile (giro 11): nascosto scendendo, pieno risalendo, trasparente in cima. */
+  /* Mobile: sempre visibile. In cima trasparente; scorrendo barra piena
+     da 60 px (logo a 44 px). La safe-area di iOS si aggiunge sopra (oggi
+     è 0: il viewport non ha viewport-fit=cover). Gli sticky (valori,
+     preventivatore) stanno sotto --altezza-header (96 px), più alta della
+     barra piena: non le finiscono mai sotto.
+
+     Nota (giro correttivo di Chi sono): qui c'era la regola
+     «.pieno::before, .pieno .logo-gaia svg { opacity: 0 }» che spegneva
+     anche il logo: è per quello che, quando la barra ricompariva, il logo
+     mancava. L'opacità 0 va SOLO sulla sfumatura ::before. */
   @media (max-width: 63.98rem) {
     .site-header {
+      padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
       transition:
-        transform 0.35s var(--ease-gaia),
-        background-color 0.3s var(--ease-gaia),
+        background-color 0.35s var(--ease-gaia),
         color 0.5s var(--ease-gaia),
-        text-shadow 0.5s var(--ease-gaia);
-    }
-
-    .site-header.nascosto {
-      transform: translateY(-100%);
+        text-shadow 0.5s var(--ease-gaia),
+        padding 0.35s var(--ease-gaia);
     }
 
     .site-header.pieno {
+      --logo-h: 44px;
+      --logo-h-md: 44px;
+      padding-bottom: 0.5rem;
       background: var(--color-avorio);
       text-shadow: none;
     }
@@ -484,10 +495,18 @@ const preventivo = existsIn('quote', lang);
       background: var(--color-notte);
     }
 
-    .site-header.pieno::before,
+    .site-header.pieno::before {
+      opacity: 0;
+    }
+
     .site-header.pieno :global(.logo-gaia svg) {
       filter: none;
-      opacity: 0;
+    }
+
+    :global(.site-header .logo-gaia svg) {
+      transition:
+        filter 0.5s var(--ease-gaia),
+        height 0.35s var(--ease-gaia);
     }
   }
 
@@ -676,7 +695,6 @@ const preventivo = existsIn('quote', lang);
   @media (prefers-reduced-motion: reduce) {
     .site-header::before,
     .site-header,
-    .site-header.nascosto,
     .menu,
     .menu-voci a::after,
     .menu-toggle-linee i,
