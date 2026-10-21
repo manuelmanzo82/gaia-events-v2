@@ -29,6 +29,7 @@ import Apertura from '../servizi/Apertura.astro';
 import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
 import Destination from '../servizi/Destination.astro';
+import Metodo from '../servizi/Metodo.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
 interface Props {
@@ -67,6 +68,10 @@ const indice = servizi.map((s, i) => ({
 // Blocchi della pagina (page_sections): intro, process, cta.
 const blocco = (kind: string) => (page?.blocks ?? []).find((b) => b.kind === kind) ?? null;
 const intro = blocco('intro');
+const processo = blocco('process');
+const passi = (processo?.items ?? [])
+  .map((i) => ({ titolo: text(i.title, lang), testo: text(i.text, lang), image: i.image ?? null }))
+  .filter((i) => i.titolo);
 
 // Capitoli: tutti i servizi tranne la destination, che ha la sua fascia.
 const capitoli = servizi.filter((s) => s.slug !== 'destination');
@@ -111,6 +116,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
     servizi={servizi}
     titolo={text(settings.servizi?.compare?.title, lang) || t('nav.services')}
   />
+
+  <Metodo lang={lang} titolo={text(processo?.title, lang)} passi={passi} />
 </BaseLayout>
 
 <script>

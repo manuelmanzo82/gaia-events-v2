@@ -9,7 +9,8 @@
  *                             la foto interna torna in scala; scrub legato
  *                             allo scroll. "piccola" = un po' più tardi
  *   [data-filo]               filetto oro verticale che si riempie mentre
- *                             la sezione dei passi attraversa lo schermo
+ *                             i passi ([data-filo-traccia]) attraversano
+ *                             lo schermo
  *
  * Con prefers-reduced-motion niente del tutto: le pagine sono complete
  * senza JS (nessuno stato iniziale nascosto nel CSS: gli stati di partenza
@@ -66,7 +67,7 @@ function maschere(): void {
 
 function fili(): void {
   for (const filo of document.querySelectorAll<HTMLElement>('[data-filo]')) {
-    const sezione = filo.closest<HTMLElement>('section') ?? filo;
+    const sezione = filo.closest<HTMLElement>('[data-filo-traccia]') ?? filo.closest<HTMLElement>('section') ?? filo;
     gsap.fromTo(
       filo,
       { scaleY: 0 },

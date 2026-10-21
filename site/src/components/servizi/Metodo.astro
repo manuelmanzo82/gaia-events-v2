@@ -1,0 +1,293 @@
+---
+/**
+ * Servizi — 5. Come lavoro: il blocco «process» della pagina (cinque
+ * passi, ognuno con titolo, testo e foto nella chiave media).
+ *
+ * Desktop (≥64rem): testo a sinistra, a destra una foto fissa (sticky
+ * sotto il header, colonna ≤ 520 px) che cambia in dissolvenza col passo
+ * attivo; il passo attivo lo segna un IntersectionObserver qui sotto. Un
+ * filetto oro verticale accanto ai passi si riempie con lo scroll
+ * ([data-filo], scrub in servizi-effetti.ts).
+ * Mobile: passi impilati, ognuno con la sua foto, stesso filetto.
+ * Senza JS o con reduced-motion: tutto il testo visibile, la prima foto
+ * ferma, filetto pieno.
+ */
+import type { Lang } from '../../config/site';
+import { picture } from '../../lib/images';
+import type { Image } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  passi: Array<{ titolo: string; testo: string; image: Image | null }>;
+}
+
+const { lang, titolo, passi } = Astro.props;
+
+// La cornice desktop è 4:5: una foto orizzontale in «cover» è larga circa
+// 1,5 × l'altezza della cornice, una verticale quanto la colonna.
+const orizzontale = (i: Image | null) => !!i && (i.width ?? 0) > (i.height ?? 0);
+const elenco = passi.map((p, i) => ({
+  ...p,
+  numero: String(i + 1).padStart(2, '0'),
+  fotoMobile: picture(p.image, lang, '92vw'),
+  fotoDesktop: picture(
+    p.image,
+    lang,
+    orizzontale(p.image) ? '(min-width: 64rem) min(108vh, 980px), 1px' : '(min-width: 64rem) min(36vw, 520px), 1px',
+  ),
+}));
+const conFoto = elenco.some((p) => p.fotoDesktop);
+---
+
+{
+  elenco.length > 0 && (
+    <section class="sv-metodo" data-theme="light" aria-labelledby="titolo-metodo" data-metodo>
+      <div class="sv-metodo-griglia">
+        <div class="sv-metodo-colonna">
+          {titolo && (
+            <h2 id="titolo-metodo" class="font-display sv-metodo-titolo" data-reveal="righe">
+              {titolo}
+            </h2>
+          )}
+
+          <div class="sv-passi-traccia" data-filo-traccia>
+            <span class="sv-filo" aria-hidden="true">
+              <span class="sv-filo-pieno" data-filo />
+            </span>
+            <ol class="sv-passi" role="list">
+              {elenco.map((p, i) => (
+                <li class="sv-passo" data-passo={i} data-attivo={i === 0 ? '' : undefined}>
+                  <span class="sv-passo-punto" aria-hidden="true" />
+                  {p.fotoMobile && (
+                    <figure class="sv-passo-foto">
+                      <Picture data={p.fotoMobile} cap={false} class="sv-metodo-img" />
+                    </figure>
+                  )}
+                  <p class="font-display sv-passo-numero" aria-hidden="true">
+                    {p.numero}
+                  </p>
+                  <h3 class="font-display sv-passo-titolo">{p.titolo}</h3>
+                  {p.testo && <p class="sv-passo-testo">{p.testo}</p>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+
+        {conFoto && (
+          <div class="sv-metodo-foto" aria-hidden="true">
+            <div class="sv-metodo-cornice">
+              {elenco.map(
+                (p, i) =>
+                  p.fotoDesktop && (
+                    <figure class="sv-metodo-scatto" data-scatto={i} data-attivo={i === 0 ? '' : undefined}>
+                      <Picture data={p.fotoDesktop} cap={false} class="sv-metodo-img" />
+                    </figure>
+                  ),
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Passo attivo: quello che attraversa una fascia a un terzo dello
+  // schermo, all'altezza della parte alta della foto.
+  // Segna il passo (punto pieno) e la foto corrispondente (dissolvenza).
+  const sezione = document.querySelector<HTMLElement>('[data-metodo]');
+  if (sezione && 'IntersectionObserver' in window) {
+    const passi = [...sezione.querySelectorAll<HTMLElement>('[data-passo]')];
+    const scatti = [...sezione.querySelectorAll<HTMLElement>('[data-scatto]')];
+    const attiva = (n: string) => {
+      for (const el of passi) el.toggleAttribute('data-attivo', Number(el.dataset.passo) <= Number(n));
+      for (const el of scatti) el.toggleAttribute('data-attivo', el.dataset.scatto === n);
+    };
+    const io = new IntersectionObserver(
+      (righe) => {
+        for (const r of righe) if (r.isIntersecting) attiva((r.target as HTMLElement).dataset.passo ?? '0');
+      },
+      { rootMargin: '-30% 0px -65% 0px', threshold: 0 },
+    );
+    for (const p of passi) io.observe(p);
+  }
+</script>
+
+<style>
+  .sv-metodo {
+    padding-block: var(--spacing-section);
+    background: var(--color-bianco-caldo);
+  }
+
+  .sv-metodo-griglia {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    margin: 0 auto;
+  }
+
+  .sv-metodo-titolo {
+    margin: 0 0 clamp(2.5rem, 6vh, 4rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  /* — Filetto: traccia grigia, riempimento oro (scaleY dall'alto) — */
+  .sv-passi-traccia {
+    position: relative;
+    padding-left: 2.5rem;
+  }
+
+  .sv-filo {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    width: 1px;
+    background: color-mix(in srgb, var(--color-inchiostro) 15%, transparent);
+  }
+
+  .sv-filo-pieno {
+    position: absolute;
+    inset: 0;
+    background: var(--color-oro);
+    transform-origin: top;
+  }
+
+  .sv-passi {
+    display: grid;
+    gap: clamp(3rem, 8vh, 4.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sv-passo {
+    position: relative;
+  }
+
+  .sv-passo-punto {
+    position: absolute;
+    top: 0.55rem;
+    left: calc(-2.5rem + 0.5rem - 5px);
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--color-oro);
+    border-radius: 50%;
+    background: var(--color-bianco-caldo);
+    transition: background-color 0.4s var(--ease-gaia);
+  }
+
+  .sv-passo[data-attivo] .sv-passo-punto {
+    background: var(--color-oro);
+  }
+
+  .sv-passo-foto {
+    margin: 0 0 1.5rem;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 3 / 2;
+  }
+
+  .sv-metodo-img,
+  .sv-metodo :global(picture),
+  .sv-metodo :global(.sv-metodo-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .sv-passo-numero {
+    margin: 0;
+    font-size: 1.25rem;
+    font-style: italic;
+    line-height: 1;
+    color: var(--color-oro-testo);
+  }
+
+  .sv-passo-titolo {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.15;
+    font-weight: 400;
+  }
+
+  .sv-passo-testo {
+    max-width: 32rem;
+    margin: 0.75rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .sv-metodo-foto {
+    display: none;
+  }
+
+  /* — Desktop: foto fissa a destra che cambia col passo — */
+  @media (min-width: 64rem) {
+    .sv-metodo-griglia {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) min(36vw, 520px);
+      gap: clamp(3rem, 7vw, 8rem);
+      max-width: 76rem;
+    }
+
+    .sv-passo-foto {
+      display: none;
+    }
+
+    /* Ogni passo occupa buona parte dello schermo: la foto ha il tempo
+       di restare e di cambiare. */
+    .sv-passi {
+      gap: 0;
+    }
+
+    .sv-passo {
+      min-height: 55vh;
+      min-height: 55svh;
+    }
+
+    .sv-passo:last-child {
+      min-height: 0;
+      padding-bottom: 2rem;
+    }
+
+    .sv-metodo-foto {
+      display: block;
+      align-self: stretch;
+    }
+
+    .sv-metodo-cornice {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 1.5rem);
+      width: 100%;
+      height: min(calc(100svh - var(--altezza-header, 146px) - 4rem), 650px);
+      overflow: hidden;
+      border-radius: 16px;
+      background: var(--color-beige);
+    }
+
+    .sv-metodo-scatto {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      transition: opacity 0.8s var(--ease-gaia);
+    }
+
+    .sv-metodo-scatto[data-attivo] {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sv-passo-punto,
+    .sv-metodo-scatto {
+      transition: none;
+    }
+  }
+</style>
