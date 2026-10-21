@@ -1,5 +1,8 @@
 name: Build e deploy del sito
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Pubblicazione {0}', inputs.target) || github.event.head_commit.message }}
+# Titolo della run: «Pubblicazione <ambiente>» per quelle avviate dal back
+# office (il pannello le riconosce così); vuoto per i push, così GitHub
+# tiene il suo titolo predefinito (la prima riga del commit).
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Pubblicazione {0}', inputs.target) || '' }}
 
 # Si avvia in tre modi, che passano tutti da qui:
 #  - a mano, da Actions, scegliendo l'ambiente;

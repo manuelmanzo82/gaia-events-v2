@@ -126,6 +126,13 @@ final class Publisher
                 continue;
             }
 
+            // Annullata = sostituita da una run più nuova dello stesso
+            // ambiente (concurrency): non è un errore, si guarda la
+            // precedente.
+            if (($run['conclusion'] ?? '') === 'cancelled') {
+                continue;
+            }
+
             $stato = match (true) {
                 ($run['status'] ?? '') !== 'completed' => 'in_corso',
                 ($run['conclusion'] ?? '') === 'success' => 'riuscita',

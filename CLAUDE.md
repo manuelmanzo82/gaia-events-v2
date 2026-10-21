@@ -188,6 +188,19 @@ Mai nel codice, mai nei commit.
   (401 della vecchia basic auth) e la build del ramo è tornata solo con un
   push su `design/home`. Da sistemare a mano in `config.php` (chiave
   `github.ref`); quando `design/home` verrà fuso in `main`, rimettere `main`.
+- **Export robusto** (21/10/2026): lo scaricamento dei contenuti nella Action
+  sta in `.github/scripts/scarica-contenuti.sh` — timeout 180 s per chiamata
+  (30 per la connessione), nuovi tentativi dopo 10, 30, 60 s (1 + 3), niente
+  nuovi tentativi su 401/403/404; se fallisce, annotazione e riepilogo
+  «Pubblicazione non riuscita». Il pannello del back office
+  (`Publisher::ultimaPubblicazione()`) legge da GitHub l'ultima run con
+  titolo «Pubblicazione <ambiente>» (`run-name` in deploy.yml, solo per i
+  workflow_dispatch) e mostra in corso / riuscita / «Pubblicazione non
+  riuscita, riprova tra qualche minuto»; le run annullate (sostituite da una
+  più nuova) si saltano. Provato il 21/10 sullo staging con un aggancio
+  temporaneo in export.php (chiamate lente da 200 s e 503), poi tolto.
+  Per provarlo da locale serve `jq` (sul PC non c'è: nello scratchpad c'è
+  un sostituto minimo, `jq-finto/`).
 - Il `.gitignore` ignora `*.sql`: la riga `!admin/sql/migrations/*.sql` è
   quella che tiene le migrazioni in repo (la prima, di fase 2, era rimasta
   fuori fino al 16/10).
