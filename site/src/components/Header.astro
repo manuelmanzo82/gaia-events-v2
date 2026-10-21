@@ -20,12 +20,11 @@ import LogoGaia from './LogoGaia.astro';
  * Il logo resta sempre alla misura originale (130 px desktop, 80 px
  * mobile): allo scroll cambia solo colore, mai dimensione.
  *
- * Menu corto: Chi sono · Servizi · Luoghi · Storie · Blog · Contatti, più
- * Preventivo e lingua; il resto sta nel footer. Su desktop le voci sono
- * in riga; sotto gli 80rem un pulsante apre un pannello a tutto schermo
- * (a 15 px le voci, Preventivo e lingua accanto al logo chiedono ~1200 px).
- * Le voci sono filtrate con existsIn(): niente link a pagine che in
- * questa lingua non esistono.
+ * Menu (giro 11): Chi sono · Servizi · Luoghi · Matrimoni · Dicono di me ·
+ * Magazine, più Preventivo e lingua. Contatti, Partner e FAQ stanno nel
+ * footer. Su desktop le voci sono in riga; sotto gli 80rem un pulsante
+ * apre un pannello a tutto schermo. Le voci sono filtrate con existsIn():
+ * niente link a pagine che in questa lingua non esistono.
  */
 interface Props {
   lang: Lang;
@@ -42,8 +41,8 @@ const VOCI: Array<{ key: RouteKey; label: UIKey }> = [
   { key: 'services', label: 'nav.services' },
   { key: 'places', label: 'nav.places' },
   { key: 'stories', label: 'nav.stories' },
+  { key: 'reviews', label: 'nav.reviews' },
   { key: 'blog', label: 'nav.blog' },
-  { key: 'contact', label: 'nav.contact' },
 ];
 
 const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
