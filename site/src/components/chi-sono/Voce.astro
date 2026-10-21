@@ -1,0 +1,107 @@
+---
+/**
+ * Chi sono — 2. La sua voce (avorio): i primi paragrafi del testo della
+ * pagina in grande, in prima persona, rivelati parola per parola allo
+ * scroll (opacità 0,15 → 1, scrub in chi-sono-effetti.ts, [data-parole]);
+ * sotto, il paragrafo che resta in corpo lead e la firma «Gaia» in
+ * corsivo. Con reduced-motion il testo è pieno fin dall'inizio: lo stato
+ * iniziale lo imposta GSAP, non il CSS.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+
+interface Props {
+  lang: Lang;
+  /** Paragrafi in grande (testo puro, già senza tag). */
+  grandi: string[];
+  /** Paragrafi in corpo lead, dopo quelli grandi. */
+  resto: string[];
+}
+
+const { lang, grandi, resto } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  grandi.length > 0 && (
+    <section id="voce" class="voce" data-theme="light">
+      <div class="container-gaia voce-interno">
+        <div class="voce-grande font-display">
+          {grandi.map((p) => (
+            <p data-parole>{p}</p>
+          ))}
+        </div>
+        {(
+          <div class="voce-coda">
+            {resto.map((p) => (
+              <p class="text-lead voce-resto" data-reveal="alto">
+                {p}
+              </p>
+            ))}
+            <p class="font-display voce-firma" data-reveal="alto" aria-hidden="true">
+              {t('cta.firma')}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .voce {
+    padding-block: var(--spacing-section);
+  }
+
+  /* Grande ma non da titolo: una via di mezzo fra lead e display, così
+     due paragrafi restano in una schermata e mezza a 1440. */
+  .voce-grande p {
+    max-width: 36ch;
+    margin: 0 0 1em;
+    font-size: clamp(1.625rem, 1.1rem + 1.9vw, 2.75rem);
+    line-height: 1.25;
+    font-weight: 400;
+    text-wrap: pretty;
+  }
+
+  .voce-grande p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Le parole sono span di SplitText: nessuna riga tagliata, niente
+     overflow hidden (le discendenti dei titoli restano intere). */
+  .voce-grande :global(.parola) {
+    display: inline-block;
+    will-change: opacity;
+  }
+
+  .voce-coda {
+    max-width: 40rem;
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .voce-resto {
+    margin: 0 0 1rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .voce-firma {
+    margin: 1.5rem 0 0;
+    font-size: 2.25rem;
+    font-style: italic;
+    color: var(--color-bordeaux);
+  }
+
+  @media (min-width: 64rem) {
+    .voce-interno {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: end;
+    }
+
+    .voce-coda {
+      margin-top: 0;
+    }
+  }
+</style>

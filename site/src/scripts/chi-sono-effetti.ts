@@ -5,6 +5,8 @@
  *
  *   [data-parallasse="da a"]  la foto scorre da yPercent `da` a `a`
  *                             mentre la sua sezione attraversa lo schermo
+ *   [data-parole]             testo rivelato parola per parola allo scroll
+ *                             (opacità 0,15 → 1, SplitText + scrub)
  *
  * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale.
  * Con prefers-reduced-motion niente del tutto: le pagine sono complete
@@ -12,6 +14,7 @@
  */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
 import { riduciMotion } from './motion-leggero';
 
@@ -39,13 +42,36 @@ function parallasse(): void {
   }
 }
 
+function parolePerParola(): void {
+  for (const el of document.querySelectorAll<HTMLElement>('[data-parole]')) {
+    // aria: 'none' come in motion.ts (niente aria-label sui <p>).
+    const split = SplitText.create(el, { type: 'words', wordsClass: 'parola', aria: 'none' });
+    gsap.fromTo(
+      split.words,
+      { opacity: 0.15 },
+      {
+        opacity: 1,
+        ease: 'none',
+        stagger: 0.04,
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 78%',
+          end: 'bottom 45%',
+          scrub: true,
+        },
+      },
+    );
+  }
+}
+
 /** Da chiamare una volta, dopo initMotion(). */
 export function initChiSonoEffetti(): void {
   if (riduciMotion()) return;
 
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
   parallasse();
+  parolePerParola();
 
   const mm = gsap.matchMedia();
   mm.add(DESKTOP, () => {
