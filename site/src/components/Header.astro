@@ -277,8 +277,10 @@ const preventivo = existsIn('quote', lang);
     gap: 1.25rem;
   }
 
+  /* Tinte esplicite per tema: con currentColor all'hover la tinta si
+     risolverebbe nel colore del testo già cambiato (fondo e testo uguali). */
   .menu-cta {
-    --btn-tinta: currentColor;
+    --btn-tinta: var(--color-inchiostro);
     --btn-contro: var(--color-avorio);
     padding: 0.8rem 1.6rem;
     font-size: 0.875rem;
@@ -288,6 +290,7 @@ const preventivo = existsIn('quote', lang);
   }
 
   .site-header[data-header-theme='dark'] .menu-cta {
+    --btn-tinta: var(--color-avorio-su-notte);
     --btn-contro: var(--color-notte);
   }
 
