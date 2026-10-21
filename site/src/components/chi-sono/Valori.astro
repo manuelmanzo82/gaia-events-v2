@@ -1,17 +1,20 @@
 ---
 /**
  * Chi sono — 5. I valori (avorio): quattro fasce a tutta larghezza
- * impilate, come i pannelli «Come posso aiutarvi» della home ma in
- * verticale. La fascia attiva si apre in altezza e mostra foto e testo;
- * le altre restano strisce con numero e titolo. Nessun link: i valori
- * non portano a nessuna pagina.
+ * impilate. La fascia aperta mostra, a sinistra, numero, titolo e testo
+ * e, a destra, la foto in una finestra 3:2 con gli angoli arrotondati
+ * (circa il 45% della larghezza); le fasce chiuse sono strisce con numero
+ * e titolo su fondo beige, senza foto. Nessun link.
  *
- * Desktop (≥64rem): sezione agganciata, la fascia attiva segue lo scroll
- * e l'hover la apre (chi-sono-effetti.ts, [data-valori]). Mobile: si apre
- * la fascia al centro dello schermo (IntersectionObserver qui sotto).
- * Stesse curve e durate delle card della home (flex-grow 0,7 s, dettaglio
- * 0,6 s, foto 1,2 s, ease-gaia), angoli a 4 px. Reduced-motion: tutte le
- * fasce aperte allo stesso modo, nessuna transizione.
+ * `stile="piena"` è la variante con la foto a tutta fascia (foto
+ * orizzontali di scene, testo sopra): tenuta per confronto.
+ *
+ * Desktop (≥64rem): sezione agganciata sotto il header, la fascia attiva
+ * segue lo scroll e l'hover la apre (chi-sono-effetti.ts, [data-valori]).
+ * Mobile: si apre la fascia al centro dello schermo (IntersectionObserver
+ * qui sotto). Stesse curve e durate delle card della home (flex-grow
+ * 0,7 s, dettaglio 0,6 s, foto 1,2 s, ease-gaia), angoli a 4 px.
+ * Reduced-motion: tutte aperte uguali, nessuna transizione.
  */
 import type { Lang } from '../../config/site';
 import type { Image } from '../../lib/types';
@@ -22,14 +25,20 @@ interface Props {
   lang: Lang;
   titolo: string;
   valori: Array<{ titolo: string; testo: string; image: Image | null }>;
+  stile?: 'finestra' | 'piena';
 }
 
-const { lang, titolo, valori } = Astro.props;
+const { lang, titolo, valori, stile = 'finestra' } = Astro.props;
 ---
 
 {
   valori.length > 0 && (
-    <section class="valori" data-theme="light" data-valori aria-labelledby="valori-titolo">
+    <section
+      class:list={['valori', `valori--${stile}`]}
+      data-theme="light"
+      data-valori
+      aria-labelledby="valori-titolo"
+    >
       <div class="valori-testa container-gaia">
         <h2 id="valori-titolo" class="eyebrow" data-reveal="alto">
           {titolo}
@@ -37,15 +46,13 @@ const { lang, titolo, valori } = Astro.props;
       </div>
       <ol class="fasce" role="list">
         {valori.map((v, i) => {
-          const foto = picture(v.image, lang, '100vw');
+          const foto = picture(v.image, lang, stile === 'piena' ? '100vw' : '(min-width: 64rem) 45vw, 92vw');
           return (
-            <li class:list={['fascia', { attiva: i === 0 }]} data-fascia={i} tabindex="0">
-              <div class="fascia-interno" data-theme="dark" data-foto>
-                {foto && <Picture data={foto} cap={false} class="fascia-img" />}
-                <span class="fascia-velo" aria-hidden="true" />
+            <li class:list={['fascia', { attiva: i === 0 }]} data-fascia={i}>
+              <div class="fascia-interno">
                 <div class="fascia-testo">
-                  <span class="fascia-numero" aria-hidden="true">
-                    N° {String(i + 1).padStart(2, '0')}
+                  <span class="fascia-numero numero" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
                   </span>
                   <h3 class="font-display fascia-titolo">{v.titolo}</h3>
                   {v.testo && (
@@ -54,6 +61,12 @@ const { lang, titolo, valori } = Astro.props;
                     </div>
                   )}
                 </div>
+                {foto && (
+                  <figure class="fascia-foto" data-theme="dark" data-foto>
+                    <Picture data={foto} cap={false} class="fascia-img" />
+                    {stile === 'piena' && <span class="fascia-velo" aria-hidden="true" />}
+                  </figure>
+                )}
               </div>
             </li>
           );
@@ -106,71 +119,32 @@ const { lang, titolo, valori } = Astro.props;
     list-style: none;
   }
 
-  .fascia {
-    outline: none;
-  }
-
-  .fascia:focus-visible .fascia-interno {
-    outline: 2px solid var(--color-bordeaux);
-    outline-offset: 4px;
-  }
-
+  /* — Fascia: chiusa è una striscia beige con numero e titolo — */
   .fascia-interno {
     position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
     height: 4.5rem;
+    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem);
     overflow: hidden;
     border-radius: 4px;
-    background: var(--color-notte);
-    color: var(--color-avorio-su-notte);
-    isolation: isolate;
-    transition: height 0.7s var(--ease-gaia);
-  }
-
-  .fascia-interno :global(picture),
-  .fascia-interno :global(.fascia-img) {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: none !important;
-    object-fit: cover;
-  }
-
-  .fascia-interno :global(.fascia-img) {
-    transition: transform 1.2s var(--ease-gaia);
-  }
-
-  .fascia-velo {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-      linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
-      linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
-    transition: opacity 0.5s var(--ease-gaia);
-  }
-
-  /* Chiusa: la striscia mostra solo numero e titolo, su fondo scuro. */
-  .fascia:not(.attiva) .fascia-velo {
-    opacity: 1;
-    background: rgb(27 22 17 / 0.72);
+    background: var(--color-beige);
+    color: var(--color-inchiostro);
+    transition:
+      height 0.7s var(--ease-gaia),
+      background-color 0.5s var(--ease-gaia);
   }
 
   .fascia-testo {
-    position: absolute;
-    inset: auto 0 0 0;
-    z-index: 2;
     display: grid;
-    gap: 0.4rem;
-    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.1rem, 3vh, 2rem);
+    align-content: center;
+    gap: 0.35rem;
+    min-height: 4.5rem;
   }
 
   .fascia-numero {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--text-caption);
-    letter-spacing: 0.08em;
+    margin: 0;
   }
 
   .fascia-titolo {
@@ -182,7 +156,6 @@ const { lang, titolo, valori } = Astro.props;
     transition: font-size 0.6s var(--ease-gaia);
   }
 
-  /* Il testo si apre con la fascia, come il dettaglio dei pannelli. */
   .fascia-dettaglio {
     display: grid;
     grid-template-rows: 0fr;
@@ -197,15 +170,47 @@ const { lang, titolo, valori } = Astro.props;
   }
 
   .fascia-riga {
-    max-width: 32rem;
-    margin: 0.3rem 0 0;
+    max-width: 30rem;
+    margin: 0.4rem 0 0;
     font-size: 1.0625rem;
     line-height: 1.55;
-    opacity: 0.92;
+    color: var(--color-grigio-caldo);
   }
 
+  /* Foto: finestra 3:2 con gli angoli arrotondati. */
+  .fascia-foto {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    aspect-ratio: 3 / 2;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.6s var(--ease-gaia),
+      transform 0.8s var(--ease-gaia);
+  }
+
+  .fascia-foto :global(picture),
+  .fascia-foto :global(.fascia-img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none !important;
+    object-fit: cover;
+  }
+
+  .fascia-foto :global(.fascia-img) {
+    transition: transform 1.2s var(--ease-gaia);
+  }
+
+  /* Aperta */
   .fascia.attiva .fascia-interno {
-    height: min(70vh, 28rem);
+    height: auto;
+    padding-block: clamp(1.25rem, 3vh, 2rem);
+    background: var(--color-bianco-caldo);
   }
 
   .fascia.attiva .fascia-titolo {
@@ -218,19 +223,74 @@ const { lang, titolo, valori } = Astro.props;
     transition-delay: 0.15s;
   }
 
+  .fascia.attiva .fascia-foto {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.1s;
+  }
+
   .fascia.attiva :global(.fascia-img) {
     transform: scale(1.04);
   }
 
-  /* — Desktop: sezione a uno schermo, le fasce si spartiscono l'altezza — */
+  /* — Variante «piena»: foto a tutta fascia, testo sopra su velo — */
+  .valori--piena .fascia-interno {
+    display: block;
+    padding: 0;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+    isolation: isolate;
+  }
+
+  .valori--piena .fascia-foto {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    border-radius: 0;
+    opacity: 1;
+    transform: none;
+  }
+
+  .valori--piena .fascia-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.3) 120px, rgb(0 0 0 / 0) 240px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+  }
+
+  .valori--piena .fascia:not(.attiva) .fascia-velo {
+    background: rgb(27 22 17 / 0.72);
+  }
+
+  .valori--piena .fascia-testo {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.1rem, 3vh, 2rem);
+  }
+
+  .valori--piena .fascia-riga {
+    color: inherit;
+    opacity: 0.92;
+  }
+
+  .valori--piena .fascia.attiva .fascia-interno {
+    height: min(70vh, 28rem);
+    background: var(--color-notte);
+  }
+
+  /* — Desktop: sezione agganciata sotto il header, le fasce si spartiscono
+     l'altezza; aperta = testo a sinistra, foto a destra (45%) — */
   @media (min-width: 64rem) {
     .valori {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      height: 100svh;
-      min-height: 44rem;
-      padding-block: var(--altezza-header, 146px) 2rem;
+      height: calc(100svh - var(--altezza-header, 146px));
+      min-height: 36rem;
+      padding-block: 1.5rem 2rem;
     }
 
     .fasce {
@@ -250,15 +310,51 @@ const { lang, titolo, valori } = Astro.props;
     .fascia-interno,
     .fascia.attiva .fascia-interno {
       height: 100%;
-      transition: none;
+      padding-block: 0;
+      transition: background-color 0.5s var(--ease-gaia);
     }
 
     .fascia.attiva {
-      flex-grow: 3.2;
+      flex-grow: 3.4;
+    }
+
+    .fascia.attiva .fascia-interno {
+      grid-template-columns: minmax(0, 1fr) 45%;
+      align-items: center;
+      column-gap: clamp(2rem, 4vw, 4rem);
+      padding-block: 1.25rem;
+    }
+
+    .fascia-interno {
+      grid-template-columns: minmax(0, 1fr) 45%;
+    }
+
+    .fascia:not(.attiva) .fascia-foto {
+      display: none;
+    }
+
+    /* La finestra non supera l'altezza della fascia aperta. */
+    .fascia-foto {
+      width: 100%;
+      max-height: 100%;
+      aspect-ratio: 3 / 2;
+      justify-self: end;
     }
 
     .fascia-riga {
-      max-width: 40rem;
+      max-width: 36rem;
+    }
+
+    .valori--piena .fascia-interno {
+      display: block;
+    }
+
+    .valori--piena .fascia:not(.attiva) .fascia-foto {
+      display: block;
+    }
+
+    .valori--piena .fascia.attiva .fascia-interno {
+      height: 100%;
     }
   }
 
@@ -266,16 +362,18 @@ const { lang, titolo, valori } = Astro.props;
     .fascia,
     .fascia-interno,
     .fascia-dettaglio,
-    .fascia-velo,
     .fascia-titolo,
-    .fascia-interno :global(.fascia-img) {
+    .fascia-foto,
+    .fascia-foto :global(.fascia-img) {
       transition: none;
     }
 
     /* Tutte aperte uguali, senza animazione. */
     .fascia-interno,
     .fascia.attiva .fascia-interno {
-      height: min(60vh, 24rem);
+      height: auto;
+      padding-block: clamp(1.25rem, 3vh, 2rem);
+      background: var(--color-bianco-caldo);
     }
 
     .fascia-dettaglio,
@@ -284,10 +382,10 @@ const { lang, titolo, valori } = Astro.props;
       opacity: 1;
     }
 
-    .fascia:not(.attiva) .fascia-velo {
-      background:
-        linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
-        linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+    .fascia-foto,
+    .fascia.attiva .fascia-foto {
+      opacity: 1;
+      transform: none;
     }
 
     .fascia.attiva :global(.fascia-img) {
@@ -307,7 +405,15 @@ const { lang, titolo, valori } = Astro.props;
 
       .fascia-interno,
       .fascia.attiva .fascia-interno {
-        height: min(50vh, 20rem);
+        grid-template-columns: minmax(0, 1fr) 45%;
+        align-items: center;
+        column-gap: clamp(2rem, 4vw, 4rem);
+        height: auto;
+        padding-block: 1.25rem;
+      }
+
+      .fascia:not(.attiva) .fascia-foto {
+        display: block;
       }
     }
   }

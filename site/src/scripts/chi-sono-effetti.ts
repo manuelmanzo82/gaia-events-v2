@@ -194,9 +194,13 @@ function valoriDesktop(): void {
     let dalloScroll = 0;
     let sopra: number | null = null;
 
+    // Il pin parte sotto il header fisso (altezza da --altezza-header), così
+    // la sezione non gli passa mai dietro.
+    const altezzaHeader = (): number =>
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header')) || 146;
     ScrollTrigger.create({
       trigger: sezione,
-      start: 'top top',
+      start: () => `top ${altezzaHeader()}px`,
       end: () => `+=${fasce.length * 45}%`,
       pin: true,
       anticipatePin: 1,
