@@ -797,6 +797,29 @@ Fatto:
     già cambiato). Footer: meno aria sopra il logo, logo 110/80 px.
   - **Preventivatore**: titolo con focus programmatico ma senza contorno;
     ospiti come campo di testo numerico senza spinner, largo come gli altri.
+- **Giro 11 — ritocchi mobile** (21/10/2026):
+  - **Header mobile** (sotto 64rem): scendendo si nasconde (`nascosto`,
+    translateY(-100%)), risalendo torna con fondo pieno (`pieno`: avorio, o
+    notte sul tema scuro; niente ombra, sfumatura `::before` e drop-shadow
+    del logo spente); sotto 24 px di scroll torna trasparente; a menu
+    aperto le due classi vengono tolte. Soglia 4 px per ignorare il
+    rimbalzo. Desktop invariato (le classi non hanno CSS fuori dalla media
+    query).
+  - **Punto focale**: `media.focal_x/focal_y` si impostano cliccando sulla
+    foto nel back office (Immagini: anteprima grande, pallino, campi X/Y
+    compilati dal clic) e valgono in OGNI ritaglio `object-fit: cover`
+    (hero, schede, fasce, foto del preventivatore, Gaia in home — che prima
+    aveva `object-position` fisso nel CSS). Se una foto non entra in un
+    ritaglio, si cambia foto o si sposta il punto, mai una regola CSS
+    locale.
+  - **Flottanti sul preventivatore**: su mobile, mentre il modulo è sullo
+    schermo, `html.modulo-in-vista` (IntersectionObserver nel componente)
+    nasconde WhatsApp e torna-su; nel ringraziamento tornano. Sulle altre
+    pagine il footer tiene 64 px in più in fondo, così il tondo non copre
+    mai i link legali.
+  - Verifica: `mobile-g11.js` nello scratchpad (360 e 390: menu, stati del
+    header, footer, passaggi del preventivatore con posizione di fascia e
+    domanda).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
