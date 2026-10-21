@@ -1031,6 +1031,10 @@ Prossimi passi (fase 3, resta):
 - Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)
   sono ancora segnaposto.
 - Contenuti veri da Gaia (luoghi, location, storie, testi dei partner).
+- **Prima del lancio, form del back office per i blocchi di pagina**
+  (`page_sections`: percorso e valori di Chi sono; filosofia, passi del
+  metodo e «Non solo matrimoni» di Servizi), con le foto per voce (chiave
+  `media` nel JSON delle voci). Oggi si cambiano solo con migrazione.
 - **Prima del lancio, foto** (le note stanno in `media.note_interne`, sezione
   Immagini del back office):
   - **18 foto da sostituire con i file senza watermark**: sono quelle di
