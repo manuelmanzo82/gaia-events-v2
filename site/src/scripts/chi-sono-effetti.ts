@@ -101,11 +101,12 @@ function timelineDesktop(): void {
       scrollTrigger: {
         trigger: sezione,
         start: 'top top',
-        // Il tratto di scroll è più lungo della distanza percorsa: lo
-        // scorrimento resta lento e si legge ogni tappa.
-        end: () => `+=${Math.round(distanza() * 1.8)}`,
+        // Durata del pin proporzionale alla lunghezza del binario (un po'
+        // più del tratto percorso, così si legge ogni tappa); scrub con
+        // una leggera inerzia.
+        end: () => `+=${Math.round(distanza() * 1.25)}`,
         pin: true,
-        scrub: 0.6,
+        scrub: 1.2,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
@@ -124,9 +125,9 @@ function timelineDesktop(): void {
       if (!img) continue;
       gsap.fromTo(
         img,
-        { xPercent: -5 },
+        { xPercent: -9 },
         {
-          xPercent: 5,
+          xPercent: 9,
           ease: 'none',
           scrollTrigger: {
             trigger: tappa,
