@@ -261,14 +261,20 @@
     background: var(--color-oro);
   }
 
-  /* — Bottoni: ghost editoriale, il bordeaux arriva all'hover — */
+  /* — Bottoni a cornice (giro 10): due variabili, --btn-tinta (cornice e
+       testo) e --btn-contro (il testo quando il fondo si riempie). Hover e
+       focus-visible: fondo pieno nel colore della cornice e testo nel
+       colore opposto; su fondo chiaro inchiostro/avorio, sulle sezioni
+       scure e sulle foto avorio/notte. Contrasto ≥ 4,5:1 in ogni stato. — */
   .btn {
+    --btn-tinta: var(--color-inchiostro);
+    --btn-contro: var(--color-avorio);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
     padding: 0.95rem 2.1rem;
-    border: 1px solid currentColor;
+    border: 1px solid var(--btn-tinta);
     border-radius: 2px;
     background: transparent;
     font-family: var(--font-sans);
@@ -277,7 +283,7 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--color-inchiostro);
+    color: var(--btn-tinta);
     cursor: pointer;
     transition:
       background-color 0.35s var(--ease-gaia),
@@ -285,30 +291,47 @@
       color 0.35s var(--ease-gaia);
   }
 
-  .btn:hover {
-    background: var(--color-bordeaux);
-    border-color: var(--color-bordeaux);
-    color: var(--color-avorio);
+  .btn:hover,
+  .btn:focus-visible {
+    background: var(--btn-tinta);
+    border-color: var(--btn-tinta);
+    color: var(--btn-contro);
   }
 
+  .btn:focus-visible {
+    outline: 2px solid var(--btn-tinta);
+    outline-offset: 3px;
+  }
+
+  /* Pieno: bordeaux con testo avorio; all'hover inchiostro. */
   .btn--pieno {
+    --btn-tinta: var(--color-bordeaux);
     background: var(--color-bordeaux);
-    border-color: var(--color-bordeaux);
     color: var(--color-avorio);
   }
 
-  .btn--pieno:hover {
+  .btn--pieno:hover,
+  .btn--pieno:focus-visible {
+    --btn-tinta: var(--color-inchiostro);
     background: var(--color-inchiostro);
-    border-color: var(--color-inchiostro);
+    color: var(--color-avorio);
   }
 
-  [data-theme='dark'] .btn {
-    color: var(--color-avorio-su-notte);
+  [data-theme='dark'] .btn,
+  [data-header-theme='dark'] .btn {
+    --btn-tinta: var(--color-avorio-su-notte);
+    --btn-contro: var(--color-notte);
   }
 
-  [data-theme='dark'] .btn:hover {
+  [data-theme='dark'] .btn--pieno {
+    --btn-tinta: var(--color-bordeaux);
+    color: var(--color-avorio);
+  }
+
+  [data-theme='dark'] .btn--pieno:hover,
+  [data-theme='dark'] .btn--pieno:focus-visible {
+    --btn-tinta: var(--color-avorio-su-notte);
     background: var(--color-avorio-su-notte);
-    border-color: var(--color-avorio-su-notte);
     color: var(--color-notte);
   }
 

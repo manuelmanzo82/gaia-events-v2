@@ -278,18 +278,23 @@ const preventivo = existsIn('quote', lang);
   }
 
   .menu-cta {
+    --btn-tinta: currentColor;
+    --btn-contro: var(--color-avorio);
     padding: 0.8rem 1.6rem;
     font-size: 0.875rem;
     letter-spacing: 0.14em;
     white-space: nowrap;
-    color: inherit;
     text-shadow: none;
   }
 
-  .site-header[data-header-theme='dark'] .menu-cta:hover {
-    background: var(--color-avorio-su-notte);
-    border-color: var(--color-avorio-su-notte);
-    color: var(--color-notte);
+  .site-header[data-header-theme='dark'] .menu-cta {
+    --btn-contro: var(--color-notte);
+  }
+
+  /* All'hover il testo non deve ereditare l'ombra del header. */
+  .menu-cta:hover,
+  .menu-cta:focus-visible {
+    text-shadow: none;
   }
 
   /* «EN» discreto: più piccolo del menu, stesso colore. */
