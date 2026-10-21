@@ -49,7 +49,7 @@ const voci = VOCI.filter((voce) => existsIn(voce.key, lang));
 const preventivo = existsIn('quote', lang);
 ---
 
-<header class="site-header" data-header-theme="light" data-header-foto="0" data-header-theme-menu="light" data-header-foto-menu="0">
+<header class="site-header" data-header-theme="light" data-header-foto="0">
   <a class="brand" href={path('home', lang)} aria-label="Gaia Events">
     <LogoGaia />
   </a>
@@ -167,46 +167,20 @@ const preventivo = existsIn('quote', lang);
     pointer-events: auto;
   }
 
-  /* Il tema arriva per lato (theme-observer.ts, giro 6): il logo guarda
-     il punto sotto di sé, il menu e l'hamburger il punto sotto di loro.
-     Sopra una foto, sempre avorio. */
-  .brand,
-  .menu,
-  .menu-toggle {
-    transition:
-      color 0.5s var(--ease-gaia),
-      text-shadow 0.5s var(--ease-gaia);
-  }
-
-  .site-header[data-header-theme='dark'] .brand {
+  /* Un solo colore per tutto il header (giro 10), dal data-theme della
+     sezione sotto la linea a metà header (theme-observer.ts): avorio sulle
+     sezioni con foto, inchiostro sui fondi chiari. */
+  .site-header[data-header-theme='dark'] {
     color: var(--color-avorio-su-notte);
   }
 
-  /* Ogni voce del menu ha il suo tema (data-tema dal punto sotto di sé). */
-  .menu-voci a,
-  .menu-cta,
-  :global(.site-header .lang-switcher) {
-    transition:
-      color 0.5s var(--ease-gaia),
-      text-shadow 0.5s var(--ease-gaia);
-  }
-
-  .menu-voci a[data-tema='dark'],
-  .menu-cta[data-tema='dark'],
-  :global(.site-header .lang-switcher[data-tema='dark']),
-  .menu-toggle[data-tema='dark'] {
-    color: var(--color-avorio-su-notte);
-  }
-
-  /* Sopra una foto: ombra testuale morbidissima, quasi invisibile. */
-  .menu-voci a[data-foto='1'],
-  :global(.site-header .lang-switcher[data-foto='1']),
-  .menu-toggle[data-foto='1'] {
-    text-shadow: 0 1px 2px rgb(27 22 17 / 0.28), 0 0 18px rgb(27 22 17 / 0.22);
+  /* Sopra una foto: ombra testuale appena percettibile, su testo e logo. */
+  .site-header[data-header-foto='1'] {
+    text-shadow: 0 1px 2px rgb(27 22 17 / 0.3), 0 0 14px rgb(27 22 17 / 0.2);
   }
 
   .site-header[data-header-foto='1'] :global(.logo-gaia svg) {
-    filter: drop-shadow(0 1px 2px rgb(27 22 17 / 0.28)) drop-shadow(0 0 14px rgb(27 22 17 / 0.2));
+    filter: drop-shadow(0 1px 2px rgb(27 22 17 / 0.3)) drop-shadow(0 0 12px rgb(27 22 17 / 0.18));
   }
 
   /* Il logo resta sempre alla misura originale (80 px mobile, 130 px da
@@ -286,7 +260,7 @@ const preventivo = existsIn('quote', lang);
     text-shadow: none;
   }
 
-  .menu-cta[data-tema='dark']:hover {
+  .site-header[data-header-theme='dark'] .menu-cta:hover {
     background: var(--color-avorio-su-notte);
     border-color: var(--color-avorio-su-notte);
     color: var(--color-notte);
@@ -406,7 +380,6 @@ const preventivo = existsIn('quote', lang);
     .menu-aperto,
     .menu-aperto .brand,
     .menu-aperto .menu,
-    .menu-aperto .menu [data-tema],
     .menu-aperto .menu-toggle {
       color: var(--color-inchiostro) !important;
       text-shadow: none !important;

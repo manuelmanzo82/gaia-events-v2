@@ -78,7 +78,7 @@ const href = `https://wa.me/${BUSINESS.whatsapp}?text=${encodeURIComponent(t('wh
   const bottone = document.querySelector<HTMLElement>('.wa-flottante');
   // Il colore si misura sotto l'icona, che resta ferma mentre la pillola
   // si allarga verso sinistra.
-  if (bottone) initFlottante(bottone, { dopoIntro: true, punto: bottone.querySelector<HTMLElement>('.wa-icona') });
+  if (bottone) initFlottante(bottone, { dopoIntro: true });
 </script>
 
 <style>

@@ -71,7 +71,7 @@ const post = feed.posts
         </a>
       </header>
 
-      <ul class="ig-griglia" role="list" data-theme="dark" data-foto data-luce>
+      <ul class="ig-griglia" role="list" data-theme="dark" data-foto>
         {post.map((p) => (
           <li class="ig-voce">
             <a class="ig-link" href={p.href} target="_blank" rel="noopener" aria-label={p.etichetta}>
@@ -158,12 +158,24 @@ const post = feed.posts
 
   /* — Griglia 4:5 da bordo a bordo — */
   .ig-griglia {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2px;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Fascia alta scura leggerissima per la leggibilità del header. */
+  .ig-griglia::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 2;
+    height: 220px;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.3) 50%, rgb(0 0 0 / 0) 100%);
+    pointer-events: none;
   }
 
   /* Sotto i 48rem: 3 × 3, i post oltre il nono non si vedono. */

@@ -68,7 +68,7 @@ const foto = highlights
       )}
       <ul class="binario" role="list">
         {foto.map((f) => (
-          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto data-luce>
+          <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto>
             <Picture data={f.data} cap={false} class="tessera-img" />
           </li>
         ))}
@@ -191,10 +191,23 @@ const foto = highlights
   }
 
   .tessera {
+    position: relative;
     flex: 0 0 auto;
     overflow: hidden;
     border-radius: 16px;
     background: var(--color-beige);
+  }
+
+  /* Fascia alta scura leggerissima: su mobile le tessere passano sotto il
+     header (su desktop il header sta sopra il titolo, mai sulle foto). */
+  .tessera::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    height: 220px;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.3) 50%, rgb(0 0 0 / 0) 100%);
+    pointer-events: none;
   }
 
   .tessera :global(picture),

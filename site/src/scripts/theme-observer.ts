@@ -1,35 +1,32 @@
 /**
- * Il header (logo, menu, hamburger) e il torna-su cambiano colore in base
- * a quello che hanno sotto: ogni sezione o blocco con foto dichiara
- * data-theme="dark|light" (e data-foto se è una foto), e qui si misura
- * cosa c'è sotto un PUNTO dato.
+ * Il header (logo, menu, EN, icone social) e i flottanti hanno SEMPRE lo
+ * stesso colore tra loro (giro 10), deciso dal data-theme della sezione
+ * che passa sotto la linea a metà header:
  *
- * Regola (giro 6): sopra qualsiasi foto il testo è avorio; inchiostro solo
- * sui fondi chiari pieni. Siccome una sezione può essere divisa a metà
- * (CTA finale: foto a sinistra, beige a destra; Gaia: foto a sinistra,
- * avorio a destra), il tema si decide per punto e non per riga: il logo
- * guarda il punto sotto di sé, il menu (o l'hamburger) il punto sotto di
- * sé, il torna-su il proprio centro. Sul header finiscono quattro
- * attributi: data-header-theme / data-header-foto (lato logo) e
- * data-header-theme-menu / data-header-foto-menu (lato menu). In più
- * OGNI voce del menu (link, Preventivo, lingua, hamburger) riceve
- * data-tema e data-foto per il punto sotto il proprio centro: sopra la
- * fascia orizzontale, per esempio, una voce può stare su una foto e
- * quella accanto sullo spazio chiaro tra due foto.
+ *   dark  → avorio  (hero, schede, pannelli, destination, griglia
+ *                    Instagram: sezioni con foto, che portano anche una
+ *                    sfumatura scura nella fascia alta per la leggibilità)
+ *   light → inchiostro (fondi chiari pieni)
  *
- * Se più elementi [data-theme] contengono il punto — una foto scura
- * dentro una sezione chiara — vince il più interno, cioè l'ultimo
- * nell'ordine del documento. Non è un IntersectionObserver (vedi la
- * storia nel giro 3): leggere qualche decina di rettangoli per frame di
- * scroll costa nulla.
+ * Conta la sezione: un elemento [data-theme] che contiene la linea e che
+ * è largo almeno il 60% dello schermo. I blocchi più stretti (la foto di
+ * Gaia e quella della CTA, che occupano metà sezione; le tessere della
+ * fascia su desktop) non cambiano il colore: altrimenti il menu, sull'altra
+ * metà chiara, sarebbe illeggibile. Se più elementi contengono la linea
+ * vince il più interno (l'ultimo nell'ordine del documento).
+ *
+ * Il tema finisce su data-header-theme e data-header-foto del header; i
+ * flottanti leggono gli stessi attributi (scripts/flottanti.ts). Niente
+ * IntersectionObserver (vedi la storia nel giro 3): qualche rettangolo
+ * per frame di scroll costa nulla.
  */
-
-import { SOGLIA_INCHIOSTRO, luminanzaSotto } from './luminosita';
 
 interface Tema {
   tema: 'dark' | 'light';
   foto: '0' | '1';
 }
+
+const LARGHEZZA_MINIMA = 0.6;
 
 let elementi: HTMLElement[] = [];
 let programma: () => void = () => {};
@@ -39,81 +36,25 @@ export function aggiornaTema(): void {
   programma();
 }
 
-/** L'elemento [data-theme] più interno che contiene il punto, oppure null. */
-function piuInterno(x: number, y: number, rett: DOMRect[]): HTMLElement | null {
+/** La sezione (elemento [data-theme] largo almeno il 60%) più interna che contiene il punto (x, y). */
+export function sezioneInPunto(x: number, y: number): HTMLElement | null {
+  const minima = window.innerWidth * LARGHEZZA_MINIMA;
   let sotto: HTMLElement | null = null;
-  for (let i = 0; i < elementi.length; i++) {
-    const r = rett[i];
+  for (const el of elementi) {
+    const r = el.getBoundingClientRect();
     // Rettangolo vuoto = elemento nascosto (display: none): non conta.
-    if (r.height === 0 || r.width === 0) continue;
-    if (r.top <= y && r.bottom > y && r.left <= x && r.right > x) sotto = elementi[i];
+    if (r.height === 0 || r.width < minima) continue;
+    if (r.top <= y && r.bottom > y && r.left <= x && r.right > x) sotto = el;
   }
   return sotto;
 }
 
-const lin = (c: number): number => {
-  const v = c / 255;
-  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-};
-
-/** Luminanza del primo fondo pieno risalendo da `el` (avorio se non ce n'è). */
-function luminanzaFondo(el: HTMLElement): number {
-  for (let n: HTMLElement | null = el; n; n = n.parentElement) {
-    const bg = getComputedStyle(n).backgroundColor;
-    const m = bg.match(/[\d.]+/g);
-    if (!m) continue;
-    // color-mix() torna come «color(srgb 0.95 0.94 0.92 / a)», in scala 0..1.
-    const scala = bg.startsWith('color(') ? 255 : 1;
-    const alfa = m.length > 3 ? parseFloat(m[3]) : 1;
-    if (alfa > 0.5) {
-      const [r, g, b] = m.slice(0, 3).map((v) => Number(v) * scala);
-      return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    }
-  }
-  return 0.9;
-}
-
-/**
- * Tema per il rettangolo di un elemento (logo, voce del menu, flottante):
- * una griglia di punti su tutto il rettangolo; in ogni punto la luminanza
- * reale — i pixel della foto (con il suo velo) dove c'è una foto
- * dichiarata data-luce, il colore di fondo altrove — poi la media. Sopra
- * la soglia vince l'inchiostro, sotto l'avorio: il colore con il contrasto
- * migliore anche quando l'elemento sta a cavallo tra foto e fondo chiaro.
- */
-export function temaInRett(r: { left: number; top: number; width: number; height: number }): Tema | null {
-  const rett = elementi.map((e) => e.getBoundingClientRect());
-  const colonne = Math.min(5, Math.max(2, Math.round(r.width / 40)));
-  const righe = r.height > 60 ? 3 : 2;
-  let somma = 0;
-  let n = 0;
-  let suFoto = false;
-  let trovato = false;
-  for (let i = 0; i < colonne; i++) {
-    for (let j = 0; j < righe; j++) {
-      const x = r.left + ((i + 0.5) / colonne) * r.width;
-      const y = r.top + ((j + 0.5) / righe) * r.height;
-      const el = piuInterno(x, y, rett);
-      if (!el) continue;
-      trovato = true;
-      let l: number | null = null;
-      if (el.hasAttribute('data-luce')) {
-        l = luminanzaSotto(el, { left: x - 3, right: x + 3, top: y - 3, bottom: y + 3 });
-        suFoto = true;
-      }
-      if (l === null) l = el.getAttribute('data-theme') === 'dark' ? 0.02 : luminanzaFondo(el);
-      somma += l;
-      n++;
-    }
-  }
-  if (!trovato || n === 0) return null;
-  const media = somma / n;
-  return media > SOGLIA_INCHIOSTRO ? { tema: 'light', foto: '0' } : { tema: 'dark', foto: suFoto ? '1' : '0' };
-}
-
-/** Tema nel punto (x, y): un rettangolo minimo attorno al punto. */
-export function temaInPunto(x: number, y: number, largo = 8, alto = 8): Tema | null {
-  return temaInRett({ left: x - largo / 2, top: y - alto / 2, width: largo, height: alto });
+export function temaDi(el: HTMLElement | null): Tema | null {
+  if (!el) return null;
+  return {
+    tema: el.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+    foto: el.hasAttribute('data-foto') ? '1' : '0',
+  };
 }
 
 function imposta(el: HTMLElement, nome: string, valore: string): void {
@@ -127,13 +68,6 @@ export function initThemeObserver(header: HTMLElement): void {
   );
   if (elementi.length === 0) return;
 
-  const brand = header.querySelector<HTMLElement>('.brand');
-  const toggle = header.querySelector<HTMLElement>('.menu-toggle');
-  const menu = header.querySelector<HTMLElement>('.menu');
-  const voci = [
-    ...header.querySelectorAll<HTMLElement>('.menu-voci a, .menu-cta, .lang-switcher, .menu-toggle'),
-  ];
-
   let inAttesa = false;
 
   const aggiorna = (): void => {
@@ -141,34 +75,11 @@ export function initThemeObserver(header: HTMLElement): void {
 
     const box = header.getBoundingClientRect();
     const linea = box.top + box.height / 2;
+    const sotto = temaDi(sezioneInPunto(window.innerWidth / 2, linea));
+    if (!sotto) return;
 
-    // Lato logo: il centro del logo. Lato menu: l'hamburger se visibile,
-    // altrimenti il centro del menu in riga.
-    const xLogo = brand ? centro(brand, box.left + 80) : box.left + 80;
-    const bottone = toggle && toggle.getBoundingClientRect().width > 0 ? toggle : menu;
-    const xMenu = bottone ? centro(bottone, box.right - 80) : box.right - 80;
-
-    const rLogo = brand?.getBoundingClientRect();
-    const lato = rLogo && rLogo.width > 0 ? temaInRett(rLogo) : temaInPunto(xLogo, linea);
-    if (lato) {
-      imposta(header, 'data-header-theme', lato.tema);
-      imposta(header, 'data-header-foto', lato.foto);
-    }
-    const latoMenu = temaInPunto(xMenu, linea) ?? lato;
-    if (latoMenu) {
-      imposta(header, 'data-header-theme-menu', latoMenu.tema);
-      imposta(header, 'data-header-foto-menu', latoMenu.foto);
-    }
-
-    // Voce per voce: solo quelle visibili (in riga o l'hamburger).
-    for (const voce of voci) {
-      const r = voce.getBoundingClientRect();
-      if (r.width === 0) continue;
-      const sotto = temaInRett(r) ?? latoMenu;
-      if (!sotto) continue;
-      imposta(voce, 'data-tema', sotto.tema);
-      imposta(voce, 'data-foto', sotto.foto);
-    }
+    imposta(header, 'data-header-theme', sotto.tema);
+    imposta(header, 'data-header-foto', sotto.foto);
   };
 
   programma = (): void => {
@@ -184,16 +95,5 @@ export function initThemeObserver(header: HTMLElement): void {
   window.addEventListener('load', programma);
   if ('ResizeObserver' in window) new ResizeObserver(programma).observe(header);
 
-  // Le foto senza velo vanno misurate: appena una (lazy) arriva, si rimisura.
-  for (const el of elementi) {
-    if (!el.hasAttribute('data-luce')) continue;
-    for (const img of el.querySelectorAll('img')) img.addEventListener('load', programma);
-  }
-
   aggiorna();
-}
-
-function centro(el: HTMLElement, altrimenti: number): number {
-  const r = el.getBoundingClientRect();
-  return r.width > 0 ? r.left + r.width / 2 : altrimenti;
 }

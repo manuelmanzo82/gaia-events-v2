@@ -46,7 +46,7 @@ const emailHref = `mailto:${BUSINESS.email}`;
   titolo && destinazione && (
     <section id="cta" class:list={['cta-finale', { 'cta-finale--senza-foto': !foto }]} data-theme="light">
       {foto && (
-        <figure class="cta-figura" data-theme="dark" data-foto data-luce>
+        <figure class="cta-figura" data-theme="dark" data-foto>
           <Picture data={foto} cap={false} class="cta-img" />
         </figure>
       )}

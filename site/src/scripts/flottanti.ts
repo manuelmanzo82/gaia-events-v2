@@ -1,25 +1,22 @@
 /**
  * Bottoni flottanti in basso a destra (torna-su, WhatsApp): la parte in
- * comune. Il colore lo decide ciò che il bottone ha sotto il proprio
- * rettangolo (temaInRett di theme-observer.ts): avorio sopra le foto e le
- * sezioni scure, inchiostro sui fondi chiari.
+ * comune. Il colore segue la stessa regola del header (theme-observer.ts:
+ * il data-theme della sezione), misurata però sotto il bottone stesso, che
+ * sta in fondo allo schermo: avorio sopra le sezioni con foto e sul
+ * footer, inchiostro sui fondi chiari. Quando sotto il bottone non c'è
+ * nessuna sezione (margini) vale il colore del header.
  *
  * Visibilità, per opzione:
  *  - dopoHero: compare solo dopo una schermata di scroll (torna-su);
  *    altrimenti è visibile subito (WhatsApp);
- *  - viaSulFooter: classe `coperto` mentre il footer è in vista, per non
- *    finire sopra i suoi bottoni (torna-su);
  *  - dopoIntro: se l'intro a velo è attiva, compare solo alla sua fine
  *    (evento gaia:intro-fine, con una rete di sicurezza a 9 s).
  */
-import { temaInRett } from './theme-observer';
+import { sezioneInPunto, temaDi } from './theme-observer';
 
 interface Opzioni {
   dopoHero?: boolean;
-  viaSulFooter?: boolean;
   dopoIntro?: boolean;
-  /** Dove misurare il colore (default: il bottone intero). */
-  punto?: HTMLElement | null;
 }
 
 export function initFlottante(el: HTMLElement, opzioni: Opzioni = {}): void {
@@ -37,8 +34,9 @@ export function initFlottante(el: HTMLElement, opzioni: Opzioni = {}): void {
     el.hidden = false;
     const dopoHero = !opzioni.dopoHero || window.scrollY > window.innerHeight;
     el.classList.toggle('visibile', introFinita && dopoHero);
-    const r = (opzioni.punto ?? el).getBoundingClientRect();
-    const sotto = temaInRett(r);
+
+    const r = el.getBoundingClientRect();
+    const sotto = temaDi(sezioneInPunto(r.left + r.width / 2, r.top + r.height / 2));
     el.dataset.tema = sotto?.tema ?? header?.dataset.headerTheme ?? 'light';
   };
 
@@ -55,13 +53,8 @@ export function initFlottante(el: HTMLElement, opzioni: Opzioni = {}): void {
   window.addEventListener('scroll', aggiorna, { passive: true });
   window.addEventListener('resize', aggiorna, { passive: true });
   window.addEventListener('load', aggiorna);
-  aggiorna();
-
-  const footer = document.querySelector('footer');
-  if (opzioni.viaSulFooter && footer && 'IntersectionObserver' in window) {
-    new IntersectionObserver(
-      ([voce]) => el.classList.toggle('coperto', !!voce?.isIntersecting),
-      { threshold: 0 },
-    ).observe(footer);
+  if (header) {
+    new MutationObserver(aggiorna).observe(header, { attributes: true, attributeFilter: ['data-header-theme'] });
   }
+  aggiorna();
 }

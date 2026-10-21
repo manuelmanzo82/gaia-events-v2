@@ -58,11 +58,11 @@ const servizi = getServices()
         {testo && <p class="text-lead text-velato">{testo}</p>}
       </header>
 
-      <ul class="pannelli" role="list" data-reveal-gruppo>
+      <ul class="pannelli" role="list" data-reveal-gruppo data-theme="dark" data-foto>
         {servizi.map(({ servizio, numero, href, foto }) => {
           const Pannello = href ? 'a' : 'div';
           return (
-            <li class="pannello" data-theme="dark" data-foto data-luce data-reveal="alto">
+            <li class="pannello" data-theme="dark" data-foto data-reveal="alto">
               <Pannello class="pannello-link" href={href ?? undefined}>
                 {foto && <Picture data={foto} cap={false} class="pannello-img" />}
                 <span class="pannello-velo" aria-hidden="true" />
@@ -111,6 +111,8 @@ const servizi = getServices()
   .pannelli {
     display: grid;
     gap: 1rem;
+    background: transparent;
+    color: inherit;
     width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 80rem);
     margin: 0 auto;
     padding: 0;
@@ -156,7 +158,9 @@ const servizi = getServices()
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.3) 110px, rgb(0 0 0 / 0) 220px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
     transition: opacity 0.5s var(--ease-gaia);
   }
 
