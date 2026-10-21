@@ -92,6 +92,10 @@ export const UI = {
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
   'nav.backToTop': { it: 'Torna su', en: 'Back to top' },
+  // Pagina Servizi.
+  'servizi.incluso': { it: 'incluso', en: 'included' },
+  'servizi.nonIncluso': { it: 'non incluso', en: 'not included' },
+  'servizi.chiediQuesto': { it: 'Chiedi un preventivo per questo', en: 'Ask for a quote for this' },
   // Pagina Chi sono (fase 4.2).
   'about.dal': { it: 'dal', en: 'since' },
   // Tipi di evento (giro 11): eyebrow nelle card e nel dettaglio, filtri.

@@ -1,6 +1,7 @@
 import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type {
   Client,
+  CompareItem,
   DestinationWedding,
   Faq,
   Highlight,
@@ -163,6 +164,11 @@ export function getReviews(): Review[] {
 export function getFeaturedReviews(limit?: number): Review[] {
   const featured = getReviews().filter((review) => review.featured);
   return limit ? featured.slice(0, limit) : featured;
+}
+
+/** Voci della tabella di confronto dei servizi, pubblicate e in ordine. */
+export function getCompare(): CompareItem[] {
+  return load<CompareItem[]>('confronto', []).filter(isActive).sort(byOrder);
 }
 
 /** Stampa e clienti (giro 11), solo quelli pubblicati, in ordine. */

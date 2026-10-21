@@ -80,6 +80,7 @@
   <a href="<?= e(admin_url('partner')) ?>">Partner</a>
   <a href="<?= e(admin_url('instagram')) ?>">Instagram</a>
   <a href="<?= e(admin_url('servizi')) ?>">Servizi</a>
+  <a href="<?= e(admin_url('confronto-servizi')) ?>">Confronto servizi</a>
   <a href="<?= e(admin_url('recensioni')) ?>">Recensioni</a>
   <a href="<?= e(admin_url('stampa')) ?>">Stampa</a>
   <a href="<?= e(admin_url('clienti')) ?>">Clienti</a>

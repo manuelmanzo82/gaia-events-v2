@@ -646,3 +646,20 @@ CREATE TABLE IF NOT EXISTS `clients` (
   KEY `fk_clients_logo` (`logo_media_id`),
   CONSTRAINT `fk_clients_logo` FOREIGN KEY (`logo_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Servizi: voci della tabella «Quale fa per voi?»
+-- (migrazione 2026-10-21-servizi-confronto.sql)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `service_compare` (
+  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `label_it`      VARCHAR(190) DEFAULT NULL,
+  `label_en`      VARCHAR(190) DEFAULT NULL,
+  `service_slugs` VARCHAR(255) DEFAULT NULL,
+  `active`        TINYINT(1) NOT NULL DEFAULT 1,
+  `sort_order`    SMALLINT NOT NULL DEFAULT 0,
+  `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_service_compare_active` (`active`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

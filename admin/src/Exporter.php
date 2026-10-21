@@ -26,6 +26,7 @@ final class Exporter
             'services' => self::services(),
             'reviews' => self::reviews(),
             'stampa' => self::press(),
+            'confronto' => self::serviceCompare(),
             'clienti' => self::clients(),
             'posts' => self::posts(),
             'faq' => self::faqs(),
@@ -393,6 +394,26 @@ final class Exporter
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], Db::all('SELECT * FROM press ORDER BY sort_order, published_on DESC, id'));
+    }
+
+    /**
+     * Voci della tabella «Quale fa per voi?» (pagina Servizi): etichetta
+     * IT/EN e i servizi che la comprendono direttamente.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function serviceCompare(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'label' => self::text($row['label_it'], $row['label_en']),
+            'services' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) ($row['service_slugs'] ?? '')),
+            ), static fn (string $s): bool => $s !== '')),
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM service_compare ORDER BY sort_order, id'));
     }
 
     /**

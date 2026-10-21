@@ -3,7 +3,8 @@ import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { isPublishable, getPage, getServices, pick, text } from '../../lib/content';
+import { isPublishable, getPage, getServices, getSettings, pick, text } from '../../lib/content';
+import Confronto from '../servizi/Confronto.astro';
 import { SERVICE_FIELDS, existsIn, langsFor } from '../../lib/availability';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
@@ -74,4 +75,9 @@ const jsonLd = [
   }
 
   {existsIn('quote', lang) && <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>}
+  <Confronto
+    lang={lang}
+    servizi={services}
+    titolo={text(getSettings().servizi?.compare?.title, lang) || t('nav.services')}
+  />
 </BaseLayout>

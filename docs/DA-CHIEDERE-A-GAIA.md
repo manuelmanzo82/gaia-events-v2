@@ -221,6 +221,35 @@ nascoste:
   confermare.
 - **Il testo inglese** della pagina resta la bozza del 16/10 (sotto).
 
+### 14. Pagina «Servizi» (21/10/2026)
+
+- **BLOCCANTE PER IL LANCIO — consenso degli sposi della foto 57**
+  (`sposi-fronte-luci-notte`, apertura della pagina Servizi): sono
+  riconoscibili. Senza il loro consenso scritto, prima del lancio si passa
+  alla foto 60 (`cerimonia-prato-vista-mare`, senza persone).
+- **Tabella «Quale fa per voi?» — DA CONFERMARE**: le 10 voci e le spunte
+  le abbiamo scritte noi (back office → «Confronto servizi»). Per ogni voce
+  si indica il servizio che la comprende; il wedding planning completo
+  eredita da solo quelle di coordinamento e design. Bozza attuale:
+  ricerca della location, fornitori, budget e contratti, inviti e RSVP →
+  planning; concept e design, allestimenti e styling → design;
+  sopralluoghi, timeline, coordinamento del giorno, imprevisti →
+  coordinamento. Servono le voci vere e quali servizi le comprendono.
+- **Prezzi «a partire da»**: si mostrano sì o no? Se sì, la cifra per
+  servizio.
+- **Consulenza iniziale gratuita**: sì o no? La FAQ «La consulenza
+  iniziale è a pagamento?» oggi risponde di sì (gratuita) e così le
+  rassicurazioni del preventivo: confermare.
+- **I 5 passi del metodo** (consulenza, proposta, progettazione, il giorno,
+  dopo il giorno): i testi sono una bozza nostra.
+- **Partner con consenso**: l'elenco dei fornitori da citare, con il loro
+  consenso a comparire (nome, categoria, sito, logo o foto). Senza almeno
+  un partner con consenso la sezione non compare.
+- **FAQ in inglese**: nessuna FAQ ha la traduzione; sulla pagina EN la
+  sezione resta nascosta.
+- **Foto del Coordinamento del giorno**: quella del servizio
+  (`planner-controlla-tavolo`) ha il watermark VD IMAGE.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

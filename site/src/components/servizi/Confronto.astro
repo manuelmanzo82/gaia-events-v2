@@ -1,0 +1,364 @@
+---
+/**
+ * Servizi — 4. «Quale fa per voi?»: tabella di confronto.
+ *
+ * Righe = voci di confronto (tabella service_compare del back office),
+ * colonne = i servizi citati dalle voci o dai loro include. Spunta se la
+ * voce appartiene al servizio o a un servizio che lui include
+ * (include_slugs: la stessa logica del preventivatore, qui non duplicata
+ * ma letta dagli stessi dati). La destination ha la sua fascia e non è una
+ * colonna, a meno che una voce la citi.
+ *
+ * HTML semantico: <table> con caption, th di colonna e di riga, testo
+ * nascosto «incluso / non incluso» per screen reader e AI. Su mobile la
+ * tabella si nasconde (resta nell'HTML) e compaiono le schede, un servizio
+ * per volta, scelte con dei bottoni (tablist); senza JS le schede sono
+ * tutte visibili, una sotto l'altra.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { getCompare, text } from '../../lib/content';
+import type { Service } from '../../lib/types';
+
+interface Props {
+  lang: Lang;
+  servizi: Service[];
+  titolo: string;
+  nota?: string;
+}
+
+const { lang, servizi, titolo, nota } = Astro.props;
+const t = useTranslations(lang);
+
+const voci = getCompare()
+  .map((v) => ({ label: text(v.label, lang), slugs: v.services }))
+  .filter((v) => v.label);
+
+const perSlug = new Map(servizi.map((s) => [s.slug, s]));
+/** Il servizio comprende la voce: è sua, o di un servizio che include. */
+const comprende = (servizio: Service, slugs: string[]): boolean =>
+  slugs.includes(servizio.slug) || (servizio.includes ?? []).some((i) => slugs.includes(i));
+
+// Colonne: i servizi che hanno almeno una spunta, nell'ordine del back office.
+const colonne = servizi.filter((s) => voci.some((v) => comprende(s, v.slugs)));
+const preventivo = existsIn('quote', lang);
+---
+
+{
+  voci.length > 0 && colonne.length > 1 && (
+    <section id="confronto" class="confronto container-gaia" data-theme="light" aria-labelledby="confronto-titolo">
+      <h2 id="confronto-titolo" class="text-display confronto-titolo" data-reveal="righe">
+        {titolo}
+      </h2>
+      {nota && <p class="confronto-nota">{nota}</p>}
+
+      <div class="confronto-tabella-scorri">
+        <table class="confronto-tabella">
+          <caption class="sr-only">{titolo}</caption>
+          <thead>
+            <tr>
+              <td />
+              {colonne.map((s) => (
+                <th scope="col">
+                  <span class="font-display confronto-servizio">{text(s.title, lang)}</span>
+                  {text(s.subtitle, lang) && <span class="confronto-sotto">{text(s.subtitle, lang)}</span>}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {voci.map((v) => (
+              <tr>
+                <th scope="row">{v.label}</th>
+                {colonne.map((s) =>
+                  comprende(s, v.slugs) ? (
+                    <td class="si">
+                      <span class="spunta" aria-hidden="true" />
+                      <span class="sr-only">{t('servizi.incluso')}</span>
+                    </td>
+                  ) : (
+                    <td class="no">
+                      <span class="trattino" aria-hidden="true">—</span>
+                      <span class="sr-only">{t('servizi.nonIncluso')}</span>
+                    </td>
+                  ),
+                )}
+              </tr>
+            ))}
+          </tbody>
+          {preventivo && (
+            <tfoot>
+              <tr>
+                <td />
+                {colonne.map((s) => (
+                  <td>
+                    <a class="link-filo" href={`${path('quote', lang)}?servizio=${encodeURIComponent(s.slug)}`}>
+                      {t('servizi.chiediQuesto')}
+                    </a>
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+
+      {/* Mobile: una scheda per servizio, scelta con i bottoni. */}
+      <div class="confronto-schede" data-schede>
+        <div class="confronto-tab" role="tablist" aria-label={titolo} hidden data-tablist>
+          {colonne.map((s, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`confronto-tab-${s.slug}`}
+              aria-controls={`confronto-scheda-${s.slug}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              {text(s.title, lang)}
+            </button>
+          ))}
+        </div>
+        {colonne.map((s) => (
+          <div class="confronto-scheda" id={`confronto-scheda-${s.slug}`} role="tabpanel" aria-labelledby={`confronto-tab-${s.slug}`}>
+            <p class="font-display confronto-scheda-titolo">{text(s.title, lang)}</p>
+            <ul role="list">
+              {voci.map((v) => (
+                <li class={comprende(s, v.slugs) ? 'si' : 'no'}>
+                  <span class={comprende(s, v.slugs) ? 'spunta' : 'trattino'} aria-hidden="true">
+                    {comprende(s, v.slugs) ? '' : '—'}
+                  </span>
+                  <span>{v.label}</span>
+                  <span class="sr-only">
+                    {comprende(s, v.slugs) ? t('servizi.incluso') : t('servizi.nonIncluso')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {preventivo && (
+              <a class="btn" href={`${path('quote', lang)}?servizio=${encodeURIComponent(s.slug)}`}>
+                {t('servizi.chiediQuesto')}
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Schede su mobile: un servizio per volta. Senza JS restano tutte visibili.
+  for (const box of document.querySelectorAll<HTMLElement>('[data-schede]')) {
+    const lista = box.querySelector<HTMLElement>('[data-tablist]');
+    const tab = [...box.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const pannelli = [...box.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    if (!lista || tab.length < 2) continue;
+    lista.hidden = false;
+    const scegli = (i: number, focus = false): void => {
+      tab.forEach((b, k) => {
+        b.setAttribute('aria-selected', String(k === i));
+        b.tabIndex = k === i ? 0 : -1;
+      });
+      pannelli.forEach((p, k) => (p.hidden = k !== i));
+      if (focus) tab[i]?.focus();
+    };
+    tab.forEach((b, i) => {
+      b.addEventListener('click', () => scegli(i));
+      b.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') scegli((i + 1) % tab.length, true);
+        if (e.key === 'ArrowLeft') scegli((i - 1 + tab.length) % tab.length, true);
+      });
+    });
+    scegli(0);
+  }
+</script>
+
+<style>
+  .confronto {
+    padding-block: var(--spacing-section);
+  }
+
+  .confronto-titolo {
+    margin: 0;
+    max-width: 18ch;
+  }
+
+  .confronto-nota {
+    max-width: 40rem;
+    margin: 1rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* — Tabella (da 48rem) — */
+  .confronto-tabella-scorri {
+    display: none;
+    margin-top: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .confronto-tabella {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .confronto-tabella thead th {
+    padding: 0 1rem 1.25rem;
+    text-align: center;
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--color-inchiostro);
+  }
+
+  .confronto-tabella thead td {
+    width: 38%;
+    border-bottom: 1px solid var(--color-inchiostro);
+  }
+
+  .confronto-servizio {
+    display: block;
+    font-size: clamp(1.25rem, 0.9rem + 0.9vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .confronto-sotto {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: var(--text-caption);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-grigio-caldo);
+  }
+
+  .confronto-tabella tbody th {
+    padding: 1rem 1rem 1rem 0;
+    font-weight: 400;
+    text-align: left;
+  }
+
+  .confronto-tabella tbody td {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .confronto-tabella tbody tr {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-inchiostro) 12%, transparent);
+  }
+
+  .confronto-tabella tbody tr:hover {
+    background: color-mix(in srgb, var(--color-beige) 45%, transparent);
+  }
+
+  .confronto-tabella tfoot td {
+    padding: 1.5rem 0.5rem 0;
+    text-align: center;
+  }
+
+  .confronto-tabella tfoot .link-filo {
+    display: inline;
+    font-size: 0.75rem;
+    line-height: 1.9;
+    letter-spacing: 0.1em;
+  }
+
+  /* Spunta disegnata: un segno di visto in bordeaux. */
+  .spunta {
+    display: inline-block;
+    width: 0.55rem;
+    height: 1rem;
+    border-right: 2px solid var(--color-bordeaux);
+    border-bottom: 2px solid var(--color-bordeaux);
+    transform: rotate(45deg) translate(-2px, -2px);
+  }
+
+  .trattino {
+    color: color-mix(in srgb, var(--color-inchiostro) 30%, transparent);
+  }
+
+  /* — Schede (mobile) — */
+  .confronto-schede {
+    margin-top: 2rem;
+  }
+
+  /* Una riga sola che scorre in orizzontale, se serve. */
+  .confronto-tab {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 calc(-1 * clamp(1.25rem, 4vw, 3.5rem)) 1.5rem;
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem) 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .confronto-tab[hidden] {
+    display: none;
+  }
+
+  .confronto-tab button {
+    flex: none;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    white-space: nowrap;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 25%, transparent);
+    border-radius: 999px;
+    background: none;
+    color: var(--color-inchiostro);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .confronto-tab button[aria-selected='true'] {
+    border-color: var(--color-inchiostro);
+    background: var(--color-inchiostro);
+    color: var(--color-avorio);
+  }
+
+  .confronto-scheda {
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: var(--color-beige);
+  }
+
+  .confronto-scheda + .confronto-scheda {
+    margin-top: 1rem;
+  }
+
+  .confronto-scheda-titolo {
+    margin: 0 0 1rem;
+    font-size: var(--text-title);
+    line-height: 1.15;
+  }
+
+  .confronto-scheda ul {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .confronto-scheda li {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .confronto-scheda li.no {
+    color: color-mix(in srgb, var(--color-inchiostro) 45%, transparent);
+  }
+
+  @media (min-width: 48rem) {
+    .confronto-tabella-scorri {
+      display: block;
+    }
+
+    .confronto-schede {
+      display: none;
+    }
+  }
+</style>

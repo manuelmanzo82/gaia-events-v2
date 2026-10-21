@@ -73,6 +73,10 @@ export interface Settings extends SeoFields {
     photos?: Record<string, Image | null>;
   };
   contact: { title: Localized; text: Localized; address: Localized };
+  /** Pagina Servizi (impostazioni del gruppo «servizi»). */
+  servizi?: {
+    compare?: { title?: Localized };
+  };
   /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
   quote?: {
     eyebrow?: Localized;
@@ -280,6 +284,16 @@ export interface Partner {
   logo: Image | null;
   description: Localized;
   website?: string | null;
+  active: boolean;
+  order: number;
+}
+
+/** Voce della tabella di confronto dei servizi (pagina Servizi). */
+export interface CompareItem {
+  id: number;
+  label: Localized;
+  /** Slug dei servizi che comprendono direttamente la voce. */
+  services: string[];
   active: boolean;
   order: number;
 }

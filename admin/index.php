@@ -28,6 +28,7 @@ use Gaia\Admin\Controllers\PartnersController;
 use Gaia\Admin\Controllers\PostsController;
 use Gaia\Admin\Controllers\PressController;
 use Gaia\Admin\Controllers\ReviewsController;
+use Gaia\Admin\Controllers\ServiceCompareController;
 use Gaia\Admin\Controllers\ServicesController;
 use Gaia\Admin\Controllers\SettingsController;
 use Gaia\Admin\Controllers\StoriesController;
@@ -65,6 +66,7 @@ $router->post('/pagine/{key}', [PagesController::class, 'save']);
 // Sezioni di contenuto: stesse rotte per tutte, cambia il controller.
 $resources = [
     'servizi' => ServicesController::class,
+    'confronto-servizi' => ServiceCompareController::class,
     'recensioni' => ReviewsController::class,
     'stampa' => PressController::class,
     'clienti' => ClientsController::class,

@@ -1,0 +1,5 @@
+[
+  { "id": 1, "label": { "it": "Ricerca della location (esempio)", "en": "Venue search (sample)" }, "services": ["planning"], "active": true, "order": 1 },
+  { "id": 2, "label": { "it": "Coordinamento il giorno (esempio)", "en": "On-the-day coordination (sample)" }, "services": ["coordinamento"], "active": true, "order": 2 },
+  { "id": 3, "label": { "it": "Design e allestimenti (esempio)", "en": "Design and styling (sample)" }, "services": ["design"], "active": true, "order": 3 }
+]
