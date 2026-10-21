@@ -24,7 +24,6 @@ final class Exporter
             'settings' => self::settings(),
             'pages' => self::pages(),
             'services' => self::services(),
-            'events' => self::events(),
             'reviews' => self::reviews(),
             'stampa' => self::press(),
             'clienti' => self::clients(),
@@ -348,49 +347,6 @@ final class Exporter
             'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
             'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
             'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
-            'active' => (bool) $row['active'],
-            'order' => (int) $row['sort_order'],
-        ], $rows);
-    }
-
-    // -----------------------------------------------------------------
-    // Eventi
-    // -----------------------------------------------------------------
-
-    /** @return list<array<string, mixed>> */
-    public static function events(): array
-    {
-        $rows = Db::all('SELECT * FROM events ORDER BY sort_order, event_date DESC, id');
-
-        $galleries = [];
-        foreach (
-            Db::all(
-                'SELECT ei.event_id, m.*
-                 FROM event_images ei
-                 JOIN media m ON m.id = ei.media_id
-                 ORDER BY ei.event_id, ei.sort_order, ei.id',
-            ) as $row
-        ) {
-            $galleries[(int) $row['event_id']][] = self::image($row);
-        }
-
-        return array_map(static fn (array $row): array => [
-            'id' => (int) $row['id'],
-            'slug' => $row['slug'],
-            'macroCategory' => $row['macro_category'],
-            'title' => self::text($row['title_it'], $row['title_en']),
-            'location' => self::text($row['location_it'], $row['location_en']),
-            'date' => self::date($row['event_date']) ?? '',
-            'category' => self::text($row['category_it'], $row['category_en']),
-            'excerpt' => self::text($row['excerpt_it'], $row['excerpt_en']),
-            'description' => self::text($row['description_it'], $row['description_en']),
-            'cover' => self::image(self::mediaById((int) ($row['cover_media_id'] ?? 0))),
-            'hero' => self::image(self::mediaById((int) ($row['hero_media_id'] ?? 0))),
-            'video' => $row['video_url'],
-            'gallery' => $galleries[(int) $row['id']] ?? [],
-            'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
-            'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
-            'featured' => (bool) $row['featured'],
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], $rows);

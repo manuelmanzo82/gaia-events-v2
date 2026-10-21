@@ -201,62 +201,6 @@ CREATE TABLE IF NOT EXISTS `services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Eventi (portfolio)
--- ---------------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `events` (
-  `id`                  INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `slug`                VARCHAR(160) NOT NULL,
-  `macro_category`      ENUM('wedding','corporate','celebrations') NOT NULL DEFAULT 'wedding',
-  `title_it`            VARCHAR(255) DEFAULT NULL,
-  `title_en`            VARCHAR(255) DEFAULT NULL,
-  `location_it`         VARCHAR(255) DEFAULT NULL,
-  `location_en`         VARCHAR(255) DEFAULT NULL,
-  `event_date`          DATE DEFAULT NULL,
-  `category_it`         VARCHAR(120) DEFAULT NULL,
-  `category_en`         VARCHAR(120) DEFAULT NULL,
-  `excerpt_it`          TEXT DEFAULT NULL,
-  `excerpt_en`          TEXT DEFAULT NULL,
-  `description_it`      MEDIUMTEXT DEFAULT NULL,
-  `description_en`      MEDIUMTEXT DEFAULT NULL,
-  `cover_media_id`      INT UNSIGNED DEFAULT NULL,
-  `hero_media_id`       INT UNSIGNED DEFAULT NULL,
-  -- URL YouTube o Vimeo; il CSP del sito consente solo questi due domini.
-  `video_url`           VARCHAR(500) DEFAULT NULL,
-  `meta_title_it`       VARCHAR(255) DEFAULT NULL,
-  `meta_title_en`       VARCHAR(255) DEFAULT NULL,
-  `meta_description_it` VARCHAR(400) DEFAULT NULL,
-  `meta_description_en` VARCHAR(400) DEFAULT NULL,
-  `featured`            TINYINT(1) NOT NULL DEFAULT 0,
-  `active`              TINYINT(1) NOT NULL DEFAULT 1,
-  `sort_order`          SMALLINT NOT NULL DEFAULT 0,
-  `created_at`          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_events_slug` (`slug`),
-  KEY `idx_events_active` (`active`, `sort_order`),
-  KEY `idx_events_featured` (`featured`, `sort_order`),
-  KEY `fk_events_cover` (`cover_media_id`),
-  KEY `fk_events_hero` (`hero_media_id`),
-  CONSTRAINT `fk_events_cover` FOREIGN KEY (`cover_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_events_hero` FOREIGN KEY (`hero_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Galleria di un evento: l'ordine è deciso da Gaia nel back office.
-CREATE TABLE IF NOT EXISTS `event_images` (
-  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `event_id`   INT UNSIGNED NOT NULL,
-  `media_id`   INT UNSIGNED NOT NULL,
-  `sort_order` SMALLINT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_event_images` (`event_id`, `media_id`),
-  KEY `idx_event_images_order` (`event_id`, `sort_order`),
-  KEY `fk_event_images_media` (`media_id`),
-  CONSTRAINT `fk_event_images_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_event_images_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------
 -- Recensioni
 -- ---------------------------------------------------------------------
 
@@ -384,31 +328,6 @@ CREATE TABLE IF NOT EXISTS `inquiries` (
   PRIMARY KEY (`id`),
   KEY `idx_inquiries_status` (`status`, `created_at`),
   KEY `idx_inquiries_type` (`type`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------
--- Instagram (feed automatico, più avanti)
---
--- Le immagini vengono scaricate in uploads/ e referenziate via media_id:
--- così il sito non dipende dalla CDN di Instagram e il CSP resta chiuso.
--- ---------------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `instagram_items` (
-  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ig_id`      VARCHAR(80) NOT NULL,
-  `media_type` ENUM('image','video') NOT NULL DEFAULT 'image',
-  `media_id`   INT UNSIGNED DEFAULT NULL,
-  `caption_it` TEXT DEFAULT NULL,
-  `caption_en` TEXT DEFAULT NULL,
-  `permalink`  VARCHAR(500) NOT NULL,
-  `posted_at`  DATETIME DEFAULT NULL,
-  `active`     TINYINT(1) NOT NULL DEFAULT 1,
-  `sort_order` SMALLINT NOT NULL DEFAULT 0,
-  `synced_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_instagram_ig_id` (`ig_id`),
-  KEY `fk_instagram_media` (`media_id`),
-  CONSTRAINT `fk_instagram_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

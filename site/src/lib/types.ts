@@ -97,29 +97,6 @@ export interface Service extends SeoFields {
   order: number;
 }
 
-export type EventCategory = 'wedding' | 'corporate' | 'celebrations';
-
-export interface Event extends SeoFields {
-  id: number;
-  slug: string;
-  macroCategory: EventCategory;
-  title: Localized;
-  location: Localized;
-  /** ISO 8601, es. '2026-06-14' */
-  date: string;
-  category: Localized;
-  excerpt: Localized;
-  description: Localized;
-  cover: Image | null;
-  hero: Image | null;
-  /** URL YouTube o Vimeo. */
-  video?: string | null;
-  gallery: Image[];
-  featured: boolean;
-  active: boolean;
-  order: number;
-}
-
 export interface Review {
   id: number;
   author: string;

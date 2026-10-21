@@ -32,9 +32,6 @@
         <?php endforeach; ?>
         <td>
           <a href="<?= e(admin_url($route . '/' . (int) $row['id'] . '/modifica')) ?>">Modifica</a>
-          <?php if ($route === 'eventi'): ?>
-            · <a href="<?= e(admin_url($route . '/' . (int) $row['id'] . '/galleria')) ?>">Galleria</a>
-          <?php endif; ?>
         </td>
       </tr>
     <?php endforeach; ?>

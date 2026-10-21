@@ -152,8 +152,8 @@ Mai nel codice, mai nei commit.
   zone o location collegate e dice quante sono), **highlights** (alt su `media`,
   sezioni con ordine PER sezione), **partners**, **stories** (slug bilingue,
   fotografo = riferimento a partner), **page_hero** + foto ordinate.
-- **Tabella `events` congelata**: dentro solo dati di esempio; il DROP con la
-  rimozione di /portfolio va fatto in fase 3, in un commit dedicato.
+- **Tabella `events`**: era rimasta congelata con dati di esempio; tolta il
+  21/10/2026 (migrazione `2026-10-21-drop-events.sql`, vedi giro 11).
 - Rotte nuove: `places` /luoghi/ ↔ /en/destinations/ (dettagli a due livelli con
   slug composto, vedi `slugLuogo()` in `site/src/lib/content.ts`), `stories`
   /storie/ ↔ /en/stories/, `partners` /partner/ ↔ /en/partners/. In
@@ -869,9 +869,15 @@ Fatto:
     Preventivo sotto; mobile impilato nello stesso ordine, link ≥ 44 px.
   - **Portfolio tolto dal sito**: rotte `/portfolio/…` e `/en/portfolio/…`
     non vengono più generate (chiave `portfolio` via da routes.ts,
-    sitemap, llms, [section]); 301 su `/eventi/` e `/en/events/`. La
-    tabella `events`, il back office «Eventi» e `events.json` restano
-    fino al DROP dedicato (vedi Prossimi passi).
+    sitemap, llms, [section]); 301 su `/eventi/` e `/en/events/`.
+  - **Sezione «Eventi» rimossa** (migrazione `2026-10-21-drop-events.sql`,
+    dump prima): DROP di `events`, `event_images` e di `instagram_items`
+    (mai usata), via la riga `pages.portfolio`; tolti EventsController,
+    rotte e voce del back office, `Exporter::events()`, `events.json`,
+    tipo `Event`, `getEvents*`, `EVENT_FIELDS`. Le foto restano in
+    `media` (il legame era solo in event_images). I seed storici in
+    `admin/sql/seed-*.sql` citano ancora `events`: non vanno più
+    eseguiti così come sono.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
@@ -889,8 +895,6 @@ Prossimi passi (fase 3, resta):
   token è scaduto o il rinnovo fallisce. I post caricati a mano restano e
   si possono sempre nascondere o riordinare.
 - Allineare `schema.sql` alle migrazioni del 16-17/10 (vedi sopra).
-- Tabella `instagram_items` dello schema iniziale, mai usata: DROP insieme
-  a `events`.
 - Ok di Manuel sulla home dello staging; poi Lighthouse anche sullo
   staging (senza più header di autenticazione).
 - Rimettere `INTRO_SEMPRE = false` prima del lancio.
@@ -899,8 +903,6 @@ Prossimi passi (fase 3, resta):
 - Footer: è ancora quello segnaposto, da disegnare.
 - Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)
   sono ancora segnaposto.
-- DROP di `events`/`event_images` + rimozione di /portfolio quando /storie la
-  sostituisce (commit dedicato).
 - Contenuti veri da Gaia (luoghi, location, storie, testi dei partner).
 - **Prima del lancio, foto** (le note stanno in `media.note_interne`, sezione
   Immagini del back office):

@@ -2,10 +2,9 @@ import type { APIRoute } from 'astro';
 import { DEFAULT_LANG, IS_STAGING, LANGS, type Lang } from '../config/site';
 import { HTML_LANG } from '../i18n';
 import { url, type RouteKey } from '../i18n/routes';
-import { EVENT_FIELDS, LUOGO_FIELDS, POST_FIELDS, STORY_FIELDS, langsFor } from '../lib/availability';
+import { LUOGO_FIELDS, POST_FIELDS, STORY_FIELDS, langsFor } from '../lib/availability';
 import {
   availableLangs,
-  getEvents,
   getLuoghiFlat,
   getPage,
   getPosts,

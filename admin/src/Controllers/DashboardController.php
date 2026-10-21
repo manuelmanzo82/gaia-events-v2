@@ -21,7 +21,6 @@ final class DashboardController
         View::render('dashboard', [
             'title' => 'Pannello',
             'counts' => [
-                'Eventi' => $this->count('events'),
                 'Servizi' => $this->count('services'),
                 'Recensioni' => $this->count('reviews'),
                 'Stampa' => $this->count('press'),

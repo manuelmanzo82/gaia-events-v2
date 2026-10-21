@@ -2,7 +2,6 @@ import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type {
   Client,
   DestinationWedding,
-  Event,
   Faq,
   Highlight,
   HighlightSection,
@@ -155,19 +154,6 @@ export function getServices(): Service[] {
 
 export function getServiceBySlug(slug: string): Service | null {
   return getServices().find((service) => service.slug === slug) ?? null;
-}
-
-export function getEvents(): Event[] {
-  return load<Event[]>('events', []).filter(isActive).sort(byOrder);
-}
-
-export function getFeaturedEvents(limit?: number): Event[] {
-  const featured = getEvents().filter((event) => event.featured);
-  return limit ? featured.slice(0, limit) : featured;
-}
-
-export function getEventBySlug(slug: string): Event | null {
-  return getEvents().find((event) => event.slug === slug) ?? null;
 }
 
 export function getReviews(): Review[] {

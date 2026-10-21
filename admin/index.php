@@ -15,7 +15,6 @@ require __DIR__ . '/src/bootstrap.php';
 use Gaia\Admin\Controllers\AuthController;
 use Gaia\Admin\Controllers\ClientsController;
 use Gaia\Admin\Controllers\DashboardController;
-use Gaia\Admin\Controllers\EventsController;
 use Gaia\Admin\Controllers\FaqsController;
 use Gaia\Admin\Controllers\HeroController;
 use Gaia\Admin\Controllers\HighlightsController;
@@ -66,7 +65,6 @@ $router->post('/pagine/{key}', [PagesController::class, 'save']);
 // Sezioni di contenuto: stesse rotte per tutte, cambia il controller.
 $resources = [
     'servizi' => ServicesController::class,
-    'eventi' => EventsController::class,
     'recensioni' => ReviewsController::class,
     'stampa' => PressController::class,
     'clienti' => ClientsController::class,
@@ -88,11 +86,6 @@ foreach ($resources as $segment => $controller) {
     $router->post("/{$segment}/{id}/elimina", [$controller, 'destroy']);
 }
 
-// Galleria degli eventi
-$router->get('/eventi/{id}/galleria', [EventsController::class, 'gallery']);
-$router->post('/eventi/{id}/galleria/aggiungi', [EventsController::class, 'galleryAdd']);
-$router->post('/eventi/{id}/galleria/ordina', [EventsController::class, 'gallerySort']);
-$router->post('/eventi/{id}/galleria/{image}/rimuovi', [EventsController::class, 'galleryRemove']);
 
 // Gallerie di luoghi e storie (stesso schema della galleria eventi).
 foreach (['luoghi' => LuoghiController::class, 'storie' => StoriesController::class] as $segment => $controller) {

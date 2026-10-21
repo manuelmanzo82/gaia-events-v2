@@ -15,7 +15,7 @@ import {
   getStories,
   isPublishable,
 } from './content';
-import type { Event, Faq, Luogo, Post, Review, Service, Story } from './types';
+import type { Faq, Luogo, Post, Review, Service, Story } from './types';
 
 /**
  * In quali lingue esiste davvero una pagina.
@@ -55,8 +55,6 @@ const PAGE_REQUIREMENTS: Partial<Record<RouteKey, string[]>> = {
  * sitemap, home. Quando indice e dettaglio usavano criteri diversi, l'indice
  * inglese finiva per linkare una scheda che il build non aveva generato.
  */
-/** Portfolio (tabella events): la pagina è stata tolta (giro 11, 301 su /eventi/); i campi restano per il DROP futuro. */
-export const EVENT_FIELDS: Array<keyof Event> = ['title', 'excerpt', 'description'];
 export const POST_FIELDS: Array<keyof Post> = ['title', 'slug', 'body'];
 export const SERVICE_FIELDS: Array<keyof Service> = ['title', 'description'];
 export const REVIEW_FIELDS: Array<keyof Review> = ['text'];

@@ -11,7 +11,7 @@ use Gaia\Admin\Session;
 use Gaia\Admin\View;
 
 /**
- * Pagine statiche: chi sono, privacy, cookie, intro di servizi e portfolio,
+ * Pagine statiche: chi sono, privacy, cookie, intro di servizi,
  * destination wedding.
  *
  * `page_key` corrisponde a una chiave di ROUTES in site/src/i18n/routes.ts:
@@ -23,7 +23,6 @@ final class PagesController
     private const KEYS = [
         'about' => 'Chi sono',
         'services' => 'Servizi (introduzione)',
-        'portfolio' => 'Portfolio (introduzione)',
         'reviews' => 'Dicono di me (introduzione)',
         'blog' => 'Magazine (introduzione)',
         'faq' => 'FAQ (introduzione)',
