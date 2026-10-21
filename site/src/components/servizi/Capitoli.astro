@@ -346,6 +346,12 @@ const capitoli = servizi.map((s, i) => ({
       color: var(--color-oro-testo);
     }
 
+    /* Colonna di testo stretta fino a ~1280: il titolo scala con il
+       viewport, così «Coordinamento» non esce dalla colonna. */
+    .sv-titolo {
+      font-size: min(var(--text-display), 3.9vw);
+    }
+
     .sv-capitolo {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: clamp(2.5rem, 5vw, 5rem);
