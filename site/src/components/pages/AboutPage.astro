@@ -23,11 +23,12 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { langsFor } from '../../lib/availability';
-import { getHighlights, getPage, getSettings, text } from '../../lib/content';
+import { getHighlights, getPage, getPress, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
+import Citazione from '../chi-sono/Citazione.astro';
 import Numeri from '../chi-sono/Numeri.astro';
 import Percorso from '../chi-sono/Percorso.astro';
 import Valori from '../chi-sono/Valori.astro';
@@ -83,6 +84,12 @@ const fotoValori = getHighlights('chi-sono')
   .map((h) => picture(h.image, lang, '(min-width: 64rem) 42vw, 100vw'))
   .filter((p): p is NonNullable<typeof p> => p !== null && p.maxWidth >= 480);
 
+// Citazione a tutto schermo: la foto about.photos.quote; se c'è una voce
+// Stampa con estratto in questa lingua, prende il posto della citazione.
+const fotoCitazione = picture(settings.about?.photos?.quote ?? null, lang, '100vw');
+const primaStampa = getPress().find((p) => text(p.excerpt, lang));
+const stampa = primaStampa ? { estratto: text(primaStampa.excerpt, lang), testata: primaStampa.outlet, url: primaStampa.url } : null;
+
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).
 const fotoApertura = picture(getHighlights('chi-sono')[0]?.image ?? settings.about.image, lang, '100vw');
@@ -126,6 +133,8 @@ const jsonLd = [
   <Percorso lang={lang} titolo={text(timeline?.title, lang)} tappe={tappe} />
 
   <Valori titolo={text(valoriBlocco?.title, lang)} valori={valori} foto={fotoValori} />
+
+  <Citazione lang={lang} citazione={citazione} foto={fotoCitazione} stampa={stampa} />
 </BaseLayout>
 
 <script>
