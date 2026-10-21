@@ -147,15 +147,16 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
 
 <style>
   .site-footer {
-    --logo-h: 96px;
-    --logo-h-md: 140px;
+    --logo-h: 80px;
+    --logo-h-md: 110px;
     background: var(--color-notte);
     color: var(--color-avorio-su-notte);
     font-size: 0.9rem;
   }
 
+  /* Meno aria tra l'ultima sezione e il logo (giro 10). */
   .footer-interno {
-    padding-block: var(--spacing-section) 2rem;
+    padding-block: clamp(2.5rem, 6vh, 4rem) 2rem;
   }
 
   .footer-testa {
