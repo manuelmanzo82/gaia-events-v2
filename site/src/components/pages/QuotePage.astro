@@ -107,6 +107,11 @@ for (const [passo, chiave] of Object.entries(CHIAVI) as Array<[Passaggio, string
 
 const oreRisposta = Number(text(q?.replyHours, 'it')) || 48;
 
+// Su mobile la foto della fascia del primo passaggio è l'elemento più
+// grande della prima schermata (LCP): si precarica, solo sotto i 64rem,
+// nel formato migliore. Su desktop la fascia è nascosta e non si scarica.
+const fasciaPrimo = foto.evento?.sources[0] ?? null;
+
 const rassicurazioni = [1, 2, 3]
   .map((n) => {
     const a = q?.[`assurance${n}` as 'assurance1'];
@@ -123,6 +128,20 @@ const domande = [1, 2, 3]
 ---
 
 <BaseLayout lang={lang} routeKey="quote" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} largo>
+  {
+    fasciaPrimo && (
+      <link
+        slot="head"
+        rel="preload"
+        as="image"
+        type={fasciaPrimo.type}
+        imagesrcset={fasciaPrimo.srcset}
+        imagesizes="calc(100vw - 2.5rem)"
+        media="(max-width: 63.98rem)"
+        fetchpriority="high"
+      />
+    )
+  }
   <section class="prev-testa container-gaia" data-theme="light">
     {text(q?.eyebrow, lang) && <p class="eyebrow">{text(q?.eyebrow, lang)}</p>}
     <h1 class="text-display prev-titolo">{titolo}</h1>
