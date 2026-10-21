@@ -1012,7 +1012,9 @@ Fatto:
   su mobile la foto copre i 68svh alti e sfuma, `sizes` 102vh) ·
   Filosofia (blocco intro) · Capitoli (servizi tranne destination; H2 per
   servizio; `pageImage` grande + `pageImage2` piccola con bordo avorio
-  6/4 px; indice sticky ≥64rem con `aria-current`; maschera `[data-apri]`;
+  6/4 px; indice sticky ≥64rem con `aria-current`; maschera `[data-apri-foto]`
+  (modulo condiviso `scripts/maschere-foto.ts`, usato anche dalla voce di
+  Chi sono; NON `[data-apri]`, che è l'etichetta Menu dell'header);
   titolo `min(--text-display, 3.9vw)` per non sforare a 1024) ·
   Destination (fascia notte, link alla pagina se esiste, altrimenti
   preventivo con il servizio) · Confronto · Metodo (blocco process; foto
@@ -1025,8 +1027,10 @@ Fatto:
   FAQ (gruppo «servizi», solo tradotte: in EN nascosta) · Ponte Dicono
   di me (solo se la pagina esiste: oggi nascosto) · CtaFinale con
   `servizi.photos.cta`. JSON-LD: BreadcrumbList, Service × 4 (areaServed
-  Roma + Italia), FAQPage. Il preventivatore legge `?servizio=<slug>`
-  (vince sullo stato salvato, poi il parametro si toglie dall'URL);
+  Roma + Italia), FAQPage. Niente link al preventivo nei capitoli e sotto
+  la tabella (tolti il 21/10: resta menu + CtaFinale). Il preventivatore
+  legge comunque `?servizio=<slug>` (oggi nessun link lo usa; vince sullo
+  stato salvato, poi il parametro si toglie dall'URL);
   I miei eventi legge `?tipo=`. **Playwright di default ha
   reduced-motion attivo**: per vedere gli effetti
   `page.emulateMedia({ reducedMotion: 'no-preference' })`.

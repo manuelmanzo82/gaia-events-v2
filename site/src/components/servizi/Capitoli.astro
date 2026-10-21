@@ -2,8 +2,8 @@
 /**
  * Servizi — 3. Un capitolo per servizio (dal database), destination
  * esclusa (ha la sua fascia). Ogni capitolo: numero grande, titolo (H2),
- * sottotitolo, descrizione, «Cosa include», bottone «Chiedi un preventivo
- * per questo» (preventivatore con ?servizio=<slug>) e due foto
+ * sottotitolo, descrizione, «Cosa include» e due foto (niente bottone al
+ * preventivo dal 21/10: resta nel menu e nella CtaFinale)
  * (page_media_id grande, page_media2_id piccola sovrapposta, bordo nel
  * colore di fondo, come la voce di Chi sono). L'id del capitolo è lo slug:
  * le card della home linkano #planning ecc.
@@ -17,8 +17,6 @@
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
-import { path } from '../../i18n/routes';
-import { existsIn } from '../../lib/availability';
 import { picture } from '../../lib/images';
 import { text } from '../../lib/content';
 import type { Service } from '../../lib/types';
@@ -31,7 +29,6 @@ interface Props {
 
 const { lang, servizi } = Astro.props;
 const t = useTranslations(lang);
-const preventivo = existsIn('quote', lang);
 
 const capitoli = servizi.map((s, i) => ({
   s,
@@ -100,13 +97,6 @@ const capitoli = servizi.map((s, i) => ({
                     ))}
                   </ul>
                 </>
-              )}
-              {preventivo && (
-                <p class="sv-azione">
-                  <a class="btn btn--pieno" href={`${path('quote', lang)}?servizio=${encodeURIComponent(c.s.slug)}`}>
-                    {t('servizi.chiediQuesto')}
-                  </a>
-                </p>
               )}
             </div>
           </section>
@@ -271,10 +261,6 @@ const capitoli = servizi.map((s, i) => ({
     width: 0.75rem;
     height: 1px;
     background: var(--color-oro);
-  }
-
-  .sv-azione {
-    margin: 1.75rem 0 0;
   }
 
   /* — Desktop: indice fisso a sinistra, capitoli alternati — */

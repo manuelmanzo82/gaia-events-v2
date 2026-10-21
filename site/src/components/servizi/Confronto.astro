@@ -14,11 +14,12 @@
  * tabella si nasconde (resta nell'HTML) e compaiono le schede, un servizio
  * per volta, scelte con dei bottoni (tablist); senza JS le schede sono
  * tutte visibili, una sotto l'altra.
+ *
+ * Niente link al preventivo sotto le colonne (21/10): il preventivo si
+ * raggiunge dal menu e dalla CtaFinale.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
-import { path } from '../../i18n/routes';
-import { existsIn } from '../../lib/availability';
 import { getCompare, text } from '../../lib/content';
 import type { Service } from '../../lib/types';
 
@@ -43,7 +44,6 @@ const comprende = (servizio: Service, slugs: string[]): boolean =>
 
 // Colonne: i servizi che hanno almeno una spunta, nell'ordine del back office.
 const colonne = servizi.filter((s) => voci.some((v) => comprende(s, v.slugs)));
-const preventivo = existsIn('quote', lang);
 ---
 
 {
@@ -88,20 +88,6 @@ const preventivo = existsIn('quote', lang);
               </tr>
             ))}
           </tbody>
-          {preventivo && (
-            <tfoot>
-              <tr>
-                <td />
-                {colonne.map((s) => (
-                  <td>
-                    <a class="link-filo" href={`${path('quote', lang)}?servizio=${encodeURIComponent(s.slug)}`}>
-                      {t('servizi.chiediQuesto')}
-                    </a>
-                  </td>
-                ))}
-              </tr>
-            </tfoot>
-          )}
         </table>
       </div>
 
@@ -137,11 +123,6 @@ const preventivo = existsIn('quote', lang);
                 </li>
               ))}
             </ul>
-            {preventivo && (
-              <a class="btn" href={`${path('quote', lang)}?servizio=${encodeURIComponent(s.slug)}`}>
-                {t('servizi.chiediQuesto')}
-              </a>
-            )}
           </div>
         ))}
       </div>
@@ -250,18 +231,6 @@ const preventivo = existsIn('quote', lang);
 
   .confronto-tabella tbody tr:hover {
     background: color-mix(in srgb, var(--color-beige) 45%, transparent);
-  }
-
-  .confronto-tabella tfoot td {
-    padding: 1.5rem 0.5rem 0;
-    text-align: center;
-  }
-
-  .confronto-tabella tfoot .link-filo {
-    display: inline;
-    font-size: 0.75rem;
-    line-height: 1.9;
-    letter-spacing: 0.1em;
   }
 
   /* Spunta disegnata: un segno di visto in bordeaux. */
