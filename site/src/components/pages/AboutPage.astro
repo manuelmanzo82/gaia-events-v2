@@ -28,6 +28,7 @@ import { picture } from '../../lib/images';
 import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
+import Numeri from '../chi-sono/Numeri.astro';
 import Voce from '../chi-sono/Voce.astro';
 
 interface Props {
@@ -55,6 +56,12 @@ const senzaTag = (html: string): string => html.replace(/<[^>]+>/g, '').replace(
 const paragrafi = [...body.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map((m) => senzaTag(m[1] ?? '')).filter(Boolean);
 const citazione = senzaTag(body.match(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/i)?.[1] ?? '');
 const GRANDI = 2;
+
+// I numeri: solo le coppie valore + etichetta compilate, nell'ordine 1-4.
+const numeri = Object.entries(settings.about?.stats ?? {})
+  .sort(([a], [b]) => Number(a) - Number(b))
+  .map(([, n]) => ({ value: text(n?.value, lang).trim(), label: text(n?.label, lang).trim() }))
+  .filter((n) => n.value && n.label);
 
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).
@@ -93,6 +100,8 @@ const jsonLd = [
   <Apertura lang={lang} eyebrow={titolo} nome={nome} riga={tagline} anno={anno} foto={fotoApertura} />
 
   <Voce lang={lang} grandi={paragrafi.slice(0, GRANDI)} resto={paragrafi.slice(GRANDI)} />
+
+  <Numeri numeri={numeri} />
 </BaseLayout>
 
 <script>

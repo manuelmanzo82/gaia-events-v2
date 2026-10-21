@@ -7,6 +7,9 @@
  *                             mentre la sua sezione attraversa lo schermo
  *   [data-parole]             testo rivelato parola per parola allo scroll
  *                             (opacità 0,15 → 1, SplitText + scrub)
+ *   [data-contatore="150+"]   numero che conta da 0 al valore al primo
+ *                             ingresso (prefisso/suffisso non numerici
+ *                             restano com'erano)
  *
  * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale.
  * Con prefers-reduced-motion niente del tutto: le pagine sono complete
@@ -64,6 +67,30 @@ function parolePerParola(): void {
   }
 }
 
+function contatori(): void {
+  for (const el of document.querySelectorAll<HTMLElement>('[data-contatore]')) {
+    const testo = el.dataset.contatore ?? el.textContent ?? '';
+    const m = testo.match(/^([^\d]*)(\d[\d.,]*)(.*)$/);
+    if (!m) continue;
+    const [, prefisso, cifre, suffisso] = m;
+    const separatore = cifre.includes('.') ? '.' : '';
+    const valore = Number(cifre.replace(/[.,]/g, ''));
+    if (!Number.isFinite(valore)) continue;
+    const stato = { n: 0 };
+    gsap.to(stato, {
+      n: valore,
+      duration: 1.6,
+      ease: 'power2.out',
+      onUpdate: () => {
+        const intero = Math.round(stato.n);
+        const resa = separatore ? intero.toLocaleString('it-IT') : String(intero);
+        el.textContent = `${prefisso}${resa}${suffisso}`;
+      },
+      scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+    });
+  }
+}
+
 /** Da chiamare una volta, dopo initMotion(). */
 export function initChiSonoEffetti(): void {
   if (riduciMotion()) return;
@@ -72,6 +99,7 @@ export function initChiSonoEffetti(): void {
 
   parallasse();
   parolePerParola();
+  contatori();
 
   const mm = gsap.matchMedia();
   mm.add(DESKTOP, () => {

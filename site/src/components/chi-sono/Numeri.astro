@@ -1,0 +1,77 @@
+---
+/**
+ * Chi sono — 3. I numeri (beige): tre o quattro contatori dalle
+ * impostazioni about.stats.N (valore + etichetta IT/EN). Solo numeri
+ * veri: con nessuna coppia valore/etichetta compilata la sezione non
+ * esiste. Il conteggio parte al primo ingresso nello schermo
+ * ([data-contatore] in chi-sono-effetti.ts): il valore è già scritto nel
+ * markup, l'animazione parte da zero e torna a quello, quindi senza JS o
+ * con reduced-motion il numero è semplicemente lì.
+ */
+interface Props {
+  numeri: Array<{ value: string; label: string }>;
+}
+
+const { numeri } = Astro.props;
+---
+
+{
+  numeri.length > 0 && (
+    <section class="numeri" data-theme="light" aria-label="I numeri">
+      <ul class="container-gaia numeri-lista" role="list">
+        {numeri.map((n) => (
+          <li class="numeri-voce" data-reveal="alto">
+            <p class="font-display numeri-valore" data-contatore={n.value}>
+              {n.value}
+            </p>
+            <p class="numeri-etichetta">{n.label}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .numeri {
+    padding-block: var(--spacing-section-sm);
+    background: var(--color-beige);
+  }
+
+  .numeri-lista {
+    display: grid;
+    gap: 2rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding-block: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .numeri-lista {
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    }
+  }
+
+  .numeri-voce {
+    padding-left: 1rem;
+    border-left: 1px solid color-mix(in srgb, var(--color-inchiostro) 22%, transparent);
+  }
+
+  .numeri-valore {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: 1;
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    color: var(--color-inchiostro);
+  }
+
+  .numeri-etichetta {
+    margin: 0.5rem 0 0;
+    font-size: var(--text-caption);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-grigio-caldo);
+  }
+</style>
