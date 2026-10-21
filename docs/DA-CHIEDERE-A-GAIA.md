@@ -227,14 +227,23 @@ nascoste:
   (`sposi-fronte-luci-notte`, apertura della pagina Servizi): sono
   riconoscibili. Senza il loro consenso scritto, prima del lancio si passa
   alla foto 60 (`cerimonia-prato-vista-mare`, senza persone).
-- **Tabella «Quale fa per voi?» — DA CONFERMARE**: le 10 voci e le spunte
+- **Tabella «Quale fa per voi?» — DA CONFERMARE**: le 12 voci e le spunte
   le abbiamo scritte noi (back office → «Confronto servizi»). Per ogni voce
   si indica il servizio che la comprende; il wedding planning completo
   eredita da solo quelle di coordinamento e design. Bozza attuale:
-  ricerca della location, fornitori, budget e contratti, inviti e RSVP →
-  planning; concept e design, allestimenti e styling → design;
-  sopralluoghi, timeline, coordinamento del giorno, imprevisti →
-  coordinamento. Servono le voci vere e quali servizi le comprendono.
+  location, ricerca e selezione dei fornitori, budget e contratti, inviti
+  e conferme → planning; coordinamento dei fornitori scelti, timeline,
+  coordinamento del giorno, imprevisti → coordinamento; concept e design,
+  allestimenti e styling, scelta di fioristi e noleggi → design;
+  sopralluoghi con i fornitori → coordinamento e design. Servono le voci
+  vere e quali servizi le comprendono.
+- **Altre persone riconoscibili nella pagina Servizi**: nei passi di «Come
+  lavoro» gli sposi di `uscita-chiesa-arco-fiori` (Il giorno) e di
+  `brindisi-sposi-tramonto` (Dopo il giorno); in «Non solo matrimoni» il
+  cantante e la ragazza di `cantante-scalinata-villa`; nella chiusura la
+  sposa di `sposa-bouquet-sguardo`. Serve il loro consenso, altrimenti si
+  cambiano le foto (si fa dal back office senza toccare il codice, tranne
+  i passi del metodo che oggi richiedono una migrazione).
 - **Prezzi «a partire da»**: si mostrano sì o no? Se sì, la cifra per
   servizio.
 - **Consulenza iniziale gratuita**: sì o no? La FAQ «La consulenza

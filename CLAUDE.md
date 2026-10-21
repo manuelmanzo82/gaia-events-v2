@@ -1006,6 +1006,31 @@ Fatto:
   spegneva anche il logo; l'opacità 0 va solo su `::before`. Verifica:
   `header-mobile.js` nello scratchpad.
 
+- **Pagina Servizi** (21/10/2026, `components/servizi/`, effetti in
+  `scripts/servizi-effetti.ts` dopo `gaia:motion-pronta`): Apertura (hero
+  «services», foto 57, H1 dal titolo dell'hero, indice con ancore = slug;
+  su mobile la foto copre i 68svh alti e sfuma, `sizes` 102vh) ·
+  Filosofia (blocco intro) · Capitoli (servizi tranne destination; H2 per
+  servizio; `pageImage` grande + `pageImage2` piccola con bordo avorio
+  6/4 px; indice sticky ≥64rem con `aria-current`; maschera `[data-apri]`;
+  titolo `min(--text-display, 3.9vw)` per non sforare a 1024) ·
+  Destination (fascia notte, link alla pagina se esiste, altrimenti
+  preventivo con il servizio) · Confronto · Metodo (blocco process; foto
+  sticky che cambia col passo via IntersectionObserver a un terzo dello
+  schermo, filetto `[data-filo]` con trigger `[data-filo-traccia]`;
+  `sizes` per orientamento: le orizzontali in cornice 4:5 sono larghe
+  ~1,5 × l'altezza) · Partner (solo `consent`, oggi nessuno: nascosta) ·
+  Non solo matrimoni (blocco cta; link a `/eventi/?tipo=feste|aziendali`
+  se ci sono eventi pubblicati di quel tipo, altrimenti preventivo) ·
+  FAQ (gruppo «servizi», solo tradotte: in EN nascosta) · Ponte Dicono
+  di me (solo se la pagina esiste: oggi nascosto) · CtaFinale con
+  `servizi.photos.cta`. JSON-LD: BreadcrumbList, Service × 4 (areaServed
+  Roma + Italia), FAQPage. Il preventivatore legge `?servizio=<slug>`
+  (vince sullo stato salvato, poi il parametro si toglie dall'URL);
+  I miei eventi legge `?tipo=`. **Playwright di default ha
+  reduced-motion attivo**: per vedere gli effetti
+  `page.emulateMedia({ reducedMotion: 'no-preference' })`.
+
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
   Instagram Login (account professionale di Gaia, niente pagina Facebook
