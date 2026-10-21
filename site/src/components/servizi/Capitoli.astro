@@ -10,8 +10,8 @@
  *
  * Desktop (≥64rem): indice fisso a sinistra (sticky sotto il header) che
  * evidenzia il capitolo corrente (IntersectionObserver qui sotto); foto
- * che entrano con una maschera che si apre ([data-apri], scrub in
- * servizi-effetti.ts); layout alternato (foto a destra, poi a sinistra).
+ * che entrano con una maschera che si apre ([data-apri-foto], modulo
+ * maschere-foto.ts); layout alternato (foto a destra, poi a sinistra).
  * Mobile: niente indice, capitoli impilati con le foto sopra il testo.
  * Reduced-motion: foto già aperte, nessuna animazione.
  */
@@ -71,11 +71,11 @@ const capitoli = servizi.map((s, i) => ({
           >
             {c.grande && (
               <div class:list={['sv-foto', { 'sv-foto--sola': !c.piccola }]}>
-                <figure class="sv-foto-grande" data-apri>
+                <figure class="sv-foto-grande" data-apri-foto>
                   <Picture data={c.grande} cap={false} class="sv-foto-img" />
                 </figure>
                 {c.piccola && (
-                  <figure class="sv-foto-piccola" data-apri="piccola">
+                  <figure class="sv-foto-piccola" data-apri-foto="piccola">
                     <Picture data={c.piccola} cap={false} class="sv-foto-img" />
                   </figure>
                 )}

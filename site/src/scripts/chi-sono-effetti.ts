@@ -5,6 +5,8 @@
  *
  *   [data-parallasse="da a"]  l'elemento scorre da yPercent `da` a `a`
  *                             mentre la sua sezione attraversa lo schermo
+ *   [data-apri-foto]          foto della voce che entrano con una maschera
+ *                             che si apre (maschere-foto.ts, come Servizi)
  *   [data-contatore="150+"]   numero che conta da 0 al valore al primo
  *                             ingresso (prefisso/suffisso restano)
  *   [data-timeline]           il percorso: da 64rem sezione agganciata con
@@ -22,6 +24,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+import { maschereFoto } from './maschere-foto';
 import { riduciMotion } from './motion-leggero';
 import { schedeImpilate } from './schede-impilate';
 import { aggiornaTema } from './theme-observer';
@@ -192,6 +195,7 @@ export function initChiSonoEffetti(): void {
   document.documentElement.classList.add('motion-attivo');
 
   parallasse();
+  maschereFoto();
   contatori();
 
   const mm = gsap.matchMedia();

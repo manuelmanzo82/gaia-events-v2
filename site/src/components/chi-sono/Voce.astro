@@ -14,6 +14,10 @@
  * la mezza interlinea in cima e in fondo, così i bordi coincidono. La
  * piccola ha una parallasse leggera (±5%), allineata a metà del passaggio.
  *
+ * Entrata delle due foto: la stessa maschera che si apre dei capitoli di
+ * Servizi ([data-apri-foto], modulo maschere-foto.ts), la piccola un po'
+ * dopo la grande; desktop e mobile.
+ *
  * Mobile: foto grande 4:5, la piccola dentro i margini, sovrapposta in
  * basso a destra (sporge di circa il 15%), poi il testo.
  *
@@ -43,11 +47,11 @@ const [primo, ...altri] = paragrafi;
       <div class="container-gaia voce-griglia">
         {fotoGrande && (
           <div class:list={['voce-foto', { 'voce-foto--sola': !fotoPiccola }]}>
-            <figure class="voce-figura" data-reveal="maschera">
+            <figure class="voce-figura" data-apri-foto>
               <Picture data={fotoGrande} cap={false} class="voce-img" />
             </figure>
             {fotoPiccola && (
-              <figure class="voce-figura-piccola" data-parallasse="5 -5">
+              <figure class="voce-figura-piccola" data-apri-foto="piccola" data-parallasse="5 -5">
                 <Picture data={fotoPiccola} cap={false} class="voce-img" />
               </figure>
             )}
