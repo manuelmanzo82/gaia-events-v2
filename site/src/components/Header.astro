@@ -462,7 +462,7 @@ const preventivo = existsIn('quote', lang);
       flex-direction: column;
       justify-content: flex-end;
       gap: 1.75rem;
-      padding: calc(var(--altezza-header, 96px) + 1rem) var(--bordo-pannello) 1.5rem;
+      padding: calc(var(--altezza-header, 96px) + 2rem) var(--bordo-pannello) 1.5rem;
       overflow-y: auto;
       background: var(--color-avorio);
       color: var(--color-inchiostro);
@@ -542,8 +542,12 @@ const preventivo = existsIn('quote', lang);
       gap: 1rem 1.5rem;
     }
 
-    /* Preventivo a cornice, come sul desktop. */
-    .menu-cta {
+    /* Preventivo a cornice, come sul desktop: sul pannello avorio cornice e
+       testo in inchiostro qualunque sia il tema del header sotto; al tocco
+       fondo inchiostro e testo avorio. */
+    .site-header.menu-aperto .menu-cta {
+      --btn-tinta: var(--color-inchiostro);
+      --btn-contro: var(--color-avorio);
       min-height: 48px;
       padding-inline: 1.5rem;
       font-size: 0.875rem;
