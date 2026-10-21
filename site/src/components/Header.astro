@@ -110,33 +110,31 @@ const preventivo = existsIn('quote', lang);
       </ul>
     </div>
 
-    {/* Solo nel pannello mobile (sotto gli 80rem): due contatti in fondo. */}
+    {/* Solo nel pannello hamburger (sotto gli 80rem): tre icone in fondo,
+        senza scritte, 24 px dentro un tocco di 44. */}
     <ul class="menu-contatti" role="list">
       <li>
-        <a href={`https://wa.me/${BUSINESS.whatsapp}`} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <a href={`https://wa.me/${BUSINESS.whatsapp}`} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')} title={t('cta.whatsapp')}>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z" />
             <path d="M9.2 8.6c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.2-.1.3 0 .5a6.4 6.4 0 0 0 3 2.8c.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1.1-.6 1.4-.5.4-1.2.6-1.8.5-3.1-.6-5.6-3-6.3-6.1-.2-.7 0-1.4.1-2z" />
           </svg>
-          <span>WhatsApp</span>
         </a>
       </li>
       <li>
-        <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank" aria-label="Instagram" title="Instagram">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
             <circle cx="12" cy="12" r="4.4" />
             <circle cx="17.6" cy="6.4" r="1.05" fill="currentColor" stroke="none" />
           </svg>
-          <span>Instagram</span>
         </a>
       </li>
       <li>
-        <a href={BUSINESS.facebookUrl} rel="noopener me" target="_blank">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+        <a href={BUSINESS.facebookUrl} rel="noopener me" target="_blank" aria-label="Facebook" title="Facebook">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 8.5V6.8c0-.9.5-1.3 1.3-1.3H17V2.5h-2.5C11.7 2.5 10.5 4.3 10.5 7v1.5H8V12h2.5v9.5H14V12h2.6l.4-3.5H14z" />
           </svg>
-          <span>Facebook</span>
         </a>
       </li>
     </ul>
@@ -511,10 +509,13 @@ const preventivo = existsIn('quote', lang);
       display: inline-flex;
     }
 
-    /* Pannello a tutto schermo (giro 10): voci in Cormorant grandi e
-       spaziate, allineate a sinistra con il logo; Preventivo a cornice come
-       sul desktop; «EN» ben visibile; in fondo WhatsApp, Instagram e
-       Facebook con le icone. Apertura in dissolvenza, voci a cascata. */
+    /* Pannello a tutto schermo (giro 11, centrato): vale ovunque compaia
+       l'hamburger (telefono, tablet, finestra stretta). Il blocco voci +
+       Preventivo + EN + icone è centrato in orizzontale e in verticale
+       nello spazio sotto il header: i margini auto della prima e
+       dell'ultima voce si spartiscono lo spazio libero e, se lo schermo è
+       basso, si azzerano e il pannello scorre senza tagliare nulla.
+       Apertura in dissolvenza, voci a cascata. */
     .menu {
       --bordo-pannello: clamp(1.25rem, 4vw, 3.5rem);
       position: fixed;
@@ -522,10 +523,12 @@ const preventivo = existsIn('quote', lang);
       z-index: -1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      gap: 1.75rem;
-      padding: calc(var(--altezza-header, 96px) + 2rem) var(--bordo-pannello) 1.5rem;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 1.5rem;
+      padding: calc(var(--altezza-header, 96px) + 1rem) var(--bordo-pannello) 1.5rem;
       overflow-y: auto;
+      text-align: center;
       background: var(--color-avorio);
       color: var(--color-inchiostro);
       text-shadow: none;
@@ -559,6 +562,7 @@ const preventivo = existsIn('quote', lang);
 
     .menu-voci {
       flex-direction: column;
+      align-items: center;
       gap: 0.25rem;
       margin-top: auto;
     }
@@ -580,7 +584,9 @@ const preventivo = existsIn('quote', lang);
     .menu-voci a {
       display: flex;
       align-items: center;
-      min-height: 56px;
+      justify-content: center;
+      min-height: clamp(44px, 6.5vh, 56px);
+      padding-inline: 0.75rem;
       font-family: var(--font-display);
       font-size: clamp(2rem, 1.4rem + 2.6vw, 2.5rem);
       font-weight: 340;
@@ -597,11 +603,11 @@ const preventivo = existsIn('quote', lang);
       color: var(--color-bordeaux);
     }
 
+    /* Preventivo a cornice e, sotto, «EN»: uno sopra l'altro, centrati. */
     .menu-coda {
-      flex-direction: row;
-      flex-wrap: wrap;
+      flex-direction: column;
       align-items: center;
-      gap: 1rem 1.5rem;
+      gap: 0.75rem;
     }
 
     /* Preventivo a cornice, come sul desktop: sul pannello avorio cornice e
@@ -633,24 +639,34 @@ const preventivo = existsIn('quote', lang);
       display: none;
     }
 
+    /* In fondo al blocco le tre icone in fila, centrate. */
     .menu-contatti {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem 1.5rem;
-      margin: 0;
-      padding: 1.25rem 0 0;
-      border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0 0 auto;
+      padding: 0;
       list-style: none;
     }
 
     .menu-contatti a {
       display: inline-flex;
       align-items: center;
-      gap: 0.55rem;
-      min-height: 44px;
-      font-size: 0.9375rem;
-      letter-spacing: 0.02em;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
       text-decoration: none;
+      transition: background-color 0.3s var(--ease-gaia);
+    }
+
+    .menu-contatti a:hover,
+    .menu-contatti a:focus-visible {
+      background: color-mix(in srgb, var(--color-inchiostro) 8%, transparent);
+    }
+
+    .menu-contatti svg {
+      display: block;
     }
   }
 
