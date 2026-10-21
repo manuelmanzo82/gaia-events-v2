@@ -1,0 +1,159 @@
+---
+/**
+ * Servizi — 3b. Destination wedding: fascia a tutta larghezza (notte) con
+ * la foto grande del servizio (page_media_id), numero, titolo H2 e
+ * descrizione. Il link porta alla pagina Destination wedding se esiste in
+ * questa lingua, altrimenti al preventivatore con il servizio preselezionato.
+ * id="destination": l'ancora della card in home e dell'indice d'apertura.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import type { Service } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  servizio: Service | null;
+  numero: string;
+}
+
+const { lang, servizio, numero } = Astro.props;
+const t = useTranslations(lang);
+
+const foto = servizio ? picture(servizio.pageImage ?? servizio.image ?? null, lang, '100vw') : null;
+const pagina = existsIn('destinationWedding', lang);
+const link = pagina
+  ? { href: path('destinationWedding', lang), etichetta: t('cta.discover') }
+  : existsIn('quote', lang) && servizio
+    ? { href: `${path('quote', lang)}?servizio=${encodeURIComponent(servizio.slug)}`, etichetta: t('servizi.chiediQuesto') }
+    : null;
+---
+
+{
+  servizio && (
+    <section
+      id={servizio.slug}
+      class="sv-destination"
+      data-theme="dark"
+      data-foto
+      aria-labelledby={`titolo-${servizio.slug}`}
+    >
+      {foto && (
+        <figure class="sv-destination-foto" aria-hidden="true" data-parallasse="-8 8">
+          <Picture data={foto} cap={false} class="sv-destination-img" />
+        </figure>
+      )}
+      <div class="sv-destination-velo" aria-hidden="true" />
+
+      <div class="sv-destination-testo container-gaia">
+        <p class="font-display sv-destination-numero" aria-hidden="true">
+          {numero}
+        </p>
+        {text(servizio.subtitle, lang) && <p class="eyebrow">{text(servizio.subtitle, lang)}</p>}
+        <h2 id={`titolo-${servizio.slug}`} class="font-display sv-destination-titolo">
+          {text(servizio.title, lang)}
+        </h2>
+        {text(servizio.description, lang) && (
+          <p class="text-lead sv-destination-descrizione">{text(servizio.description, lang)}</p>
+        )}
+        {link && (
+          <p class="sv-destination-azione">
+            <a class="btn btn--pieno" href={link.href}>
+              {link.etichetta}
+            </a>
+          </p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .sv-destination {
+    position: relative;
+    display: grid;
+    align-content: end;
+    min-height: 88vh;
+    min-height: 88svh;
+    overflow: hidden;
+    isolation: isolate;
+    scroll-margin-top: 0;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .sv-destination-foto {
+    position: absolute;
+    inset: -10% 0;
+    z-index: 0;
+    margin: 0;
+  }
+
+  .sv-destination-foto :global(picture),
+  .sv-destination-foto :global(.sv-destination-img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .sv-destination-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.45) 0%, rgb(0 0 0 / 0) 220px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.92) 0%, rgb(27 22 17 / 0.78) 40%, rgb(27 22 17 / 0.35) 70%, rgb(27 22 17 / 0.1) 100%);
+    pointer-events: none;
+  }
+
+  /* Desktop: il testo sta a sinistra, un velo in più da quel lato. */
+  @media (min-width: 48rem) {
+    .sv-destination-velo {
+      background:
+        linear-gradient(90deg, rgb(27 22 17 / 0.6) 0%, rgb(27 22 17 / 0) 60%),
+        linear-gradient(180deg, rgb(0 0 0 / 0.45) 0%, rgb(0 0 0 / 0) 220px),
+        linear-gradient(0deg, rgb(27 22 17 / 0.88) 0%, rgb(27 22 17 / 0.55) 45%, rgb(27 22 17 / 0.1) 85%);
+    }
+  }
+
+  .sv-destination-testo {
+    position: relative;
+    z-index: 2;
+    padding-block: calc(var(--altezza-header, 96px) + 2rem) clamp(3rem, 8vh, 5rem);
+  }
+
+  .sv-destination-numero {
+    margin: 0 0 0.75rem;
+    font-size: clamp(3rem, 1.75rem + 3vw, 4.75rem);
+    line-height: 0.9;
+    font-weight: 300;
+    color: var(--color-oro);
+    font-variant-numeric: lining-nums;
+  }
+
+  .sv-destination-titolo {
+    max-width: 16ch;
+    margin: 0.5rem 0 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .sv-destination-descrizione {
+    max-width: 36rem;
+    margin: 1.25rem 0 0;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .sv-destination-azione {
+    margin: 2rem 0 0;
+  }
+</style>

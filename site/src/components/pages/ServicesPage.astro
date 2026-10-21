@@ -28,6 +28,7 @@ import { buildMeta } from '../../lib/seo';
 import Apertura from '../servizi/Apertura.astro';
 import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
+import Destination from '../servizi/Destination.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
 interface Props {
@@ -69,6 +70,8 @@ const intro = blocco('intro');
 
 // Capitoli: tutti i servizi tranne la destination, che ha la sua fascia.
 const capitoli = servizi.filter((s) => s.slug !== 'destination');
+const destination = servizi.find((s) => s.slug === 'destination') ?? null;
+const numeroDestination = String(servizi.indexOf(destination!) + 1).padStart(2, '0');
 
 const meta = buildMeta({
   lang,
@@ -100,6 +103,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
   <Filosofia titolo={text(intro?.title, lang)} testo={text(intro?.text, lang)} />
 
   <Capitoli lang={lang} servizi={capitoli} />
+
+  <Destination lang={lang} servizio={destination} numero={numeroDestination} />
 
   <Confronto
     lang={lang}
