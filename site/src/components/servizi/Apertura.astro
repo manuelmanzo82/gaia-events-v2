@@ -6,8 +6,9 @@
  * anche le card della home (#planning, #coordinamento, #design,
  * #destination: lo slug del servizio).
  *
- * La foto riempie il viewport, quindi Chrome la esclude dall'LCP (che
- * diventa il titolo); preload senza fetchpriority alta in ServicesPage.
+ * Su desktop la foto riempie il viewport e Chrome la esclude dall'LCP;
+ * su mobile copre i 68svh alti ed è lei l'LCP: fetchpriority alta qui e
+ * nel preload di ServicesPage.
  */
 import type { PictureData } from '../../lib/images';
 import Picture from '../Picture.astro';
@@ -27,7 +28,7 @@ const { eyebrow, titolo, frase, foto, indice } = Astro.props;
   {
     foto && (
       <figure class="sv-apertura-foto" aria-hidden="true" data-parallasse="0 12">
-        <Picture data={foto} cap={false} loading="eager" decoding="async" class="sv-apertura-img" />
+        <Picture data={foto} cap={false} loading="eager" fetchpriority="high" decoding="async" class="sv-apertura-img" />
       </figure>
     )
   }

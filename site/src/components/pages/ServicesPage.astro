@@ -127,7 +127,7 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
 <BaseLayout lang={lang} routeKey="services" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
   {
     preload && (
-      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes={SIZES_APERTURA} />
+      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes={SIZES_APERTURA} fetchpriority="high" />
     )
   }
 
