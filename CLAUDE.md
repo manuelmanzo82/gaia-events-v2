@@ -182,6 +182,12 @@ Mai nel codice, mai nei commit.
   4. verifica, poi **cancellare il dump**;
   5. controllare con curl che `/admin/bin/`, `/admin/sql/` e `/admin/storage/`
      rispondano 403.
+- **Pulsante «Pubblica» sullo staging**: `github.ref` in `config.php` dello
+  staging deve essere il ramo di lavoro (`design/home`), non `main`: il
+  21/10/2026 un dispatch con `ref = main` ha caricato il main sullo staging
+  (401 della vecchia basic auth) e la build del ramo è tornata solo con un
+  push su `design/home`. Da sistemare a mano in `config.php` (chiave
+  `github.ref`); quando `design/home` verrà fuso in `main`, rimettere `main`.
 - Il `.gitignore` ignora `*.sql`: la riga `!admin/sql/migrations/*.sql` è
   quella che tiene le migrazioni in repo (la prima, di fase 2, era rimasta
   fuori fino al 16/10).

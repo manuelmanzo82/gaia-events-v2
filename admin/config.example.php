@@ -65,6 +65,10 @@ return [
         'token' => '',
 
         // Quale workflow avviare, su quale ramo e verso quale ambiente.
+        // ATTENZIONE: «ref» è il ramo che viene costruito e caricato. Sullo
+        // staging deve essere il ramo di lavoro (es. 'design/home'): con
+        // 'main' il pulsante Pubblica carica il main sullo staging e
+        // cancella la build del ramo (successo il 21/10/2026).
         'workflow' => 'deploy.yml',
         'ref' => 'main',
         'target' => 'production',
