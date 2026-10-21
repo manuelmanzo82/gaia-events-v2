@@ -98,6 +98,13 @@ export const UI = {
   'servizi.chiediQuesto': { it: 'Chiedi un preventivo per questo', en: 'Ask for a quote for this' },
   'servizi.cosaInclude': { it: 'Cosa include', en: 'What’s included' },
   'servizi.indice': { it: 'I servizi', en: 'The services' },
+  'servizi.tuttiPartner': { it: 'Tutti i partner', en: 'All partners' },
+  'partner.cat.location': { it: 'Location', en: 'Venues' },
+  'partner.cat.fiori': { it: 'Fiori e allestimenti', en: 'Flowers and styling' },
+  'partner.cat.fotografo': { it: 'Foto e video', en: 'Photo and video' },
+  'partner.cat.catering': { it: 'Catering', en: 'Catering' },
+  'partner.cat.musica': { it: 'Musica', en: 'Music' },
+  'partner.cat.altro': { it: 'Altri fornitori', en: 'Other suppliers' },
   // Pagina Chi sono (fase 4.2).
   'about.dal': { it: 'dal', en: 'since' },
   // Tipi di evento (giro 11): eyebrow nelle card e nel dettaglio, filtri.

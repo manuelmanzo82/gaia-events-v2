@@ -30,6 +30,7 @@ import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
 import Destination from '../servizi/Destination.astro';
 import Metodo from '../servizi/Metodo.astro';
+import Partner from '../servizi/Partner.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
 interface Props {
@@ -118,6 +119,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
   />
 
   <Metodo lang={lang} titolo={text(processo?.title, lang)} passi={passi} />
+
+  <Partner lang={lang} titolo={text(settings.servizi?.partners?.title, lang) || t('servizi.tuttiPartner')} />
 </BaseLayout>
 
 <script>

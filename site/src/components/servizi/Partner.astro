@@ -1,0 +1,171 @@
+---
+/**
+ * Servizi — 6. I partner con cui lavoro: griglia per categoria, solo i
+ * partner attivi che hanno dato il consenso a essere citati
+ * (partners.consenso_citazione). Nessun partner con consenso: la sezione
+ * non esiste. Link «Tutti i partner» solo se la pagina Partner esiste in
+ * questa lingua.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { getPartners, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import type { PartnerCategory } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+}
+
+const { lang, titolo } = Astro.props;
+const t = useTranslations(lang);
+
+const ORDINE: PartnerCategory[] = ['location', 'fiori', 'fotografo', 'catering', 'musica', 'altro'];
+const conConsenso = getPartners().filter((p) => p.active && p.consent === true);
+const gruppi = ORDINE.map((categoria) => ({
+  categoria,
+  etichetta: t(`partner.cat.${categoria}`),
+  partner: conConsenso
+    .filter((p) => p.category === categoria)
+    .sort((a, b) => a.order - b.order)
+    .map((p) => ({ ...p, logoFoto: picture(p.logo, lang, '10rem'), testo: text(p.description, lang) })),
+})).filter((g) => g.partner.length > 0);
+const tutti = existsIn('partners', lang);
+---
+
+{
+  gruppi.length > 0 && (
+    <section class="sv-partner container-gaia" data-theme="light" aria-labelledby="titolo-partner">
+      <h2 id="titolo-partner" class="font-display sv-partner-titolo" data-reveal="righe">
+        {titolo}
+      </h2>
+
+      <div class="sv-partner-gruppi">
+        {gruppi.map((g) => (
+          <div class="sv-partner-gruppo">
+            <h3 class="sv-partner-categoria">{g.etichetta}</h3>
+            <ul class="sv-partner-elenco" role="list">
+              {g.partner.map((p) => (
+                <li class="sv-partner-voce">
+                  {p.logoFoto && (
+                    <span class="sv-partner-logo">
+                      <Picture data={p.logoFoto} class="sv-partner-img" />
+                    </span>
+                  )}
+                  <span class="font-display sv-partner-nome">
+                    {p.website ? (
+                      <a href={p.website} rel="noopener" target="_blank">
+                        {p.name}
+                      </a>
+                    ) : (
+                      p.name
+                    )}
+                  </span>
+                  {p.testo && <span class="sv-partner-testo">{p.testo}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {tutti && (
+        <p class="sv-partner-tutti">
+          <a class="link-filo" href={path('partners', lang)}>
+            {t('servizi.tuttiPartner')}
+          </a>
+        </p>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .sv-partner {
+    padding-block: var(--spacing-section);
+  }
+
+  .sv-partner-titolo {
+    margin: 0 0 clamp(2rem, 5vh, 3rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .sv-partner-gruppi {
+    display: grid;
+    gap: 2.5rem 3rem;
+  }
+
+  .sv-partner-categoria {
+    margin: 0 0 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-beige);
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .sv-partner-elenco {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sv-partner-voce {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .sv-partner-logo {
+    display: block;
+    width: 8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sv-partner-logo :global(.sv-partner-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .sv-partner-nome {
+    font-size: 1.375rem;
+    line-height: 1.2;
+  }
+
+  .sv-partner-nome a {
+    color: inherit;
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.4s var(--ease-gaia);
+  }
+
+  .sv-partner-nome a:hover,
+  .sv-partner-nome a:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  .sv-partner-testo {
+    color: var(--color-grigio-caldo);
+    font-size: 0.9375rem;
+  }
+
+  .sv-partner-tutti {
+    margin: 2.5rem 0 0;
+  }
+
+  @media (min-width: 48rem) {
+    .sv-partner-gruppi {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    }
+  }
+</style>
