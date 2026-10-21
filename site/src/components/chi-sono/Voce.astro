@@ -1,48 +1,67 @@
 ---
 /**
- * Chi sono — 2. La sua voce (avorio): i primi paragrafi del testo della
- * pagina in grande, in prima persona, rivelati parola per parola allo
- * scroll (opacità 0,15 → 1, scrub in chi-sono-effetti.ts, [data-parole]);
- * sotto, il paragrafo che resta in corpo lead e la firma «Gaia» in
- * corsivo. Con reduced-motion il testo è pieno fin dall'inizio: lo stato
- * iniziale lo imposta GSAP, non il CSS.
+ * Chi sono — 2. La sua voce (avorio), split: da una parte una foto grande
+ * di Gaia al lavoro, sticky; dall'altra il testo della pagina, sempre
+ * pienamente leggibile, con un reveal discreto per paragrafo
+ * (data-reveal="alto" di motion.ts, a cascata). Una seconda foto più
+ * piccola sta in sovrapposizione sulla grande e scorre a velocità
+ * diversa ([data-parallasse]). Il primo paragrafo è in corpo grande, gli
+ * altri in lead; chiude la firma «Gaia» in corsivo.
+ *
+ * Foto: highlight «chi-sono» (la grande è quella dopo l'apertura, la
+ * piccola la successiva). Sotto i 64rem: foto grande con la piccola
+ * sovrapposta, poi il testo. Senza JS o con reduced-motion: tutto fermo e
+ * visibile.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
+import type { PictureData } from '../../lib/images';
+import Picture from '../Picture.astro';
 
 interface Props {
   lang: Lang;
-  /** Paragrafi in grande (testo puro, già senza tag). */
-  grandi: string[];
-  /** Paragrafi in corpo lead, dopo quelli grandi. */
-  resto: string[];
+  paragrafi: string[];
+  fotoGrande: PictureData | null;
+  fotoPiccola: PictureData | null;
 }
 
-const { lang, grandi, resto } = Astro.props;
+const { lang, paragrafi, fotoGrande, fotoPiccola } = Astro.props;
 const t = useTranslations(lang);
+const [primo, ...altri] = paragrafi;
 ---
 
 {
-  grandi.length > 0 && (
+  primo && (
     <section id="voce" class="voce" data-theme="light">
-      <div class="container-gaia voce-interno">
-        <div class="voce-grande font-display">
-          {grandi.map((p) => (
-            <p data-parole>{p}</p>
-          ))}
-        </div>
-        {(
-          <div class="voce-coda">
-            {resto.map((p) => (
-              <p class="text-lead voce-resto" data-reveal="alto">
-                {p}
-              </p>
-            ))}
-            <p class="font-display voce-firma" data-reveal="alto" aria-hidden="true">
-              {t('cta.firma')}
-            </p>
+      <div class="container-gaia voce-griglia">
+        {fotoGrande && (
+          <div class="voce-foto">
+            <div class="voce-sticky">
+              <figure class="voce-figura" data-reveal="maschera">
+                <Picture data={fotoGrande} cap={false} class="voce-img" />
+              </figure>
+              {fotoPiccola && (
+                <figure class="voce-figura-piccola" data-parallasse="14 -14">
+                  <Picture data={fotoPiccola} cap={false} class="voce-img" />
+                </figure>
+              )}
+            </div>
           </div>
         )}
+
+        <div class="voce-testo" data-reveal-gruppo>
+          <p class="font-display voce-primo" data-reveal="alto">
+            {primo}
+          </p>
+          {altri.map((p) => (
+            <p class="text-lead voce-paragrafo" data-reveal="alto">
+              {p}
+            </p>
+          ))}
+          <p class="font-display voce-firma" data-reveal="alto" aria-hidden="true">
+            {t('cta.firma')}
+          </p>
+        </div>
       </div>
     </section>
   )
@@ -53,35 +72,61 @@ const t = useTranslations(lang);
     padding-block: var(--spacing-section);
   }
 
-  /* Grande ma non da titolo: una via di mezzo fra lead e display, così
-     due paragrafi restano in una schermata e mezza a 1440. */
-  .voce-grande p {
-    max-width: 36ch;
-    margin: 0 0 1em;
-    font-size: clamp(1.625rem, 1.1rem + 1.9vw, 2.75rem);
+  .voce-griglia {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  /* — Foto grande 4:5 con la piccola sovrapposta in basso a destra — */
+  .voce-sticky {
+    position: relative;
+  }
+
+  .voce-figura {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4 / 5;
+  }
+
+  .voce-figura :global(picture),
+  .voce-figura :global(.voce-img),
+  .voce-figura-piccola :global(picture),
+  .voce-figura-piccola :global(.voce-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none !important;
+    object-fit: cover;
+  }
+
+  .voce-figura-piccola {
+    position: absolute;
+    right: -6%;
+    bottom: -10%;
+    width: 42%;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    aspect-ratio: 3 / 4;
+    box-shadow: 0 24px 60px rgb(27 22 17 / 0.22);
+  }
+
+  /* — Testo: primo paragrafo grande, gli altri in lead, firma — */
+  .voce-testo {
+    max-width: 36rem;
+  }
+
+  .voce-primo {
+    margin: 0 0 1.25rem;
+    font-size: clamp(1.625rem, 1.15rem + 1.7vw, 2.5rem);
     line-height: 1.25;
     font-weight: 400;
     text-wrap: pretty;
   }
 
-  .voce-grande p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Le parole sono span di SplitText: nessuna riga tagliata, niente
-     overflow hidden (le discendenti dei titoli restano intere). */
-  .voce-grande :global(.parola) {
-    display: inline-block;
-    will-change: opacity;
-  }
-
-  .voce-coda {
-    max-width: 40rem;
-    margin-top: clamp(2.5rem, 6vh, 4rem);
-  }
-
-  .voce-resto {
-    margin: 0 0 1rem;
+  .voce-paragrafo {
+    margin: 0 0 1.25rem;
     color: var(--color-grigio-caldo);
   }
 
@@ -92,16 +137,33 @@ const t = useTranslations(lang);
     color: var(--color-bordeaux);
   }
 
+  @media (max-width: 63.98rem) {
+    /* Spazio per la foto piccola che sporge sotto. */
+    .voce-foto {
+      padding-bottom: 10%;
+    }
+  }
+
   @media (min-width: 64rem) {
-    .voce-interno {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: clamp(3rem, 6vw, 6rem);
-      align-items: end;
+    .voce-griglia {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+      gap: clamp(3rem, 7vw, 7rem);
+      align-items: start;
     }
 
-    .voce-coda {
-      margin-top: 0;
+    /* La colonna si allunga quanto la riga, così lo sticky ha spazio. */
+    .voce-foto {
+      align-self: stretch;
+      padding-bottom: 8%;
+    }
+
+    .voce-sticky {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) * 0.7);
+    }
+
+    .voce-testo {
+      padding-top: clamp(1rem, 6vh, 4rem);
     }
   }
 </style>
