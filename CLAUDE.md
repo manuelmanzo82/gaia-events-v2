@@ -923,6 +923,36 @@ Fatto:
   Verifica: `chisono-shots.js`, `*-motion.js`, `pagina-shots.js` nello
   scratchpad; per vedere Numeri e Clienti servono dati di prova nei JSON
   gitignorati, poi si rimette l'export dello staging.
+- **Chi sono — giro di revisione** (21/10/2026, stesso giorno):
+  - **Timeline** (`Percorso`, `[data-timeline]`): desktop a uno schermo
+    agganciato con scroll orizzontale (tratto ×1,8 della distanza),
+    filetto oro `.percorso-filo-pieno` che si disegna dal progresso, anno
+    attivo pieno e gli altri in contorno (`-webkit-text-stroke`), foto per
+    tappa con parallasse via `containerAnimation`; mobile linea verticale
+    che si riempie (scrub) e tappe che si accendono. Padding-top = header
+    perché la sezione è pinnata in cima. Nessuna voce «2025 Prova» nel
+    database (era altrove).
+  - **Foto per voce dei blocchi**: chiave `media` (id) nel JSON `items_it`
+    di `page_sections`, esportata come `image` della voce. I blocchi NON
+    sono ancora modificabili dal back office («arrivano con il design»):
+    oggi si impostano con migrazione (`2026-10-21-chi-sono-foto.sql`).
+  - **Voce**: via l'opacity-scrub (grigio senza motivo). Split con foto
+    grande sticky (ultimo highlight «chi-sono» con `maxWidth ≥ 600`) e
+    foto piccola in sovrapposizione con `[data-parallasse]`; testo pieno,
+    reveal per paragrafo (`data-reveal-gruppo`).
+  - **Valori** (`[data-valori]`): quattro fasce a tutta larghezza come i
+    pannelli della home ma in verticale (stesse durate/curve, raggio 4);
+    desktop pinnato, la fascia attiva segue il progresso e l'hover la
+    apre (JS, non :hover, per non averne due aperte); mobile
+    IntersectionObserver al centro; reduced-motion tutte aperte uguali.
+    Foto = `media` delle voci del blocco «values».
+  - **Citazione**: foto `prato-lago-crepuscolo-luci` con punto focale
+    0,6 / 0,58 (migrazione), cielo libero per il testo.
+  - **Link**: due card affiancate (foto piena, titolo in basso, zoom e velo
+    al passaggio, `data-reveal-gruppo`), «I miei eventi» con `inMenu`;
+    una sola → tutta larghezza 21:9. Via la lista con foto al passaggio.
+  - **CtaFinale**: props `foto` e `lato` ('sinistra' | 'destra'); Chi sono
+    passa `about.photos.cta` e 'destra', la home non cambia.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
