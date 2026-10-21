@@ -169,6 +169,21 @@ const crumbs = [
     padding: 0;
   }
 
+  /* Copertina contenuta nella card (3:2, ritaglio sul punto focale). */
+  .storie-segnaposto :global(img) {
+    display: block;
+    width: 100%;
+    max-width: none !important;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .storie-segnaposto h2 {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 400;
+  }
+
   .storie-segnaposto .eyebrow {
     margin: 0.75rem 0 0.25rem;
   }

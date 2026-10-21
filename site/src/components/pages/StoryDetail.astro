@@ -105,4 +105,13 @@ const crumbs = [
     list-style: none;
     padding: 0;
   }
+
+  /* Foto contenute nella griglia (4:5, ritaglio sul punto focale). */
+  .galleria-segnaposto :global(img) {
+    display: block;
+    width: 100%;
+    max-width: none !important;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
 </style>
