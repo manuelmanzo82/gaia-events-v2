@@ -24,6 +24,8 @@ final class DashboardController
                 'Eventi' => $this->count('events'),
                 'Servizi' => $this->count('services'),
                 'Recensioni' => $this->count('reviews'),
+                'Stampa' => $this->count('press'),
+                'Clienti' => $this->count('clients'),
                 'Magazine' => $this->count('posts'),
                 'Matrimoni' => $this->count('stories'),
                 'FAQ' => $this->count('faqs'),

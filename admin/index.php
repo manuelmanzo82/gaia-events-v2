@@ -13,6 +13,7 @@ declare(strict_types=1);
 require __DIR__ . '/src/bootstrap.php';
 
 use Gaia\Admin\Controllers\AuthController;
+use Gaia\Admin\Controllers\ClientsController;
 use Gaia\Admin\Controllers\DashboardController;
 use Gaia\Admin\Controllers\EventsController;
 use Gaia\Admin\Controllers\FaqsController;
@@ -26,6 +27,7 @@ use Gaia\Admin\Controllers\MediaController;
 use Gaia\Admin\Controllers\PagesController;
 use Gaia\Admin\Controllers\PartnersController;
 use Gaia\Admin\Controllers\PostsController;
+use Gaia\Admin\Controllers\PressController;
 use Gaia\Admin\Controllers\ReviewsController;
 use Gaia\Admin\Controllers\ServicesController;
 use Gaia\Admin\Controllers\SettingsController;
@@ -66,6 +68,8 @@ $resources = [
     'servizi' => ServicesController::class,
     'eventi' => EventsController::class,
     'recensioni' => ReviewsController::class,
+    'stampa' => PressController::class,
+    'clienti' => ClientsController::class,
     'blog' => PostsController::class,
     'faq' => FaqsController::class,
     'luoghi' => LuoghiController::class,

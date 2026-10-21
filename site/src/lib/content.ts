@@ -1,5 +1,6 @@
 import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type {
+  Client,
   DestinationWedding,
   Event,
   Faq,
@@ -13,6 +14,7 @@ import type {
   PageHero,
   Partner,
   Post,
+  Press,
   Review,
   Service,
   Settings,
@@ -175,6 +177,15 @@ export function getReviews(): Review[] {
 export function getFeaturedReviews(limit?: number): Review[] {
   const featured = getReviews().filter((review) => review.featured);
   return limit ? featured.slice(0, limit) : featured;
+}
+
+/** Stampa e clienti (giro 11), solo quelli pubblicati, in ordine. */
+export function getPress(): Press[] {
+  return load<Press[]>('stampa', []).filter(isActive).sort(byOrder);
+}
+
+export function getClients(): Client[] {
+  return load<Client[]>('clienti', []).filter(isActive).sort(byOrder);
 }
 
 export function getPosts(): Post[] {

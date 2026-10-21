@@ -82,6 +82,8 @@
   <a href="<?= e(admin_url('eventi')) ?>">Eventi</a>
   <a href="<?= e(admin_url('servizi')) ?>">Servizi</a>
   <a href="<?= e(admin_url('recensioni')) ?>">Recensioni</a>
+  <a href="<?= e(admin_url('stampa')) ?>">Stampa</a>
+  <a href="<?= e(admin_url('clienti')) ?>">Clienti</a>
   <a href="<?= e(admin_url('blog')) ?>">Magazine</a>
   <a href="<?= e(admin_url('faq')) ?>">FAQ</a>
   <a href="<?= e(admin_url('immagini')) ?>">Immagini</a>

@@ -93,6 +93,10 @@ export const UI = {
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
   'nav.backToTop': { it: 'Torna su', en: 'Back to top' },
+  // Pagina Dicono di me (giro 11): i tre blocchi.
+  'reviews.coppie': { it: 'Le parole delle coppie', en: 'Words from couples' },
+  'reviews.stampa': { it: 'Sulla stampa', en: 'In the press' },
+  'reviews.clienti': { it: 'Hanno scelto Gaia', en: 'They chose Gaia' },
   'footer.contacts': { it: 'Contatti', en: 'Contact' },
   'footer.explore': { it: 'Esplora', en: 'Explore' },
   'footer.social': { it: 'Seguici', en: 'Follow' },

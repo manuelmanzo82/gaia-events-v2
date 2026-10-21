@@ -147,6 +147,24 @@ Anche i sottotitoli italiani dei servizi sono scritti da noi (prima c'erano
 quelli inglesi): «Servizio completo», «Il giorno dell'evento»,
 «Creatività», «In Italia e nel mondo».
 
+### 11. Pagina «Dicono di me»: recensioni, stampa, loghi dei clienti (21/10/2026)
+
+La pagina (/dicono-di-me/ ↔ /en/kind-words/) ha tre blocchi e **oggi è
+vuota, quindi non esiste né sta nel menu**: compare da sola appena uno dei
+tre ha contenuti.
+
+- **Recensioni** (back office → Recensioni): solo quelle vere, con nome,
+  evento e data. Niente testimonianze inventate: le due di Sanity erano
+  demo e non sono state riportate.
+- **Stampa** (back office → Stampa): testata, titolo, data, link, logo
+  della testata (opzionale), estratto IT/EN. Servono gli articoli e le
+  interviste che parlano di Gaia, con il link.
+- **Hanno scelto Gaia** (back office → Clienti): i loghi delle aziende.
+  La bio cita Calzedonia, BNL e Zurich: **i loghi NON sono stati caricati**.
+  Servono i file (SVG o PNG su fondo trasparente) e il **permesso scritto
+  di ogni azienda** a usare il logo sul sito; senza, si pubblica solo il
+  nome o nulla.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

@@ -26,6 +26,8 @@ final class Exporter
             'services' => self::services(),
             'events' => self::events(),
             'reviews' => self::reviews(),
+            'stampa' => self::press(),
+            'clienti' => self::clients(),
             'posts' => self::posts(),
             'faq' => self::faqs(),
             'destination-wedding' => self::destinationWedding(),
@@ -414,6 +416,44 @@ final class Exporter
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], $rows);
+    }
+
+    /**
+     * Stampa (giro 11): articoli e interviste per «Dicono di me».
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function press(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'outlet' => (string) $row['outlet'],
+            'title' => (string) $row['title'],
+            'date' => self::date($row['published_on']),
+            'url' => $row['url'] !== null && $row['url'] !== '' ? (string) $row['url'] : null,
+            'logo' => self::image(self::mediaById((int) ($row['logo_media_id'] ?? 0))),
+            'excerpt' => self::text($row['excerpt_it'], $row['excerpt_en']),
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM press ORDER BY sort_order, published_on DESC, id'));
+    }
+
+    /**
+     * Hanno scelto Gaia (giro 11): aziende clienti per la fila di loghi.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function clients(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'name' => (string) $row['name'],
+            'logo' => self::image(self::mediaById((int) ($row['logo_media_id'] ?? 0))),
+            'sector' => $row['sector'] !== null && $row['sector'] !== '' ? (string) $row['sector'] : null,
+            'website' => $row['website'] !== null && $row['website'] !== '' ? (string) $row['website'] : null,
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM clients ORDER BY sort_order, name'));
     }
 
     // -----------------------------------------------------------------

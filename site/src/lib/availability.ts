@@ -2,6 +2,7 @@ import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type { RouteKey } from '../i18n/routes';
 import {
   availableLangs,
+  getClients,
   getDestinationWedding,
   getEvents,
   getFaqs,
@@ -9,6 +10,7 @@ import {
   getPage,
   getPartners,
   getPosts,
+  getPress,
   getReviews,
   getServices,
   getStories,
@@ -80,7 +82,13 @@ function hasItems(key: IndexKey, lang: Lang): boolean {
     case 'portfolio':
       return getEvents().some((item) => isPublishable(item, lang, EVENT_FIELDS));
     case 'reviews':
-      return getReviews().some((item) => isPublishable(item, lang, REVIEW_FIELDS));
+      // Dicono di me (giro 11): basta uno dei tre blocchi. Stampa e
+      // clienti non hanno campi tradotti, quindi contano in ogni lingua.
+      return (
+        getReviews().some((item) => isPublishable(item, lang, REVIEW_FIELDS)) ||
+        getPress().length > 0 ||
+        getClients().length > 0
+      );
     case 'blog':
       return getPosts().some((item) => isPublishable(item, lang, POST_FIELDS));
     case 'faq':
@@ -122,6 +130,11 @@ export function langsFor(key: RouteKey): Lang[] {
   if (isIndexKey(key)) {
     langs = langs.filter((lang) => hasItems(key, lang));
   }
+
+  // Dicono di me è l'unica pagina italiana che può NON esistere: senza
+  // recensioni vere, stampa o clienti non viene generata (rotta dinamica
+  // pages/[sezione].astro), e qui non va forzata.
+  if (key === 'reviews') return langs;
 
   return withDefault(langs);
 }

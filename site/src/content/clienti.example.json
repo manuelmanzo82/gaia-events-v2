@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "Azienda di esempio",
+    "logo": null,
+    "sector": "Segnaposto",
+    "website": null,
+    "active": true,
+    "order": 1
+  }
+]

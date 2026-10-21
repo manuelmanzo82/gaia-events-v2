@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "outlet": "Testata di esempio",
+    "title": "Titolo segnaposto dell'articolo che parla di Gaia",
+    "date": "2026-05-12",
+    "url": "https://example.com/articolo",
+    "logo": null,
+    "excerpt": {
+      "it": "Estratto segnaposto: due righe dell'articolo, come apparirebbero nella pagina Dicono di me.",
+      "en": "Placeholder excerpt: two lines from the article, as they would appear on the Kind words page."
+    },
+    "active": true,
+    "order": 1
+  }
+]

@@ -11,7 +11,6 @@ import type {
   Luogo,
   Partner,
   Post,
-  Review,
   Service,
   Story,
 } from './types';
@@ -155,36 +154,10 @@ export function faqPage(items: Faq[], lang: Lang): Thing | null {
   };
 }
 
-export function reviewSnippets(items: Review[], lang: Lang): Thing | null {
-  const reviews = items.filter((item) => text(item.text, lang));
-  if (reviews.length === 0) return null;
-
-  const total = reviews.reduce((sum, item) => sum + item.rating, 0);
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    '@id': ORG_ID,
-    name: BUSINESS.name,
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: (total / reviews.length).toFixed(1),
-      reviewCount: reviews.length,
-      bestRating: 5,
-    },
-    review: reviews.map((item) => ({
-      '@type': 'Review',
-      author: { '@type': 'Person', name: item.author },
-      datePublished: item.date,
-      reviewBody: text(item.text, lang),
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: item.rating,
-        bestRating: 5,
-      },
-    })),
-  };
-}
+/*
+ * Niente Review / AggregateRating sul LocalBusiness (giro 11): Google li
+ * considera autoreferenziali e la pagina Dicono di me li tiene come testo.
+ */
 
 export interface Crumb {
   name: string;

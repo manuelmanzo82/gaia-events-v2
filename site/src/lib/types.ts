@@ -297,6 +297,31 @@ export interface Partner {
   order: number;
 }
 
+/** Stampa (giro 11): un articolo o un'intervista che parla di Gaia. */
+export interface Press {
+  id: number;
+  /** Testata, non tradotta. */
+  outlet: string;
+  title: string;
+  date: string | null;
+  url: string | null;
+  logo: Image | null;
+  excerpt: Localized;
+  active: boolean;
+  order: number;
+}
+
+/** Azienda cliente (giro 11): per la fila di loghi «Hanno scelto Gaia». */
+export interface Client {
+  id: number;
+  name: string;
+  logo: Image | null;
+  sector: string | null;
+  website: string | null;
+  active: boolean;
+  order: number;
+}
+
 /** Storia: un matrimonio raccontato per intero (2-3 in tutto). */
 export interface Story extends SeoFields {
   id: number;

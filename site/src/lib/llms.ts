@@ -1,6 +1,6 @@
 import { BUSINESS, DEFAULT_LANG, SITE_URL, type Lang } from '../config/site';
 import { url } from '../i18n/routes';
-import { EVENT_FIELDS, POST_FIELDS } from './availability';
+import { EVENT_FIELDS, POST_FIELDS, existsIn } from './availability';
 import {
   getDestinationWedding,
   getEvents,
@@ -59,7 +59,7 @@ export function llmsTxt(): string {
   lines.push('## Pagine', '');
   for (const key of ['about', 'services', 'portfolio', 'reviews', 'blog', 'faq', 'quote', 'contact'] as const) {
     const page = getPage(key);
-    if (!page) continue;
+    if (!page || !existsIn(key, lang)) continue;
     const description = text(page.intro, lang) || text(page.metaDescription, lang);
     lines.push(`- [${text(page.title, lang)}](${url(key, lang)})${description ? `: ${description}` : ''}`);
   }

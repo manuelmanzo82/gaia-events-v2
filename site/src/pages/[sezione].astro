@@ -1,0 +1,30 @@
+---
+/**
+ * Indici italiani che esistono SOLO con contenuti.
+ *
+ * Di norma le pagine italiane sono file statici (l'italiano c'è sempre).
+ * «Dicono di me» fa eccezione: senza recensioni vere, stampa o clienti
+ * pubblicati la pagina non deve nascere — né qui, né nel menu, né in
+ * sitemap — e un file statico verrebbe generato comunque. Con
+ * getStaticPaths nasce solo quando langsFor('reviews') include 'it', la
+ * stessa regola di menu e sitemap. Le rotte statiche hanno la precedenza
+ * su questa dinamica, quindi non interferisce con le altre pagine.
+ */
+import ReviewsPage from '../components/pages/ReviewsPage.astro';
+import { ROUTES } from '../i18n/routes';
+import { existsIn } from '../lib/availability';
+
+export function getStaticPaths() {
+  return (['reviews'] as const)
+    .filter((key) => existsIn(key, 'it'))
+    .map((key) => ({ params: { sezione: ROUTES[key].it }, props: { key } }));
+}
+
+interface Props {
+  key: 'reviews';
+}
+
+const { key } = Astro.props as Props;
+---
+
+{key === 'reviews' && <ReviewsPage lang="it" />}
