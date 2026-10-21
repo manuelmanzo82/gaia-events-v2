@@ -349,8 +349,10 @@ const EyebrowTag = titolo ? 'p' : 'h2';
       padding: clamp(2rem, 4vw, 4.5rem);
     }
 
+    /* Sul beige servono tinte un po' più scure dei token: oro-testo e
+       grigio-caldo stanno a 4,47 e 4,32:1 (sotto 4,5). */
     .impila--divisa .scheda-numero {
-      color: var(--color-oro-testo);
+      color: #685321;
     }
 
     .impila--divisa .scheda-titolo {
@@ -361,7 +363,7 @@ const EyebrowTag = titolo ? 'p' : 'h2';
     .impila--divisa .scheda-riga {
       max-width: 28rem;
       margin-top: 0.4rem;
-      color: var(--color-grigio-caldo);
+      color: #655d54;
       opacity: 1;
     }
   }

@@ -48,7 +48,7 @@ const { lang, titolo, tappe } = Astro.props;
               const foto = picture(t.image, lang, '(min-width: 64rem) min(49vw, 76vh), 100vw');
               return (
                 <li class:list={['tappa', { attiva: i === 0 }]} data-tappa={i}>
-                  <p class="font-display tappa-anno" aria-hidden={t.anno ? undefined : 'true'}>
+                  <p class="font-display tappa-anno" aria-hidden="true">
                     {t.anno}
                   </p>
                   <span class="tappa-punto" aria-hidden="true" />
@@ -58,7 +58,10 @@ const { lang, titolo, tappe } = Astro.props;
                     </figure>
                   )}
                   <div class="tappa-corpo">
-                    <h3 class="font-display tappa-titolo">{t.titolo}</h3>
+                    <h3 class="font-display tappa-titolo">
+                      {t.anno && <span class="sr-only">{t.anno}: </span>}
+                      {t.titolo}
+                    </h3>
                     {t.testo && <p class="tappa-testo">{t.testo}</p>}
                   </div>
                 </li>
