@@ -1,13 +1,32 @@
 ---
+/**
+ * Servizi (/servizi/ ↔ /en/services/). Ogni sezione vive solo se ha i
+ * suoi contenuti nel back office, niente segnaposto visibili:
+ *
+ *  1. Apertura — page_hero «services» (foto, titolo H1, frase) + indice
+ *  2. Filosofia — blocco «intro» della pagina
+ *  3. Capitoli — un capitolo per servizio (destination: fascia a parte)
+ *  4. Quale fa per voi — tabella di confronto (service_compare)
+ *  5. Come lavoro — blocco «process», cinque passi
+ *  6. Partner — solo partner attivi con il consenso alla citazione
+ *  7. Non solo matrimoni — blocco «cta»
+ *  8. Domande frequenti — FAQ del gruppo «servizi»
+ *  9. Dicono di me — ponte, solo se la pagina esiste
+ * 10. Chiusura — la CTA finale con la foto servizi.photos.cta
+ *
+ * Effetti in scripts/servizi-effetti.ts, caricati dopo il motion di base.
+ */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { isPublishable, getPage, getServices, getSettings, pick, text } from '../../lib/content';
-import Confronto from '../servizi/Confronto.astro';
-import { SERVICE_FIELDS, existsIn, langsFor } from '../../lib/availability';
+import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
+import { getHero, getPage, getServices, getSettings, isPublishable, text } from '../../lib/content';
+import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import Apertura from '../servizi/Apertura.astro';
+import Confronto from '../servizi/Confronto.astro';
 
 interface Props {
   lang: Lang;
@@ -18,66 +37,74 @@ const t = useTranslations(lang);
 
 const page = getPage('services');
 const langs = langsFor('services');
+const settings = getSettings();
+const hero = getHero('services');
 
 // Un servizio compare solo se tradotto nella lingua della pagina.
-const services = getServices().filter((item) => isPublishable(item, lang, SERVICE_FIELDS));
+const servizi = getServices().filter((item) => isPublishable(item, lang, SERVICE_FIELDS));
 
-const title = text(page?.title, lang) || t('nav.services');
+const titoloPagina = text(page?.title, lang) || t('nav.services');
+const titoloApertura = text(hero?.title, lang) || titoloPagina;
+const fraseApertura = text(hero?.subtitle, lang) || text(page?.intro, lang);
+const immagineApertura = hero?.images?.[0] ?? hero?.poster ?? null;
+const fotoApertura = picture(immagineApertura, lang, '100vw');
+const preload = fotoApertura?.sources[0] ?? null;
+
+// Indice dell'apertura: tutti i servizi, nell'ordine del back office;
+// l'ancora è lo slug (le card della home linkano /servizi/#planning).
+const indice = servizi.map((s, i) => ({
+  slug: s.slug,
+  numero: String(i + 1).padStart(2, '0'),
+  titolo: text(s.title, lang),
+}));
 
 const meta = buildMeta({
   lang,
   routeKey: 'services',
-  title,
-  description: text(page?.intro, lang),
+  title: titoloPagina,
+  description: text(page?.intro, lang) || fraseApertura,
   seo: page ?? undefined,
+  image: immagineApertura,
   availableLangs: langs,
 });
 
 const crumbs = [
   { name: t('nav.home'), href: path('home', lang) },
-  { name: title, href: path('services', lang) },
+  { name: titoloPagina, href: path('services', lang) },
 ];
 
-const jsonLd = [
-  breadcrumbs(crumbs),
-  ...services.map((item) => serviceSchema(item, lang)),
-];
+const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item, lang))];
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="services"
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={jsonLd}
-  crumbs={crumbs}
->
-  <h1>{title}</h1>
-  {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
-
-  {services.length === 0 && <p>{t('common.empty')}</p>}
-
+<BaseLayout lang={lang} routeKey="services" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
   {
-    services.map((item) => (
-      <article id={item.slug}>
-        <h2>{text(item.title, lang)}</h2>
-        {text(item.subtitle, lang) && <p>{text(item.subtitle, lang)}</p>}
-        <p>{text(item.description, lang)}</p>
-        {
-          pick(item.features, lang) && (
-            <ul>
-              {pick(item.features, lang)!.map((feature) => <li>{feature}</li>)}
-            </ul>
-          )
-        }
-      </article>
-    ))
+    preload && (
+      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes="100vw" />
+    )
   }
 
-  {existsIn('quote', lang) && <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>}
+  <Apertura eyebrow={titoloPagina} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={indice} />
+
   <Confronto
     lang={lang}
-    servizi={services}
-    titolo={text(getSettings().servizi?.compare?.title, lang) || t('nav.services')}
+    servizi={servizi}
+    titolo={text(settings.servizi?.compare?.title, lang) || t('nav.services')}
   />
 </BaseLayout>
+
+<script>
+  // Effetti della pagina dopo il motion di base (GSAP già caricato).
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/servizi-effetti').then(({ initServiziEffetti }) => {
+        if (document.fonts?.ready) {
+          void document.fonts.ready.then(() => initServiziEffetti());
+        } else {
+          initServiziEffetti();
+        }
+      });
+    },
+    { once: true },
+  );
+</script>

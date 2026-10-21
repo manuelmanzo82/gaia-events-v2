@@ -115,7 +115,10 @@ export function service(item: Service, lang: Lang): Thing {
     description: text(item.description, lang),
     serviceType: text(item.subtitle, lang) || undefined,
     provider: businessRef,
-    areaServed: { '@type': 'Country', name: 'Italia' },
+    areaServed: [
+      { '@type': 'City', name: 'Roma' },
+      { '@type': 'Country', name: 'Italia' },
+    ],
     url: url('services', lang) + `#${item.slug}`,
     inLanguage: HTML_LANG[lang],
   };

@@ -96,6 +96,8 @@ export const UI = {
   'servizi.incluso': { it: 'incluso', en: 'included' },
   'servizi.nonIncluso': { it: 'non incluso', en: 'not included' },
   'servizi.chiediQuesto': { it: 'Chiedi un preventivo per questo', en: 'Ask for a quote for this' },
+  'servizi.cosaInclude': { it: 'Cosa include', en: 'What’s included' },
+  'servizi.indice': { it: 'I servizi', en: 'The services' },
   // Pagina Chi sono (fase 4.2).
   'about.dal': { it: 'dal', en: 'since' },
   // Tipi di evento (giro 11): eyebrow nelle card e nel dettaglio, filtri.
