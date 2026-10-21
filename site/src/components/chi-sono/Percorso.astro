@@ -54,8 +54,10 @@ const { lang, titolo, tappe } = Astro.props;
                       <Picture data={foto} class="tappa-img" />
                     </figure>
                   )}
-                  <h3 class="font-display tappa-titolo">{t.titolo}</h3>
-                  {t.testo && <p class="tappa-testo">{t.testo}</p>}
+                  <div class="tappa-corpo">
+                    <h3 class="font-display tappa-titolo">{t.titolo}</h3>
+                    {t.testo && <p class="tappa-testo">{t.testo}</p>}
+                  </div>
                 </li>
               );
             })}
@@ -244,17 +246,13 @@ const { lang, titolo, tappe } = Astro.props;
       margin: 0;
     }
 
-    .tappa-titolo,
-    .tappa-testo {
-      grid-column: testo;
-    }
-
-    .tappa-titolo {
+    /* Titolo e testo in una cella sola, in basso accanto alla foto. */
+    .tappa-corpo {
+      grid-area: testo;
       align-self: end;
     }
 
     .tappa-testo {
-      align-self: start;
       max-width: none;
     }
 
