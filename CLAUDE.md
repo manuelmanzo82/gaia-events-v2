@@ -953,6 +953,16 @@ Fatto:
     una sola → tutta larghezza 21:9. Via la lista con foto al passaggio.
   - **CtaFinale**: props `foto` e `lato` ('sinistra' | 'destra'); Chi sono
     passa `about.photos.cta` e 'destra', la home non cambia.
+- **Chi sono — giro correttivo** (21/10/2026): timeline con tappe da
+  56vw (una e mezza a schermo, binario ≈ 2,5 schermi), anni a 16vw, foto
+  `min(40vw, 62svh)` in 3:2 con parallasse ±9%, scrub 1,2 e pin ×1,25
+  della distanza; titolo+testo in una cella (`.tappa-corpo`) altrimenti
+  la griglia li metteva su due righe e a 1280×720 usciva dallo schermo.
+  Valori: fascia aperta = testo a sinistra + foto in finestra 3:2 al 45%
+  (variante `stile="piena"` tenuta solo per confronto), strisce chiuse
+  beige senza foto, pin da `top <altezza header>`; foto di scene senza
+  volti (migrazione `2026-10-21-chi-sono-valori-foto.sql`). Card finali
+  con lo stesso contenitore delle card della home, 50/50, 80svh.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
