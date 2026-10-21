@@ -766,6 +766,37 @@ Fatto:
     solo la scelta ('' | consigliateci | location), città/zona sempre a
     parte (location → nome obbligatorio; nessuna scelta → città
     obbligatoria). Focus sul primo campo in errore in ogni passaggio.
+- **Giro 10 — header a colore unico, menu mobile, bottoni** (21/10/2026):
+  - **Colore del header**: via la misura dei pixel per elemento
+    (`luminosita.ts` cancellato). `theme-observer.ts` decide UN tema dal
+    data-theme della sezione che contiene la linea a metà header — conta
+    solo un `[data-theme]` largo ≥ 60% dello schermo, così la foto di Gaia
+    e quella della CTA (metà sezione) non cambiano il colore (il menu
+    sull'altra metà chiara resterebbe illeggibile): lì il header è
+    inchiostro e la foto ha una fascia alta CHIARA. Sezioni con foto →
+    avorio + text-shadow leggero; fondi chiari → inchiostro. I flottanti
+    seguono la stessa regola misurata sotto di sé (avorio sul footer, dove
+    il torna-su resta visibile).
+  - **Leggibilità sulle foto**: fascia scura in cima alla FOTO (schede,
+    pannelli, destination, griglia Instagram, tessere; nell'hero il velo
+    alto è più deciso). Limite strutturale: il header è fisso e la foto
+    scorre sotto per tutta la sua altezza, la fascia protegge solo i primi
+    ~240 px; oltre, il contrasto dipende dalla foto. Schede e pannelli hanno
+    lo stesso margine del header (niente tetto a 80rem), così logo ed EN
+    cadono sempre sulla foto. Verifica: `tema-g10.js` nello scratchpad
+    (pixel veri, header nascosto, 1280/1440/1920).
+  - **Header**: «EN»/«IT» discreto con nome intero in aria-label; icone
+    Instagram e Facebook (18 px) nella riga desktop; nel pannello mobile
+    niente numeri, logo nei colori originali (`--logo-accento` pesca a
+    pannello aperto), Preventivo a cornice, EN 16 px, contatti WhatsApp /
+    Instagram / Facebook in fondo, voci Cormorant allineate al logo.
+  - **Bottoni a cornice**: `--btn-tinta` / `--btn-contro` in `global.css`;
+    hover e focus-visible = fondo pieno nella tinta, testo nel contro; il
+    tema scuro (`[data-theme='dark']`, `[data-header-theme='dark']`)
+    inverte. Mai `currentColor` come tinta (all'hover si risolve nel testo
+    già cambiato). Footer: meno aria sopra il logo, logo 110/80 px.
+  - **Preventivatore**: titolo con focus programmatico ma senza contorno;
+    ospiti come campo di testo numerico senza spinner, largo come gli altri.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
