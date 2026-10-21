@@ -1,4 +1,5 @@
 name: Build e deploy del sito
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Pubblicazione {0}', inputs.target) || github.event.head_commit.message }}
 
 # Si avvia in tre modi, che passano tutti da qui:
 #  - a mano, da Actions, scegliendo l'ambiente;
@@ -87,6 +88,8 @@ jobs:
         env:
           EXPORT_URL: ${{ secrets.EXPORT_URL }}
           EXPORT_TOKEN: ${{ secrets.EXPORT_TOKEN }}
+          EXPORT_TIMEOUT: '180'
+          EXPORT_ATTESE: '10 30 60'
         run: |
           set -euo pipefail
 
@@ -95,29 +98,10 @@ jobs:
             exit 1
           fi
 
-          # Un solo scaricamento: così i contenuti sono uno scatto coerente.
-          status=$(curl -sS --fail-with-body --max-time 60 \
-            -H "Authorization: Bearer ${EXPORT_TOKEN}" \
-            -o payload.json -w '%{http_code}' \
-            "${EXPORT_URL}") || {
-              echo "::error::Export non raggiungibile (HTTP ${status:-?})."
-              head -c 500 payload.json || true
-              exit 1
-            }
-
-          if ! jq -e '.content | type == "object"' payload.json > /dev/null; then
-            echo "::error::Risposta dell'export non valida."
-            head -c 500 payload.json
-            exit 1
-          fi
-
-          # Una chiave del JSON = un file in site/src/content/.
-          for key in $(jq -r '.content | keys[]' payload.json); do
-            jq --arg k "$key" '.content[$k]' payload.json > "site/src/content/${key}.json"
-            echo "scritto ${key}.json ($(wc -c < "site/src/content/${key}.json") byte)"
-          done
-
-          rm -f payload.json
+          # Un solo scaricamento riuscito: i contenuti sono uno scatto
+          # coerente. Timeout 180 s e nuovi tentativi dopo 10, 30, 60 s
+          # (IONOS ogni tanto non risponde): vedi lo script.
+          bash .github/scripts/scarica-contenuti.sh
 
       - name: Avvisa se si usano i contenuti di esempio
         if: ${{ inputs.skip_content == true }}

@@ -34,6 +34,7 @@ final class DashboardController
                 "SELECT COUNT(*) FROM inquiries WHERE status = 'new'",
             ),
             'publishLog' => Publisher::recent(5),
+            'ultimaPubblicazione' => Publisher::ultimaPubblicazione(),
             'avifSupported' => ImageService::avifSupported(),
         ]);
     }

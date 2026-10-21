@@ -3,6 +3,7 @@
  * @var array<string, int> $counts
  * @var int $newInquiries
  * @var list<array<string, mixed>> $publishLog
+ * @var array{stato: string, quando: string, url: string}|null $ultimaPubblicazione
  * @var bool $avifSupported
  */
 ?>
@@ -27,6 +28,22 @@
   Il pulsante avvia la GitHub Action: scarica i contenuti, ricostruisce il sito
   e lo carica sull'hosting. Ci vogliono pochi minuti.
 </p>
+
+<?php if ($ultimaPubblicazione !== null): ?>
+  <?php if ($ultimaPubblicazione['stato'] === 'non_riuscita'): ?>
+    <p class="flash error">
+      Pubblicazione non riuscita, riprova tra qualche minuto.
+      <span class="muted">(avviata il <?= e($ultimaPubblicazione['quando']) ?>; il sito online non è cambiato)</span>
+    </p>
+  <?php elseif ($ultimaPubblicazione['stato'] === 'in_corso'): ?>
+    <p class="flash">
+      Pubblicazione in corso, avviata il <?= e($ultimaPubblicazione['quando']) ?>.
+      Ricarica la pagina tra qualche minuto per vedere l'esito.
+    </p>
+  <?php else: ?>
+    <p class="muted">Ultima pubblicazione riuscita il <?= e($ultimaPubblicazione['quando']) ?>.</p>
+  <?php endif; ?>
+<?php endif; ?>
 
 <form method="post" action="<?= e(admin_url('pubblica')) ?>">
   <?= Gaia\Admin\Csrf::field() ?>

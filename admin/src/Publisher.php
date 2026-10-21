@@ -18,6 +18,12 @@ namespace Gaia\Admin;
  * repo. Questo token vive su un hosting condiviso: meno può fare, meglio è.
  *
  * Il token sta solo in config.php sul server, sotto github.token.
+ *
+ * Esito: la Action non scrive niente sul server, quindi il pannello legge
+ * l'ultima run dall'API di GitHub (ultimaPubblicazione): la run di una
+ * pubblicazione dal back office si chiama «Pubblicazione <ambiente>»
+ * (run-name in deploy.yml). Lo stesso token basta: «Actions: Read and
+ * write» comprende la lettura delle run.
  */
 final class Publisher
 {
@@ -79,6 +85,67 @@ final class Publisher
     }
 
     /**
+     * L'ultima pubblicazione avviata dal back office per questo ambiente,
+     * letta da GitHub: in corso, riuscita o non riuscita. Null se GitHub
+     * non risponde (in 5 s) o non c'è ancora nessuna pubblicazione: il
+     * pannello allora non mostra niente, non è un errore di Gaia.
+     *
+     * @return array{stato: 'in_corso'|'riuscita'|'non_riuscita', quando: string, url: string}|null
+     */
+    public static function ultimaPubblicazione(): ?array
+    {
+        $owner = (string) Config::get('github.owner', '');
+        $repo = (string) Config::get('github.repo', '');
+        $token = (string) Config::get('github.token', '');
+        $workflow = (string) Config::get('github.workflow', self::WORKFLOW_PREDEFINITO);
+        $ref = (string) Config::get('github.ref', self::REF_PREDEFINITO);
+        $target = (string) Config::get('github.target', 'production');
+
+        if ($owner === '' || $repo === '' || $token === '' || !function_exists('curl_init')) {
+            return null;
+        }
+
+        $url = sprintf(
+            'https://api.github.com/repos/%s/%s/actions/workflows/%s/runs?%s',
+            rawurlencode($owner),
+            rawurlencode($repo),
+            rawurlencode($workflow),
+            http_build_query(['branch' => $ref, 'event' => 'workflow_dispatch', 'per_page' => 20]),
+        );
+
+        $risposta = self::chiamaGitHub($url, $token, null, 5);
+        if ($risposta['errore'] !== '' || $risposta['stato'] !== 200) {
+            return null;
+        }
+
+        $dati = json_decode($risposta['corpo'], true);
+        $runs = is_array($dati['workflow_runs'] ?? null) ? $dati['workflow_runs'] : [];
+
+        foreach ($runs as $run) {
+            if (!is_array($run) || ($run['display_title'] ?? '') !== 'Pubblicazione ' . $target) {
+                continue;
+            }
+
+            $stato = match (true) {
+                ($run['status'] ?? '') !== 'completed' => 'in_corso',
+                ($run['conclusion'] ?? '') === 'success' => 'riuscita',
+                default => 'non_riuscita',
+            };
+
+            $quando = '';
+            try {
+                $data = new \DateTimeImmutable((string) ($run['run_started_at'] ?? $run['created_at'] ?? 'now'));
+                $quando = $data->setTimezone(new \DateTimeZone('Europe/Rome'))->format('d/m H:i');
+            } catch (\Throwable) {
+            }
+
+            return ['stato' => $stato, 'quando' => $quando, 'url' => (string) ($run['html_url'] ?? '')];
+        }
+
+        return null;
+    }
+
+    /**
      * Traduce gli errori più comuni in qualcosa di leggibile, invece di
      * lasciare a Gaia un numero e un JSON.
      *
@@ -98,16 +165,27 @@ final class Publisher
         };
     }
 
-    /** @return array{stato: int, corpo: string, errore: string} */
-    private static function chiamaGitHub(string $url, string $token, string $payload): array
+    /**
+     * POST con $payload, GET se $payload è null.
+     *
+     * @return array{stato: int, corpo: string, errore: string}
+     */
+    private static function chiamaGitHub(string $url, string $token, ?string $payload, int $timeout = 20): array
     {
         $handle = curl_init($url);
 
+        // Le costanti CURLOPT_* sono interi: niente spread (rinumererebbe
+        // le chiavi), si impostano a parte.
+        if ($payload !== null) {
+            curl_setopt($handle, CURLOPT_POST, true);
+            curl_setopt($handle, CURLOPT_POSTFIELDS, $payload);
+        } else {
+            curl_setopt($handle, CURLOPT_HTTPGET, true);
+        }
+
         curl_setopt_array($handle, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 20,
+            CURLOPT_TIMEOUT => $timeout,
             CURLOPT_HTTPHEADER => [
                 'Accept: application/vnd.github+json',
                 'Authorization: Bearer ' . $token,
