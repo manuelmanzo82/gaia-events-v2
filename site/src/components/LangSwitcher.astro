@@ -42,11 +42,11 @@ const targets = LANGS.filter((candidate) => candidate !== lang).map((candidate) 
   {
     targets.map((target) =>
       target.tradotta ? (
-        <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate" aria-label={target.nome} title={target.nome}>
+        <a href={target.href} hreflang={target.lang} lang={target.lang} rel="alternate" aria-label={`${target.label} — ${target.nome}`} title={target.nome}>
           {target.label}
         </a>
       ) : (
-        <a href={target.href} lang={target.lang} aria-label={target.nome} title={target.nome}>
+        <a href={target.href} lang={target.lang} aria-label={`${target.label} — ${target.nome}`} title={target.nome}>
           {target.label}
         </a>
       ),
