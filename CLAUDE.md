@@ -820,6 +820,38 @@ Fatto:
   - Verifica: `mobile-g11.js` nello scratchpad (360 e 390: menu, stati del
     header, footer, passaggi del preventivatore con posizione di fascia e
     domanda).
+- **Giro 11 — menu, rinomine, Dicono di me** (21/10/2026):
+  - **Pannello hamburger** (sotto gli 80rem, ovunque): blocco voci +
+    Preventivo + EN + icone centrato in orizzontale e verticale (margini
+    auto della prima e dell'ultima voce; se lo schermo è basso scorre);
+    in fondo solo le tre icone WhatsApp/Instagram/Facebook. Icone: un
+    solo set a linea in `Icona.astro` (tratto 1,5, viewBox 24, stesso
+    ingombro), usato in header, footer e CTA; il tondo flottante ha il
+    suo SVG a 44 con lo stesso tratto. Il toggle Menu/Chiudi mostra il
+    contorno solo con :focus-visible.
+  - **Menu**: Chi sono · Servizi · Luoghi · Matrimoni · Dicono di me ·
+    Magazine + Preventivo (EN: About · Services · Destinations · Weddings
+    · Kind words · Magazine + Enquire). Filtrato con `inMenu()`
+    (availability.ts): come existsIn, ma Matrimoni solo con ≥ 2 matrimoni
+    pubblicati nella lingua. Contatti, Partner e FAQ solo nel footer.
+  - **Rinomine** (routes.ts, le chiavi restano): blog → `/magazine/` ↔
+    `/en/magazine/`, stories → `/matrimoni/` ↔ `/en/weddings/`, reviews
+    EN → `/en/kind-words/`. File in `pages/` rinominati di conseguenza.
+    301 dai vecchi percorsi nel `.htaccess` (anche EN, indice e
+    dettaglio). Back office: sezioni «Magazine» e «Matrimoni» (URL admin
+    invariati), titolo della pagina indice via migrazione.
+  - **Dicono di me** (`ReviewsPage.astro`): tre blocchi — recensioni vere
+    (fondo notte), Stampa (tabella `press`, export `stampa.json`), Hanno
+    scelto Gaia (tabella `clients`, export `clienti.json`) — ognuno solo
+    con contenuti. **È l'unica pagina italiana che può non esistere**:
+    `langsFor('reviews')` non forza l'italiano e la rotta IT è dinamica
+    (`pages/[sezione].astro`); menu, footer, sitemap e llms.txt seguono.
+    Niente Review/AggregateRating nel JSON-LD (`reviewSnippets` tolta).
+    Oggi sullo staging è vuota → 404, finché Gaia non carica recensioni,
+    articoli o loghi (DA-CHIEDERE n. 11: loghi e permessi delle aziende).
+  - Verifica: `menu-centrato.js`, `menu-voci.js`, `dicono-shots.js` nello
+    scratchpad (per la pagina servono dati locali di prova nei JSON
+    gitignorati; poi si rimettono vuoti).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
