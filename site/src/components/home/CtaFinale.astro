@@ -123,6 +123,17 @@ const emailHref = `mailto:${BUSINESS.email}`;
     object-fit: cover;
   }
 
+  /* Come la foto di Gaia: il header è inchiostro, fascia alta chiara. */
+  .cta-figura::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    height: 240px;
+    background: linear-gradient(180deg, rgb(250 248 245 / 0.6) 0%, rgb(250 248 245 / 0.35) 120px, rgb(250 248 245 / 0) 100%);
+    pointer-events: none;
+  }
+
   /* — Metà di testo — */
   .cta-meta {
     display: grid;

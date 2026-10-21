@@ -126,6 +126,18 @@ const paginaChiSono = existsIn('about', lang);
     object-position: 50% 30% !important;
   }
 
+  /* Il header passa sopra la foto in inchiostro (la sezione è chiara):
+     fascia alta chiara, leggerissima, per la leggibilità. */
+  .gaia-figura::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    height: 240px;
+    background: linear-gradient(180deg, rgb(250 248 245 / 0.6) 0%, rgb(250 248 245 / 0.35) 120px, rgb(250 248 245 / 0) 100%);
+    pointer-events: none;
+  }
+
   .gaia-testo {
     padding: 0;
   }

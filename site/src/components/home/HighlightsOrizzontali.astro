@@ -66,7 +66,7 @@ const foto = highlights
           )}
         </header>
       )}
-      <ul class="binario" role="list">
+      <ul class="binario" role="list" data-theme="dark" data-foto>
         {foto.map((f) => (
           <li class="tessera" style={`--rapporto: ${f.rapporto}; --limite: ${f.limite}px`} data-theme="dark" data-foto>
             <Picture data={f.data} cap={false} class="tessera-img" />
@@ -185,6 +185,8 @@ const foto = highlights
   .binario {
     display: flex;
     gap: clamp(1rem, 2vw, 1.75rem);
+    background: transparent;
+    color: inherit;
     margin: 0;
     padding: 0 clamp(1.25rem, 4vw, 3.5rem);
     list-style: none;
@@ -340,10 +342,20 @@ const foto = highlights
       padding-top: 0;
     }
 
+    /* Senza pin: carosello a scorrimento libero come su mobile (le righe a
+       capo lascerebbero fondo chiaro sotto il header avorio). */
     .binario {
       width: auto;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: clamp(1.25rem, 4vw, 3.5rem);
       padding-block: 0 var(--spacing-section-sm);
+      scrollbar-width: thin;
+    }
+
+    .tessera {
+      scroll-snap-align: start;
     }
   }
 </style>
