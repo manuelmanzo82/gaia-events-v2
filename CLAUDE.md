@@ -963,6 +963,23 @@ Fatto:
   beige senza foto, pin da `top <altezza header>`; foto di scene senza
   volti (migrazione `2026-10-21-chi-sono-valori-foto.sql`). Card finali
   con lo stesso contenitore delle card della home, 50/50, 80svh.
+- **Chi sono — secondo giro correttivo** (21/10/2026):
+  - **Voce**: foto piccola con bordo avorio 9 px e ombra; su desktop la
+    colonna foto è alta quanto il testo (grid stretch, foto in absolute) e
+    `text-box: trim-start/trim-end cap alphabetic` sulla prima e l'ultima
+    riga fa coincidere i bordi; la firma sta sotto, fuori dall'allineamento.
+  - **Timeline sgranata**: la causa era il `sizes` rimasto a 26vw (il
+    browser scaricava la variante da 800 px per una foto resa a ~817).
+    Quando si cambia la misura di una foto, aggiornare SEMPRE il `sizes`
+    di `picture()`. Le foto da screenshot (nota «Origine screenshot») sono
+    ingrandimenti: anche se il file è largo, non reggono. Anni non attivi
+    oro al 18% + contorno 1,5 px.
+  - **Schede impilate condivise**: `components/SchedeImpilate.astro`
+    (varianti «piena» per la home, «divisa» per i valori di Chi sono) e
+    `scripts/schede-impilate.ts`; `MenuVisivo.astro` è un involucro che
+    calcola le schede. La fisarmonica dei valori (`[data-valori]`) non
+    esiste più. Foto dei valori: niente ospiti né nomi leggibili (il menù
+    della mise en place mostrava i nomi degli sposi a 1920).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
