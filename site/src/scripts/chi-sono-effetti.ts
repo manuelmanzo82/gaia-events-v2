@@ -12,10 +12,8 @@
  *                             si disegna, anno attivo pieno, foto in
  *                             parallasse; sotto, la linea verticale si
  *                             riempie con lo scroll e le tappe si accendono
- *   [data-valori]             le fasce dei valori: da 64rem sezione
- *                             agganciata, la fascia attiva segue lo scroll
- *                             (e l'hover la apre); sotto, si apre quella al
- *                             centro dello schermo (nel componente)
+ *   [data-impila]             i valori come schede impilate, stesso scrub
+ *                             del menu visivo della home (schede-impilate.ts)
  *
  * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale. Con
  * prefers-reduced-motion niente del tutto: le pagine sono complete senza
@@ -25,6 +23,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { riduciMotion } from './motion-leggero';
+import { schedeImpilate } from './schede-impilate';
 import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';
@@ -182,53 +181,6 @@ function timelineMobile(): void {
   }
 }
 
-/** Apre la fascia i e chiude le altre. */
-function apriFascia(fasce: HTMLElement[], i: number): void {
-  fasce.forEach((f, k) => f.classList.toggle('attiva', k === i));
-}
-
-function valoriDesktop(): void {
-  for (const sezione of document.querySelectorAll<HTMLElement>('[data-valori]')) {
-    const fasce = [...sezione.querySelectorAll<HTMLElement>('.fascia')];
-    if (fasce.length < 2) continue;
-    let dalloScroll = 0;
-    let sopra: number | null = null;
-
-    // Il pin parte sotto il header fisso (altezza da --altezza-header), così
-    // la sezione non gli passa mai dietro.
-    const altezzaHeader = (): number =>
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header')) || 146;
-    ScrollTrigger.create({
-      trigger: sezione,
-      start: () => `top ${altezzaHeader()}px`,
-      end: () => `+=${fasce.length * 45}%`,
-      pin: true,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        dalloScroll = Math.min(fasce.length - 1, Math.floor(self.progress * fasce.length));
-        if (sopra === null) apriFascia(fasce, dalloScroll);
-      },
-    });
-
-    // L'hover (o il focus) apre la fascia; uscendo torna a quella dello scroll.
-    for (const [i, fascia] of fasce.entries()) {
-      fascia.addEventListener('mouseenter', () => {
-        sopra = i;
-        apriFascia(fasce, i);
-      });
-      fascia.addEventListener('focusin', () => {
-        sopra = i;
-        apriFascia(fasce, i);
-      });
-    }
-    sezione.addEventListener('mouseleave', () => {
-      sopra = null;
-      apriFascia(fasce, dalloScroll);
-    });
-  }
-}
-
 /** Da chiamare una volta, dopo initMotion(). */
 export function initChiSonoEffetti(): void {
   if (riduciMotion()) return;
@@ -245,7 +197,7 @@ export function initChiSonoEffetti(): void {
   const mm = gsap.matchMedia();
   mm.add(DESKTOP, () => {
     timelineDesktop();
-    valoriDesktop();
+    schedeImpilate();
   });
   mm.add(MOBILE, () => {
     timelineMobile();

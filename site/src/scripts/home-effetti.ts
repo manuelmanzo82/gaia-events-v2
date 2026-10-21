@@ -21,37 +21,11 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { riduciMotion } from './motion-leggero';
+import { schedeImpilate } from './schede-impilate';
 import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';
 const MOBILE = '(max-width: 63.98rem)';
-
-function schedeImpilate(): void {
-  for (const pila of document.querySelectorAll<HTMLElement>('[data-impila]')) {
-    const schede = [...pila.querySelectorAll<HTMLElement>('.scheda')];
-
-    schede.forEach((scheda, i) => {
-      const successiva = schede[i + 1];
-      if (!successiva) return;
-
-      // Mentre la successiva le scorre sopra, la scheda si ritira: un po'
-      // più piccola e più scura (il velo .scheda-ombra), ma resta visibile
-      // nella fascia in alto perché ogni scheda è sticky un gradino più
-      // giù della precedente. Lo scrub lega tutto allo scroll.
-      const ombra = scheda.querySelector<HTMLElement>('.scheda-ombra');
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: successiva,
-          start: 'top bottom',
-          end: 'top top',
-          scrub: true,
-        },
-      });
-      tl.to(scheda, { scale: 0.95, ease: 'none' }, 0);
-      if (ombra) tl.to(ombra, { opacity: 0.55, ease: 'none' }, 0);
-    });
-  }
-}
 
 function scorrimentoOrizzontale(): void {
   for (const sezione of document.querySelectorAll<HTMLElement>('[data-orizzontale]')) {

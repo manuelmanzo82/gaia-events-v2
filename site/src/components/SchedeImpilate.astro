@@ -1,0 +1,380 @@
+---
+/**
+ * Schede impilate (pattern alla Haywood), condivise da home e Chi sono:
+ * ogni scheda è sticky un gradino più giù della precedente sotto il
+ * header, quella successiva le sale sopra e la coperta si riduce e si
+ * scurisce con lo scrub (scripts/schede-impilate.ts, [data-impila], solo
+ * da 64rem). Sotto i 64rem: schede 4:5 con sticky semplice in CSS, senza
+ * GSAP. Con reduced-motion: una sotto l'altra, ferme.
+ *
+ * Varianti:
+ *  - «piena» (home, menu visivo): foto a tutta scheda, velo scuro, numero,
+ *    titolo grande, riga e «Scopri →» in basso; la scheda è un link.
+ *  - «divisa» (Chi sono, valori): da 64rem testo a sinistra su fondo beige
+ *    e foto a destra (55% della scheda); sotto i 64rem identica alla
+ *    «piena». Senza link.
+ *
+ * Il markup della variante piena è quello del menu visivo della home
+ * (MenuVisivo.astro passa qui le sue schede): non cambiarlo senza
+ * controllare la home.
+ */
+import type { PictureData } from '../lib/images';
+import Picture from './Picture.astro';
+
+export interface Scheda {
+  titolo: string;
+  riga?: string;
+  numero: string;
+  foto: PictureData;
+  href?: string | null;
+  scopri?: string | null;
+}
+
+interface Props {
+  schede: Scheda[];
+  id?: string;
+  eyebrow?: string;
+  titolo?: string;
+  variante?: 'piena' | 'divisa';
+}
+
+const { schede, id, eyebrow, titolo, variante = 'piena' } = Astro.props;
+const divisa = variante === 'divisa';
+// Senza titolo, l'eyebrow fa da intestazione della sezione.
+const EyebrowTag = titolo ? 'p' : 'h2';
+---
+
+{
+  schede.length > 0 && (
+    <section id={id} class:list={['impila', { 'impila--divisa': divisa }]} data-theme="light">
+      {(eyebrow || titolo) && (
+        <header class="impila-testa">
+          {eyebrow && <EyebrowTag class="eyebrow impila-eyebrow">{eyebrow}</EyebrowTag>}
+          {titolo && (
+            <h2 class="text-display" data-reveal="righe">
+              {titolo}
+            </h2>
+          )}
+        </header>
+      )}
+
+      <div class="impila-pila" data-impila>
+        {schede.map((s, indice) => {
+          const Link = s.href ? 'a' : 'div';
+          const Titolo = s.href ? 'span' : 'h3';
+          return (
+            <article
+              class="scheda"
+              style={`--i: ${indice}`}
+              data-theme={divisa ? 'light' : 'dark'}
+              data-foto={divisa ? undefined : ''}
+            >
+              <Link class="scheda-link" href={s.href ?? undefined}>
+                <figure class="scheda-figura">
+                  <Picture data={s.foto} cap={false} class="scheda-img" />
+                  <div class="scheda-velo" aria-hidden="true" />
+                  <figcaption class="scheda-testo">
+                    <span class="scheda-numero" aria-hidden="true">
+                      N° {s.numero}
+                    </span>
+                    <Titolo class="font-display scheda-titolo">{s.titolo}</Titolo>
+                    {s.riga && <span class="scheda-riga">{s.riga}</span>}
+                    {s.href && s.scopri && (
+                      <span class="scheda-scopri">
+                        {s.scopri} <span aria-hidden="true">→</span>
+                      </span>
+                    )}
+                  </figcaption>
+                  <div class="scheda-ombra" aria-hidden="true" />
+                </figure>
+              </Link>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .impila {
+    /* Stesso margine del header (giro 10): logo ed EN cadono sempre sulla
+       scheda, mai sul fondo chiaro accanto (a 1440 le schede sono il 92%
+       della finestra, a 1920 il 94%). */
+    --margine-scheda: clamp(1.25rem, 4vw, 3.5rem);
+    --larghezza-scheda: calc(100vw - 2 * var(--margine-scheda));
+    padding-block: var(--spacing-section) 0;
+    background: var(--color-avorio);
+  }
+
+  /* Subito dopo la sezione Gaia (stesso fondo) resta un margine solo. */
+  :global(.gaia) + .impila {
+    padding-top: 0;
+  }
+
+  .impila-testa {
+    width: var(--larghezza-scheda);
+    margin: 0 auto clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .impila-eyebrow {
+    display: flex;
+    margin: 0;
+  }
+
+  .impila-testa h2 {
+    margin: 0.9rem 0 0;
+  }
+
+  .impila-testa h2.impila-eyebrow {
+    margin: 0;
+  }
+
+  .impila-pila {
+    display: grid;
+    gap: clamp(1.25rem, 3vh, 2rem);
+    padding-bottom: var(--spacing-section);
+  }
+
+  .scheda {
+    width: var(--larghezza-scheda);
+    margin-inline: auto;
+    will-change: transform;
+    background: transparent;
+  }
+
+  .scheda-link {
+    display: block;
+    color: var(--color-avorio-su-notte);
+    text-decoration: none;
+    border-radius: 24px;
+  }
+
+  .scheda-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .scheda-figura {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 24px;
+    background: var(--color-notte);
+    isolation: isolate;
+  }
+
+  .scheda-figura :global(picture),
+  .scheda-figura :global(.scheda-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scheda-figura :global(.scheda-img) {
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-gaia);
+  }
+
+  .scheda-link:hover :global(.scheda-img) {
+    transform: scale(1.03);
+  }
+
+  /* Velo scuro per la leggibilità, più fitto in basso dove sta il testo. */
+  .scheda-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.42) 45%, rgb(27 22 17 / 0.12) 100%);
+  }
+
+  .scheda-testo {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: grid;
+    gap: 0.6rem;
+    padding: 0 clamp(1.25rem, 5vw, 4rem) clamp(1.5rem, 6vh, 3.5rem);
+  }
+
+  .scheda-numero {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-caption);
+    letter-spacing: 0.08em;
+  }
+
+  .scheda-titolo {
+    margin: 0;
+    font-size: var(--text-display-xl);
+    font-weight: 320;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    color: inherit;
+  }
+
+  .scheda-riga {
+    max-width: 34rem;
+    font-size: var(--text-lead);
+    line-height: 1.45;
+    color: var(--color-avorio-su-notte);
+    opacity: 0.88;
+  }
+
+  .scheda-scopri {
+    margin-top: 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .scheda-link:hover .scheda-scopri {
+    transform: translateX(0.35rem);
+  }
+
+  /* Oscuramento della scheda coperta: lo scrub ne alza l'opacità. */
+  .scheda-ombra {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--color-notte);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* — Mobile e tablet: pila sticky in CSS, raggio 16 px — */
+  @media (max-width: 63.98rem) {
+    .impila {
+      --gradino: 0.5rem;
+    }
+
+    .impila-testa {
+      margin-bottom: calc(var(--altezza-header, 96px) + 0.5rem);
+    }
+
+    .impila-pila {
+      gap: 0;
+    }
+
+    .scheda {
+      position: sticky;
+      top: calc(var(--altezza-header, 96px) + 0.5rem + var(--i) * var(--gradino));
+      margin-bottom: 1.25rem;
+    }
+
+    .scheda:last-child {
+      margin-bottom: 0;
+    }
+
+    .scheda-link,
+    .scheda-figura {
+      border-radius: 16px;
+    }
+
+    .scheda-titolo {
+      font-size: 2.5rem;
+    }
+
+    .scheda-riga {
+      font-size: 1.0625rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .impila {
+      --gradino: 1.5rem;
+      --altezza-scheda: min(75svh, 100svh - var(--altezza-header, 146px) - 5 * var(--gradino) - 2rem);
+    }
+
+    .impila-pila {
+      gap: 0;
+    }
+
+    /* Sticky un gradino più giù per ogni scheda, sotto il header. */
+    .scheda {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 0.5rem + var(--i) * var(--gradino));
+      margin-bottom: 10vh;
+      transform-origin: 50% 0%;
+    }
+
+    .scheda:last-child {
+      margin-bottom: 0;
+    }
+
+    .scheda-figura {
+      aspect-ratio: auto;
+      height: var(--altezza-scheda);
+    }
+
+    .scheda-testo {
+      max-width: 60rem;
+    }
+
+    /* — Variante divisa: testo a sinistra su beige, foto a destra (55%) — */
+    .impila--divisa .scheda-link {
+      color: var(--color-inchiostro);
+    }
+
+    .impila--divisa .scheda-figura {
+      display: grid;
+      grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+      background: var(--color-beige);
+    }
+
+    .impila--divisa .scheda-figura :global(picture) {
+      grid-column: 2;
+      grid-row: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .impila--divisa .scheda-velo {
+      display: none;
+    }
+
+    .impila--divisa .scheda-testo {
+      position: relative;
+      inset: auto;
+      grid-column: 1;
+      grid-row: 1;
+      align-content: center;
+      max-width: none;
+      padding: clamp(2rem, 4vw, 4.5rem);
+    }
+
+    .impila--divisa .scheda-numero {
+      color: var(--color-oro-testo);
+    }
+
+    .impila--divisa .scheda-titolo {
+      font-size: var(--text-display);
+      line-height: var(--text-display--line-height);
+    }
+
+    .impila--divisa .scheda-riga {
+      max-width: 28rem;
+      margin-top: 0.4rem;
+      color: var(--color-grigio-caldo);
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scheda {
+      position: static;
+      margin-bottom: 1.5rem;
+    }
+
+    .scheda-figura :global(.scheda-img),
+    .scheda-scopri {
+      transition: none;
+    }
+  }
+</style>

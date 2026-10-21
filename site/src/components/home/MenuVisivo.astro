@@ -18,6 +18,9 @@
  * di sé un margine pari al header, così al primo frame dello snap è già
  * fuori dallo schermo e il logo non lo copre.
  *
+ * Markup, CSS e scrub stanno in SchedeImpilate.astro e in
+ * scripts/schede-impilate.ts, condivisi con i valori di Chi sono.
+ *
  * Nota sul limite delle foto: a 90vw la scheda supera il maxWidth delle
  * foto da 1024 px (scelta del giro 4: la larghezza conta più della regola
  * di CLAUDE.md, qui e solo qui). Con file più grandi non si pone.
@@ -28,7 +31,7 @@ import { path, type RouteKey } from '../../i18n/routes';
 import { existsIn } from '../../lib/availability';
 import type { Highlight } from '../../lib/content';
 import { picture } from '../../lib/images';
-import Picture from '../Picture.astro';
+import SchedeImpilate, { type Scheda } from '../SchedeImpilate.astro';
 
 interface Props {
   lang: Lang;
@@ -51,288 +54,20 @@ const AREE: Array<{ key: RouteKey; nome: UIKey; riga: UIKey }> = [
 
 const SIZES = '(min-width: 64rem) 90vw, 92vw';
 
-const schede = AREE.filter((area) => existsIn(area.key, lang))
+const schede: Scheda[] = AREE.filter((area) => existsIn(area.key, lang))
   .map((area, i) => {
-    const data = picture(highlights[i]?.image, lang, SIZES);
-    if (!data) return null;
+    const foto = picture(highlights[i]?.image, lang, SIZES);
+    if (!foto) return null;
     return {
       href: path(area.key, lang),
-      nome: t(area.nome),
+      titolo: t(area.nome),
       riga: t(area.riga),
-      data,
-      indice: i,
+      foto,
       numero: String(i + 1).padStart(2, '0'),
+      scopri: t('cta.scopri'),
     };
   })
   .filter((s): s is NonNullable<typeof s> => s !== null);
 ---
 
-{
-  schede.length > 0 && (
-    <section id="highlights" class="impila" data-theme="light">
-      {(eyebrow || titolo) && (
-        <header class="impila-testa">
-          {eyebrow && <p class="eyebrow impila-eyebrow">{eyebrow}</p>}
-          {titolo && (
-            <h2 class="text-display" data-reveal="righe">
-              {titolo}
-            </h2>
-          )}
-        </header>
-      )}
-
-      <div class="impila-pila" data-impila>
-        {schede.map((s) => (
-          <article class="scheda" style={`--i: ${s.indice}`} data-theme="dark" data-foto>
-            <a class="scheda-link" href={s.href}>
-              <figure class="scheda-figura">
-                <Picture data={s.data} cap={false} class="scheda-img" />
-                <div class="scheda-velo" aria-hidden="true" />
-                <figcaption class="scheda-testo">
-                  <span class="scheda-numero" aria-hidden="true">
-                    N° {s.numero}
-                  </span>
-                  <span class="font-display scheda-titolo">{s.nome}</span>
-                  <span class="scheda-riga">{s.riga}</span>
-                  <span class="scheda-scopri">
-                    {t('cta.scopri')} <span aria-hidden="true">→</span>
-                  </span>
-                </figcaption>
-                <div class="scheda-ombra" aria-hidden="true" />
-              </figure>
-            </a>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-<style>
-  .impila {
-    /* Stesso margine del header (giro 10): logo ed EN cadono sempre sulla
-       scheda, mai sul fondo chiaro accanto (a 1440 le schede sono il 92%
-       della finestra, a 1920 il 94%). */
-    --margine-scheda: clamp(1.25rem, 4vw, 3.5rem);
-    --larghezza-scheda: calc(100vw - 2 * var(--margine-scheda));
-    padding-block: var(--spacing-section) 0;
-    background: var(--color-avorio);
-  }
-
-  /* Subito dopo la sezione Gaia (stesso fondo) resta un margine solo. */
-  :global(.gaia) + .impila {
-    padding-top: 0;
-  }
-
-  .impila-testa {
-    width: var(--larghezza-scheda);
-    margin: 0 auto clamp(2rem, 5vh, 3.5rem);
-  }
-
-  .impila-eyebrow {
-    display: flex;
-    margin: 0;
-  }
-
-  .impila-testa h2 {
-    margin: 0.9rem 0 0;
-  }
-
-  .impila-pila {
-    display: grid;
-    gap: clamp(1.25rem, 3vh, 2rem);
-    padding-bottom: var(--spacing-section);
-  }
-
-  .scheda {
-    width: var(--larghezza-scheda);
-    margin-inline: auto;
-    will-change: transform;
-    background: transparent;
-  }
-
-  .scheda-link {
-    display: block;
-    color: var(--color-avorio-su-notte);
-    text-decoration: none;
-    border-radius: 24px;
-  }
-
-  .scheda-link:focus-visible {
-    outline: 2px solid var(--color-bordeaux);
-    outline-offset: 4px;
-  }
-
-  .scheda-figura {
-    position: relative;
-    margin: 0;
-    aspect-ratio: 4 / 5;
-    overflow: hidden;
-    border-radius: 24px;
-    background: var(--color-notte);
-    isolation: isolate;
-  }
-
-  .scheda-figura :global(picture),
-  .scheda-figura :global(.scheda-img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .scheda-figura :global(.scheda-img) {
-    object-fit: cover;
-    transition: transform 1.2s var(--ease-gaia);
-  }
-
-  .scheda-link:hover :global(.scheda-img) {
-    transform: scale(1.03);
-  }
-
-  /* Velo scuro per la leggibilità, più fitto in basso dove sta il testo. */
-  .scheda-velo {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-      linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
-      linear-gradient(0deg, rgb(27 22 17 / 0.78) 0%, rgb(27 22 17 / 0.42) 45%, rgb(27 22 17 / 0.12) 100%);
-  }
-
-  .scheda-testo {
-    position: absolute;
-    inset: auto 0 0 0;
-    z-index: 2;
-    display: grid;
-    gap: 0.6rem;
-    padding: 0 clamp(1.25rem, 5vw, 4rem) clamp(1.5rem, 6vh, 3.5rem);
-  }
-
-  .scheda-numero {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--text-caption);
-    letter-spacing: 0.08em;
-  }
-
-  .scheda-titolo {
-    font-size: var(--text-display-xl);
-    font-weight: 320;
-    line-height: 1.02;
-    letter-spacing: -0.01em;
-    text-wrap: balance;
-  }
-
-  .scheda-riga {
-    max-width: 34rem;
-    font-size: var(--text-lead);
-    line-height: 1.45;
-    color: var(--color-avorio-su-notte);
-    opacity: 0.88;
-  }
-
-  .scheda-scopri {
-    margin-top: 0.6rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    transition: transform 0.4s var(--ease-gaia);
-  }
-
-  .scheda-link:hover .scheda-scopri {
-    transform: translateX(0.35rem);
-  }
-
-  /* Oscuramento della scheda coperta: lo scrub ne alza l'opacità. */
-  .scheda-ombra {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    background: var(--color-notte);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* — Mobile e tablet: pila sticky in CSS, raggio 16 px — */
-  @media (max-width: 63.98rem) {
-    .impila {
-      --gradino: 0.5rem;
-    }
-
-    .impila-testa {
-      margin-bottom: calc(var(--altezza-header, 96px) + 0.5rem);
-    }
-
-    .impila-pila {
-      gap: 0;
-    }
-
-    .scheda {
-      position: sticky;
-      top: calc(var(--altezza-header, 96px) + 0.5rem + var(--i) * var(--gradino));
-      margin-bottom: 1.25rem;
-    }
-
-    .scheda:last-child {
-      margin-bottom: 0;
-    }
-
-    .scheda-link,
-    .scheda-figura {
-      border-radius: 16px;
-    }
-
-    .scheda-titolo {
-      font-size: 2.5rem;
-    }
-
-    .scheda-riga {
-      font-size: 1.0625rem;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .impila {
-      --gradino: 1.5rem;
-      --altezza-scheda: min(75svh, 100svh - var(--altezza-header, 146px) - 5 * var(--gradino) - 2rem);
-    }
-
-    .impila-pila {
-      gap: 0;
-    }
-
-    /* Sticky un gradino più giù per ogni scheda, sotto il header. */
-    .scheda {
-      position: sticky;
-      top: calc(var(--altezza-header, 146px) + 0.5rem + var(--i) * var(--gradino));
-      margin-bottom: 10vh;
-      transform-origin: 50% 0%;
-    }
-
-    .scheda:last-child {
-      margin-bottom: 0;
-    }
-
-    .scheda-figura {
-      aspect-ratio: auto;
-      height: var(--altezza-scheda);
-    }
-
-    .scheda-testo {
-      max-width: 60rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .scheda {
-      position: static;
-      margin-bottom: 1.5rem;
-    }
-
-    .scheda-figura :global(.scheda-img),
-    .scheda-scopri {
-      transition: none;
-    }
-  }
-</style>
+<SchedeImpilate id="highlights" schede={schede} eyebrow={eyebrow} titolo={titolo} />
