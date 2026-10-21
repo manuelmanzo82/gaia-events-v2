@@ -8,7 +8,8 @@
  *
  * Desktop: i due blocchi hanno la stessa altezza. La colonna delle foto si
  * allunga quanto il testo (grid stretch): la foto grande parte all'altezza
- * della prima riga, la piccola (bordo avorio, ombra morbida) finisce
+ * della prima riga, la piccola (bordo nel colore del fondo della sezione,
+ * senza ombra: sembra un ritaglio nella grande) finisce
  * all'altezza dell'ultima riga dell'ultimo paragrafo; text-box-trim toglie
  * la mezza interlinea in cima e in fondo, così i bordi coincidono. La
  * piccola ha una parallasse leggera (±5%), allineata a metà del passaggio.
@@ -74,6 +75,7 @@ const [primo, ...altri] = paragrafi;
 
 <style>
   .voce {
+    --raggio-voce: 16px;
     padding-block: var(--spacing-section);
   }
 
@@ -89,7 +91,7 @@ const [primo, ...altri] = paragrafi;
   }
 
   .voce-figura {
-    border-radius: 16px;
+    border-radius: var(--raggio-voce);
   }
 
   .voce-figura :global(picture),
@@ -103,17 +105,18 @@ const [primo, ...altri] = paragrafi;
     object-fit: cover;
   }
 
-  /* La piccola si stacca dalla grande: cornice avorio e ombra morbida. */
+  /* La piccola è un ritaglio nella grande: il bordo ha esattamente il
+     colore del fondo della sezione, niente ombra; l'arrotondamento esterno
+     è lo stesso della grande, quello interno ne toglie lo spessore. */
   .voce-figura-piccola {
-    border: 9px solid var(--color-bianco-caldo);
-    border-radius: 14px;
-    box-shadow:
-      0 2px 6px rgb(27 22 17 / 0.08),
-      0 24px 56px rgb(27 22 17 / 0.2);
+    --bordo-voce: 6px;
+    border: var(--bordo-voce) solid var(--color-avorio);
+    border-radius: var(--raggio-voce);
+    background: var(--color-avorio);
   }
 
   .voce-figura-piccola :global(.voce-img) {
-    border-radius: 6px;
+    border-radius: calc(var(--raggio-voce) - var(--bordo-voce));
   }
 
   /* — Testo — */
@@ -157,13 +160,14 @@ const [primo, ...altri] = paragrafi;
       aspect-ratio: 4 / 5;
     }
 
+    /* Circa il 40% della larghezza della grande, dentro i margini. */
     .voce-figura-piccola {
+      --bordo-voce: 4px;
       position: absolute;
       right: 0.75rem;
       bottom: 0;
-      width: 42%;
+      width: 40%;
       aspect-ratio: 3 / 4;
-      border-width: 7px;
     }
 
     .voce-foto--sola {
