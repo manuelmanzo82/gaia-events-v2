@@ -61,6 +61,39 @@ export function localBusiness(opts: {
   };
 }
 
+const PERSON_ID = `${SITE_URL}/#gaia`;
+
+/** La pagina Chi sono come AboutPage, con la persona come soggetto. */
+export function aboutPage(opts: { lang: Lang; title: string; description?: string }): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: opts.title,
+    description: opts.description,
+    url: url('about', opts.lang),
+    inLanguage: HTML_LANG[opts.lang],
+    mainEntity: { '@id': PERSON_ID },
+    isPartOf: { '@id': SITE_ID },
+  };
+}
+
+/** Gaia Crognale come Person: lavora per il LocalBusiness, stessi profili. */
+export function person(opts: { lang: Lang; image?: string | null; description?: string }): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': PERSON_ID,
+    name: BUSINESS.legalName,
+    jobTitle: opts.lang === 'it' ? 'Wedding & event planner' : 'Wedding & event planner',
+    description: opts.description || undefined,
+    image: opts.image ?? undefined,
+    url: url('about', opts.lang),
+    worksFor: businessRef,
+    sameAs: [BUSINESS.instagramUrl, BUSINESS.facebookUrl],
+    knowsLanguage: ['it', 'en'],
+  };
+}
+
 export function webSite(lang: Lang, name: string, description?: string): Thing {
   return {
     '@context': 'https://schema.org',

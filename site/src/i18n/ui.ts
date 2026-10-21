@@ -92,6 +92,8 @@ export const UI = {
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
   'nav.backToTop': { it: 'Torna su', en: 'Back to top' },
+  // Pagina Chi sono (fase 4.2).
+  'about.dal': { it: 'dal', en: 'since' },
   // Tipi di evento (giro 11): eyebrow nelle card e nel dettaglio, filtri.
   'evento.matrimonio': { it: 'Matrimonio', en: 'Wedding' },
   'evento.unione_civile': { it: 'Unione civile', en: 'Civil union' },

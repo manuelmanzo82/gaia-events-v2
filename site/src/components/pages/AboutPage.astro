@@ -1,0 +1,100 @@
+---
+/**
+ * Chi sono (/chi-sono/ ↔ /en/about/), fase 4.2. Riferimento di ritmo:
+ * sarahhaywood.com/about, reinterpretato per una planner che lavora in
+ * prima persona. Ogni sezione «prova» qualcosa e vive solo se ha i suoi
+ * contenuti nel back office:
+ *
+ *  1. Apertura — foto di Gaia a tutto schermo, nome, tagline (+ anno)
+ *  2. La sua voce — il testo della pagina, parola per parola allo scroll
+ *  3. I numeri — about.stats.* (solo se impostati)
+ *  4. Il percorso — blocco «timeline» della pagina
+ *  5. Come lavoro — blocco «values», sticky split con le foto di Gaia
+ *  6. Citazione — il <blockquote> del testo (o un estratto Stampa)
+ *  7. Hanno scelto Gaia — Clienti (solo se ce ne sono)
+ *  8. Due link enormi — I miei eventi, Servizi
+ *  9. Chiusura — la CTA finale della home
+ *
+ * Testi solo dal back office (pages.about, settings.about.*, tagline).
+ * Effetti in scripts/chi-sono-effetti.ts, caricati dopo il motion di base.
+ */
+import { BUSINESS, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { langsFor } from '../../lib/availability';
+import { getHighlights, getPage, getSettings, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
+import { buildMeta } from '../../lib/seo';
+import Apertura from '../chi-sono/Apertura.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const page = getPage('about');
+const langs = langsFor('about');
+const settings = getSettings();
+
+const titolo = text(page?.title, lang) || t('nav.about');
+const nome = BUSINESS.legalName;
+const tagline = text(settings.tagline, lang);
+const anno = text(settings.about?.since, lang).trim();
+
+// Foto dell'apertura: il primo highlight della sezione «chi-sono», il
+// ritratto di Gaia al lavoro (taglio sul punto focale).
+const fotoApertura = picture(getHighlights('chi-sono')[0]?.image ?? settings.about.image, lang, '100vw');
+const preload = fotoApertura?.sources[0] ?? null;
+
+const meta = buildMeta({
+  lang,
+  routeKey: 'about',
+  title: titolo,
+  description: text(page?.intro, lang),
+  seo: page ?? undefined,
+  image: getHighlights('chi-sono')[0]?.image ?? null,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: titolo, href: path('about', lang) },
+];
+
+const jsonLd = [
+  aboutPage({ lang, title: meta.title, description: meta.description }),
+  person({ lang, image: meta.ogImage, description: text(settings.about.text, lang) }),
+  breadcrumbs(crumbs),
+];
+---
+
+<BaseLayout lang={lang} routeKey="about" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
+  {
+    preload && (
+      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes="100vw" />
+    )
+  }
+
+  <Apertura lang={lang} eyebrow={titolo} nome={nome} riga={tagline} anno={anno} foto={fotoApertura} />
+</BaseLayout>
+
+<script>
+  // Effetti della pagina dopo il motion di base (GSAP già caricato).
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/chi-sono-effetti').then(({ initChiSonoEffetti }) => {
+        if (document.fonts?.ready) {
+          void document.fonts.ready.then(() => initChiSonoEffetti());
+        } else {
+          initChiSonoEffetti();
+        }
+      });
+    },
+    { once: true },
+  );
+</script>

@@ -61,7 +61,17 @@ export interface Settings extends SeoFields {
   home: { manifesto: Localized; manifestoFirma: Localized };
   /** Dati legali per il footer: la P.IVA e' obbligatoria sui siti aziendali italiani. */
   legal: { piva: Localized };
-  about: { title: Localized; text: Localized; image: Image | null };
+  about: {
+    title: Localized;
+    text: Localized;
+    image: Image | null;
+    /** Anno di inizio (riga «dal …» nell'apertura di Chi sono). */
+    since?: Localized;
+    /** I numeri di Chi sono: valore + etichetta, solo se impostati. */
+    stats?: Record<string, { value?: Localized; label?: Localized }>;
+    /** Foto di Chi sono: quote, events, services. */
+    photos?: Record<string, Image | null>;
+  };
   contact: { title: Localized; text: Localized; address: Localized };
   /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
   quote?: {

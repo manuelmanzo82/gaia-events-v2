@@ -1,0 +1,180 @@
+---
+/**
+ * Chi sono — 1. Apertura (notte, 100svh): foto di Gaia al lavoro a tutto
+ * schermo (primo highlight della sezione «chi-sono», taglio sul punto
+ * focale), eyebrow «Chi sono», nome in display, riga «Wedding & event
+ * planner a Roma[, dal ANNO]» (tagline + about.since).
+ *
+ * Come l'hero della home: la foto riempie il viewport, quindi Chrome la
+ * esclude dall'LCP, che diventa il nome; preload della foto senza
+ * fetchpriority alta (sta in AboutPage, slot head). Niente motion sopra
+ * il LCP: solo una parallasse leggera della foto allo scroll (mobile e
+ * desktop), spenta con reduced-motion.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import type { PictureData } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  eyebrow: string;
+  nome: string;
+  riga: string;
+  anno: string;
+  foto: PictureData | null;
+}
+
+const { lang, eyebrow, nome, riga, anno, foto } = Astro.props;
+const t = useTranslations(lang);
+const sottotitolo = [riga, anno ? `${t('about.dal')} ${anno}` : ''].filter(Boolean).join(', ');
+---
+
+<section class="apertura" data-theme="dark" data-foto>
+  {
+    foto && (
+      <figure class="apertura-foto" aria-hidden="true" data-parallasse="0 12">
+        <Picture data={foto} cap={false} loading="eager" decoding="async" class="apertura-img" />
+      </figure>
+    )
+  }
+  <div class="apertura-velo" aria-hidden="true"></div>
+
+  <div class="apertura-testo container-gaia">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 class="text-display-xl apertura-nome">{nome}</h1>
+    {sottotitolo && <p class="text-lead apertura-riga">{sottotitolo}</p>}
+  </div>
+
+  <a class="apertura-scorri" href="#voce" aria-label={t('cta.discover')}>
+    <span></span>
+  </a>
+</section>
+
+<style>
+  .apertura {
+    position: relative;
+    display: grid;
+    align-content: end;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .apertura-foto,
+  .apertura-foto :global(picture) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    margin: 0;
+  }
+
+  /* La foto scorre un po' (parallasse): sporge in basso per non scoprire
+     il fondo. */
+  .apertura-foto {
+    inset: 0 0 -12%;
+  }
+
+  .apertura-foto :global(.apertura-img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  /* Su schermi stretti il taglio è verticale: lo spostiamo un po' a
+     sinistra del punto focale (50%), così l'angolo in basso a destra, dove
+     la foto porta il watermark del fotografo, resta fuori. Da togliere
+     quando arriverà il ritratto definitivo. */
+  @media (max-width: 47.98rem) {
+    .apertura-foto :global(.apertura-img) {
+      object-position: 38% 30% !important;
+    }
+  }
+
+  /* Velo: scuro in alto per il header, in basso per il testo. */
+  .apertura-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0.35) 120px, rgb(0 0 0 / 0) 260px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.82) 0%, rgb(27 22 17 / 0.45) 40%, rgb(27 22 17 / 0) 70%);
+    pointer-events: none;
+  }
+
+  .apertura-testo {
+    position: relative;
+    z-index: 2;
+    padding-top: calc(var(--altezza-header, 146px) + 2rem);
+    padding-bottom: clamp(4rem, 12vh, 7rem);
+  }
+
+  .apertura-testo .eyebrow {
+    margin: 0 0 1rem;
+  }
+
+  .apertura-nome {
+    max-width: 12ch;
+    margin: 0;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .apertura-riga {
+    max-width: 34rem;
+    margin: 1rem 0 0;
+    color: var(--color-velato-su-notte);
+  }
+
+  /* Freccia di scorrimento: un filo che pulsa, in basso a destra. */
+  .apertura-scorri {
+    position: absolute;
+    right: clamp(1.25rem, 4vw, 3.5rem);
+    bottom: 2rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+  }
+
+  .apertura-scorri span {
+    width: 1px;
+    height: 36px;
+    background: var(--color-avorio-su-notte);
+    opacity: 0.7;
+    transform-origin: top;
+    animation: apertura-filo 2.4s var(--ease-gaia) infinite;
+  }
+
+  @keyframes apertura-filo {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    45% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    55% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .apertura-scorri span {
+      animation: none;
+      transform: none;
+    }
+  }
+</style>

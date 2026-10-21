@@ -187,6 +187,29 @@ Grasso). Le altre cartelle (Yael e Simone, Alexa e Roberto, Giorgia e
 Mirko, John e Valeria, Michelle e Paolo) hanno 5–7 foto l'una, quasi tutte
 già in home: si possono aggiungere come eventi quando arrivano più foto.
 
+### 13. Pagina «Chi sono» — PRIORITÀ ALTA (21/10/2026)
+
+La pagina nuova (/chi-sono/ ↔ /en/about/) mostra solo quello che c'è nel
+back office; queste cose mancano e finché mancano le sezioni restano
+nascoste:
+
+- **I numeri** (Impostazioni → chi sono → Numero 1-4): valore + etichetta
+  IT/EN, per esempio anni di attività, eventi realizzati, location, paesi.
+  **Solo numeri veri.** Finché sono vuoti la sezione «I numeri» non esiste.
+- **L'anno di inizio** (Impostazioni → chi sono → Anno di inizio): serve per
+  la riga «Wedding & event planner a Roma, dal 20XX» sotto il nome.
+- **Foto per le tappe del percorso** (Pagine → Chi sono → blocco «Il mio
+  percorso»): oggi le quattro tappe (2014, 2016, 2018, 2022, importate da
+  Sanity) non hanno foto; il campo c'è.
+- **Altre foto di Gaia al lavoro** (Highlights, sezione «chi sono»): oggi ne
+  usiamo quattro; la foto di apertura (planner-sala-ritratto) porta il
+  watermark VD IMAGE ed è già in lista «da sostituire» — qui servono i
+  ritratti veri.
+- **Meta title e meta description** della pagina (Pagine → Chi sono) li
+  abbiamo composti noi con la tagline e la prima frase del testo: bozza da
+  confermare.
+- **Il testo inglese** della pagina resta la bozza del 16/10 (sotto).
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database
