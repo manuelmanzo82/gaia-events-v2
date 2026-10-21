@@ -35,6 +35,7 @@ import Numeri from '../chi-sono/Numeri.astro';
 import Percorso from '../chi-sono/Percorso.astro';
 import Valori from '../chi-sono/Valori.astro';
 import Voce from '../chi-sono/Voce.astro';
+import CtaFinale from '../home/CtaFinale.astro';
 
 interface Props {
   lang: Lang;
@@ -151,6 +152,8 @@ const jsonLd = [
   <Clienti lang={lang} clienti={getClients()} />
 
   <LinkGrandi link={linkGrandi} />
+
+  <CtaFinale lang={lang} settings={settings} />
 </BaseLayout>
 
 <script>
