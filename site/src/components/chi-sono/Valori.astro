@@ -1,198 +1,314 @@
 ---
 /**
- * Chi sono — 5. Come lavoro (avorio): i valori del blocco «values» in
- * sticky split. A sinistra i valori scorrono (numero, titolo, riga); a
- * destra una colonna sticky con le foto di Gaia al lavoro (highlights
- * «chi-sono» dopo la prima, che è l'apertura) che cambiano in dissolvenza
- * quando il valore corrispondente entra al centro dello schermo
- * (IntersectionObserver qui sotto, niente GSAP). Con reduced-motion il
- * cambio è istantaneo; su mobile tutto impilato, una foto sola in testa.
+ * Chi sono — 5. I valori (avorio): quattro fasce a tutta larghezza
+ * impilate, come i pannelli «Come posso aiutarvi» della home ma in
+ * verticale. La fascia attiva si apre in altezza e mostra foto e testo;
+ * le altre restano strisce con numero e titolo. Nessun link: i valori
+ * non portano a nessuna pagina.
+ *
+ * Desktop (≥64rem): sezione agganciata, la fascia attiva segue lo scroll
+ * e l'hover la apre (chi-sono-effetti.ts, [data-valori]). Mobile: si apre
+ * la fascia al centro dello schermo (IntersectionObserver qui sotto).
+ * Stesse curve e durate delle card della home (flex-grow 0,7 s, dettaglio
+ * 0,6 s, foto 1,2 s, ease-gaia), angoli a 4 px. Reduced-motion: tutte le
+ * fasce aperte allo stesso modo, nessuna transizione.
  */
-import type { PictureData } from '../../lib/images';
+import type { Lang } from '../../config/site';
+import type { Image } from '../../lib/types';
+import { picture } from '../../lib/images';
 import Picture from '../Picture.astro';
 
 interface Props {
+  lang: Lang;
   titolo: string;
-  valori: Array<{ titolo: string; testo: string }>;
-  foto: PictureData[];
+  valori: Array<{ titolo: string; testo: string; image: Image | null }>;
 }
 
-const { titolo, valori, foto } = Astro.props;
+const { lang, titolo, valori } = Astro.props;
 ---
 
 {
   valori.length > 0 && (
-    <section class="valori" data-theme="light" aria-labelledby="valori-titolo">
-      <div class="container-gaia valori-griglia">
-        <div class="valori-testo">
-          <h2 id="valori-titolo" class="eyebrow" data-reveal="alto">
-            {titolo}
-          </h2>
-          <ol class="valori-lista" role="list">
-            {valori.map((v, i) => (
-              <li class="valore" data-valore={i} data-reveal="alto">
-                <p class="valore-numero numero" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </p>
-                <h3 class="font-display valore-titolo">{v.titolo}</h3>
-                {v.testo && <p class="text-lead valore-testo">{v.testo}</p>}
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {foto.length > 0 && (
-          <div class="valori-foto" aria-hidden="true">
-            <div class="valori-sticky">
-              {foto.map((f, i) => (
-                <figure class:list={['valori-figura', { attiva: i === 0 }]} data-foto-indice={i}>
-                  <Picture data={f} cap={false} class="valori-img" />
-                </figure>
-              ))}
-            </div>
-          </div>
-        )}
+    <section class="valori" data-theme="light" data-valori aria-labelledby="valori-titolo">
+      <div class="valori-testa container-gaia">
+        <h2 id="valori-titolo" class="eyebrow" data-reveal="alto">
+          {titolo}
+        </h2>
       </div>
+      <ol class="fasce" role="list">
+        {valori.map((v, i) => {
+          const foto = picture(v.image, lang, '100vw');
+          return (
+            <li class:list={['fascia', { attiva: i === 0 }]} data-fascia={i} tabindex="0">
+              <div class="fascia-interno" data-theme="dark" data-foto>
+                {foto && <Picture data={foto} cap={false} class="fascia-img" />}
+                <span class="fascia-velo" aria-hidden="true" />
+                <div class="fascia-testo">
+                  <span class="fascia-numero" aria-hidden="true">
+                    N° {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 class="font-display fascia-titolo">{v.titolo}</h3>
+                  {v.testo && (
+                    <div class="fascia-dettaglio">
+                      <p class="fascia-riga">{v.testo}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </section>
   )
 }
 
 <script>
-  // Il valore al centro dello schermo accende la foto i % n.
-  for (const sezione of document.querySelectorAll<HTMLElement>('.valori')) {
-    const figure = [...sezione.querySelectorAll<HTMLElement>('.valori-figura')];
-    const valori = [...sezione.querySelectorAll<HTMLElement>('.valore')];
-    if (figure.length < 2 || valori.length === 0 || !('IntersectionObserver' in window)) continue;
-
-    const accendi = (i: number): void => {
-      const scelta = i % figure.length;
-      figure.forEach((f, k) => f.classList.toggle('attiva', k === scelta));
-    };
-    const io = new IntersectionObserver(
-      (voci) => {
-        for (const voce of voci) {
-          if (voce.isIntersecting) accendi(Number((voce.target as HTMLElement).dataset.valore ?? 0));
-        }
-      },
-      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
-    );
-    for (const v of valori) io.observe(v);
+  // Mobile: la fascia che passa il centro dello schermo si apre.
+  const mobile = window.matchMedia('(max-width: 63.98rem)');
+  if (mobile.matches && 'IntersectionObserver' in window) {
+    for (const sezione of document.querySelectorAll<HTMLElement>('[data-valori]')) {
+      const fasce = [...sezione.querySelectorAll<HTMLElement>('.fascia')];
+      const io = new IntersectionObserver(
+        (voci) => {
+          for (const voce of voci) {
+            if (!voce.isIntersecting) continue;
+            const i = Number((voce.target as HTMLElement).dataset.fascia ?? 0);
+            fasce.forEach((f, k) => f.classList.toggle('attiva', k === i));
+          }
+        },
+        { rootMargin: '-40% 0px -40% 0px', threshold: 0 },
+      );
+      for (const f of fasce) io.observe(f);
+    }
   }
 </script>
 
 <style>
   .valori {
-    padding-block: var(--spacing-section);
+    padding-block: var(--spacing-section-sm) var(--spacing-section);
   }
 
-  .valori-griglia {
-    display: grid;
-    gap: 2.5rem;
+  .valori-testa {
+    margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
   }
 
-  .valori-testo .eyebrow {
-    margin: 0 0 1.5rem;
-  }
-
-  .valori-lista {
-    display: grid;
-    gap: clamp(2.5rem, 6vh, 4rem);
+  .valori-testa .eyebrow {
     margin: 0;
+  }
+
+  .fasce {
+    display: grid;
+    gap: 0.75rem;
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    margin: 0 auto;
     padding: 0;
     list-style: none;
   }
 
-  .valore-numero {
-    margin: 0 0 0.5rem;
+  .fascia {
+    outline: none;
   }
 
-  .valore-titolo {
-    margin: 0;
-    font-size: var(--text-display);
-    line-height: var(--text-display--line-height);
-    font-weight: 400;
+  .fascia:focus-visible .fascia-interno {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
   }
 
-  .valore-testo {
-    max-width: 30rem;
-    margin: 0.75rem 0 0;
-    color: var(--color-grigio-caldo);
-  }
-
-  /* Mobile: una foto sola, in testa, 4:5. */
-  .valori-foto {
-    order: -1;
-  }
-
-  .valori-sticky {
+  .fascia-interno {
     position: relative;
+    height: 4.5rem;
     overflow: hidden;
-    border-radius: 16px;
-    aspect-ratio: 4 / 5;
+    border-radius: 4px;
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+    isolation: isolate;
+    transition: height 0.7s var(--ease-gaia);
   }
 
-  .valori-figura {
+  .fascia-interno :global(picture),
+  .fascia-interno :global(.fascia-img) {
     position: absolute;
     inset: 0;
-    margin: 0;
-    opacity: 0;
-    transition: opacity 0.9s var(--ease-gaia);
-  }
-
-  .valori-figura.attiva {
-    opacity: 1;
-  }
-
-  .valori-figura :global(.valori-img) {
+    display: block;
     width: 100%;
     height: 100%;
-    max-width: none;
+    max-width: none !important;
     object-fit: cover;
   }
 
-  @media (max-width: 63.98rem) {
-    .valori-figura:not(:first-child) {
-      display: none;
-    }
+  .fascia-interno :global(.fascia-img) {
+    transition: transform 1.2s var(--ease-gaia);
   }
 
-  /* Desktop: testo a sinistra, foto sticky a destra. */
+  .fascia-velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
+      linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+    transition: opacity 0.5s var(--ease-gaia);
+  }
+
+  /* Chiusa: la striscia mostra solo numero e titolo, su fondo scuro. */
+  .fascia:not(.attiva) .fascia-velo {
+    opacity: 1;
+    background: rgb(27 22 17 / 0.72);
+  }
+
+  .fascia-testo {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: grid;
+    gap: 0.4rem;
+    padding: 0 clamp(1.25rem, 2.5vw, 2.25rem) clamp(1.1rem, 3vh, 2rem);
+  }
+
+  .fascia-numero {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-caption);
+    letter-spacing: 0.08em;
+  }
+
+  .fascia-titolo {
+    margin: 0;
+    font-size: var(--text-title);
+    font-weight: 320;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    transition: font-size 0.6s var(--ease-gaia);
+  }
+
+  /* Il testo si apre con la fascia, come il dettaglio dei pannelli. */
+  .fascia-dettaglio {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.6s var(--ease-gaia),
+      opacity 0.45s var(--ease-gaia);
+  }
+
+  .fascia-dettaglio > * {
+    min-height: 0;
+  }
+
+  .fascia-riga {
+    max-width: 32rem;
+    margin: 0.3rem 0 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    opacity: 0.92;
+  }
+
+  .fascia.attiva .fascia-interno {
+    height: min(70vh, 28rem);
+  }
+
+  .fascia.attiva .fascia-titolo {
+    font-size: var(--text-display);
+  }
+
+  .fascia.attiva .fascia-dettaglio {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition-delay: 0.15s;
+  }
+
+  .fascia.attiva :global(.fascia-img) {
+    transform: scale(1.04);
+  }
+
+  /* — Desktop: sezione a uno schermo, le fasce si spartiscono l'altezza — */
   @media (min-width: 64rem) {
-    .valori-griglia {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-      gap: clamp(3rem, 6vw, 6rem);
-      align-items: start;
-    }
-
-    /* La colonna deve essere alta quanto la riga, altrimenti lo sticky
-       non ha spazio in cui restare fermo. */
-    .valori-foto {
-      order: 0;
-      align-self: stretch;
-    }
-
-    .valori-lista {
-      gap: 0;
-    }
-
-    .valore {
+    .valori {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 70vh;
+      height: 100svh;
+      min-height: 44rem;
+      padding-block: var(--altezza-header, 146px) 2rem;
     }
 
-    .valori-sticky {
-      position: sticky;
-      top: calc(var(--altezza-header, 146px) * 0.6);
-      height: calc(100vh - var(--altezza-header, 146px) * 0.6 - 2rem);
-      aspect-ratio: auto;
+    .fasce {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      gap: 0.75rem;
+    }
+
+    .fascia {
+      flex: 1 1 0;
+      min-height: 0;
+      transition: flex-grow 0.7s var(--ease-gaia);
+    }
+
+    .fascia-interno,
+    .fascia.attiva .fascia-interno {
+      height: 100%;
+      transition: none;
+    }
+
+    .fascia.attiva {
+      flex-grow: 3.2;
+    }
+
+    .fascia-riga {
+      max-width: 40rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .valori-figura {
+    .fascia,
+    .fascia-interno,
+    .fascia-dettaglio,
+    .fascia-velo,
+    .fascia-titolo,
+    .fascia-interno :global(.fascia-img) {
       transition: none;
+    }
+
+    /* Tutte aperte uguali, senza animazione. */
+    .fascia-interno,
+    .fascia.attiva .fascia-interno {
+      height: min(60vh, 24rem);
+    }
+
+    .fascia-dettaglio,
+    .fascia.attiva .fascia-dettaglio {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .fascia:not(.attiva) .fascia-velo {
+      background:
+        linear-gradient(180deg, rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.38) 120px, rgb(0 0 0 / 0) 240px),
+        linear-gradient(0deg, rgb(27 22 17 / 0.8) 0%, rgb(27 22 17 / 0.4) 50%, rgb(27 22 17 / 0.15) 100%);
+    }
+
+    .fascia.attiva :global(.fascia-img) {
+      transform: none;
+    }
+
+    @media (min-width: 64rem) {
+      .valori {
+        height: auto;
+        padding-top: var(--spacing-section-sm);
+      }
+
+      .fascia,
+      .fascia.attiva {
+        flex: 0 0 auto;
+      }
+
+      .fascia-interno,
+      .fascia.attiva .fascia-interno {
+        height: min(50vh, 20rem);
+      }
     }
   }
 </style>
