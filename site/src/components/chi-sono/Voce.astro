@@ -1,17 +1,23 @@
 ---
 /**
- * Chi sono — 2. La sua voce (avorio), split: da una parte una foto grande
- * di Gaia al lavoro, sticky; dall'altra il testo della pagina, sempre
- * pienamente leggibile, con un reveal discreto per paragrafo
- * (data-reveal="alto" di motion.ts, a cascata). Una seconda foto più
- * piccola sta in sovrapposizione sulla grande e scorre a velocità
- * diversa ([data-parallasse]). Il primo paragrafo è in corpo grande, gli
- * altri in lead; chiude la firma «Gaia» in corsivo.
+ * Chi sono — 2. La sua voce (avorio), split: da una parte le foto di
+ * Gaia al lavoro, dall'altra il testo della pagina, sempre pienamente
+ * leggibile, con un reveal discreto per paragrafo (data-reveal="alto" di
+ * motion.ts, a cascata). Il primo paragrafo è in corpo grande, gli altri
+ * in lead; sotto, la firma «Gaia» in corsivo.
  *
- * Foto: highlight «chi-sono» (la grande è quella dopo l'apertura, la
- * piccola la successiva). Sotto i 64rem: foto grande con la piccola
- * sovrapposta, poi il testo. Senza JS o con reduced-motion: tutto fermo e
- * visibile.
+ * Desktop: i due blocchi hanno la stessa altezza. La colonna delle foto si
+ * allunga quanto il testo (grid stretch): la foto grande parte all'altezza
+ * della prima riga, la piccola (bordo avorio, ombra morbida) finisce
+ * all'altezza dell'ultima riga dell'ultimo paragrafo; text-box-trim toglie
+ * la mezza interlinea in cima e in fondo, così i bordi coincidono. La
+ * piccola ha una parallasse leggera (±5%), allineata a metà del passaggio.
+ *
+ * Mobile: foto grande 4:5, la piccola dentro i margini, sovrapposta in
+ * basso a destra (sporge di circa il 15%), poi il testo.
+ *
+ * Foto: highlight «chi-sono» (la grande e la piccola le sceglie
+ * AboutPage). Senza JS o con reduced-motion: tutto fermo e visibile.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -35,17 +41,15 @@ const [primo, ...altri] = paragrafi;
     <section id="voce" class="voce" data-theme="light">
       <div class="container-gaia voce-griglia">
         {fotoGrande && (
-          <div class="voce-foto">
-            <div class="voce-sticky">
-              <figure class="voce-figura" data-reveal="maschera">
-                <Picture data={fotoGrande} cap={false} class="voce-img" />
+          <div class:list={['voce-foto', { 'voce-foto--sola': !fotoPiccola }]}>
+            <figure class="voce-figura" data-reveal="maschera">
+              <Picture data={fotoGrande} cap={false} class="voce-img" />
+            </figure>
+            {fotoPiccola && (
+              <figure class="voce-figura-piccola" data-parallasse="5 -5">
+                <Picture data={fotoPiccola} cap={false} class="voce-img" />
               </figure>
-              {fotoPiccola && (
-                <figure class="voce-figura-piccola" data-parallasse="14 -14">
-                  <Picture data={fotoPiccola} cap={false} class="voce-img" />
-                </figure>
-              )}
-            </div>
+            )}
           </div>
         )}
 
@@ -58,10 +62,11 @@ const [primo, ...altri] = paragrafi;
               {p}
             </p>
           ))}
-          <p class="font-display voce-firma" data-reveal="alto" aria-hidden="true">
-            {t('cta.firma')}
-          </p>
         </div>
+
+        <p class="font-display voce-firma" data-reveal="alto" aria-hidden="true">
+          {t('cta.firma')}
+        </p>
       </div>
     </section>
   )
@@ -77,16 +82,14 @@ const [primo, ...altri] = paragrafi;
     gap: clamp(2.5rem, 6vh, 4rem);
   }
 
-  /* — Foto grande 4:5 con la piccola sovrapposta in basso a destra — */
-  .voce-sticky {
-    position: relative;
+  .voce-figura,
+  .voce-figura-piccola {
+    margin: 0;
+    overflow: hidden;
   }
 
   .voce-figura {
-    margin: 0;
-    overflow: hidden;
     border-radius: 16px;
-    aspect-ratio: 4 / 5;
   }
 
   .voce-figura :global(picture),
@@ -100,26 +103,27 @@ const [primo, ...altri] = paragrafi;
     object-fit: cover;
   }
 
+  /* La piccola si stacca dalla grande: cornice avorio e ombra morbida. */
   .voce-figura-piccola {
-    position: absolute;
-    right: -6%;
-    bottom: -10%;
-    width: 42%;
-    margin: 0;
-    overflow: hidden;
-    border-radius: 12px;
-    aspect-ratio: 3 / 4;
-    box-shadow: 0 24px 60px rgb(27 22 17 / 0.22);
+    border: 9px solid var(--color-bianco-caldo);
+    border-radius: 14px;
+    box-shadow:
+      0 2px 6px rgb(27 22 17 / 0.08),
+      0 24px 56px rgb(27 22 17 / 0.2);
   }
 
-  /* — Testo: primo paragrafo grande, gli altri in lead, firma — */
+  .voce-figura-piccola :global(.voce-img) {
+    border-radius: 6px;
+  }
+
+  /* — Testo — */
   .voce-testo {
     max-width: 36rem;
   }
 
   .voce-primo {
     margin: 0 0 1.25rem;
-    font-size: clamp(1.625rem, 1.15rem + 1.7vw, 2.5rem);
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem);
     line-height: 1.25;
     font-weight: 400;
     text-wrap: pretty;
@@ -130,40 +134,96 @@ const [primo, ...altri] = paragrafi;
     color: var(--color-grigio-caldo);
   }
 
+  .voce-testo > :last-child {
+    margin-bottom: 0;
+  }
+
   .voce-firma {
-    margin: 1.5rem 0 0;
+    margin: 0;
     font-size: 2.25rem;
     font-style: italic;
     color: var(--color-bordeaux);
   }
 
+  /* — Mobile: grande 4:5, piccola dentro i margini in basso a destra — */
   @media (max-width: 63.98rem) {
-    /* Spazio per la foto piccola che sporge sotto. */
     .voce-foto {
-      padding-bottom: 10%;
+      position: relative;
+      /* Spazio per la parte della piccola che sporge sotto la grande. */
+      padding-bottom: 9%;
+    }
+
+    .voce-figura {
+      aspect-ratio: 4 / 5;
+    }
+
+    .voce-figura-piccola {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0;
+      width: 42%;
+      aspect-ratio: 3 / 4;
+      border-width: 7px;
+    }
+
+    .voce-foto--sola {
+      padding-bottom: 0;
     }
   }
 
+  /* — Desktop: foto e testo della stessa altezza — */
   @media (min-width: 64rem) {
     .voce-griglia {
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-      gap: clamp(3rem, 7vw, 7rem);
-      align-items: start;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'foto testo'
+        '. firma';
+      column-gap: clamp(3rem, 7vw, 7rem);
+      row-gap: 1.75rem;
+      align-items: stretch;
     }
 
-    /* La colonna si allunga quanto la riga, così lo sticky ha spazio. */
     .voce-foto {
-      align-self: stretch;
-      padding-bottom: 8%;
-    }
-
-    .voce-sticky {
-      position: sticky;
-      top: calc(var(--altezza-header, 146px) * 0.7);
+      grid-area: foto;
+      position: relative;
+      min-height: 32rem;
     }
 
     .voce-testo {
-      padding-top: clamp(1rem, 6vh, 4rem);
+      grid-area: testo;
+      align-self: start;
+    }
+
+    .voce-firma {
+      grid-area: firma;
+    }
+
+    /* Prima riga e ultima riga a filo dei bordi delle foto. */
+    .voce-primo {
+      text-box: trim-start cap alphabetic;
+    }
+
+    .voce-testo > :last-child {
+      text-box: trim-end cap alphabetic;
+    }
+
+    /* La grande occupa la colonna dall'alto, lasciando sotto lo spazio
+       in cui la piccola sporge; la piccola finisce in fondo alla colonna. */
+    .voce-figura {
+      position: absolute;
+      inset: 0 14% 16% 0;
+    }
+
+    .voce-figura-piccola {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 42%;
+      height: 46%;
+    }
+
+    .voce-foto--sola .voce-figura {
+      inset: 0;
     }
   }
 </style>
