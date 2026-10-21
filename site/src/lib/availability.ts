@@ -144,10 +144,16 @@ export function existsIn(key: RouteKey, lang: Lang): boolean {
 }
 
 /**
- * La voce sta nel menu principale? Oggi coincide con existsIn (la regola
- * «almeno due eventi» del giro 11 è stata tolta: basta uno pubblicato);
- * resta il punto unico dove aggiungere regole solo di menu.
+ * La voce sta nel menu principale? Come existsIn, con una regola in più:
+ * «I miei eventi» compare solo con almeno un evento pubblicato in quella
+ * lingua. Serve perché gli indici italiani esistono sempre (withDefault:
+ * /eventi/ è un file statico e viene generato anche vuoto), quindi
+ * existsIn da solo metterebbe in menu una pagina senza eventi.
  */
 export function inMenu(key: RouteKey, lang: Lang): boolean {
-  return existsIn(key, lang);
+  if (!existsIn(key, lang)) return false;
+  if (key === 'stories') {
+    return getStories().some((item) => isPublishable(item, lang, STORY_FIELDS));
+  }
+  return true;
 }

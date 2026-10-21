@@ -832,8 +832,12 @@ Fatto:
   - **Menu**: Chi sono · Servizi · Luoghi · I miei eventi · Dicono di me ·
     Magazine + Preventivo (EN: About · Services · Destinations · My events
     · Kind words · Magazine + Enquire). Filtrato con `inMenu()`
-    (availability.ts), oggi = existsIn (la regola «≥ 2» è stata tolta:
-    basta un evento pubblicato). Contatti, Partner e FAQ solo nel footer.
+    (availability.ts): existsIn più «I miei eventi» solo con ≥ 1 evento
+    pubblicato nella lingua — necessario perché gli indici IT esistono
+    sempre (`/eventi/` è un file statico, generato anche vuoto) e con
+    il solo existsIn la voce compariva su una pagina senza eventi
+    (successo sullo staging il 21/10). Contatti, Partner e FAQ solo nel
+    footer.
   - **Rinomine** (routes.ts, le chiavi restano): blog → `/magazine/` ↔
     `/en/magazine/`, stories → `/eventi/` ↔ `/en/events/` («I miei
     eventi» / «My events»), reviews EN → `/en/kind-words/`. File in
