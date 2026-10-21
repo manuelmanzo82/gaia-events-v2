@@ -1,0 +1,112 @@
+---
+/**
+ * Servizi — 7. Non solo matrimoni: il blocco «cta» della pagina, fascia
+ * bordeaux profondo con la foto (media_id del blocco) e il testo. Il link
+ * porta a «I miei eventi» filtrati per tipo (?tipo=feste|aziendali) se ci
+ * sono eventi pubblicati di quel tipo, altrimenti al preventivatore.
+ */
+import type { PictureData } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  titolo: string;
+  testo: string;
+  foto: PictureData | null;
+  link: { href: string; etichetta: string } | null;
+}
+
+const { titolo, testo, foto, link } = Astro.props;
+---
+
+{
+  titolo && (
+    <section
+      class:list={['sv-oltre', { 'sv-oltre--senza-foto': !foto }]}
+      data-theme="dark"
+      aria-labelledby="titolo-oltre"
+    >
+      <div class="sv-oltre-griglia">
+        {foto && (
+          <figure class="sv-oltre-foto" data-apri>
+            <Picture data={foto} cap={false} class="sv-oltre-img" />
+          </figure>
+        )}
+        <div class="sv-oltre-testo">
+          <h2 id="titolo-oltre" class="font-display sv-oltre-titolo" data-reveal="righe">
+            {titolo}
+          </h2>
+          {testo && <p class="text-lead sv-oltre-frase">{testo}</p>}
+          {link && (
+            <p class="sv-oltre-azione">
+              <a class="btn btn--pieno" href={link.href}>
+                {link.etichetta}
+              </a>
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .sv-oltre {
+    padding-block: var(--spacing-section);
+    background: var(--color-bordeaux-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .sv-oltre-griglia {
+    display: grid;
+    gap: 2.5rem;
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  .sv-oltre-foto {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4 / 5;
+  }
+
+  .sv-oltre-foto :global(picture),
+  .sv-oltre-foto :global(.sv-oltre-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .sv-oltre-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .sv-oltre-frase {
+    max-width: 30rem;
+    margin: 1.25rem 0 0;
+    color: var(--color-velato-su-notte);
+  }
+
+  .sv-oltre-azione {
+    margin: 2rem 0 0;
+  }
+
+  @media (min-width: 64rem) {
+    .sv-oltre-griglia {
+      grid-template-columns: min(36vw, 480px) minmax(0, 1fr);
+      gap: clamp(3rem, 7vw, 7rem);
+    }
+
+    .sv-oltre--senza-foto .sv-oltre-griglia {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

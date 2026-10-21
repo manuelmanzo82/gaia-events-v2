@@ -20,8 +20,8 @@ import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
-import { getHero, getPage, getServices, getSettings, isPublishable, text } from '../../lib/content';
+import { SERVICE_FIELDS, STORY_FIELDS, existsIn, inMenu, langsFor } from '../../lib/availability';
+import { getHero, getPage, getServices, getSettings, getStories, isPublishable, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
@@ -30,6 +30,7 @@ import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
 import Destination from '../servizi/Destination.astro';
 import Metodo from '../servizi/Metodo.astro';
+import NonSoloMatrimoni from '../servizi/NonSoloMatrimoni.astro';
 import Partner from '../servizi/Partner.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
@@ -79,6 +80,23 @@ const capitoli = servizi.filter((s) => s.slug !== 'destination');
 const destination = servizi.find((s) => s.slug === 'destination') ?? null;
 const numeroDestination = String(servizi.indexOf(destination!) + 1).padStart(2, '0');
 
+// Non solo matrimoni: verso «I miei eventi» filtrati per tipo se ci sono
+// feste o eventi aziendali pubblicati in questa lingua, altrimenti verso
+// il preventivatore.
+const oltre = blocco('cta');
+const tipiPubblicati = new Set(
+  getStories()
+    .filter((s) => isPublishable(s, lang, STORY_FIELDS))
+    .map((s) => s.type),
+);
+const linkOltre = inMenu('stories', lang) && tipiPubblicati.has('festa')
+  ? { href: `${path('stories', lang)}?tipo=feste`, etichetta: t('servizi.vediFeste') }
+  : inMenu('stories', lang) && tipiPubblicati.has('aziendale')
+    ? { href: `${path('stories', lang)}?tipo=aziendali`, etichetta: t('servizi.vediAziendali') }
+    : existsIn('quote', lang)
+      ? { href: path('quote', lang), etichetta: t('cta.quote') }
+      : null;
+
 const meta = buildMeta({
   lang,
   routeKey: 'services',
@@ -121,6 +139,13 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
   <Metodo lang={lang} titolo={text(processo?.title, lang)} passi={passi} />
 
   <Partner lang={lang} titolo={text(settings.servizi?.partners?.title, lang) || t('servizi.tuttiPartner')} />
+
+  <NonSoloMatrimoni
+    titolo={text(oltre?.title, lang)}
+    testo={text(oltre?.text, lang)}
+    foto={picture(oltre?.image ?? null, lang, '(min-width: 64rem) min(36vw, 480px), 92vw')}
+    link={linkOltre}
+  />
 </BaseLayout>
 
 <script>

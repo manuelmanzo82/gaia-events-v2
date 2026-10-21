@@ -125,6 +125,11 @@ const crumbs = [
       if (stato) stato.textContent = `${visibili}`;
     };
     for (const b of bottoni) b.addEventListener('click', () => applica(b.dataset.gruppo ?? ''));
+
+    // ?tipo=feste|aziendali|matrimoni (dalla pagina Servizi): filtro già
+    // applicato all'arrivo, se quel gruppo esiste.
+    const tipo = new URLSearchParams(window.location.search).get('tipo') ?? '';
+    if (tipo && bottoni.some((b) => b.dataset.gruppo === tipo)) applica(tipo);
   }
 </script>
 
