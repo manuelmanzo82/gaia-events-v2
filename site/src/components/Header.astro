@@ -200,6 +200,36 @@ const preventivo = existsIn('quote', lang);
     color: var(--color-avorio-su-notte);
   }
 
+  /* Sfumatura fissa in cima allo schermo (giro 10, chiusura): c'è solo
+     quando il header è sopra una sezione con foto / scura. 150 px, da
+     nero al 30% a trasparente, nessun bordo né fondo pieno; sta sotto logo
+     e menu (z-index negativo nel contesto del header, che è fisso con
+     z-index 50) e sopra i contenuti; pointer-events: none. Compare e
+     sparisce in 300 ms col cambio di tema; con reduced-motion è
+     istantanea. Stessa logica su mobile. */
+  .site-header::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    height: 150px;
+    background: linear-gradient(180deg, rgb(0 0 0 / 0.3) 0%, rgb(0 0 0 / 0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-gaia);
+    pointer-events: none;
+  }
+
+  .site-header[data-header-theme='dark']::before {
+    opacity: 1;
+  }
+
+  /* A pannello mobile aperto il header è sull'avorio del pannello. */
+  .site-header.menu-aperto::before {
+    opacity: 0;
+  }
+
   /* Sopra una foto: ombra testuale appena percettibile, su testo e logo. */
   .site-header[data-header-foto='1'] {
     text-shadow: 0 1px 2px rgb(27 22 17 / 0.3), 0 0 14px rgb(27 22 17 / 0.2);
@@ -571,6 +601,7 @@ const preventivo = existsIn('quote', lang);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .site-header::before,
     .site-header,
     .menu,
     .menu-voci a::after,
