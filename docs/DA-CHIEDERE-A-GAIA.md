@@ -165,6 +165,28 @@ tre ha contenuti.
   di ogni azienda** a usare il logo sul sito; senza, si pubblica solo il
   nome o nulla.
 
+### 12. I tre eventi di prova in «I miei eventi» (21/10/2026)
+
+Sullo staging ci sono tre eventi pubblicati, creati da noi con le foto già
+in libreria raggruppate per cartella d'origine, così la pagina e la voce di
+menu si vedono. Titoli provvisori e generici, **nessun nome né location**:
+
+| Evento (staging) | Cartella d'origine | Foto |
+|---|---|---|
+| Un matrimonio in una villa storica | FOTO E VIDEO 2026 / Benedetta e Tommaso | copertina + 12 |
+| Un matrimonio in un castello sul mare | FOTO E VIDEO 2026 / Vittoria e Davide | copertina + 12 |
+| Un matrimonio tra edera e affreschi | FOTO 2025 STAGIONE / Flavia e Gabriele | copertina + 7 (la cartella non ne ha altre) |
+
+Per ognuno servono da Gaia: **i nomi degli sposi** (solo con il loro
+consenso a comparire sul sito), **la location** (nome vero, e se va
+collegata a un Luogo), **la data**, **il racconto vero** al posto della
+bozza segnata «[Bozza — testo da Gaia]», e **il fotografo** da collegare
+tra i Partner (i file di Benedetta e Tommaso e di Vittoria e Davide non
+portano il nome dello studio: non sappiamo se sono di Vilella, New Light o
+Grasso). Le altre cartelle (Yael e Simone, Alexa e Roberto, Giorgia e
+Mirko, John e Valeria, Michelle e Paolo) hanno 5–7 foto l'una, quasi tutte
+già in home: si possono aggiungere come eventi quando arrivano più foto.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database
