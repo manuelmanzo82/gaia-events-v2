@@ -4,7 +4,6 @@ import {
   availableLangs,
   getClients,
   getDestinationWedding,
-  getEvents,
   getFaqs,
   getLuoghiFlat,
   getPage,
@@ -28,7 +27,7 @@ import type { Event, Faq, Luogo, Post, Review, Service, Story } from './types';
  * La regola è una sola, applicata a due livelli:
  *
  *  1. una PAGINA esiste in una lingua se i suoi campi essenziali sono tradotti;
- *  2. un ELENCO (servizi, portfolio, recensioni, blog, FAQ) esiste in una
+ *  2. un ELENCO (servizi, eventi, recensioni, blog, FAQ) esiste in una
  *     lingua solo se ha almeno un elemento tradotto in quella lingua.
  *
  * Il secondo punto evita le pagine indice vuote: finché nessun articolo ha la
@@ -42,7 +41,6 @@ const PAGE_REQUIREMENTS: Partial<Record<RouteKey, string[]>> = {
   privacy: ['title', 'body'],
   cookie: ['title', 'body'],
   services: ['title'],
-  portfolio: ['title'],
   reviews: ['title'],
   blog: ['title'],
   faq: ['title'],
@@ -57,6 +55,7 @@ const PAGE_REQUIREMENTS: Partial<Record<RouteKey, string[]>> = {
  * sitemap, home. Quando indice e dettaglio usavano criteri diversi, l'indice
  * inglese finiva per linkare una scheda che il build non aveva generato.
  */
+/** Portfolio (tabella events): la pagina è stata tolta (giro 11, 301 su /eventi/); i campi restano per il DROP futuro. */
 export const EVENT_FIELDS: Array<keyof Event> = ['title', 'excerpt', 'description'];
 export const POST_FIELDS: Array<keyof Post> = ['title', 'slug', 'body'];
 export const SERVICE_FIELDS: Array<keyof Service> = ['title', 'description'];
@@ -66,7 +65,7 @@ export const LUOGO_FIELDS: Array<keyof Luogo> = ['nome', 'slug', 'testo'];
 export const STORY_FIELDS: Array<keyof Story> = ['title', 'slug', 'body'];
 
 /** Pagine che elencano altri contenuti: senza elementi tradotti non esistono. */
-const INDEX_KEYS = ['services', 'portfolio', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const;
+const INDEX_KEYS = ['services', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const;
 
 type IndexKey = (typeof INDEX_KEYS)[number];
 
@@ -79,8 +78,6 @@ function hasItems(key: IndexKey, lang: Lang): boolean {
   switch (key) {
     case 'services':
       return getServices().some((item) => isPublishable(item, lang, SERVICE_FIELDS));
-    case 'portfolio':
-      return getEvents().some((item) => isPublishable(item, lang, EVENT_FIELDS));
     case 'reviews':
       // Dicono di me (giro 11): basta uno dei tre blocchi. Stampa e
       // clienti non hanno campi tradotti, quindi contano in ogni lingua.

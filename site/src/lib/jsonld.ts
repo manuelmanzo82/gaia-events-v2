@@ -4,7 +4,6 @@ import { path, url } from '../i18n/routes';
 import { text } from './content';
 import { imageAbsoluteUrl } from './images';
 import type {
-  Event,
   Faq,
   Image,
   LocationVenue,
@@ -85,30 +84,6 @@ export function service(item: Service, lang: Lang): Thing {
     provider: businessRef,
     areaServed: { '@type': 'Country', name: 'Italia' },
     url: url('services', lang) + `#${item.slug}`,
-    inLanguage: HTML_LANG[lang],
-  };
-}
-
-export function event(item: Event, lang: Lang): Thing {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: text(item.title, lang),
-    description: text(item.excerpt, lang),
-    startDate: item.date,
-    eventStatus: 'https://schema.org/EventScheduled',
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    location: {
-      '@type': 'Place',
-      name: text(item.location, lang),
-      address: {
-        '@type': 'PostalAddress',
-        addressCountry: BUSINESS.country,
-      },
-    },
-    image: imageAbsoluteUrl(item.cover, SITE_URL) ?? undefined,
-    organizer: businessRef,
-    url: url('portfolio', lang, item.slug),
     inLanguage: HTML_LANG[lang],
   };
 }

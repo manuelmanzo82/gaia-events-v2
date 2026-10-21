@@ -39,7 +39,6 @@ const STATIC_KEYS: RouteKey[] = [
   'home',
   'about',
   'services',
-  'portfolio',
   'reviews',
   'blog',
   'faq',
@@ -61,13 +60,6 @@ function entries(): Entry[] {
     if (langs.length === 0) continue;
 
     list.push({ key, langs, lastmod: getPage(key)?.updatedAt });
-  }
-
-  for (const event of getEvents()) {
-    const langs = availableLangs(event, EVENT_FIELDS);
-    if (langs.length > 0) {
-      list.push({ key: 'portfolio', slug: event.slug, langs, lastmod: event.date });
-    }
   }
 
   for (const post of getPosts()) {

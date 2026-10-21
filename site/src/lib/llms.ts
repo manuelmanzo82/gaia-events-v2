@@ -1,9 +1,8 @@
 import { BUSINESS, DEFAULT_LANG, SITE_URL, type Lang } from '../config/site';
 import { url } from '../i18n/routes';
-import { EVENT_FIELDS, POST_FIELDS, existsIn } from './availability';
+import { POST_FIELDS, existsIn } from './availability';
 import {
   getDestinationWedding,
-  getEvents,
   getFaqs,
   getLocations,
   getLuoghi,
@@ -57,7 +56,7 @@ export function llmsTxt(): string {
   const lines = [...header()];
 
   lines.push('## Pagine', '');
-  for (const key of ['about', 'services', 'portfolio', 'reviews', 'blog', 'faq', 'quote', 'contact'] as const) {
+  for (const key of ['about', 'services', 'stories', 'reviews', 'blog', 'faq', 'quote', 'contact'] as const) {
     const page = getPage(key);
     if (!page || !existsIn(key, lang)) continue;
     const description = text(page.intro, lang) || text(page.metaDescription, lang);
@@ -74,18 +73,6 @@ export function llmsTxt(): string {
     lines.push('## Servizi', '');
     for (const service of services) {
       lines.push(`- ${text(service.title, lang)}: ${text(service.description, lang)}`);
-    }
-    lines.push('');
-  }
-
-  const events = getEvents();
-  if (events.length > 0) {
-    lines.push('## Eventi realizzati', '');
-    for (const event of events) {
-      lines.push(
-        `- [${text(event.title, lang)}](${url('portfolio', lang, event.slug)}): ` +
-          `${text(event.location, lang)}, ${event.date}`,
-      );
     }
     lines.push('');
   }
@@ -150,22 +137,6 @@ export function llmsFullTxt(): string {
         for (const feature of features) lines.push(`- ${feature}`);
         lines.push('');
       }
-    }
-  }
-
-  const events = getEvents().filter((event) => isPublishable(event, lang, EVENT_FIELDS));
-  if (events.length > 0) {
-    lines.push('## Eventi realizzati', '');
-    for (const event of events) {
-      lines.push(
-        `### ${text(event.title, lang)}`,
-        '',
-        `URL: ${url('portfolio', lang, event.slug)}`,
-        `Location: ${text(event.location, lang)} · Data: ${event.date} · Categoria: ${text(event.category, lang)}`,
-        '',
-        stripHtml(text(event.description, lang)),
-        '',
-      );
     }
   }
 

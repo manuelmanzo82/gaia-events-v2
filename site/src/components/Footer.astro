@@ -9,15 +9,19 @@ import LangSwitcher from './LangSwitcher.astro';
 import LogoGaia from './LogoGaia.astro';
 
 /**
- * Footer su fondo notte: logo grande in avorio e una frase breve (la
- * tagline delle impostazioni); quattro colonne — Contatti, Esplora (tutte
- * le pagine, comprese quelle tolte dal menu), Social, CTA — e la riga
- * legale con © anno, P.IVA (impostazione legal.piva: finché manca c'è il
- * segnaposto), Privacy, Cookie e lingua.
+ * Footer su fondo notte (giro 11): logo grande in avorio e una frase breve
+ * (la tagline delle impostazioni); tre colonne uguali — Contatti (email,
+ * WhatsApp, indirizzo e, sotto, Seguici con Instagram e Facebook),
+ * Esplora (tutte le pagine su due sottocolonne, nessuna voce a capo),
+ * Preventivo (testo + bottone) — e la riga legale con © anno, P.IVA
+ * (impostazione legal.piva: finché manca c'è il segnaposto), Privacy,
+ * Cookie e lingua.
  *
  * Come nel menu: niente link verso pagine che in questa lingua non
- * esistono (existsIn). Su mobile le colonne si impilano e ogni link ha
- * almeno 44 px di altezza.
+ * esistono (existsIn). Su mobile le colonne si impilano nello stesso
+ * ordine e ogni link ha almeno 44 px di altezza. Hover: stessa
+ * sottolineatura sottile per tutte le voci, anche su più righe (va sul
+ * testo, non su un ::after assoluto).
  */
 interface Props {
   lang: Lang;
@@ -36,16 +40,16 @@ const indirizzo = text(settings.contact.address, lang) || `${BUSINESS.street}, $
 const tagline = text(settings.tagline, lang);
 const piva = text(settings.legal.piva, lang);
 
+// Stesso ordine del menu, poi le pagine che stanno solo qui.
 const ESPLORA: RouteKey[] = [
   'about',
   'services',
   'places',
   'stories',
-  'destinationWedding',
-  'portfolio',
   'reviews',
-  'partners',
   'blog',
+  'destinationWedding',
+  'partners',
   'faq',
   'contact',
 ];
@@ -54,15 +58,15 @@ const etichetta: Record<string, string> = {
   services: t('nav.services'),
   places: t('nav.places'),
   stories: t('nav.stories'),
-  destinationWedding: t('nav.destinationWedding'),
-  portfolio: t('nav.portfolio'),
   reviews: t('nav.reviews'),
-  partners: t('nav.partners'),
   blog: t('nav.blog'),
+  destinationWedding: t('nav.destinationWedding'),
+  partners: t('nav.partners'),
   faq: t('nav.faq'),
   contact: t('nav.contact'),
 };
 const esplora = ESPLORA.filter((key) => existsIn(key, lang));
+const righe = Math.ceil(esplora.length / 2);
 const preventivo = existsIn('quote', lang) ? 'quote' : existsIn('contact', lang) ? 'contact' : null;
 const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(key, lang));
 ---
@@ -80,36 +84,52 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
       <section class="footer-colonna">
         <h2 class="footer-titolo">{t('footer.contacts')}</h2>
         <ul class="footer-lista">
-          <li><a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a></li>
-          <li><a href={whatsappHref} rel="noopener">{t('cta.whatsapp')}</a></li>
+          <li>
+            <a href={`mailto:${BUSINESS.email}`} class="footer-icona">
+              <Icona nome="email" dimensione={18} />
+              <span>{BUSINESS.email}</span>
+            </a>
+          </li>
+          <li>
+            <a href={whatsappHref} rel="noopener" class="footer-icona">
+              <Icona nome="whatsapp" dimensione={18} />
+              <span>{t('cta.whatsapp')}</span>
+            </a>
+          </li>
           <li><span class="footer-indirizzo">{indirizzo}</span></li>
         </ul>
-      </section>
 
-      <nav class="footer-colonna" aria-label={t('footer.explore')}>
-        <h2 class="footer-titolo">{t('footer.explore')}</h2>
-        <ul class="footer-lista footer-lista--due">
-          {esplora.map((key) => <li><a href={path(key, lang)}>{etichetta[key]}</a></li>)}
-        </ul>
-      </nav>
-
-      <section class="footer-colonna">
-        <h2 class="footer-titolo">{t('footer.social')}</h2>
+        <h2 class="footer-titolo footer-titolo--seguici">{t('footer.social')}</h2>
         <ul class="footer-lista">
           <li>
-            <a href={BUSINESS.instagramUrl} rel="noopener me" class="footer-social">
+            <a href={BUSINESS.instagramUrl} rel="noopener me" class="footer-icona">
               <Icona nome="instagram" dimensione={18} />
               <span>Instagram</span>
             </a>
           </li>
           <li>
-            <a href={BUSINESS.facebookUrl} rel="noopener me" class="footer-social">
+            <a href={BUSINESS.facebookUrl} rel="noopener me" class="footer-icona">
               <Icona nome="facebook" dimensione={18} />
               <span>Facebook</span>
             </a>
           </li>
         </ul>
       </section>
+
+      <nav class="footer-colonna" aria-label={t('footer.explore')}>
+        <h2 class="footer-titolo">{t('footer.explore')}</h2>
+        <ul class="footer-lista footer-lista--due" style={`--righe: ${righe}`}>
+          {
+            esplora.map((key) => (
+              <li>
+                <a href={path(key, lang)}>
+                  <span>{etichetta[key]}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
 
       {
         preventivo && (
@@ -196,13 +216,17 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
   }
 
   .footer-titolo {
-    margin: 0 0 1rem;
+    margin: 0 0 0.75rem;
     font-family: var(--font-sans);
     font-size: var(--text-eyebrow);
     font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-oro);
+  }
+
+  .footer-titolo--seguici {
+    margin-top: 1.75rem;
   }
 
   .footer-lista {
@@ -222,39 +246,48 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
     text-decoration: none;
   }
 
-  .footer-lista a {
-    position: relative;
+  /* Hover: sottolineatura sottile sul testo, uguale per tutte le voci
+     e corretta anche quando il testo va a capo. */
+  .footer-lista a span {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color 0.3s var(--ease-gaia);
   }
 
-  .footer-lista a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 8px;
-    width: 100%;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.4s var(--ease-gaia);
+  .footer-lista a:hover span,
+  .footer-lista a:focus-visible span {
+    text-decoration-color: currentColor;
   }
 
-  .footer-lista a:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
+  .footer-icona {
+    gap: 0.6rem;
+  }
+
+  .footer-icona svg {
+    flex: none;
   }
 
   .footer-indirizzo {
     color: var(--color-velato-su-notte);
   }
 
-  .footer-social {
-    gap: 0.6rem;
+  /* Esplora: due sottocolonne riempite in verticale, voci mai a capo. */
+  .footer-lista--due {
+    grid-template-columns: repeat(2, max-content);
+    grid-auto-flow: column;
+    grid-template-rows: repeat(var(--righe, 5), auto);
+    column-gap: 2rem;
+  }
+
+  .footer-lista--due a {
+    white-space: nowrap;
   }
 
   .footer-cta-testo {
     margin: 0 0 1.25rem;
-    max-width: 22rem;
+    max-width: 24rem;
     color: var(--color-velato-su-notte);
   }
 
@@ -302,17 +335,19 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
     color: var(--color-avorio-su-notte);
   }
 
+  /* Tablet: Contatti ed Esplora affiancate, Preventivo sotto a tutta
+     larghezza. */
   @media (min-width: 48rem) {
     .footer-colonne {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .footer-lista--due {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 1.5rem;
+    .footer-cta {
+      grid-column: 1 / -1;
     }
   }
 
+  /* Desktop: tre colonne uguali. */
   @media (min-width: 64rem) {
     .footer-testa {
       grid-template-columns: auto 1fr;
@@ -321,13 +356,17 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
     }
 
     .footer-colonne {
-      grid-template-columns: 1.1fr 1.4fr 0.9fr 1.3fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 3rem;
+    }
+
+    .footer-cta {
+      grid-column: auto;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .footer-lista a::after {
+    .footer-lista a span {
       transition: none;
     }
   }

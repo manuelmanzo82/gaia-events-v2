@@ -1,6 +1,6 @@
 ---
 /**
- * Indici in inglese: servizi, portfolio, recensioni, blog, FAQ.
+ * Indici in inglese: servizi, recensioni, blog, FAQ, luoghi, eventi, partner.
  *
  * Stanno tutti qui, in una rotta dinamica, perché un file statico verrebbe
  * generato comunque. Con getStaticPaths invece la pagina nasce solo se
@@ -15,7 +15,6 @@ import BlogPage from '../../components/pages/BlogPage.astro';
 import FaqPage from '../../components/pages/FaqPage.astro';
 import PartnersPage from '../../components/pages/PartnersPage.astro';
 import PlacesPage from '../../components/pages/PlacesPage.astro';
-import PortfolioPage from '../../components/pages/PortfolioPage.astro';
 import ReviewsPage from '../../components/pages/ReviewsPage.astro';
 import ServicesPage from '../../components/pages/ServicesPage.astro';
 import StoriesPage from '../../components/pages/StoriesPage.astro';
@@ -24,7 +23,6 @@ import { existsIn } from '../../lib/availability';
 
 const INDEXES = [
   'services',
-  'portfolio',
   'reviews',
   'blog',
   'faq',
@@ -37,7 +35,7 @@ export function getStaticPaths() {
   // Stesso elenco di INDEXES: getStaticPaths viene estratta dal modulo e
   // non vede le costanti del frontmatter, quindi l'array va ripetuto.
   return (
-    ['services', 'portfolio', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const
+    ['services', 'reviews', 'blog', 'faq', 'places', 'stories', 'partners'] as const
   )
     .filter((key) => existsIn(key, 'en'))
     .map((key) => ({ params: { section: ROUTES[key].en }, props: { key } }));
@@ -51,7 +49,6 @@ const { key } = Astro.props as Props;
 ---
 
 {key === 'services' && <ServicesPage lang="en" />}
-{key === 'portfolio' && <PortfolioPage lang="en" />}
 {key === 'reviews' && <ReviewsPage lang="en" />}
 {key === 'blog' && <BlogPage lang="en" />}
 {key === 'faq' && <FaqPage lang="en" />}

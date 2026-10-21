@@ -854,6 +854,24 @@ Fatto:
   - Verifica: `menu-centrato.js`, `menu-voci.js`, `dicono-shots.js` nello
     scratchpad (per la pagina servono dati locali di prova nei JSON
     gitignorati; poi si rimettono vuoti).
+  - **Tipo di evento**: `stories.event_type` (matrimonio · unione_civile ·
+    festa · aziendale, migrazione `2026-10-21-eventi-tipo.sql`, export
+    `type`). `/eventi/`: matrimoni e unioni civili prima, poi feste e
+    aziendali; filtri Tutti · Matrimoni · Feste · Aziendali solo con ≥ 2
+    gruppi, `hidden` senza JS (tutti visibili), bottoni `aria-pressed` e
+    conteggio `aria-live`. Tipo come eyebrow in card e dettaglio. La
+    pagina resta un segnaposto (design in fase 3).
+  - **Footer**: tre colonne uguali — Contatti (email e WhatsApp con icona,
+    indirizzo, poi Seguici con Instagram e Facebook), Esplora (due
+    sottocolonne riempite in verticale, `--righe` = ceil(n/2), voci
+    `nowrap`), Preventivo. Hover = sottolineatura 1 px sullo `<span>` del
+    testo (vale anche su più righe). Tablet 48–64rem: due colonne e
+    Preventivo sotto; mobile impilato nello stesso ordine, link ≥ 44 px.
+  - **Portfolio tolto dal sito**: rotte `/portfolio/…` e `/en/portfolio/…`
+    non vengono più generate (chiave `portfolio` via da routes.ts,
+    sitemap, llms, [section]); 301 su `/eventi/` e `/en/events/`. La
+    tabella `events`, il back office «Eventi» e `events.json` restano
+    fino al DROP dedicato (vedi Prossimi passi).
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with

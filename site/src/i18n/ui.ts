@@ -8,7 +8,6 @@ export const UI = {
   'nav.home': { it: 'Home', en: 'Home' },
   'nav.about': { it: 'Chi sono', en: 'About' },
   'nav.services': { it: 'Servizi', en: 'Services' },
-  'nav.portfolio': { it: 'Portfolio', en: 'Portfolio' },
   'nav.reviews': { it: 'Dicono di me', en: 'Kind words' },
   'nav.blog': { it: 'Magazine', en: 'Magazine' },
   'nav.faq': { it: 'FAQ', en: 'FAQ' },

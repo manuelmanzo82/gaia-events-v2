@@ -8,7 +8,6 @@ export const ROUTES = {
   home: { it: '', en: '' },
   about: { it: 'chi-sono', en: 'about' },
   services: { it: 'servizi', en: 'services' },
-  portfolio: { it: 'portfolio', en: 'portfolio' },
   reviews: { it: 'dicono-di-me', en: 'kind-words' },
   // Giro 11: Blog → Magazine e Storie → I miei eventi (301 dai vecchi
   // percorsi nel .htaccess). Le chiavi restano: sono nomi interni, non URL.
@@ -26,9 +25,8 @@ export const ROUTES = {
 
 export type RouteKey = keyof typeof ROUTES;
 
-/** Chiavi delle pagine che hanno un dettaglio con slug (`/portfolio/:slug`). */
+/** Chiavi delle pagine che hanno un dettaglio con slug (`/magazine/:slug`). */
 export const COLLECTION_ROUTES = [
-  'portfolio',
   'blog',
   'stories',
   // 'places' ha due livelli: lo slug passato a path() è già composto,
@@ -40,7 +38,7 @@ export const COLLECTION_ROUTES = [
  * Percorso assoluto interno di una pagina, sempre con slash finale.
  *   path('services', 'it')            → '/servizi/'
  *   path('services', 'en')            → '/en/services/'
- *   path('portfolio', 'it', 'villa')  → '/portfolio/villa/'
+ *   path('stories', 'it', 'villa')    → '/eventi/villa/'
  *   path('home', 'it')                → '/'
  *
  * Lo slash finale non è un vezzo: il build genera directory con index.html

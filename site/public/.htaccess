@@ -51,6 +51,9 @@ ErrorDocument 404 /404.html
     RewriteRule ^en/(stories|weddings)/?$ /en/events/ [R=301,L]
     RewriteRule ^en/(stories|weddings)/(.+)$ /en/events/$2 [R=301,L]
     RewriteRule ^en/reviews/?$ /en/kind-words/ [R=301,L]
+    # Portfolio esce (giro 11): la pagina I miei eventi la sostituisce.
+    RewriteRule ^portfolio(/.*)?$ /eventi/ [R=301,L]
+    RewriteRule ^en/portfolio(/.*)?$ /en/events/ [R=301,L]
 </IfModule>
 
 # ---------------------------------------------------------------------
