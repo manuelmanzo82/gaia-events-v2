@@ -201,6 +201,22 @@ export default function Preventivatore(props: Props): ReactNode {
     } catch {
       /* storage bloccato o dati rovinati: si parte da capo */
     }
+
+    // Servizio già scelto dal link «Chiedi un preventivo per questo» della
+    // pagina Servizi (?servizio=<slug>): vince sullo stato salvato. Gli
+    // inclusi si segnano da soli (inclusiDa). Il parametro si toglie
+    // dall'indirizzo, così un ricaricamento non annulla le scelte fatte dopo.
+    try {
+      const url = new URL(window.location.href);
+      const scelto = url.searchParams.get('servizio');
+      if (scelto && servizi.some((x) => x.slug === scelto)) {
+        setR((prima) => ({ ...prima, services: [scelto], destinationAuto: false }));
+        url.searchParams.delete('servizio');
+        window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+      }
+    } catch {
+      /* indirizzo non leggibile: niente preselezione */
+    }
     setCaricato(true);
   }, []);
 

@@ -1,0 +1,392 @@
+---
+/**
+ * Servizi — 3. Un capitolo per servizio (dal database), destination
+ * esclusa (ha la sua fascia). Ogni capitolo: numero grande, titolo (H2),
+ * sottotitolo, descrizione, «Cosa include», bottone «Chiedi un preventivo
+ * per questo» (preventivatore con ?servizio=<slug>) e due foto
+ * (page_media_id grande, page_media2_id piccola sovrapposta, bordo nel
+ * colore di fondo, come la voce di Chi sono). L'id del capitolo è lo slug:
+ * le card della home linkano #planning ecc.
+ *
+ * Desktop (≥64rem): indice fisso a sinistra (sticky sotto il header) che
+ * evidenzia il capitolo corrente (IntersectionObserver qui sotto); foto
+ * che entrano con una maschera che si apre ([data-apri], scrub in
+ * servizi-effetti.ts); layout alternato (foto a destra, poi a sinistra).
+ * Mobile: niente indice, capitoli impilati con le foto sopra il testo.
+ * Reduced-motion: foto già aperte, nessuna animazione.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import { picture } from '../../lib/images';
+import { text } from '../../lib/content';
+import type { Service } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  servizi: Service[];
+}
+
+const { lang, servizi } = Astro.props;
+const t = useTranslations(lang);
+const preventivo = existsIn('quote', lang);
+
+const capitoli = servizi.map((s, i) => ({
+  s,
+  numero: String(i + 1).padStart(2, '0'),
+  titolo: text(s.title, lang),
+  grande: picture(s.pageImage ?? s.image ?? null, lang, '(min-width: 64rem) min(34vw, 640px), 92vw'),
+  piccola: picture(s.pageImage2 ?? null, lang, '(min-width: 64rem) 15vw, 40vw'),
+  voci: (s.features?.[lang] ?? []).filter(Boolean),
+}));
+---
+
+{
+  capitoli.length > 0 && (
+    <div class="sv-capitoli" data-theme="light">
+      <nav class="sv-capitoli-indice" aria-label={t('nav.services')} data-indice>
+        <ol role="list">
+          {capitoli.map((c) => (
+            <li>
+              <a href={`#${c.s.slug}`} data-voce={c.s.slug}>
+                <span class="sv-ci-numero" aria-hidden="true">
+                  {c.numero}
+                </span>
+                <span>{c.titolo}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      <div class="sv-capitoli-elenco">
+        {capitoli.map((c, i) => (
+          <section
+            id={c.s.slug}
+            class:list={['sv-capitolo', { 'sv-capitolo--rovescio': i % 2 === 1 }]}
+            aria-labelledby={`titolo-${c.s.slug}`}
+            data-capitolo={c.s.slug}
+          >
+            {c.grande && (
+              <div class:list={['sv-foto', { 'sv-foto--sola': !c.piccola }]}>
+                <figure class="sv-foto-grande" data-apri>
+                  <Picture data={c.grande} cap={false} class="sv-foto-img" />
+                </figure>
+                {c.piccola && (
+                  <figure class="sv-foto-piccola" data-apri="piccola">
+                    <Picture data={c.piccola} cap={false} class="sv-foto-img" />
+                  </figure>
+                )}
+              </div>
+            )}
+
+            <div class="sv-testo">
+              <p class="font-display sv-numero" aria-hidden="true">
+                {c.numero}
+              </p>
+              {text(c.s.subtitle, lang) && <p class="eyebrow sv-sotto">{text(c.s.subtitle, lang)}</p>}
+              <h2 id={`titolo-${c.s.slug}`} class="font-display sv-titolo">
+                {c.titolo}
+              </h2>
+              {text(c.s.description, lang) && <p class="text-lead sv-descrizione">{text(c.s.description, lang)}</p>}
+              {c.voci.length > 0 && (
+                <>
+                  <h3 class="sv-include-titolo">{t('servizi.cosaInclude')}</h3>
+                  <ul class="sv-include" role="list">
+                    {c.voci.map((v) => (
+                      <li>{v}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {preventivo && (
+                <p class="sv-azione">
+                  <a class="btn btn--pieno" href={`${path('quote', lang)}?servizio=${encodeURIComponent(c.s.slug)}`}>
+                    {t('servizi.chiediQuesto')}
+                  </a>
+                </p>
+              )}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+<script>
+  // Indice fisso: evidenzia il capitolo che occupa il centro dello schermo.
+  const indice = document.querySelector<HTMLElement>('[data-indice]');
+  const capitoli = [...document.querySelectorAll<HTMLElement>('[data-capitolo]')];
+  if (indice && capitoli.length && 'IntersectionObserver' in window) {
+    const voci = new Map(
+      [...indice.querySelectorAll<HTMLAnchorElement>('[data-voce]')].map((a) => [a.dataset.voce ?? '', a]),
+    );
+    const io = new IntersectionObserver(
+      (righe) => {
+        for (const r of righe) {
+          if (!r.isIntersecting) continue;
+          const slug = (r.target as HTMLElement).dataset.capitolo ?? '';
+          voci.forEach((a, k) => {
+            if (k === slug) a.setAttribute('aria-current', 'true');
+            else a.removeAttribute('aria-current');
+          });
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 },
+    );
+    for (const c of capitoli) io.observe(c);
+  }
+</script>
+
+<style>
+  .sv-capitoli {
+    --bordo-foto: 4px;
+    --raggio-foto: 16px;
+    padding-block: var(--spacing-section-sm) var(--spacing-section);
+  }
+
+  .sv-capitoli-indice {
+    display: none;
+  }
+
+  .sv-capitoli-elenco {
+    display: grid;
+    gap: var(--spacing-section);
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    margin: 0 auto;
+  }
+
+  .sv-capitolo {
+    display: grid;
+    gap: 2.5rem;
+    scroll-margin-top: calc(var(--altezza-header, 96px) + 1rem);
+  }
+
+  /* — Foto: grande + piccola sovrapposta (ritaglio color fondo) — */
+  .sv-foto {
+    position: relative;
+    padding-bottom: 12%;
+  }
+
+  .sv-foto--sola {
+    padding-bottom: 0;
+  }
+
+  .sv-foto-grande,
+  .sv-foto-piccola {
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--raggio-foto);
+  }
+
+  .sv-foto-grande {
+    aspect-ratio: 4 / 5;
+  }
+
+  .sv-foto-piccola {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0;
+    width: 40%;
+    aspect-ratio: 3 / 4;
+    border: var(--bordo-foto) solid var(--color-avorio);
+    background: var(--color-avorio);
+  }
+
+  .sv-foto :global(picture),
+  .sv-foto :global(.sv-foto-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .sv-foto-piccola :global(.sv-foto-img) {
+    border-radius: calc(var(--raggio-foto) - var(--bordo-foto));
+  }
+
+  /* — Testo — */
+  .sv-numero {
+    margin: 0;
+    font-size: clamp(3rem, 1.75rem + 3vw, 4.75rem);
+    line-height: 0.9;
+    font-weight: 300;
+    color: var(--color-oro);
+    font-variant-numeric: lining-nums;
+  }
+
+  .sv-sotto {
+    margin: 1rem 0 0.5rem;
+  }
+
+  .sv-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .sv-descrizione {
+    max-width: 34rem;
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+    color: var(--color-grigio-caldo);
+  }
+
+  .sv-include-titolo {
+    margin: 1.75rem 0 0.75rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .sv-include {
+    display: grid;
+    gap: 0.45rem;
+    font-size: 0.9375rem;
+    max-width: 34rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sv-include li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .sv-include li::before {
+    content: '';
+    position: absolute;
+    top: 0.7em;
+    left: 0;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--color-oro);
+  }
+
+  .sv-azione {
+    margin: 1.75rem 0 0;
+  }
+
+  /* — Desktop: indice fisso a sinistra, capitoli alternati — */
+  @media (min-width: 64rem) {
+    .sv-capitoli {
+      --bordo-foto: 6px;
+      display: grid;
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 4rem);
+      width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+      margin: 0 auto;
+    }
+
+    .sv-capitoli-elenco {
+      width: auto;
+      margin: 0;
+    }
+
+    .sv-capitoli-indice {
+      display: block;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 2rem);
+    }
+
+    .sv-capitoli-indice ol {
+      display: grid;
+      gap: 0.25rem;
+      margin: 0;
+      padding: 0 0 0 1rem;
+      list-style: none;
+      border-left: 1px solid color-mix(in srgb, var(--color-inchiostro) 15%, transparent);
+    }
+
+    .sv-capitoli-indice a {
+      position: relative;
+      display: flex;
+      gap: 0.6rem;
+      align-items: baseline;
+      min-height: 44px;
+      padding-block: 0.6rem;
+      color: var(--color-grigio-caldo);
+      text-decoration: none;
+      transition: color 0.4s var(--ease-gaia);
+    }
+
+    .sv-capitoli-indice a::before {
+      content: '';
+      position: absolute;
+      top: 0.6rem;
+      bottom: 0.6rem;
+      left: calc(-1rem - 1px);
+      width: 2px;
+      background: var(--color-bordeaux);
+      transform: scaleY(0);
+      transition: transform 0.5s var(--ease-gaia);
+    }
+
+    .sv-capitoli-indice a[aria-current='true'] {
+      color: var(--color-inchiostro);
+    }
+
+    .sv-capitoli-indice a[aria-current='true']::before {
+      transform: scaleY(1);
+    }
+
+    .sv-ci-numero {
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--color-oro-testo);
+    }
+
+    .sv-capitolo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 5vw, 5rem);
+      align-items: center;
+    }
+
+    /* Foto a destra nei capitoli pari, a sinistra nei dispari. */
+    .sv-capitolo .sv-foto {
+      order: 2;
+    }
+
+    .sv-capitolo--rovescio .sv-foto {
+      order: 0;
+    }
+
+    /* La coppia di foto si accosta al testo (a 1920 la colonna è più
+       larga della foto, che resta entro i 640 px della sua risoluzione). */
+    .sv-foto {
+      width: min(100%, 640px);
+      justify-self: start;
+    }
+
+    .sv-capitolo--rovescio .sv-foto {
+      justify-self: end;
+    }
+
+    .sv-foto-piccola {
+      right: -6%;
+      width: 42%;
+    }
+
+    .sv-capitolo--rovescio .sv-foto-piccola {
+      right: auto;
+      left: -6%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sv-capitoli-indice a,
+    .sv-capitoli-indice a::before {
+      transition: none;
+    }
+  }
+</style>

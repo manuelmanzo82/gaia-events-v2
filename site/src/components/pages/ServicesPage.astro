@@ -26,6 +26,7 @@ import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../servizi/Apertura.astro';
+import Capitoli from '../servizi/Capitoli.astro';
 import Confronto from '../servizi/Confronto.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
@@ -48,7 +49,10 @@ const titoloPagina = text(page?.title, lang) || t('nav.services');
 const titoloApertura = text(hero?.title, lang) || titoloPagina;
 const fraseApertura = text(hero?.subtitle, lang) || text(page?.intro, lang);
 const immagineApertura = hero?.images?.[0] ?? hero?.poster ?? null;
-const fotoApertura = picture(immagineApertura, lang, '100vw');
+// Su mobile la foto copre una fascia alta 68svh: in «cover» è larga circa
+// 1,5 × l'altezza, quindi più del viewport.
+const SIZES_APERTURA = '(max-width: 47.99rem) 102vh, 100vw';
+const fotoApertura = picture(immagineApertura, lang, SIZES_APERTURA);
 const preload = fotoApertura?.sources[0] ?? null;
 
 // Indice dell'apertura: tutti i servizi, nell'ordine del back office;
@@ -62,6 +66,9 @@ const indice = servizi.map((s, i) => ({
 // Blocchi della pagina (page_sections): intro, process, cta.
 const blocco = (kind: string) => (page?.blocks ?? []).find((b) => b.kind === kind) ?? null;
 const intro = blocco('intro');
+
+// Capitoli: tutti i servizi tranne la destination, che ha la sua fascia.
+const capitoli = servizi.filter((s) => s.slug !== 'destination');
 
 const meta = buildMeta({
   lang,
@@ -84,13 +91,15 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
 <BaseLayout lang={lang} routeKey="services" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
   {
     preload && (
-      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes="100vw" />
+      <link slot="head" rel="preload" as="image" type={preload.type} imagesrcset={preload.srcset} imagesizes={SIZES_APERTURA} />
     )
   }
 
   <Apertura eyebrow={titoloPagina} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={indice} />
 
   <Filosofia titolo={text(intro?.title, lang)} testo={text(intro?.text, lang)} />
+
+  <Capitoli lang={lang} servizi={capitoli} />
 
   <Confronto
     lang={lang}
