@@ -93,6 +93,16 @@ export const UI = {
   'form.invalidEmail': { it: 'Indirizzo email non valido', en: 'Invalid email address' },
 
   'nav.backToTop': { it: 'Torna su', en: 'Back to top' },
+  // Tipi di evento (giro 11): eyebrow nelle card e nel dettaglio, filtri.
+  'evento.matrimonio': { it: 'Matrimonio', en: 'Wedding' },
+  'evento.unione_civile': { it: 'Unione civile', en: 'Civil union' },
+  'evento.festa': { it: 'Festa privata', en: 'Private party' },
+  'evento.aziendale': { it: 'Evento aziendale', en: 'Corporate event' },
+  'eventi.filtro': { it: 'Filtra per tipo', en: 'Filter by type' },
+  'eventi.tutti': { it: 'Tutti', en: 'All' },
+  'eventi.matrimoni': { it: 'Matrimoni', en: 'Weddings' },
+  'eventi.feste': { it: 'Feste', en: 'Parties' },
+  'eventi.aziendali': { it: 'Aziendali', en: 'Corporate' },
   // Pagina Dicono di me (giro 11): i tre blocchi.
   'reviews.coppie': { it: 'Le parole delle coppie', en: 'Words from couples' },
   'reviews.stampa': { it: 'Sulla stampa', en: 'In the press' },

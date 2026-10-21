@@ -182,6 +182,7 @@ final class Exporter
             'slug' => self::text($row['slug_it'], $row['slug_en']),
             'title' => self::text($row['title_it'], $row['title_en']),
             'couple' => $row['couple'],
+            'type' => (string) ($row['event_type'] ?? 'matrimonio'),
             'locationName' => $row['location_name'],
             'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
             'date' => self::date($row['story_date']),

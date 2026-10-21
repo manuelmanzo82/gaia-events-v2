@@ -1,7 +1,18 @@
 ---
-// Indice delle storie. SEGNAPOSTO: il design si fa in fase 3.
+/**
+ * I miei eventi (/eventi/ ↔ /en/events/). SEGNAPOSTO per il design
+ * (fase 3), ma la struttura è quella definitiva (giro 11):
+ *
+ *  - matrimoni e unioni civili per primi, poi feste e eventi aziendali,
+ *    dentro ogni gruppo nell'ordine del back office;
+ *  - filtri discreti in alto (Tutti · Matrimoni · Feste · Aziendali),
+ *    solo se ci sono almeno due gruppi; filtrano senza ricaricare
+ *    (bottoni con aria-pressed, conteggio annunciato); senza JS il
+ *    gruppo dei filtri resta nascosto e tutti gli eventi sono visibili;
+ *  - ogni card porta il tipo come eyebrow.
+ */
 import type { Lang } from '../../config/site';
-import { formatDate, useTranslations } from '../../i18n';
+import { formatDate, useTranslations, type UIKey } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { STORY_FIELDS, langsFor } from '../../lib/availability';
@@ -9,6 +20,7 @@ import { getStories, isPublishable, pick, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { breadcrumbs } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import type { EventType } from '../../lib/types';
 import Picture from '../Picture.astro';
 
 interface Props {
@@ -19,7 +31,24 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const langs = langsFor('stories');
-const stories = getStories().filter((story) => isPublishable(story, lang, STORY_FIELDS));
+
+/** Gruppo di filtro per tipo: matrimoni e unioni civili stanno insieme. */
+type Gruppo = 'matrimoni' | 'feste' | 'aziendali';
+const GRUPPO: Record<EventType, Gruppo> = {
+  matrimonio: 'matrimoni',
+  unione_civile: 'matrimoni',
+  festa: 'feste',
+  aziendale: 'aziendali',
+};
+const ORDINE: Gruppo[] = ['matrimoni', 'feste', 'aziendali'];
+
+const stories = getStories()
+  .filter((story) => isPublishable(story, lang, STORY_FIELDS))
+  .map((story, i) => ({ story, gruppo: GRUPPO[story.type] ?? 'matrimoni', i }))
+  .sort((a, b) => ORDINE.indexOf(a.gruppo) - ORDINE.indexOf(b.gruppo) || a.i - b.i);
+
+const gruppi = ORDINE.filter((g) => stories.some((s) => s.gruppo === g));
+const filtri = gruppi.length >= 2;
 
 const title = t('nav.stories');
 const meta = buildMeta({ lang, routeKey: 'stories', title, availableLangs: langs });
@@ -36,14 +65,31 @@ const crumbs = [
 
   {stories.length === 0 && <p>{t('common.empty')}</p>}
 
-  <ul class="storie-segnaposto">
+  {
+    filtri && (
+      <div class="eventi-filtri" role="group" aria-label={t('eventi.filtro')} hidden data-filtri>
+        <button type="button" aria-pressed="true" data-gruppo="">
+          {t('eventi.tutti')}
+        </button>
+        {gruppi.map((g) => (
+          <button type="button" aria-pressed="false" data-gruppo={g}>
+            {t(`eventi.${g}` as UIKey)}
+          </button>
+        ))}
+        <span class="sr-only" role="status" aria-live="polite" data-stato />
+      </div>
+    )
+  }
+
+  <ul class="storie-segnaposto" data-eventi>
     {
-      stories.map((story) => {
+      stories.map(({ story, gruppo }) => {
         const slug = pick(story.slug, lang)!;
         return (
-          <li>
+          <li data-gruppo={gruppo}>
             <a href={path('stories', lang, slug)}>
               <Picture data={picture(story.cover, lang, '(min-width: 48rem) 33vw, 100vw')} />
+              <p class="eyebrow">{t(`evento.${story.type}` as UIKey)}</p>
               <h2>{text(story.title, lang)}</h2>
             </a>
             <p>
@@ -58,12 +104,77 @@ const crumbs = [
   </ul>
 </BaseLayout>
 
+<script>
+  // Filtro per tipo, senza ricaricare. Con JS spento il gruppo resta
+  // nascosto (hidden nel markup) e tutti gli eventi sono visibili.
+  const filtri = document.querySelector<HTMLElement>('[data-filtri]');
+  const lista = document.querySelector<HTMLElement>('[data-eventi]');
+  if (filtri && lista) {
+    filtri.hidden = false;
+    const bottoni = [...filtri.querySelectorAll<HTMLButtonElement>('button[data-gruppo]')];
+    const voci = [...lista.querySelectorAll<HTMLElement>('li[data-gruppo]')];
+    const stato = filtri.querySelector<HTMLElement>('[data-stato]');
+    const applica = (gruppo: string): void => {
+      let visibili = 0;
+      for (const voce of voci) {
+        const mostra = !gruppo || voce.dataset.gruppo === gruppo;
+        voce.hidden = !mostra;
+        if (mostra) visibili += 1;
+      }
+      for (const b of bottoni) b.setAttribute('aria-pressed', String((b.dataset.gruppo ?? '') === gruppo));
+      if (stato) stato.textContent = `${visibili}`;
+    };
+    for (const b of bottoni) b.addEventListener('click', () => applica(b.dataset.gruppo ?? ''));
+  }
+</script>
+
 <style>
+  .eventi-filtri {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 2rem;
+  }
+
+  .eventi-filtri button {
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 25%, transparent);
+    border-radius: 999px;
+    background: none;
+    color: var(--color-inchiostro);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background-color 0.3s var(--ease-gaia),
+      color 0.3s var(--ease-gaia),
+      border-color 0.3s var(--ease-gaia);
+  }
+
+  .eventi-filtri button:hover,
+  .eventi-filtri button[aria-pressed='true'] {
+    border-color: var(--color-inchiostro);
+    background: var(--color-inchiostro);
+    color: var(--color-avorio);
+  }
+
   .storie-segnaposto {
     display: grid;
     gap: 2rem;
     grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
     list-style: none;
     padding: 0;
+  }
+
+  .storie-segnaposto .eyebrow {
+    margin: 0.75rem 0 0.25rem;
+  }
+
+  .storie-segnaposto a {
+    text-decoration: none;
+    color: inherit;
   }
 </style>

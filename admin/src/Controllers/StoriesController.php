@@ -39,6 +39,7 @@ final class StoriesController extends ResourceController
     {
         return [
             'title_it' => 'Titolo',
+            'event_type' => 'Tipo',
             'couple' => 'Coppia',
             'story_date' => 'Data',
             'active' => 'Attivo',
@@ -60,6 +61,16 @@ final class StoriesController extends ResourceController
         return [
             'title' => ['label' => 'Titolo', 'type' => 'text', 'bilingual' => true, 'rules' => 'required|max:255'],
             'slug' => ['label' => 'Slug', 'type' => 'slug', 'bilingual' => true, 'rules' => 'required|max:190'],
+            'event_type' => [
+                'label' => 'Tipo di evento',
+                'type' => 'select',
+                'options' => [
+                    'matrimonio' => 'Matrimonio',
+                    'unione_civile' => 'Unione civile',
+                    'festa' => 'Festa privata',
+                    'aziendale' => 'Evento aziendale',
+                ],
+            ],
             'couple' => ['label' => 'Coppia / nomi', 'type' => 'text', 'help' => 'Es. «Andrea & Federica».'],
             'location_name' => ['label' => 'Location (testo)', 'type' => 'text'],
             'luogo_id' => ['label' => 'Luogo collegato (opzionale)', 'type' => 'select', 'options' => $luoghi],

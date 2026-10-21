@@ -577,6 +577,7 @@ CREATE TABLE IF NOT EXISTS `stories` (
   `title_it`                VARCHAR(255) DEFAULT NULL,
   `title_en`                VARCHAR(255) DEFAULT NULL,
   `couple`                  VARCHAR(190) DEFAULT NULL,
+  `event_type`              ENUM('matrimonio','unione_civile','festa','aziendale') NOT NULL DEFAULT 'matrimonio',
   `location_name`           VARCHAR(255) DEFAULT NULL,
   `luogo_id`                INT UNSIGNED DEFAULT NULL,
   `story_date`              DATE DEFAULT NULL,

@@ -322,13 +322,17 @@ export interface Client {
   order: number;
 }
 
-/** Storia: un matrimonio raccontato per intero (2-3 in tutto). */
+/** Tipo di evento (giro 11): matrimoni e unioni civili stanno nel gruppo «Matrimoni». */
+export type EventType = 'matrimonio' | 'unione_civile' | 'festa' | 'aziendale';
+
+/** Evento raccontato per intero (pagina I miei eventi). */
 export interface Story extends SeoFields {
   id: number;
   /** Slug bilingue come i post del blog. */
   slug: Localized;
   title: Localized;
   couple?: string | null;
+  type: EventType;
   locationName?: string | null;
   luogoId: number | null;
   date?: string | null;

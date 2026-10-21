@@ -2,7 +2,7 @@
 // Dettaglio di una storia. SEGNAPOSTO: racconto, galleria e credito del
 // fotografo (link alla pagina Partner, mai didascalie sotto le foto).
 import type { Lang } from '../../config/site';
-import { formatDate, useTranslations } from '../../i18n';
+import { formatDate, useTranslations, type UIKey } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { STORY_FIELDS } from '../../lib/availability';
@@ -54,6 +54,7 @@ const crumbs = [
   jsonLd={[storyArticle(story, lang, slug), breadcrumbs(crumbs)]}
   crumbs={crumbs}
 >
+  <p class="eyebrow">{t(`evento.${story.type}` as UIKey)}</p>
   <h1>{title}</h1>
   <p class="segnaposto">[Segnaposto — il design arriva in fase 3]</p>
 
