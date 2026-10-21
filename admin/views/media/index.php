@@ -53,9 +53,13 @@ $uploadsUrl = rtrim((string) Gaia\Admin\Config::get('uploads_url', '/uploads'), 
       <fieldset>
         <legend><?= e((string) $row['path']) ?></legend>
         <div style="padding: 0 .8rem .8rem">
-          <img src="<?= e($uploadsUrl . '/' . (string) $row['path']) ?>"
-               alt="<?= e((string) ($row['alt_it'] ?? '')) ?>"
-               width="200" height="133" style="object-fit: cover" loading="lazy">
+          <?php $fx = (float) ($row['focal_x'] ?? 0.5); $fy = (float) ($row['focal_y'] ?? 0.5); ?>
+          <div class="focale" data-focale title="Clicca sulla foto per impostare il punto focale">
+            <img src="<?= e($uploadsUrl . '/' . (string) $row['path']) ?>"
+                 alt="<?= e((string) ($row['alt_it'] ?? '')) ?>"
+                 width="<?= (int) $row['width'] ?>" height="<?= (int) $row['height'] ?>" loading="lazy">
+            <span class="focale-punto" style="left: <?= $fx * 100 ?>%; top: <?= $fy * 100 ?>%"></span>
+          </div>
 
           <p class="muted">
             <?= (int) $row['width'] ?>×<?= (int) $row['height'] ?> px ·
@@ -100,12 +104,14 @@ $uploadsUrl = rtrim((string) Gaia\Admin\Config::get('uploads_url', '/uploads'), 
                  value="<?= e((string) ($row['note_interne'] ?? '')) ?>"
                  placeholder="Solo per il back office: non va sul sito">
 
-          <label>Punto focale (da 0 a 1)</label>
+          <label>Punto focale</label>
+          <p class="help">Clicca sulla foto qui sopra: il punto resta sempre visibile quando la
+            foto viene ritagliata (hero, schede, fasce). Valori da 0 a 1, centro = 0,5.</p>
           <div class="pair">
             <div><span>X</span>
-              <input type="text" name="focal_x" value="<?= e((string) $row['focal_x']) ?>"></div>
+              <input type="text" name="focal_x" value="<?= e((string) $row['focal_x']) ?>" data-focale-x></div>
             <div><span>Y</span>
-              <input type="text" name="focal_y" value="<?= e((string) $row['focal_y']) ?>"></div>
+              <input type="text" name="focal_y" value="<?= e((string) $row['focal_y']) ?>" data-focale-y></div>
           </div>
 
           <div class="actions">
@@ -120,4 +126,27 @@ $uploadsUrl = rtrim((string) Gaia\Admin\Config::get('uploads_url', '/uploads'), 
       </fieldset>
     </form>
   <?php endforeach; ?>
+
+<style>
+  .focale { position: relative; display: inline-block; max-width: 260px; cursor: crosshair; margin-bottom: .5rem; }
+  .focale img { display: block; width: 100%; height: auto; }
+  .focale-punto { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border: 2px solid #fff; border-radius: 50%;
+    background: rgba(114, 47, 55, .85); box-shadow: 0 0 0 1px rgba(0,0,0,.4); pointer-events: none; }
+</style>
+<script>
+  // Punto focale: un clic sulla foto scrive X e Y (0..1) nei campi e sposta il punto.
+  document.querySelectorAll('[data-focale]').forEach(function (box) {
+    box.addEventListener('click', function (e) {
+      var r = box.getBoundingClientRect();
+      var x = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
+      var y = Math.min(Math.max((e.clientY - r.top) / r.height, 0), 1);
+      var form = box.closest('form');
+      form.querySelector('[data-focale-x]').value = x.toFixed(3);
+      form.querySelector('[data-focale-y]').value = y.toFixed(3);
+      var p = box.querySelector('.focale-punto');
+      p.style.left = (x * 100) + '%';
+      p.style.top = (y * 100) + '%';
+    });
+  });
+</script>
 <?php endif; ?>

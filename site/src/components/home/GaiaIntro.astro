@@ -46,9 +46,9 @@ const paginaChiSono = existsIn('about', lang);
           foto && (
             <figure class="gaia-figura" data-reveal="maschera" data-theme="dark" data-foto>
               <Picture data={foto} cap={false} class="gaia-img" />
-              {/* Il taglio (object-position nel CSS) è centrato su Gaia ed
-                  esclude l'angolo in basso a destra, dove la foto porta il
-                  watermark del fotografo. */}
+              {/* Il taglio segue il punto focale della foto (back office,
+                  Immagini): per questa, 50% / 30%, su Gaia e lontano dal
+                  watermark in basso a destra. */}
             </figure>
           )
         }
@@ -123,7 +123,6 @@ const paginaChiSono = existsIn('about', lang);
 
   .gaia-figura :global(.gaia-img) {
     object-fit: cover;
-    object-position: 50% 30% !important;
   }
 
   /* Il header passa sopra la foto in inchiostro (la sezione è chiara):
