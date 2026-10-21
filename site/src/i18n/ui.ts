@@ -100,6 +100,7 @@ export const UI = {
   'servizi.indice': { it: 'I servizi', en: 'The services' },
   'servizi.tuttiPartner': { it: 'Tutti i partner', en: 'All partners' },
   'servizi.tutteFaq': { it: 'Tutte le domande', en: 'All questions' },
+  'servizi.leggiDicono': { it: 'Leggi cosa dicono di me', en: 'Read what they say' },
   'servizi.vediFeste': { it: 'Guarda le feste', en: 'See the parties' },
   'servizi.vediAziendali': { it: 'Guarda gli eventi aziendali', en: 'See the corporate events' },
   'partner.cat.location': { it: 'Location', en: 'Venues' },

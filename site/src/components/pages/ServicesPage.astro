@@ -33,6 +33,7 @@ import Domande from '../servizi/Domande.astro';
 import Metodo from '../servizi/Metodo.astro';
 import NonSoloMatrimoni from '../servizi/NonSoloMatrimoni.astro';
 import Partner from '../servizi/Partner.astro';
+import PonteRecensioni from '../servizi/PonteRecensioni.astro';
 import Filosofia from '../servizi/Filosofia.astro';
 
 interface Props {
@@ -155,6 +156,8 @@ const jsonLd = [breadcrumbs(crumbs), ...servizi.map((item) => serviceSchema(item
   />
 
   <Domande lang={lang} titolo={text(settings.servizi?.faq?.title, lang) || t('nav.faq')} domande={domande} />
+
+  <PonteRecensioni lang={lang} />
 </BaseLayout>
 
 <script>
