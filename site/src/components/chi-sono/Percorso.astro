@@ -1,0 +1,183 @@
+---
+/**
+ * Chi sono — 4. Il percorso (notte): le tappe del blocco «timeline»
+ * della pagina (anno = label, titolo, una riga, foto se c'è). Su desktop
+ * una striscia orizzontale agganciata: [data-orizzontale] in
+ * chi-sono-effetti.ts manda il .binario in orizzontale con lo scroll
+ * verticale (pin, solo ≥64rem). Su mobile una timeline verticale con il
+ * filo a sinistra. Senza JS o con reduced-motion: sotto i 64rem è già
+ * verticale; sopra, il binario scorre in orizzontale a mano (overflow).
+ */
+import type { Lang } from '../../config/site';
+import type { Image } from '../../lib/types';
+import { picture } from '../../lib/images';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  tappe: Array<{ anno: string; titolo: string; testo: string; image: Image | null }>;
+}
+
+const { lang, titolo, tappe } = Astro.props;
+---
+
+{
+  tappe.length > 0 && (
+    <section class="percorso" data-theme="dark" data-orizzontale aria-labelledby="percorso-titolo">
+      <div class="percorso-testa container-gaia">
+        <h2 id="percorso-titolo" class="eyebrow" data-reveal="alto">
+          {titolo}
+        </h2>
+      </div>
+      <ol class="binario percorso-binario" role="list">
+        {tappe.map((t) => {
+          const foto = picture(t.image, lang, '(min-width: 64rem) 28vw, 80vw');
+          return (
+            <li class="tappa" data-reveal="alto">
+              <p class="font-display tappa-anno" aria-hidden={t.anno ? undefined : 'true'}>
+                {t.anno}
+              </p>
+              {foto && (
+                <figure class="tappa-foto">
+                  <Picture data={foto} class="tappa-img" />
+                </figure>
+              )}
+              <h3 class="font-display tappa-titolo">{t.titolo}</h3>
+              {t.testo && <p class="tappa-testo">{t.testo}</p>}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  .percorso {
+    padding-block: var(--spacing-section);
+    overflow: hidden;
+  }
+
+  .percorso-testa .eyebrow {
+    margin: 0 0 clamp(2rem, 5vh, 3.5rem);
+  }
+
+  /* Mobile: timeline verticale, filo a sinistra, un punto per tappa. */
+  .percorso-binario {
+    position: relative;
+    display: grid;
+    gap: 2.5rem;
+    margin: 0;
+    padding: 0 var(--bordo, clamp(1.25rem, 4vw, 3.5rem)) 0 calc(var(--bordo, clamp(1.25rem, 4vw, 3.5rem)) + 1.5rem);
+    list-style: none;
+  }
+
+  .percorso-binario::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: var(--bordo, clamp(1.25rem, 4vw, 3.5rem));
+    width: 1px;
+    background: color-mix(in srgb, var(--color-avorio-su-notte) 25%, transparent);
+  }
+
+  .tappa {
+    position: relative;
+  }
+
+  .tappa::before {
+    content: '';
+    position: absolute;
+    top: 0.65rem;
+    left: -1.5rem;
+    width: 7px;
+    height: 7px;
+    margin-left: -3px;
+    border-radius: 50%;
+    background: var(--color-oro);
+  }
+
+  .tappa-anno {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-display);
+    line-height: 1;
+    font-weight: 300;
+    color: var(--color-oro);
+    font-variant-numeric: lining-nums;
+  }
+
+  .tappa-foto {
+    margin: 0 0 1rem;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .tappa-foto :global(.tappa-img) {
+    display: block;
+    width: 100%;
+    max-width: none !important;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .tappa-titolo {
+    margin: 0;
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: 400;
+  }
+
+  .tappa-testo {
+    max-width: 30rem;
+    margin: 0.6rem 0 0;
+    color: var(--color-velato-su-notte);
+  }
+
+  /* Desktop: striscia orizzontale (pin con GSAP, altrimenti scroll a mano). */
+  @media (min-width: 64rem) {
+    .percorso {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .percorso-binario {
+      display: flex;
+      gap: clamp(2.5rem, 5vw, 5rem);
+      width: max-content;
+      padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+      padding-right: 20vw;
+    }
+
+    .percorso-binario::before {
+      display: none;
+    }
+
+    .tappa {
+      width: 28vw;
+      max-width: 26rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid color-mix(in srgb, var(--color-avorio-su-notte) 25%, transparent);
+    }
+
+    .tappa::before {
+      top: -4px;
+      left: 0;
+      margin-left: 0;
+    }
+
+    .tappa-anno {
+      font-size: var(--text-display-xl);
+    }
+
+    /* Senza pin (JS spento o reduced-motion) la striscia scorre a mano. */
+    :global(html:not(.motion-attivo)) .percorso-binario {
+      overflow-x: auto;
+      width: auto;
+      scroll-snap-type: x proximity;
+    }
+  }
+</style>

@@ -10,6 +10,9 @@
  *   [data-contatore="150+"]   numero che conta da 0 al valore al primo
  *                             ingresso (prefisso/suffisso non numerici
  *                             restano com'erano)
+ *   [data-orizzontale]        sezione agganciata (pin) in cui lo scroll
+ *                             verticale fa scorrere il .binario in
+ *                             orizzontale (solo ≥64rem, come in home)
  *
  * Pin e scrub esistono solo da 64rem in su; sotto, scroll naturale.
  * Con prefers-reduced-motion niente del tutto: le pagine sono complete
@@ -20,6 +23,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
 import { riduciMotion } from './motion-leggero';
+import { aggiornaTema } from './theme-observer';
 
 const DESKTOP = '(min-width: 64rem)';
 
@@ -91,6 +95,29 @@ function contatori(): void {
   }
 }
 
+function scorrimentoOrizzontale(): void {
+  for (const sezione of document.querySelectorAll<HTMLElement>('[data-orizzontale]')) {
+    const binario = sezione.querySelector<HTMLElement>('.binario');
+    if (!binario) continue;
+    const distanza = (): number => Math.max(binario.scrollWidth - sezione.clientWidth, 0);
+    if (distanza() === 0) continue;
+    gsap.to(binario, {
+      x: () => -distanza(),
+      ease: 'none',
+      onUpdate: aggiornaTema,
+      scrollTrigger: {
+        trigger: sezione,
+        start: 'top top',
+        end: () => `+=${distanza()}`,
+        pin: true,
+        scrub: 0.6,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+  }
+}
+
 /** Da chiamare una volta, dopo initMotion(). */
 export function initChiSonoEffetti(): void {
   if (riduciMotion()) return;
@@ -101,9 +128,13 @@ export function initChiSonoEffetti(): void {
   parolePerParola();
   contatori();
 
+  // La classe dice al CSS che il pin c'è: senza (JS spento, reduced-motion)
+  // il binario del percorso scorre a mano.
+  document.documentElement.classList.add('motion-attivo');
+
   const mm = gsap.matchMedia();
   mm.add(DESKTOP, () => {
-    /* pin e scrub delle sezioni successive */
+    scorrimentoOrizzontale();
   });
 
   window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });

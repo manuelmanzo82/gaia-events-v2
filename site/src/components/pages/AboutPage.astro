@@ -29,6 +29,7 @@ import { aboutPage, breadcrumbs, person } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../chi-sono/Apertura.astro';
 import Numeri from '../chi-sono/Numeri.astro';
+import Percorso from '../chi-sono/Percorso.astro';
 import Voce from '../chi-sono/Voce.astro';
 
 interface Props {
@@ -62,6 +63,13 @@ const numeri = Object.entries(settings.about?.stats ?? {})
   .sort(([a], [b]) => Number(a) - Number(b))
   .map(([, n]) => ({ value: text(n?.value, lang).trim(), label: text(n?.label, lang).trim() }))
   .filter((n) => n.value && n.label);
+
+// Blocchi della pagina: «timeline» (il percorso) e «values» (come lavoro).
+const blocco = (kind: string) => (page?.blocks ?? []).find((b) => b.kind === kind) ?? null;
+const timeline = blocco('timeline');
+const tappe = (timeline?.items ?? [])
+  .map((i) => ({ anno: i.label ?? '', titolo: text(i.title, lang), testo: text(i.text, lang), image: i.image ?? null }))
+  .filter((i) => i.titolo);
 
 // Foto dell'apertura: il primo highlight della sezione «chi-sono», il
 // ritratto di Gaia al lavoro (taglio sul punto focale).
@@ -102,6 +110,8 @@ const jsonLd = [
   <Voce lang={lang} grandi={paragrafi.slice(0, GRANDI)} resto={paragrafi.slice(GRANDI)} />
 
   <Numeri numeri={numeri} />
+
+  <Percorso lang={lang} titolo={text(timeline?.title, lang)} tappe={tappe} />
 </BaseLayout>
 
 <script>
