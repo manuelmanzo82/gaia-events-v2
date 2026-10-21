@@ -215,6 +215,24 @@ export default function Preventivatore(props: Props): ReactNode {
     }
   }, [r, step, caricato]);
 
+  // Su mobile i flottanti (WhatsApp, torna-su) si nascondono mentre il
+  // modulo è sullo schermo: coprirebbero scelte, campi e «Ricomincia». Nel
+  // ringraziamento tornano (lì il WhatsApp è nel contenuto).
+  useEffect(() => {
+    const el = radice.current;
+    if (!el || !('IntersectionObserver' in window)) return;
+    const html = document.documentElement;
+    const io = new IntersectionObserver(
+      ([voce]) => html.classList.toggle('modulo-in-vista', !!voce?.isIntersecting && step !== 'grazie'),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      html.classList.remove('modulo-in-vista');
+    };
+  }, [step]);
+
   // Colonna delle foto solo da 64rem: su mobile non si monta nemmeno.
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 64rem)');

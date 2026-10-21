@@ -159,6 +159,14 @@ const legali = (['privacy', 'cookie'] as RouteKey[]).filter((key) => existsIn(ke
     padding-block: clamp(2.5rem, 6vh, 4rem) 2rem;
   }
 
+  /* Su mobile, in fondo, spazio per il tondo WhatsApp (40 px + 16 di
+     margine): non copre mai i link legali. */
+  @media (max-width: 63.98rem) {
+    .footer-interno {
+      padding-bottom: calc(2rem + 64px);
+    }
+  }
+
   .footer-testa {
     display: grid;
     gap: 1.25rem;
