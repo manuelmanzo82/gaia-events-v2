@@ -158,6 +158,38 @@ const preventivo = existsIn('quote', lang);
     };
 
     toggle.addEventListener('click', () => imposta(!aperto));
+
+    // Mobile: scendendo il header si nasconde, salendo ricompare con un
+    // fondo pieno nel colore della sezione (avorio o notte); in cima alla
+    // pagina torna senza fondo. Desktop invariato.
+    const mobile = window.matchMedia('(max-width: 63.98rem)');
+    let ultimo = window.scrollY;
+    let inAttesa = false;
+    const aggiornaScorrimento = (): void => {
+      inAttesa = false;
+      const y = window.scrollY;
+      if (!mobile.matches || aperto) {
+        header.classList.remove('nascosto', 'pieno');
+      } else if (y < 24) {
+        header.classList.remove('nascosto', 'pieno');
+      } else if (y > ultimo + 4) {
+        header.classList.add('nascosto', 'pieno');
+      } else if (y < ultimo - 4) {
+        header.classList.remove('nascosto');
+        header.classList.add('pieno');
+      }
+      ultimo = y;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (inAttesa) return;
+        inAttesa = true;
+        requestAnimationFrame(aggiornaScorrimento);
+      },
+      { passive: true },
+    );
+    mobile.addEventListener('change', aggiornaScorrimento);
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') imposta(false);
     });
@@ -440,6 +472,36 @@ const preventivo = existsIn('quote', lang);
     }
   }
 
+  /* Mobile (giro 11): nascosto scendendo, pieno risalendo, trasparente in cima. */
+  @media (max-width: 63.98rem) {
+    .site-header {
+      transition:
+        transform 0.35s var(--ease-gaia),
+        background-color 0.3s var(--ease-gaia),
+        color 0.5s var(--ease-gaia),
+        text-shadow 0.5s var(--ease-gaia);
+    }
+
+    .site-header.nascosto {
+      transform: translateY(-100%);
+    }
+
+    .site-header.pieno {
+      background: var(--color-avorio);
+      text-shadow: none;
+    }
+
+    .site-header.pieno[data-header-theme='dark'] {
+      background: var(--color-notte);
+    }
+
+    .site-header.pieno::before,
+    .site-header.pieno :global(.logo-gaia svg) {
+      filter: none;
+      opacity: 0;
+    }
+  }
+
   @media (max-width: 79.98rem) {
     .site-header {
       --logo-h: 80px;
@@ -607,6 +669,7 @@ const preventivo = existsIn('quote', lang);
   @media (prefers-reduced-motion: reduce) {
     .site-header::before,
     .site-header,
+    .site-header.nascosto,
     .menu,
     .menu-voci a::after,
     .menu-toggle-linee i,
