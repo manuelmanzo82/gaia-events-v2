@@ -185,6 +185,9 @@ CREATE TABLE IF NOT EXISTS `services` (
   `include_slugs`       VARCHAR(255) DEFAULT NULL,
   `icon`                VARCHAR(60) DEFAULT NULL,
   `media_id`            INT UNSIGNED DEFAULT NULL,
+  -- Foto del capitolo nella pagina Servizi (migrazione 2026-10-21-servizi-pagina.sql).
+  `page_media_id`       INT UNSIGNED DEFAULT NULL,
+  `page_media2_id`      INT UNSIGNED DEFAULT NULL,
   `meta_title_it`       VARCHAR(255) DEFAULT NULL,
   `meta_title_en`       VARCHAR(255) DEFAULT NULL,
   `meta_description_it` VARCHAR(400) DEFAULT NULL,
@@ -476,6 +479,7 @@ CREATE TABLE IF NOT EXISTS `partners` (
   `description_en` TEXT DEFAULT NULL,
   `website`        VARCHAR(300) DEFAULT NULL,
   `active`         TINYINT(1) NOT NULL DEFAULT 1,
+  `consenso_citazione` TINYINT(1) NOT NULL DEFAULT 0,
   `sort_order`     SMALLINT NOT NULL DEFAULT 0,
   `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

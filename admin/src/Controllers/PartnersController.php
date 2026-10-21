@@ -50,6 +50,11 @@ final class PartnersController extends ResourceController
             'description' => ['label' => 'Descrizione', 'type' => 'textarea', 'bilingual' => true],
             'website' => ['label' => 'Sito web', 'type' => 'text'],
             'active' => ['label' => 'Pubblicato', 'type' => 'bool'],
+            'consenso_citazione' => [
+                'label' => 'Consenso a essere citato',
+                'type' => 'bool',
+                'help' => 'Senza consenso il partner non compare nella pagina Servizi.',
+            ],
             'sort_order' => ['label' => 'Ordine', 'type' => 'number'],
         ];
     }

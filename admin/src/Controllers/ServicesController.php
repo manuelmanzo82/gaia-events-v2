@@ -41,6 +41,16 @@ final class ServicesController extends ResourceController
                 'help' => 'Slug dei servizi compresi in questo, separati da virgola (es. coordinamento,design): nel preventivatore si segnano da soli come «Incluso».',
             ],
             'icon' => ['label' => 'Icona', 'type' => 'text'],
+            'page_media_id' => [
+                'label' => 'Foto grande nella pagina Servizi',
+                'type' => 'media',
+                'help' => 'Capitolo del servizio (per la destination: la fascia a tutta larghezza).',
+            ],
+            'page_media2_id' => [
+                'label' => 'Foto piccola nella pagina Servizi',
+                'type' => 'media',
+                'help' => 'Sovrapposta alla grande, con il bordo del colore di fondo.',
+            ],
             'media_id' => ['label' => 'Immagine', 'type' => 'media'],
             'meta_title' => ['label' => 'Meta title', 'type' => 'text', 'bilingual' => true],
             'meta_description' => ['label' => 'Meta description', 'type' => 'textarea', 'bilingual' => true],

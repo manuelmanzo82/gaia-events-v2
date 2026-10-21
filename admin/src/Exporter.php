@@ -157,6 +157,7 @@ final class Exporter
             'logo' => self::image(self::mediaById((int) ($row['logo_media_id'] ?? 0))),
             'description' => self::text($row['description_it'], $row['description_en']),
             'website' => $row['website'],
+            'consent' => (bool) ($row['consenso_citazione'] ?? false),
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], Db::all('SELECT * FROM partners ORDER BY sort_order, name'));
@@ -346,6 +347,9 @@ final class Exporter
             ))),
             'icon' => $row['icon'],
             'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
+            // Foto del capitolo nella pagina Servizi (grande e piccola).
+            'pageImage' => self::image(self::mediaById((int) ($row['page_media_id'] ?? 0))),
+            'pageImage2' => self::image(self::mediaById((int) ($row['page_media2_id'] ?? 0))),
             'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
             'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
             'active' => (bool) $row['active'],

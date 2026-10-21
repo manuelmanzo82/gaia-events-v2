@@ -76,6 +76,9 @@ export interface Settings extends SeoFields {
   /** Pagina Servizi (impostazioni del gruppo «servizi»). */
   servizi?: {
     compare?: { title?: Localized };
+    partners?: { title?: Localized };
+    faq?: { title?: Localized };
+    photos?: Record<string, Image | null>;
   };
   /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
   quote?: {
@@ -107,6 +110,9 @@ export interface Service extends SeoFields {
   includes?: string[];
   icon?: string;
   image: Image | null;
+  /** Foto del capitolo nella pagina Servizi (grande e piccola). */
+  pageImage?: Image | null;
+  pageImage2?: Image | null;
   active: boolean;
   order: number;
 }
@@ -284,6 +290,8 @@ export interface Partner {
   logo: Image | null;
   description: Localized;
   website?: string | null;
+  /** Consenso a essere citato (pagina Servizi). */
+  consent?: boolean;
   active: boolean;
   order: number;
 }
