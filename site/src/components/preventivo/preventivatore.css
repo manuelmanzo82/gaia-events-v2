@@ -113,12 +113,15 @@
   line-height: 1.12;
   letter-spacing: -0.01em;
   text-wrap: balance;
-  outline: none;
 }
 
+/* Il focus programmatico sul titolo resta (annuncio allo screen reader),
+   ma senza nessun contorno: il focus si vede solo sugli elementi
+   interattivi, con :focus-visible. */
+.pv-titolo:focus,
 .pv-titolo:focus-visible {
-  outline: 2px solid var(--color-bordeaux);
-  outline-offset: 6px;
+  outline: none;
+  box-shadow: none;
 }
 
 .pv-nota {
@@ -435,6 +438,18 @@
   padding: 0.2rem 0;
   font-size: 0.75rem;
   white-space: nowrap;
+}
+
+/* Campi numerici senza freccette. */
+.pv-campo input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.pv-campo input[type='number']::-webkit-outer-spin-button,
+.pv-campo input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 
 /* Il messaggio si allarga col testo (JS + field-sizing), mai scroll interno. */

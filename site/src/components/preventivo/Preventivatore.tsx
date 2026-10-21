@@ -723,16 +723,16 @@ export default function Preventivatore(props: Props): ReactNode {
                   </label>
                 ))}
               </div>
-              <div className="pv-campo pv-campo--corto">
+              <div className="pv-campo">
                 <label htmlFor="pv-guests">{t.ospiti.oppure}</label>
                 <input
                   id="pv-guests"
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min={1}
-                  max={5000}
+                  pattern="[0-9]*"
+                  autoComplete="off"
                   value={r.guests}
-                  onChange={(e) => aggiorna({ guests: e.target.value, guestsRange: e.target.value ? '' : r.guestsRange })}
+                  onChange={(e) => aggiorna({ guests: e.target.value.replace(/\D+/g, ''), guestsRange: e.target.value ? '' : r.guestsRange })}
                   {...campo('guests')}
                 />
               </div>
