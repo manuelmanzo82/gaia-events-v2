@@ -47,7 +47,7 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
         <span class="dw-citta-voce dw-citta-voce--voi dw-voi-riga" data-voi-riga hidden />
       </p>
       <div class="dw-tabellone" role="group" aria-label={etichetta} data-tabellone>
-        <ul class="dw-citta" role="list" data-originale>
+        <ul class="dw-citta" role="list" data-originale style={`--colonne: ${elenco.length}`}>
           {elenco.map((c) => (
             <li class:list={['dw-citta-voce', { 'dw-citta-voce--casa': c.casa }]} data-fuso={c.fuso}>
               <span class="dw-citta-nome">{c.nome}</span>
@@ -162,7 +162,12 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
     visibility: visible;
   }
 
+  /* Altezze di riga fisse (in rem): quando arrivano i font (Cormorant
+     corsivo, Montserrat) la fascia non cambia altezza e l'apertura, che è
+     allineata in basso, non si sposta (CLS). */
   .dw-orologi-riga {
+    line-height: 1.75rem;
+    min-height: 1.75rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 1.5rem;
@@ -189,6 +194,8 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
   }
 
   .dw-citta-voce {
+    height: 1.75rem;
+    line-height: 1.75rem;
     display: inline-flex;
     gap: 0.6rem;
     align-items: baseline;
@@ -312,7 +319,9 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
     }
   }
 
-  /* Desktop: la fila va a capo solo se proprio non ci sta. */
+  /* Desktop: griglia con un numero fisso di colonne (tutte le città da
+     80rem, tre per riga sotto): le righe non dipendono dalla larghezza del
+     font, quindi l'arrivo dei font non cambia l'altezza (CLS). */
   @media (min-width: 64rem) {
     .dw-tabellone .dw-citta-voce--voi {
       display: none;
@@ -323,8 +332,22 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
     }
 
     .dw-citta {
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      justify-content: start;
+      column-gap: 0.25rem;
       row-gap: 0.6rem;
+    }
+
+    /* La copia serve solo allo scorrimento su mobile. */
+    .dw-citta.dw-citta--copia {
+      display: none;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .dw-citta {
+      grid-template-columns: repeat(var(--colonne, 6), auto);
     }
   }
 
