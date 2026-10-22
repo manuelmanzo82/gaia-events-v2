@@ -86,6 +86,21 @@ interface Props {
   homeHref: string;
   whatsapp: string;
   oreRisposta: number;
+  /**
+   * Benvenuto (passo zero, fuori dalla barra di avanzamento): titolo, tre
+   * punti, ritratto di Gaia e «Cominciamo». Se c'è un salvataggio, invece
+   * di «Cominciamo»: «Bentornati…» con Continua e Ricomincia. Null = si
+   * parte dal primo passo.
+   */
+  benvenuto: {
+    titolo: string;
+    punti: string[];
+    cominciamo: string;
+    bentornati: string;
+    continua: string;
+    ricomincia: string;
+    foto: Foto | null;
+  } | null;
 }
 
 const CHIAVE = 'gaia-preventivo-v1';
@@ -167,6 +182,8 @@ export default function Preventivatore(props: Props): ReactNode {
   const [fotoViste, setFotoViste] = useState<Passaggio[]>(['evento']);
   const [caricato, setCaricato] = useState(false);
   const [daRiepilogo, setDaRiepilogo] = useState(false);
+  const [benvenuto, setBenvenuto] = useState(props.benvenuto !== null);
+  const [bentornati, setBentornati] = useState(false);
 
   const inizio = useRef<number | null>(null);
   const titolo = useRef<HTMLHeadingElement>(null);
@@ -195,7 +212,10 @@ export default function Preventivatore(props: Props): ReactNode {
           setStep(passo);
           setFotoViste([passo]);
           inizio.current = s.inizio ?? null;
-          if (s.step !== 'evento' || s.r.kind) setRipreso(true);
+          if (s.step !== 'evento' || s.r.kind) {
+            setRipreso(true);
+            setBentornati(true);
+          }
         }
       }
     } catch {
@@ -257,6 +277,16 @@ export default function Preventivatore(props: Props): ReactNode {
     mq.addEventListener('change', aggiorna);
     return () => mq.removeEventListener('change', aggiorna);
   }, []);
+
+  // Uscita dal benvenuto: focus sul titolo del passo, come a ogni cambio.
+  const primoBenvenuto = useRef(true);
+  useEffect(() => {
+    if (primoBenvenuto.current) {
+      primoBenvenuto.current = false;
+      return;
+    }
+    if (!benvenuto) titolo.current?.focus();
+  }, [benvenuto]);
 
   // Cambio di passaggio: focus sul titolo e la domanda in vista.
   useEffect(() => {
@@ -1027,7 +1057,63 @@ export default function Preventivatore(props: Props): ReactNode {
           })}
         </div>
 
-        {step === 'grazie' ? (
+        {benvenuto && props.benvenuto && step !== 'grazie' ? (
+          <div className="pv-passo pv-benvenuto">
+            {props.benvenuto.foto && (
+              <picture className="pv-benvenuto-foto">
+                {props.benvenuto.foto.sources.map((s) => (
+                  <source key={s.type} type={s.type} srcSet={s.srcset} sizes={s.sizes} />
+                ))}
+                <img
+                  src={props.benvenuto.foto.src}
+                  width={props.benvenuto.foto.width}
+                  height={props.benvenuto.foto.height}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  style={props.benvenuto.foto.objectPosition ? { objectPosition: props.benvenuto.foto.objectPosition } : undefined}
+                />
+              </picture>
+            )}
+            <h2 className="pv-titolo" tabIndex={-1} id="pv-titolo-benvenuto">
+              {props.benvenuto.titolo}
+            </h2>
+            <ul className="pv-benvenuto-punti">
+              {props.benvenuto.punti.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+            {bentornati ? (
+              <>
+                <p className="pv-benvenuto-ritorno" role="status">
+                  {props.benvenuto.bentornati}
+                </p>
+                <div className="pv-azioni">
+                  <button type="button" className="btn btn--pieno" onClick={() => setBenvenuto(false)}>
+                    {props.benvenuto.continua}
+                  </button>
+                  <button
+                    type="button"
+                    className="pv-link pv-ricomincia"
+                    onClick={() => {
+                      ricomincia();
+                      setBentornati(false);
+                      setBenvenuto(false);
+                    }}
+                  >
+                    {props.benvenuto.ricomincia}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="pv-azioni">
+                <button type="button" className="btn btn--pieno" onClick={() => setBenvenuto(false)}>
+                  {props.benvenuto.cominciamo}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : step === 'grazie' ? (
           <div className="pv-passo pv-grazie">
             <h2 className="pv-titolo" tabIndex={-1} ref={titolo} id="pv-titolo">
               {t.grazie.titolo(chi)}

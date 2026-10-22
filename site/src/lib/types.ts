@@ -94,6 +94,17 @@ export interface Settings extends SeoFields {
   };
   /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
   quote?: {
+    /** Schermata di benvenuto prima del primo passo. */
+    welcome?: {
+      title?: Localized;
+      point1?: Localized;
+      point2?: Localized;
+      point3?: Localized;
+      start?: Localized;
+      back?: Localized;
+      continue?: Localized;
+      restart?: Localized;
+    };
     eyebrow?: Localized;
     title?: Localized;
     line?: Localized;

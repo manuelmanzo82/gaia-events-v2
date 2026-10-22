@@ -107,6 +107,29 @@ for (const [passo, chiave] of Object.entries(CHIAVI) as Array<[Passaggio, string
 
 const oreRisposta = Number(text(q?.replyHours, 'it')) || 48;
 
+// Benvenuto (passo zero): testi dalle impostazioni, ritratto di Gaia
+// piccolo nella colonna del modulo (la 107 regge fino a ~500 px).
+const w = q?.welcome;
+const ritratto = picture(q?.photos?.welcome ?? null, lang, '(min-width: 64rem) 12rem, 9rem');
+const benvenuto = {
+  titolo: text(w?.title, lang),
+  punti: [text(w?.point1, lang), text(w?.point2, lang), text(w?.point3, lang)].filter(Boolean),
+  cominciamo: text(w?.start, lang),
+  bentornati: text(w?.back, lang),
+  continua: text(w?.continue, lang),
+  ricomincia: text(w?.restart, lang),
+  foto: ritratto
+    ? {
+        sources: ritratto.sources,
+        src: ritratto.src,
+        width: ritratto.width,
+        height: ritratto.height,
+        alt: ritratto.alt,
+        objectPosition: ritratto.objectPosition,
+      }
+    : null,
+};
+
 // Su mobile la foto della fascia del primo passaggio è l'elemento più
 // grande della prima schermata (LCP): si precarica, solo sotto i 64rem,
 // nel formato migliore. Su desktop la fascia è nascosta e non si scarica.
@@ -167,6 +190,7 @@ const domande = [1, 2, 3]
       homeHref={path('home', lang)}
       whatsapp={BUSINESS.whatsapp}
       oreRisposta={oreRisposta}
+      benvenuto={benvenuto.titolo && benvenuto.cominciamo ? benvenuto : null}
     />
   </section>
 

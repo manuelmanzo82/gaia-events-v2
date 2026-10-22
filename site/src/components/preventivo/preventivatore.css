@@ -688,3 +688,69 @@
     transition: none;
   }
 }
+
+/* — Benvenuto (passo zero) — */
+.pv-benvenuto {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.pv-benvenuto-foto {
+  display: block;
+  width: 9rem;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-beige);
+}
+
+.pv-benvenuto-foto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* La 107 è Gaia tra i tavoli: si stringe sul viso (in alto a destra). */
+  object-position: 50% 0 !important;
+  transform: scale(2);
+  transform-origin: 73% 20%;
+}
+
+.pv-benvenuto-punti {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pv-benvenuto-punti li {
+  position: relative;
+  max-width: 34rem;
+  padding-left: 1.5rem;
+  color: var(--color-grigio-caldo);
+}
+
+.pv-benvenuto-punti li::before {
+  content: '';
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 0.75rem;
+  height: 1px;
+  background: var(--color-oro);
+}
+
+.pv-benvenuto-ritorno {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-style: italic;
+  color: var(--color-bordeaux);
+}
+
+@media (min-width: 64rem) {
+  .pv-benvenuto-foto {
+    width: 12rem;
+  }
+}
