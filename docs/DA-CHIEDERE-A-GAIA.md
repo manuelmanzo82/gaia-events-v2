@@ -304,11 +304,6 @@ testi sono una bozza nostra (IT ed EN), salvati nel database.
   le proporzioni tra le voci: location e catering 40–50%, foto e video
   8–12%, fiori e allestimenti 8–15%). Servono le fasce di budget reali di
   Gaia, se vuole darle, e la conferma delle proporzioni.
-- **Toscana e Costiera**: gli articoli «Destination wedding in Toscana» e
-  «Matrimonio in Costiera Amalfitana» sono **non pubblicati** finché Gaia
-  non conferma che lavora lì (e con quale esperienza: la v1 diceva
-  «organizzo destination wedding toscani da oltre otto anni» e «conosco
-  ogni angolo di questa costa»). Poi vanno riscritti.
 - **Tutti i testi e le traduzioni inglesi** dei sei articoli pubblicati
   sono una bozza nostra, compresi i riquadri «In breve».
 - **«10 domande al wedding planner»**: le domande 6–10 le abbiamo aggiunte

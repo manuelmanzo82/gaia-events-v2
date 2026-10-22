@@ -1089,6 +1089,10 @@ Fatto:
   l'ordine è alfabetico (`2026-10-23-magazine-1-schema` prima di
   `-2-articoli`). Upload in `admin/`: script `carica-admin.sh` nello
   scratchpad (lint in `admin/storage/lint-…/`, poi copia).
+  Articoli 3 (Toscana) e 7 (Costiera) restano **non pubblicati** finché
+  Gaia non conferma le regioni (DA-CHIEDERE n. 15); poi si riscrivono.
+  I loro titoli H2/H3 venivano dalla v1 in minuscolo: corretti a mano
+  (migrazione `magazine-3-nomi-propri`), non è una domanda per Gaia.
 
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
