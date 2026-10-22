@@ -30,6 +30,8 @@ use Gaia\Admin\Controllers\PressController;
 use Gaia\Admin\Controllers\ReviewsController;
 use Gaia\Admin\Controllers\ServiceCompareController;
 use Gaia\Admin\Controllers\DestinationRegioniController;
+use Gaia\Admin\Controllers\PostCategoriesController;
+use Gaia\Admin\Controllers\VideosController;
 use Gaia\Admin\Controllers\ServicesController;
 use Gaia\Admin\Controllers\SettingsController;
 use Gaia\Admin\Controllers\StoriesController;
@@ -69,6 +71,8 @@ $resources = [
     'servizi' => ServicesController::class,
     'confronto-servizi' => ServiceCompareController::class,
     'regioni-destination' => DestinationRegioniController::class,
+    'categorie-magazine' => PostCategoriesController::class,
+    'video' => VideosController::class,
     'recensioni' => ReviewsController::class,
     'stampa' => PressController::class,
     'clienti' => ClientsController::class,
