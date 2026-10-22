@@ -14,7 +14,8 @@ export interface Alternate {
 export interface Meta {
   title: string;
   description: string;
-  canonical: string;
+  /** Null sulle pagine con noindex forzato (404): non hanno un indirizzo proprio. */
+  canonical: string | null;
   ogImage: string;
   ogType: 'website' | 'article';
   htmlLang: string;
@@ -84,7 +85,7 @@ export function buildMeta(options: BuildMetaOptions): Meta {
     imageAbsoluteUrl(seo?.ogImage ?? image ?? settings.ogImage, SITE_URL) ??
     SITE_URL + DEFAULT_OG_IMAGE;
 
-  const alternates: Alternate[] = availableLangs.map((alt) => ({
+  const alternates: Alternate[] = noindex ? [] : availableLangs.map((alt) => ({
     lang: alt,
     hreflang: HTML_LANG[alt],
     href: url(routeKey, alt, slug),
@@ -93,7 +94,7 @@ export function buildMeta(options: BuildMetaOptions): Meta {
   return {
     title,
     description,
-    canonical: url(routeKey, lang, slug),
+    canonical: noindex ? null : url(routeKey, lang, slug),
     ogImage,
     ogType,
     htmlLang: HTML_LANG[lang],

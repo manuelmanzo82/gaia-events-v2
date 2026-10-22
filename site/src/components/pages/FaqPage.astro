@@ -5,8 +5,9 @@
  *  1. Apertura tipografica: titolo grande e una riga (pagina faq).
  *  2. Ricerca istantanea: campo con etichetta, corrispondenze evidenziate
  *     (senza accenti né maiuscole), conteggio in un'area aria-live e, se
- *     non c'è niente, «Nessuna risposta per "…": scrivetemi». Senza JS
- *     il campo non compare e tutte le domande restano visibili.
+ *     non c'è niente, «Nessuna risposta per "…": scrivetemi». Il campo
+ *     c'è da subito (niente salti); senza JS lo nasconde un <noscript> e
+ *     tutte le domande restano visibili.
  *  3. Gruppi del back office (FAQ: gruppi), nel loro ordine. Desktop:
  *     indice fisso a sinistra con la voce corrente (scripts/indice-fisso,
  *     come Servizi e Magazine). Mobile: una select «Argomenti».
@@ -93,13 +94,16 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
 ---
 
 <BaseLayout lang={lang} routeKey="faq" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
+  {/* Ricerca e select ci sono da subito (nessuno spostamento quando arriva
+      il JS); senza JS non servono e si nascondono. */}
+  <noscript slot="head" set:html="<style>[data-cerca],[data-scegli]{display:none!important}</style>" />
   <section class="fq-apertura" data-theme="light" aria-labelledby="titolo-faq">
     <h1 id="titolo-faq" class="font-display fq-titolo">{title}</h1>
     {riga && <p class="text-lead fq-riga">{riga}</p>}
 
     {
       faqs.length > 0 && (
-        <div class="fq-cerca" hidden data-cerca>
+        <div class="fq-cerca" data-cerca>
           <label class="fq-cerca-etichetta" for="fq-campo">
             {t('faq.cerca')}
           </label>
@@ -146,7 +150,7 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
               </ol>
             </nav>
 
-            <div class="fq-scegli" hidden data-scegli>
+            <div class="fq-scegli" data-scegli>
               <label for="fq-argomento">{t('faq.vaiA')}</label>
               <select id="fq-argomento" data-argomento>
                 {gruppi.map((g) => (
@@ -216,7 +220,6 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
   const scegli = document.querySelector<HTMLElement>('[data-scegli]');
   const argomento = document.querySelector<HTMLSelectElement>('[data-argomento]');
   if (scegli && argomento) {
-    scegli.hidden = false;
     argomento.addEventListener('change', () => {
       const g = document.getElementById(argomento.value);
       if (!g) return;
@@ -270,7 +273,6 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
   const domande = [...document.querySelectorAll<HTMLDetailsElement>('[data-domanda]')];
 
   if (cerca && campo && esito && nessuna && cercato && domande.length) {
-    cerca.hidden = false;
 
     // Testo senza accenti e minuscolo, con la posizione di ogni carattere
     // nel testo originale (per evidenziare il punto giusto).

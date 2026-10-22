@@ -14,7 +14,7 @@ const xDefault = meta.alternates.find((alt) => alt.lang === DEFAULT_LANG);
 
 <title>{meta.title}</title>
 <meta name="description" content={meta.description} />
-<link rel="canonical" href={meta.canonical} />
+{meta.canonical && <link rel="canonical" href={meta.canonical} />}
 
 {
   meta.noindex && (
@@ -32,7 +32,7 @@ const xDefault = meta.alternates.find((alt) => alt.lang === DEFAULT_LANG);
 <meta property="og:type" content={meta.ogType} />
 <meta property="og:title" content={meta.title} />
 <meta property="og:description" content={meta.description} />
-<meta property="og:url" content={meta.canonical} />
+{meta.canonical && <meta property="og:url" content={meta.canonical} />}
 <meta property="og:image" content={meta.ogImage} />
 <meta property="og:locale" content={meta.htmlLang.replace('-', '_')} />
 
