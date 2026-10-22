@@ -1,0 +1,170 @@
+---
+/**
+ * Magazine — 3. Griglia a ritmo di rivista: gruppi da tre, una card
+ * grande e due piccole, poi l'inverso. Nel gruppo la grande è il primo
+ * articolo con una copertina (una grande senza foto pesa poco), gli
+ * altri restano nell'ordine delle date. Mobile: una colonna.
+ *
+ * Il filtro per categoria (link dell'apertura, ?categoria=) lavora qui:
+ * nasconde le card e l'articolo in evidenza che non c'entrano e, mentre
+ * è attivo, la griglia diventa uniforme (il ritmo a gruppi non regge con
+ * buchi). Senza JS i link ricaricano l'indice completo.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import type { Post } from '../../lib/types';
+import Card from './Card.astro';
+
+interface Props {
+  lang: Lang;
+  posts: Post[];
+}
+
+const { lang, posts } = Astro.props;
+const t = useTranslations(lang);
+
+const gruppi: Array<{ grande: Post; piccole: Post[]; inverso: boolean }> = [];
+for (let i = 0; i < posts.length; i += 3) {
+  const fetta = posts.slice(i, i + 3);
+  const grande = fetta.find((p) => p.cover || p.coverVideo) ?? fetta[0];
+  gruppi.push({ grande, piccole: fetta.filter((p) => p !== grande), inverso: (i / 3) % 2 === 1 });
+}
+---
+
+{
+  posts.length > 0 && (
+    <section class="mg-griglia" data-theme="light" aria-label={t('nav.blog')} data-griglia>
+      {gruppi.map((g) => (
+        <div class:list={['mg-gruppo', { 'mg-gruppo--inverso': g.inverso, 'mg-gruppo--solo': g.piccole.length === 0 }]}>
+          <div class="mg-gruppo-grande">
+            <Card lang={lang} post={g.grande} taglia="grande" livello="h2" />
+          </div>
+          {g.piccole.length > 0 && (
+            <div class="mg-gruppo-piccole">
+              {g.piccole.map((p) => (
+                <Card lang={lang} post={p} taglia="piccola" livello="h2" />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+      <p class="mg-griglia-vuota" hidden data-vuota>
+        {t('magazine.nessuno')}
+      </p>
+    </section>
+  )
+}
+
+<script>
+  // Filtro per categoria: link veri, qui senza ricaricare.
+  const filtri = document.querySelector<HTMLElement>('[data-filtri]');
+  const griglia = document.querySelector<HTMLElement>('[data-griglia]');
+  if (filtri && griglia) {
+    const link = [...filtri.querySelectorAll<HTMLAnchorElement>('a[data-filtro]')];
+    const voci = [...document.querySelectorAll<HTMLElement>('main [data-categoria]')];
+    const vuota = griglia.querySelector<HTMLElement>('[data-vuota]');
+
+    const applica = (slug: string): void => {
+      let visibili = 0;
+      for (const v of voci) {
+        const mostra = !slug || v.dataset.categoria === slug;
+        v.hidden = !mostra;
+        if (mostra && griglia.contains(v)) visibili += 1;
+      }
+      griglia.classList.toggle('is-filtrato', Boolean(slug));
+      if (vuota) vuota.hidden = visibili > 0 || !slug;
+      for (const a of link) {
+        if ((a.dataset.filtro ?? '') === slug) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      }
+    };
+
+    for (const a of link) {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const slug = a.dataset.filtro ?? '';
+        const url = new URL(window.location.href);
+        if (slug) url.searchParams.set('categoria', slug);
+        else url.searchParams.delete('categoria');
+        window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+        applica(slug);
+      });
+    }
+
+    const iniziale = new URLSearchParams(window.location.search).get('categoria') ?? '';
+    applica(link.some((a) => a.dataset.filtro === iniziale) ? iniziale : '');
+  }
+</script>
+
+<style>
+  .mg-griglia {
+    display: grid;
+    gap: clamp(3rem, 8vh, 5rem);
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 90rem;
+    margin: clamp(4rem, 12vh, 7rem) auto var(--spacing-section);
+    padding-top: clamp(2.5rem, 6vh, 4rem);
+    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+  }
+
+  /* Filtro attivo: l'evidenza può sparire, un solo filetto basta. */
+  .mg-griglia.is-filtrato {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .mg-gruppo,
+  .mg-gruppo-piccole {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 3.5rem);
+  }
+
+  .mg-griglia-vuota {
+    margin: 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (min-width: 48rem) and (max-width: 63.99rem) {
+    .mg-gruppo-piccole {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .mg-gruppo {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: clamp(2.5rem, 4vw, 4.5rem);
+      align-items: start;
+    }
+
+    .mg-gruppo--inverso .mg-gruppo-grande {
+      order: 2;
+    }
+
+    .mg-gruppo--solo {
+      grid-template-columns: minmax(0, 7fr);
+    }
+
+    /* Filtro attivo: griglia uniforme a tre colonne. */
+    .mg-griglia.is-filtrato {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: clamp(1.5rem, 3vw, 3rem);
+    }
+
+    .mg-griglia.is-filtrato .mg-gruppo,
+    .mg-griglia.is-filtrato .mg-gruppo-grande,
+    .mg-griglia.is-filtrato .mg-gruppo-piccole {
+      display: contents;
+    }
+
+    .mg-griglia.is-filtrato .mg-griglia-vuota {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

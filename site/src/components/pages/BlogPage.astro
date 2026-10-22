@@ -20,6 +20,7 @@ import { breadcrumbs } from '../../lib/jsonld';
 import { categoriaSlug, inEvidenza, postsIn } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../magazine/Apertura.astro';
+import Griglia from '../magazine/Griglia.astro';
 import InEvidenza from '../magazine/InEvidenza.astro';
 
 interface Props {
@@ -66,6 +67,8 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
   <Apertura lang={lang} titolo={title} sottotitolo={sottotitolo} categorie={categorie} />
 
   <InEvidenza lang={lang} post={evidenza} />
+
+  <Griglia lang={lang} posts={altri} />
 </BaseLayout>
 
 <script>
