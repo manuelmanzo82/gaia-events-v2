@@ -31,6 +31,7 @@ import { buildMeta } from '../../lib/seo';
 import DaLontano from '../destination/DaLontano.astro';
 import Dove from '../destination/Dove.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
+import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
 
 interface Props {
@@ -67,6 +68,10 @@ const conto = blocco('timeline');
 const tappe = (conto?.items ?? [])
   .map((i) => ({ numero: i.label ?? '', unita: text(i.unit, lang), titolo: text(i.title, lang), testo: text(i.text, lang) }))
   .filter((i) => i.titolo && i.numero);
+const riti = blocco('riti');
+const voceRiti = (riti?.items ?? [])
+  .map((i) => ({ titolo: text(i.title, lang), serve: text(i.text, lang), cura: text(i.cura, lang) }))
+  .filter((r) => r.titolo);
 
 const meta = buildMeta({
   lang,
@@ -111,6 +116,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   <Dove lang={lang} titolo={text(dove?.title, lang)} intro={text(dove?.text, lang)} regioni={getDestinationRegions()} />
 
   <DaLontano titolo={text(conto?.title, lang)} tappe={tappe} />
+
+  <Riti lang={lang} titolo={text(riti?.title, lang)} intro={text(riti?.text, lang)} riti={voceRiti} />
 </BaseLayout>
 
 <script>

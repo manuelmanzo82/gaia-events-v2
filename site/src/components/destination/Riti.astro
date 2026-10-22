@@ -1,0 +1,137 @@
+---
+/**
+ * Destination — 5. Il rito: il blocco «riti» della pagina, tre card
+ * (civile, simbolico, religioso). Ogni card: «Cosa serve» (testo della
+ * voce) e «Cosa curo io» (chiave cura). Informazioni legali: testi
+ * prudenti e generici, da verificare con Gaia (DA-CHIEDERE n. 15).
+ * Le card salgono a cascata (data-reveal di motion.ts).
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  intro: string;
+  riti: Array<{ titolo: string; serve: string; cura: string }>;
+}
+
+const { lang, titolo, intro, riti } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  riti.length > 0 && (
+    <section class="dw-riti container-gaia" data-theme="light" aria-labelledby="titolo-riti">
+      <header class="dw-riti-testa">
+        <h2 id="titolo-riti" class="font-display dw-riti-titolo" data-reveal="righe">
+          {titolo}
+        </h2>
+        {intro && <p class="text-lead dw-riti-intro">{intro}</p>}
+      </header>
+
+      <ul class="dw-riti-card" role="list" data-reveal-gruppo>
+        {riti.map((r, i) => (
+          <li class="dw-rito" data-reveal="alto">
+            <p class="font-display dw-rito-num" aria-hidden="true">
+              {['I', 'II', 'III', 'IV', 'V'][i] ?? i + 1}
+            </p>
+            <h3 class="font-display dw-rito-nome">{r.titolo}</h3>
+            {r.serve && (
+              <>
+                <p class="dw-rito-etichetta">{t('destination.cosaServe')}</p>
+                <p class="dw-rito-testo">{r.serve}</p>
+              </>
+            )}
+            {r.cura && (
+              <>
+                <p class="dw-rito-etichetta">{t('destination.cosaCuro')}</p>
+                <p class="dw-rito-testo dw-rito-testo--cura">{r.cura}</p>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .dw-riti {
+    padding-block: var(--spacing-section);
+  }
+
+  .dw-riti-testa {
+    max-width: 44rem;
+    margin-bottom: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .dw-riti-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .dw-riti-intro {
+    margin: 1rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .dw-riti-card {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dw-rito {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.75rem, 3vw, 2.5rem);
+    border-top: 2px solid var(--color-oro);
+    border-radius: 0 0 16px 16px;
+    background: var(--color-bianco-caldo);
+  }
+
+  .dw-rito-num {
+    margin: 0;
+    font-size: 1.5rem;
+    font-style: italic;
+    line-height: 1;
+    color: var(--color-oro-testo);
+  }
+
+  .dw-rito-nome {
+    margin: 0.75rem 0 1.25rem;
+    font-size: clamp(2rem, 1.6rem + 1.2vw, 2.75rem);
+    line-height: 1.05;
+    font-weight: 400;
+  }
+
+  .dw-rito-etichetta {
+    margin: 1.25rem 0 0.4rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .dw-rito-testo {
+    margin: 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .dw-rito-testo--cura {
+    color: var(--color-inchiostro);
+  }
+
+  @media (min-width: 64rem) {
+    .dw-riti-card {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(1.25rem, 2.5vw, 2rem);
+    }
+  }
+</style>
