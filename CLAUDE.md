@@ -474,6 +474,15 @@ public_html/uploads/  immagini — mai toccate dal deploy
 - Mai scrivere un URL a mano: passa da `SITE_URL` e dagli helper di `i18n/routes.ts`.
 - Ogni campo nuovo nel database nasce **già bilingue** (`campo_it`, `campo_en`).
 - Niente adapter, niente runtime Node in produzione, niente dipendenze dal cloud.
+- **Prima di ogni upload in `admin/` si esegue `php -l` su ogni file PHP
+  modificato; se anche uno solo fallisce, non si carica niente.** In locale
+  PHP non c'è, quindi: i file vanno in una cartella temporanea fuori dal
+  web (`admin/storage/lint-AAAAMMGG/`, stessa struttura di `admin/`), lì
+  `php8.3 -l` su ognuno; solo se passano tutti si copiano al loro posto
+  (poi si cancella la cartella), altrimenti si cancella la cartella e si
+  corregge in locale. Mai estrarre un archivio direttamente in `admin/`
+  prima del lint: il 22/10 un apostrofo non escapato ha rotto per un
+  minuto la schermata eventi del back office dello staging.
 
 ## Stato e prossimi passi (16/10/2026)
 
