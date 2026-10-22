@@ -339,6 +339,8 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
           }
           for (const g of gruppi) g.hidden = false;
           indice?.querySelectorAll<HTMLElement>('[data-voce-gruppo]').forEach((li) => (li.hidden = false));
+          argomento?.querySelectorAll('option').forEach((o) => (o.hidden = o.disabled = false));
+          if (argomento) argomento.selectedIndex = 0;
           esito.textContent = '';
           nessuna.hidden = true;
           attiva = false;
@@ -367,7 +369,12 @@ const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
         indice
           ?.querySelector<HTMLElement>(`[data-voce-gruppo="${g.id}"]`)
           ?.toggleAttribute('hidden', vuoto);
+        const opzione = argomento?.querySelector<HTMLOptionElement>(`option[value="${g.id}"]`);
+        if (opzione) opzione.hidden = opzione.disabled = vuoto;
       }
+      // La select mostra solo i gruppi con risultati, a partire dal primo.
+      const primo = gruppi.find((g) => !g.hidden);
+      if (argomento && primo) argomento.value = primo.id;
 
       esito.textContent = trovate ? `${trovate} ${trovate === 1 ? esito.dataset.uno : esito.dataset.molti}` : '';
       cercato.textContent = grezzo;

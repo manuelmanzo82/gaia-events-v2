@@ -1130,7 +1130,7 @@ Fatto:
     link». Servizi mostra i gruppi `servizi` + `costi`, Destination
     `destination`.
   - **Privacy e cookie**: `components/pages/LegalPage.astro` (SimplePage
-    non è più usata da nessuna rotta). Colonna 65ch, indice dagli H2 del
+    eliminata il 28/10: non la usava più nessuna rotta). Colonna 65ch, indice dagli H2 del
     body (id aggiunti in pagina), «Ultimo aggiornamento» da
     `pages.revised_on` (data a mano nel back office, solo per privacy e
     cookie). Testi in bozza: revisione legale in DA-CHIEDERE n. 18.
