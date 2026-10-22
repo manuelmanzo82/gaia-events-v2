@@ -1158,7 +1158,8 @@ export default function Preventivatore(props: Props): ReactNode {
               </div>
             </div>
 
-            {ripreso && indice > 0 && <p className="pv-ripreso">{t.ripreso}</p>}
+            {/* Con il benvenuto il «Bentornati» è già lì: niente doppione. */}
+            {ripreso && indice > 0 && !props.benvenuto && <p className="pv-ripreso">{t.ripreso}</p>}
 
             <div className="pv-passo" key={step}>
               <h2 className="pv-titolo" tabIndex={-1} ref={titolo} id="pv-titolo">
