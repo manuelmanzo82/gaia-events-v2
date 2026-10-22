@@ -15,10 +15,11 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { existsIn, langsFor } from '../../lib/availability';
-import { getPage, getPostCategories, text } from '../../lib/content';
+import { getPage, getPostCategories, getSettings, text } from '../../lib/content';
 import { breadcrumbs } from '../../lib/jsonld';
 import { categoriaSlug, inEvidenza, postsIn } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
+import CtaFinale from '../home/CtaFinale.astro';
 import Apertura from '../magazine/Apertura.astro';
 import Griglia from '../magazine/Griglia.astro';
 import InEvidenza from '../magazine/InEvidenza.astro';
@@ -69,6 +70,8 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
   <InEvidenza lang={lang} post={evidenza} />
 
   <Griglia lang={lang} posts={altri} />
+
+  <CtaFinale lang={lang} settings={getSettings()} foto={getSettings().magazine?.photos?.cta ?? null} lato="destra" />
 </BaseLayout>
 
 <script>
