@@ -305,13 +305,16 @@ const tracce = clip?.tracks
     /* Desktop: testo centrato in verticale sulla cornice, cornice un po'
        più bassa: l'apertura non lascia vuoti sopra il titolo. */
     .ct-apertura {
-      grid-template-columns: minmax(0, 1fr) min(22vw, 19rem);
+      grid-template-columns: min(22vw, 19rem) minmax(0, 1fr);
       align-items: center;
       gap: clamp(3rem, 6vw, 6rem);
       padding-top: calc(var(--altezza-header, 146px) + 0.5rem);
     }
 
+    /* Desktop: cornice a sinistra, titolo e testo a destra (su mobile
+       l'ordine resta quello del markup: titolo, poi cornice). */
     .ct-cornice {
+      order: -1;
       width: 100%;
       margin: 0;
     }

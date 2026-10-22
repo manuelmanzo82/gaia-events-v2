@@ -166,7 +166,10 @@ const telefono = BUSINESS.phone.replace(/^\+39(\d{3})(\d{3})(\d+)$/, '+39 $1 $2 
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(0deg, rgb(27 22 17 / 0.82) 0%, rgb(27 22 17 / 0.45) 38%, rgb(27 22 17 / 0) 68%);
+    /* Velo in basso per il titolo e in alto per la freccia (cielo chiaro). */
+    background:
+      linear-gradient(180deg, rgb(27 22 17 / 0.5) 0%, rgb(27 22 17 / 0) 28%),
+      linear-gradient(0deg, rgb(27 22 17 / 0.82) 0%, rgb(27 22 17 / 0.45) 38%, rgb(27 22 17 / 0) 68%);
   }
 
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
