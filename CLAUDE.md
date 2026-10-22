@@ -1035,6 +1035,28 @@ Fatto:
   reduced-motion attivo**: per vedere gli effetti
   `page.emulateMedia({ reducedMotion: 'no-preference' })`.
 
+- **Pagina Destination wedding** (22/10/2026, `components/destination/`,
+  pubblico soprattutto straniero, testi IT/EN in bozza nel database):
+  Apertura (riusa `servizi/Apertura`, hero «destinationWedding», foto 60,
+  H1 EN «Your wedding in Italy»; `sizes` mobile 80vh perché l'AVIF della
+  60 è pesante) · Perché con me (blocco values, icone `posto`, `lingua`,
+  `rete` in Icona.astro) · Dove (tabella `destination_regioni`, back
+  office «Destination: regioni»; elenco `<ol>` testuale + mappa SVG
+  aria-hidden da `lib/mappa-italia.ts`, generata con
+  `tools/genera-mappa-italia.py` da Natural Earth; desktop con motion:
+  classe `is-scena`, palco sticky sotto `--altezza-header` e regione
+  dallo scroll; mobile card con snap; link a Luoghi solo se il luogo
+  esiste nella lingua) · Da lontano (blocco timeline con `label` = numero
+  e `unit`; desktop classe `is-conto`, rullo di cifre) · Il rito (blocco
+  `riti`, chiave `cura`) · I vostri ospiti (blocco `ospiti` + highlights
+  sezione `ospiti`; striscia trascinabile con inerzia, cursore, tastiera)
+  · Realizzati (`stories.destination`) · FAQ gruppo `destination`
+  (riusa `servizi/Domande`; da qui esiste anche /en/faq/) · Ponte ·
+  CtaFinale con props `riga` e `contattiPari`. Parallasse e maschere sono
+  moduli condivisi (`scripts/parallasse.ts`, `scripts/maschere-foto.ts`).
+  Regioni: in produzione si pubblicano solo quelle confermate da Gaia
+  (DA-CHIEDERE n. 15); Lago di Como c'è ma non è pubblicata.
+
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
   Instagram Login (account professionale di Gaia, niente pagina Facebook
