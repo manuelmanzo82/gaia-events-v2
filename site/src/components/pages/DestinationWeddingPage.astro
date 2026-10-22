@@ -27,6 +27,7 @@ import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
 import {
   getDestinationRegions,
   getDestinationWedding,
+  getFaqs,
   getHero,
   getHighlights,
   getServices,
@@ -35,7 +36,7 @@ import {
   text,
 } from '../../lib/content';
 import { picture } from '../../lib/images';
-import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
+import { breadcrumbs, faqPage, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import DaLontano from '../destination/DaLontano.astro';
 import Dove from '../destination/Dove.astro';
@@ -44,6 +45,7 @@ import Realizzati from '../destination/Realizzati.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
 import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
+import Domande from '../servizi/Domande.astro';
 
 interface Props {
   lang: Lang;
@@ -91,6 +93,12 @@ const fotoOspiti = getHighlights('ospiti')
   .map((h) => h.image)
   .filter((i): i is NonNullable<typeof i> => i !== null);
 
+// Domande frequenti: gruppo «destination», con domanda e risposta in
+// questa lingua.
+const domande = getFaqs()
+  .filter((f) => f.active && f.group === 'destination' && text(f.question, lang) && text(f.answer, lang))
+  .sort((a, b) => a.order - b.order);
+
 const meta = buildMeta({
   lang,
   routeKey: 'destinationWedding',
@@ -109,7 +117,11 @@ const crumbs = [
 // Service: il servizio «destination» del back office, se tradotto.
 const servizio = getServices().find((s) => s.slug === 'destination' && isPublishable(s, lang, SERVICE_FIELDS));
 
-const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'italia') : null];
+const jsonLd = [
+  breadcrumbs(crumbs),
+  servizio ? serviceSchema(servizio, lang, 'italia') : null,
+  faqPage(domande, lang),
+];
 ---
 
 <BaseLayout lang={lang} routeKey="destinationWedding" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
@@ -140,6 +152,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   <Ospiti lang={lang} titolo={text(ospiti?.title, lang)} intro={text(ospiti?.text, lang)} voci={vociOspiti} foto={fotoOspiti} />
 
   <Realizzati lang={lang} titolo={text(getSettings().destination?.storie?.title, lang)} />
+
+  <Domande lang={lang} titolo={text(getSettings().destination?.faq?.title, lang) || t('nav.faq')} domande={domande} />
 </BaseLayout>
 
 <script>
