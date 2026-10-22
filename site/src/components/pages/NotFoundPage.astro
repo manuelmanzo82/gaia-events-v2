@@ -1,9 +1,23 @@
 ---
+/**
+ * Pagina non trovata, IT (/404.html) ed EN (/en/404/). L'.htaccess serve
+ * quella inglese a ogni indirizzo sotto /en/, con status 404 vero.
+ *
+ * Testo a sinistra (titolo, riga e tre strade: Home, Servizi,
+ * Conosciamoci), foto a destra dall'header in giù; su mobile la foto va
+ * sotto. Testi e foto dalle impostazioni del gruppo «errore», con i testi
+ * di ripiego in i18n. noindex e fuori dalla sitemap.
+ */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { existsIn } from '../../lib/availability';
+import { getSettings, text } from '../../lib/content';
+import { picture } from '../../lib/images';
 import { buildMeta } from '../../lib/seo';
+import Icona from '../Icona.astro';
+import Picture from '../Picture.astro';
 
 interface Props {
   lang: Lang;
@@ -11,18 +25,185 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const errore = getSettings().errore;
+
+const titolo = text(errore?.titolo, lang) || t('error.404.title');
+const riga = text(errore?.riga, lang) || t('error.404.text');
+const foto = picture(errore?.photos?.foto ?? null, lang, '(min-width: 64rem) 45vw, 100vw');
+
+const strade = [
+  { href: path('home', lang), etichetta: t('nav.home') },
+  existsIn('services', lang) ? { href: path('services', lang), etichetta: t('nav.services') } : null,
+  existsIn('quote', lang) ? { href: path('quote', lang), etichetta: t('nav.quote') } : null,
+].filter((s): s is { href: string; etichetta: string } => s !== null);
 
 const meta = buildMeta({
   lang,
   routeKey: 'home',
   title: t('error.404.title'),
-  description: t('error.404.text'),
+  description: riga,
   noindex: true,
 });
 ---
 
-<BaseLayout lang={lang} routeKey="home" meta={meta}>
-  <h1>{t('error.404.title')}</h1>
-  <p>{t('error.404.text')}</p>
-  <p><a href={path('home', lang)}>{t('cta.home')}</a></p>
+<BaseLayout lang={lang} routeKey="home" meta={meta} largo>
+  <section class:list={['nf', { 'nf--senza-foto': !foto }]} data-theme="light" aria-labelledby="titolo-404">
+    <div class="nf-testo">
+      <p class="nf-codice" aria-hidden="true">404</p>
+      <h1 id="titolo-404" class="font-display nf-titolo">{titolo}</h1>
+      <p class="text-lead nf-riga">{riga}</p>
+      <ul class="nf-strade" role="list">
+        {
+          strade.map((s) => (
+            <li>
+              <a href={s.href}>
+                <span>{s.etichetta}</span>
+                <Icona nome="freccia" dimensione={22} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    {
+      foto && (
+        <figure class="nf-foto">
+          <Picture data={foto} cap={false} loading="eager" fetchpriority="high" class="nf-img" />
+        </figure>
+      )
+    }
+  </section>
 </BaseLayout>
+
+<style>
+  .nf {
+    display: grid;
+    gap: clamp(2.5rem, 6vh, 3.5rem);
+    padding-top: calc(var(--altezza-header, 96px) + clamp(1rem, 4vh, 2.5rem));
+  }
+
+  .nf-testo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    margin: 0 auto;
+  }
+
+  .nf-codice {
+    margin: 0 0 1rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--color-oro-testo);
+  }
+
+  .nf-titolo {
+    max-width: 16ch;
+    margin: 0;
+    font-size: clamp(2.5rem, 1.2rem + 4.2vw, 5rem);
+    line-height: 1.02;
+    font-weight: 300;
+    letter-spacing: -0.015em;
+  }
+
+  .nf-riga {
+    max-width: 34rem;
+    margin: clamp(1rem, 3vh, 1.5rem) 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .nf-strade {
+    max-width: 28rem;
+    margin: clamp(2rem, 5vh, 3rem) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-beige);
+  }
+
+  .nf-strade li {
+    border-bottom: 1px solid var(--color-beige);
+  }
+
+  .nf-strade a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.75rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+    color: var(--color-inchiostro);
+    text-decoration: none;
+  }
+
+  .nf-strade a :global(svg) {
+    color: var(--color-bordeaux);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .nf-strade a:hover,
+  .nf-strade a:focus-visible {
+    color: var(--color-bordeaux);
+  }
+
+  .nf-strade a:hover :global(svg),
+  .nf-strade a:focus-visible :global(svg) {
+    transform: translateX(4px);
+  }
+
+  .nf-strade a:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .nf-foto {
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .nf-foto :global(picture),
+  .nf-foto :global(.nf-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .nf--senza-foto {
+    padding-bottom: var(--spacing-section-sm);
+  }
+
+  /* Desktop: testo a sinistra, foto a filo bordo a destra, alta quanto lo schermo. */
+  @media (min-width: 64rem) {
+    .nf {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 45vw);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: center;
+      /* La foto parte sotto l'header: il menu non finisce mai sulla foto. */
+      min-height: 100svh;
+      padding-top: var(--altezza-header, 146px);
+    }
+
+    .nf-testo {
+      width: auto;
+      margin: 0 0 0 max(clamp(1.25rem, 4vw, 3.5rem), calc((100vw - 76rem) / 2));
+      padding-block: clamp(2rem, 6vh, 4rem);
+    }
+
+    .nf-foto {
+      align-self: stretch;
+      aspect-ratio: auto;
+      min-height: 32rem;
+    }
+
+    .nf--senza-foto {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-strade a :global(svg) {
+      transition: none;
+    }
+  }
+</style>

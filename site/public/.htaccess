@@ -11,8 +11,13 @@ Options -Indexes -MultiViews
 
 DirectoryIndex index.html
 
-# Il build genera 404.html in radice.
+# Il build genera 404.html in radice (italiana) e en/404/index.html:
+# sotto /en/ la 404 è quella inglese. Status 404 vero in entrambi i casi
+# (ErrorDocument con un percorso locale non fa redirect).
 ErrorDocument 404 /404.html
+<If "%{REQUEST_URI} =~ m#^/en(/|$)#">
+    ErrorDocument 404 /en/404/index.html
+</If>
 
 # ---------------------------------------------------------------------
 # Staging: vedi il blocco <If> in fondo al file (solo noindex, niente

@@ -90,6 +90,12 @@ export interface Settings extends SeoFields {
     social?: { titolo?: Localized };
     photos?: Record<string, Image | null>;
   };
+  /** Pagina non trovata (impostazioni del gruppo «errore»). */
+  errore?: {
+    titolo?: Localized;
+    riga?: Localized;
+    photos?: Record<string, Image | null>;
+  };
   /** Magazine (impostazioni del gruppo «magazine»). */
   magazine?: {
     autrice?: { bio?: Localized };
