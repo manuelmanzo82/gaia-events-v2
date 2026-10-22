@@ -1,0 +1,315 @@
+---
+/**
+ * Contatti — apertura: «Scriviamoci» enorme (H1) e una riga, accanto la
+ * cornice verticale 9:16, sempre presente.
+ *
+ *  - Con il video di saluto (impostazione contatti.video, libreria Video):
+ *    parte muto con i sottotitoli quando è a schermo, mai con
+ *    reduced-motion (allora resta fermo sul poster con «Riproduci»). Un
+ *    tocco o clic sul video attiva l'audio; due bottoni accessibili:
+ *    audio sì/no (aria-pressed) e pausa/riproduci. Sottotitoli: tracce VTT
+ *    IT/EN, quella della lingua della pagina accesa.
+ *  - Senza video: il ritratto di Gaia (contatti.photos.ritratto) con la
+ *    firma «Gaia». Nessun segnaposto finto.
+ * Mobile: la cornice va sotto il titolo, larga circa l'80%.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { text } from '../../lib/content';
+import { picture, uploadUrl } from '../../lib/images';
+import type { Image, Video } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  riga: string;
+  video: Video | null;
+  ritratto: Image | null;
+  firma: string;
+}
+
+const { lang, titolo, riga, video, ritratto, firma } = Astro.props;
+const t = useTranslations(lang);
+const SIZES = '(min-width: 64rem) min(26vw, 22rem), 80vw';
+const clip = video && video.kind === 'clip' && video.mp4 ? video : null;
+const poster = clip ? picture(clip.poster, lang, SIZES) : null;
+const posterSrc = poster?.sources.find((s) => s.type === 'image/webp')?.srcset.split(',').at(-1)?.trim().split(' ')[0] ?? poster?.src;
+const foto = clip ? null : picture(ritratto, lang, SIZES);
+const tracce = clip?.tracks
+  ? (['it', 'en'] as const)
+      .filter((l) => clip.tracks?.[l])
+      .map((l) => ({ lingua: l, src: uploadUrl(clip.tracks![l]!), etichetta: l === 'it' ? 'Italiano' : 'English' }))
+  : [];
+---
+
+<section class="ct-apertura" data-theme="light" aria-labelledby="titolo-contatti">
+  <div class="ct-apertura-testo">
+    <h1 id="titolo-contatti" class="font-display ct-titolo">{titolo}</h1>
+    {riga && <p class="text-lead ct-riga">{riga}</p>}
+  </div>
+
+  {
+    (clip || foto) && (
+      <figure class="ct-cornice" data-saluto={clip ? '' : undefined}>
+        {clip ? (
+          <>
+            <video
+              class="ct-video"
+              muted
+              playsinline
+              preload="none"
+              poster={posterSrc}
+              width={clip.width}
+              height={clip.height}
+              aria-label={text(clip.title, lang) || t('contatti.videoSaluto')}
+              data-video
+            >
+              {clip.webm && <source src={uploadUrl(clip.webm)} type="video/webm" />}
+              <source src={uploadUrl(clip.mp4!)} type="video/mp4" />
+              {tracce.map((tr) => (
+                <track kind="captions" src={tr.src} srclang={tr.lingua} label={tr.etichetta} default={tr.lingua === lang} />
+              ))}
+            </video>
+            <div class="ct-video-comandi">
+              <button type="button" class="ct-video-btn" aria-pressed="false" data-audio data-on={t('contatti.audio')} data-off={t('contatti.audioOff')}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+                  <path class="ct-onda" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+                  <path class="ct-muto" d="m16 9.5 5 5m0-5-5 5" />
+                </svg>
+                <span>{t('contatti.audio')}</span>
+              </button>
+              <button type="button" class="ct-video-btn" data-play data-pausa={t('contatti.pausa')} data-riproduci={t('contatti.play')}>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path class="ct-ico-play" d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
+                  <path class="ct-ico-pausa" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
+                </svg>
+                <span class="sr-only">{t('contatti.play')}</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          foto && (
+            <>
+              <Picture data={foto} cap={false} loading="eager" fetchpriority="high" class="ct-ritratto" />
+              {firma && (
+                <figcaption class="font-display ct-firma" aria-hidden="true">
+                  {firma}
+                </figcaption>
+              )}
+            </>
+          )
+        )}
+      </figure>
+    )
+  }
+</section>
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const cornice = document.querySelector<HTMLElement>('[data-saluto]');
+  const video = cornice?.querySelector<HTMLVideoElement>('[data-video]');
+  const audio = cornice?.querySelector<HTMLButtonElement>('[data-audio]');
+  const play = cornice?.querySelector<HTMLButtonElement>('[data-play]');
+  if (cornice && video && audio && play) {
+    const fermo = riduciMotion();
+    let toccato = false;
+
+    const aggiorna = (): void => {
+      const muto = video.muted;
+      audio.setAttribute('aria-pressed', String(!muto));
+      const etichetta = audio.querySelector('span');
+      if (etichetta) etichetta.textContent = (muto ? audio.dataset.on : audio.dataset.off) ?? '';
+      cornice.classList.toggle('is-muto', muto);
+      cornice.classList.toggle('is-pausa', video.paused);
+      const sr = play.querySelector('span');
+      if (sr) sr.textContent = (video.paused ? play.dataset.riproduci : play.dataset.pausa) ?? '';
+    };
+    const parti = (): void => {
+      void video.play().catch(() => {
+        video.controls = true;
+      });
+    };
+    const attivaAudio = (): void => {
+      toccato = true;
+      video.muted = !video.muted;
+      if (video.paused) parti();
+      aggiorna();
+    };
+
+    // Sottotitoli: quelli della lingua della pagina, accesi.
+    const lingua = document.documentElement.lang.startsWith('en') ? 'en' : 'it';
+    for (const tr of Array.from(video.textTracks)) tr.mode = tr.language === lingua ? 'showing' : 'disabled';
+
+    video.addEventListener('click', attivaAudio);
+    audio.addEventListener('click', attivaAudio);
+    play.addEventListener('click', () => {
+      toccato = true;
+      if (video.paused) parti();
+      else video.pause();
+    });
+    for (const ev of ['play', 'pause', 'ended', 'volumechange']) video.addEventListener(ev, aggiorna);
+
+    // Muto, solo a schermo, mai con reduced-motion; esce = pausa (se
+    // l'audio non l'ha acceso chi guarda).
+    if (!fermo && 'IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (righe) => {
+          for (const r of righe) {
+            if (r.isIntersecting && video.muted && !video.ended) parti();
+            else if (!r.isIntersecting && (video.muted || !toccato)) video.pause();
+          }
+        },
+        { threshold: 0.5 },
+      ).observe(video);
+    }
+    aggiorna();
+  }
+</script>
+
+<style>
+  .ct-apertura {
+    display: grid;
+    gap: clamp(2rem, 6vh, 3rem);
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 76rem;
+    margin: 0 auto;
+    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 5vh, 3rem));
+    padding-bottom: clamp(2.5rem, 7vh, 4.5rem);
+  }
+
+  .ct-titolo {
+    margin: 0 0 0 -0.04em;
+    font-size: clamp(4rem, 1rem + 11vw, 11rem);
+    line-height: 0.9;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    padding-bottom: 0.12em;
+  }
+
+  .ct-riga {
+    max-width: 30rem;
+    margin: 1.25rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* Cornice 9:16: ritratto o video, stessa misura. */
+  .ct-cornice {
+    position: relative;
+    width: 80%;
+    max-width: 22rem;
+    margin: 0 auto;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--color-beige);
+  }
+
+  .ct-cornice :global(picture),
+  .ct-cornice :global(.ct-ritratto),
+  .ct-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  /* La 107: Gaia sta a destra; il 9:16 la tiene nel quadro. */
+  .ct-cornice :global(.ct-ritratto) {
+    object-position: 78% 40% !important;
+  }
+
+  .ct-firma {
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1rem;
+    margin: 0;
+    font-size: 2rem;
+    font-style: italic;
+    color: var(--color-avorio-su-notte);
+    text-shadow: 0 1px 12px rgb(27 22 17 / 0.45);
+  }
+
+  .ct-cornice::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 30%;
+    background: linear-gradient(0deg, rgb(27 22 17 / 0.4), rgb(27 22 17 / 0));
+    pointer-events: none;
+  }
+
+  .ct-video {
+    cursor: pointer;
+  }
+
+  .ct-video::cue {
+    font-size: 0.95rem;
+    background: rgb(27 22 17 / 0.72);
+  }
+
+  /* Comandi in alto: in basso ci sono i sottotitoli. */
+  .ct-video-comandi {
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    top: 0.75rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .ct-video-btn {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(27 22 17 / 0.62);
+    color: var(--color-avorio-su-notte);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  .ct-video-btn:focus-visible {
+    outline: 2px solid var(--color-oro);
+    outline-offset: 2px;
+  }
+
+  .ct-muto,
+  .ct-ico-play {
+    display: none;
+  }
+
+  .is-muto .ct-muto,
+  .is-pausa .ct-ico-play {
+    display: inline;
+  }
+
+  .is-muto .ct-onda,
+  .is-pausa .ct-ico-pausa {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .ct-apertura {
+      grid-template-columns: minmax(0, 1fr) min(26vw, 22rem);
+      align-items: end;
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+
+    .ct-cornice {
+      width: 100%;
+      margin: 0;
+    }
+  }
+</style>

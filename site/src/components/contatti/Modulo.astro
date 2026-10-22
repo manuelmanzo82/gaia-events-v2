@@ -1,0 +1,241 @@
+---
+/**
+ * Contatti — form breve: nome, email, telefono facoltativo, messaggio,
+ * consenso privacy. Va a admin/api/contact.php (JSON) con il campo
+ * trappola «website», i secondi di compilazione (tempo minimo lato
+ * server) e il limite per IP. Finisce nelle Richieste come «Contatto»,
+ * distinto dal tool. Ringraziamento sul posto, senza ricaricare: il focus
+ * va sul messaggio di grazie. Errori in un'area aria-live.
+ * Senza JS il form non parte (il server risponde JSON): le tessere sopra
+ * restano tutte link normali.
+ */
+import { ENDPOINTS, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  grazie: string;
+}
+
+const { lang, titolo, grazie } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="ct-modulo" data-theme="light" aria-labelledby="titolo-modulo">
+  <h2 id="titolo-modulo" class="font-display ct-modulo-titolo">{titolo}</h2>
+
+  <form class="ct-form" novalidate data-modulo data-endpoint={ENDPOINTS.contact} data-lang={lang} data-errore={t('contatti.errore')} data-invio={t('contatti.invio')}>
+    <div class="ct-campi">
+      <label class="ct-campo">
+        <span>{t('contatti.nome')}</span>
+        <input type="text" name="name" autocomplete="name" required maxlength="160" />
+      </label>
+      <label class="ct-campo">
+        <span>{t('contatti.email')}</span>
+        <input type="email" name="email" autocomplete="email" required maxlength="190" />
+      </label>
+      <label class="ct-campo">
+        <span>{t('contatti.telefono')} <span class="ct-facoltativo">({t('contatti.facoltativo')})</span></span>
+        <input type="tel" name="phone" autocomplete="tel" maxlength="60" />
+      </label>
+      <label class="ct-campo ct-campo--largo">
+        <span>{t('contatti.messaggio')}</span>
+        <textarea name="message" rows="5" required maxlength="5000"></textarea>
+      </label>
+    </div>
+
+    <div class="ct-trappola" aria-hidden="true">
+      <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+
+    <label class="ct-privacy">
+      <input type="checkbox" name="privacy" required />
+      <span>
+        {t('contatti.privacy1')}<a href={path('privacy', lang)} target="_blank" rel="noopener">{t('contatti.privacy2')}</a>{t('contatti.privacy3')}
+      </span>
+    </label>
+
+    <p class="ct-errore" role="alert" aria-live="assertive" data-errore-box></p>
+
+    <button type="submit" class="btn btn--pieno ct-invia">{t('contatti.invia')}</button>
+  </form>
+
+  <div class="ct-grazie" hidden data-grazie>
+    <p class="font-display ct-grazie-testo" tabindex="-1">{grazie}</p>
+  </div>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-modulo]');
+  const grazie = document.querySelector<HTMLElement>('[data-grazie]');
+  if (form && grazie) {
+    const inizio = Date.now();
+    const box = form.querySelector<HTMLElement>('[data-errore-box]')!;
+    const bottone = form.querySelector<HTMLButtonElement>('.ct-invia')!;
+    const testoBottone = bottone.textContent ?? '';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      box.textContent = '';
+      // Controllo nativo prima dell'invio: il primo campo non valido.
+      if (!form.checkValidity()) {
+        const primo = form.querySelector<HTMLInputElement>(':invalid');
+        primo?.focus();
+        form.reportValidity();
+        return;
+      }
+      const dati = new FormData(form);
+      const corpo = {
+        name: String(dati.get('name') ?? '').trim(),
+        email: String(dati.get('email') ?? '').trim(),
+        phone: String(dati.get('phone') ?? '').trim() || undefined,
+        message: String(dati.get('message') ?? '').trim(),
+        privacy: dati.get('privacy') === 'on',
+        website: String(dati.get('website') ?? ''),
+        lang: form.dataset.lang,
+        elapsed: (Date.now() - inizio) / 1000,
+      };
+      bottone.disabled = true;
+      bottone.textContent = form.dataset.invio ?? '';
+      try {
+        const r = await fetch(form.dataset.endpoint ?? '', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(corpo),
+        });
+        const risposta = (await r.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        if (r.ok && risposta.ok) {
+          form.hidden = true;
+          grazie.hidden = false;
+          grazie.querySelector<HTMLElement>('[tabindex]')?.focus();
+          return;
+        }
+        box.textContent = risposta.error || form.dataset.errore || '';
+      } catch {
+        box.textContent = form.dataset.errore ?? '';
+      }
+      bottone.disabled = false;
+      bottone.textContent = testoBottone;
+    });
+  }
+</script>
+
+<style>
+  .ct-modulo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 52rem;
+    margin: var(--spacing-section) auto 0;
+  }
+
+  .ct-modulo-titolo {
+    margin: 0 0 clamp(1.5rem, 4vh, 2.25rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .ct-campi {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .ct-campo {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .ct-facoltativo {
+    font-weight: 400;
+    color: var(--color-grigio-caldo);
+  }
+
+  .ct-campo input,
+  .ct-campo textarea {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 22%, transparent);
+    border-radius: 2px;
+    background: var(--color-bianco-caldo);
+    font: inherit;
+    font-size: 1rem;
+    color: var(--color-inchiostro);
+  }
+
+  .ct-campo textarea {
+    resize: vertical;
+  }
+
+  .ct-campo input:focus-visible,
+  .ct-campo textarea:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 1px;
+  }
+
+  .ct-trappola {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .ct-privacy {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .ct-privacy input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.15rem;
+    accent-color: var(--color-bordeaux);
+  }
+
+  .ct-privacy a {
+    color: var(--color-bordeaux);
+  }
+
+  .ct-errore {
+    min-height: 1.5rem;
+    margin: 1rem 0 0;
+    color: var(--color-bordeaux);
+  }
+
+  .ct-invia {
+    margin-top: 0.5rem;
+  }
+
+  .ct-grazie-testo {
+    margin: 0;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 2px solid var(--color-oro);
+    border-radius: 0 0 16px 16px;
+    background: var(--color-bianco-caldo);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2.125rem);
+    line-height: 1.25;
+  }
+
+  .ct-grazie-testo:focus {
+    outline: none;
+  }
+
+  @media (min-width: 48rem) {
+    .ct-campi {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ct-campo--largo {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

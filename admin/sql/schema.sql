@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `setting_key` VARCHAR(190) NOT NULL,
   `group_name` VARCHAR(80) NOT NULL DEFAULT 'generale',
   `label`      VARCHAR(190) NOT NULL DEFAULT '',
-  `field_type` ENUM('text','textarea','html','media','number','boolean') NOT NULL DEFAULT 'text',
+  `field_type` ENUM('text','textarea','html','media','number','boolean','video') NOT NULL DEFAULT 'text',
   `value_it`   TEXT DEFAULT NULL,
   `value_en`   TEXT DEFAULT NULL,
   `sort_order` SMALLINT NOT NULL DEFAULT 0,
@@ -736,6 +736,9 @@ CREATE TABLE IF NOT EXISTS `videos` (
   -- Clip: file in uploads/video/ (mp4 H.264 obbligatorio, webm facoltativo).
   `file_mp4`        VARCHAR(400) DEFAULT NULL,
   `file_webm`       VARCHAR(400) DEFAULT NULL,
+  -- Sottotitoli WebVTT (clip), mostrati quando il video è muto.
+  `sottotitoli_it`  VARCHAR(400) DEFAULT NULL,
+  `sottotitoli_en`  VARCHAR(400) DEFAULT NULL,
   -- YouTube/Vimeo: link incollato e id estratto dal back office.
   `url`             VARCHAR(500) DEFAULT NULL,
   `provider_id`     VARCHAR(64) DEFAULT NULL,

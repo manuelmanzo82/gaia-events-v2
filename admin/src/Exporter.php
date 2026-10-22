@@ -290,9 +290,11 @@ final class Exporter
             $key = (string) $row['setting_key'];
 
             // I campi immagine contengono l'id di un record media.
-            $value = $row['field_type'] === 'media'
-                ? self::image(self::mediaById((int) $row['value_it']))
-                : self::text($row['value_it'], $row['value_en']);
+            $value = match ($row['field_type']) {
+                'media' => self::image(self::mediaById((int) $row['value_it'])),
+                'video' => self::video((int) $row['value_it']),
+                default => self::text($row['value_it'], $row['value_en']),
+            };
 
             // 'sections.about.title' → $data['sections']['about']['title']
             self::setNested($data, explode('.', $key), $value);
@@ -599,6 +601,11 @@ final class Exporter
             'kind' => $tipo,
             'mp4' => $tipo === 'clip' ? (string) $row['file_mp4'] : null,
             'webm' => $tipo === 'clip' && !empty($row['file_webm']) ? (string) $row['file_webm'] : null,
+            // Sottotitoli WebVTT (solo per le clip caricate).
+            'tracks' => [
+                'it' => $tipo === 'clip' && !empty($row['sottotitoli_it']) ? (string) $row['sottotitoli_it'] : null,
+                'en' => $tipo === 'clip' && !empty($row['sottotitoli_en']) ? (string) $row['sottotitoli_en'] : null,
+            ],
             'providerId' => $tipo !== 'clip' ? (string) $row['provider_id'] : null,
             'poster' => $poster,
             'width' => (int) $poster['width'],

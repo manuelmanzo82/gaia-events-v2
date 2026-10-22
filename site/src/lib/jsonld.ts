@@ -63,6 +63,33 @@ export function localBusiness(opts: {
   };
 }
 
+/**
+ * Pagina Contatti: ContactPage con l'attività (LocalBusiness) e il suo
+ * contactPoint (telefono, email, lingue: da confermare con Gaia).
+ */
+export function contactPage(opts: { lang: Lang; title: string; description?: string; image?: string | null }): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: opts.title,
+    description: opts.description,
+    url: url('contact', opts.lang),
+    inLanguage: HTML_LANG[opts.lang],
+    mainEntity: {
+      ...localBusiness({ lang: opts.lang, description: opts.description, image: opts.image }),
+      '@context': undefined,
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        telephone: BUSINESS.phone,
+        email: BUSINESS.email,
+        availableLanguage: ['Italian', 'English'],
+        areaServed: 'Worldwide',
+      },
+    },
+  };
+}
+
 const PERSON_ID = `${SITE_URL}/#gaia`;
 
 /** La pagina Chi sono come AboutPage, con la persona come soggetto. */

@@ -1,0 +1,267 @@
+---
+/**
+ * Contatti — quattro tessere grandi:
+ *  - Conosciamoci (al tool, «3 minuti, senza impegno»): la principale,
+ *    bordeaux e più grande;
+ *  - WhatsApp, con il messaggio precompilato IT/EN;
+ *  - Telefono (tel:), con il numero;
+ *  - Email (mailto:), con l'indirizzo visibile e «Copia» accanto.
+ * Al passaggio (e al focus) un filetto si disegna sotto il titolo e
+ * l'icona si sposta appena; con reduced-motion niente transizioni.
+ * Target ampi: le tessere sono link a tutta superficie (l'email ha due
+ * azioni, quindi link e bottone affiancati).
+ */
+import { BUSINESS, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import Icona from '../Icona.astro';
+
+interface Props {
+  lang: Lang;
+  testi: Record<string, { titolo: string; testo: string }>;
+  messaggioWhatsapp: string;
+}
+
+const { lang, testi, messaggioWhatsapp } = Astro.props;
+const t = useTranslations(lang);
+const tool = existsIn('quote', lang) ? path('quote', lang) : null;
+const wa = `https://wa.me/${BUSINESS.whatsapp}${messaggioWhatsapp ? `?text=${encodeURIComponent(messaggioWhatsapp)}` : ''}`;
+// +39 327 385 5362: leggibile, il link resta quello internazionale.
+const telefono = BUSINESS.phone.replace(/^\+39(\d{3})(\d{3})(\d+)$/, '+39 $1 $2 $3');
+---
+
+<section class="ct-tessere" data-theme="light" aria-label={t('nav.contact')}>
+  {
+    tool && (
+      <a class="ct-tessera ct-tessera--principale" href={tool}>
+        <span class="font-display ct-tessera-titolo">
+          <span class="ct-filo">{testi.conosciamoci?.titolo}</span>
+        </span>
+        {testi.conosciamoci?.testo && <span class="ct-tessera-testo">{testi.conosciamoci.testo}</span>}
+        <span class="ct-tessera-icona">
+          <Icona nome="freccia" dimensione={28} />
+        </span>
+      </a>
+    )
+  }
+
+  <a class="ct-tessera" href={wa} rel="noopener" target="_blank">
+    <span class="ct-tessera-icona"><Icona nome="whatsapp" dimensione={26} /></span>
+    <span class="font-display ct-tessera-titolo"><span class="ct-filo">{testi.whatsapp?.titolo}</span></span>
+    {testi.whatsapp?.testo && <span class="ct-tessera-testo">{testi.whatsapp.testo}</span>}
+  </a>
+
+  <a class="ct-tessera" href={`tel:${BUSINESS.phone}`}>
+    <span class="ct-tessera-icona"><Icona nome="telefono" dimensione={26} /></span>
+    <span class="font-display ct-tessera-titolo"><span class="ct-filo">{testi.telefono?.titolo}</span></span>
+    <span class="ct-tessera-dato">{telefono}</span>
+    {testi.telefono?.testo && <span class="ct-tessera-testo">{testi.telefono.testo}</span>}
+  </a>
+
+  <div class="ct-tessera ct-tessera--email">
+    <span class="ct-tessera-icona"><Icona nome="email" dimensione={26} /></span>
+    <span class="font-display ct-tessera-titolo"><span class="ct-filo">{testi.email?.titolo}</span></span>
+    <span class="ct-email">
+      <a class="ct-tessera-dato" href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+      <button type="button" class="ct-copia" data-copia={BUSINESS.email} data-copiato={t('contatti.copiato')} hidden>
+        <Icona nome="copia" dimensione={16} />
+        <span>{t('contatti.copia')}</span>
+      </button>
+      <span class="sr-only" aria-live="polite" data-esito></span>
+    </span>
+  </div>
+</section>
+
+<script>
+  for (const b of document.querySelectorAll<HTMLButtonElement>('.ct-copia[data-copia]')) {
+    if (!navigator.clipboard) continue;
+    b.hidden = false;
+    const etichetta = b.querySelector('span');
+    const iniziale = etichetta?.textContent ?? '';
+    const esito = b.parentElement?.querySelector<HTMLElement>('[data-esito]');
+    b.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copia ?? '');
+        if (etichetta) etichetta.textContent = b.dataset.copiato ?? '';
+        if (esito) esito.textContent = b.dataset.copiato ?? '';
+        window.setTimeout(() => {
+          if (etichetta) etichetta.textContent = iniziale;
+        }, 2500);
+      } catch {
+        /* permesso negato: resta il link */
+      }
+    });
+  }
+</script>
+
+<style>
+  .ct-tessere {
+    display: grid;
+    gap: 1rem;
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 76rem;
+    margin: 0 auto;
+  }
+
+  .ct-tessera {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-height: 9rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 2px solid var(--color-oro);
+    border-radius: 0 0 16px 16px;
+    background: var(--color-bianco-caldo);
+    color: var(--color-inchiostro);
+    text-decoration: none;
+  }
+
+  .ct-tessera--principale {
+    align-content: end;
+    min-height: 16rem;
+    border-top: 0;
+    border-radius: 16px;
+    background: var(--color-bordeaux);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .ct-tessera-icona {
+    display: inline-flex;
+    color: var(--color-oro-testo);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .ct-tessera--principale .ct-tessera-icona {
+    position: absolute;
+    top: clamp(1.5rem, 3vw, 2.25rem);
+    right: clamp(1.5rem, 3vw, 2.25rem);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .ct-tessera-titolo {
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    line-height: 1.1;
+  }
+
+  .ct-tessera--principale .ct-tessera-titolo {
+    font-size: clamp(2.5rem, 1.6rem + 3vw, 4.25rem);
+  }
+
+  /* Filetto che si disegna sotto il titolo. */
+  .ct-filo {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.6s var(--ease-gaia);
+  }
+
+  .ct-tessera-testo {
+    color: var(--color-grigio-caldo);
+  }
+
+  .ct-tessera--principale .ct-tessera-testo {
+    color: var(--color-avorio-su-notte);
+    font-size: 1.0625rem;
+  }
+
+  .ct-tessera-dato {
+    font-size: 1.0625rem;
+    color: var(--color-inchiostro);
+    word-break: break-word;
+  }
+
+  .ct-email {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+
+  .ct-email a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .ct-copia {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 35%, transparent);
+    background: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-inchiostro);
+    cursor: pointer;
+  }
+
+  .ct-copia[hidden] {
+    display: none;
+  }
+
+  .ct-copia:hover,
+  .ct-copia:focus-visible {
+    border-color: var(--color-bordeaux);
+    color: var(--color-bordeaux);
+  }
+
+  a.ct-tessera:hover .ct-filo,
+  a.ct-tessera:focus-visible .ct-filo,
+  .ct-tessera--email:hover .ct-filo,
+  .ct-tessera--email:focus-within .ct-filo {
+    background-size: 100% 1px;
+  }
+
+  a.ct-tessera:hover .ct-tessera-icona,
+  a.ct-tessera:focus-visible .ct-tessera-icona,
+  .ct-tessera--email:hover .ct-tessera-icona {
+    transform: translateX(3px);
+  }
+
+  a.ct-tessera:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .ct-tessera--principale:focus-visible {
+    outline-color: var(--color-oro);
+  }
+
+  @media (min-width: 48rem) {
+    .ct-tessere {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ct-tessera--principale {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Desktop: la principale a sinistra, alta quanto le altre tre. */
+  @media (min-width: 64rem) {
+    .ct-tessere {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      grid-template-rows: repeat(3, auto);
+    }
+
+    .ct-tessera--principale {
+      grid-column: 1;
+      grid-row: 1 / span 3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-filo,
+    .ct-tessera-icona {
+      transition: none;
+    }
+  }
+</style>

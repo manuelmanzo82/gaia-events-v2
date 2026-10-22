@@ -25,6 +25,9 @@ final class Inquiry
     /** Sotto questi secondi il preventivo è di un bot. */
     private const MIN_SECONDS_QUOTE = 8;
 
+    /** Form contatti: sotto questi secondi è un bot. */
+    private const MIN_SECONDS_CONTACT = 4;
+
     private const KINDS = ['matrimonio', 'unione_civile', 'festa', 'aziendale'];
     private const KIND_LABELS = [
         'matrimonio' => 'matrimonio',
@@ -260,6 +263,31 @@ final class Inquiry
     /** @param array<string, mixed> $input */
     private static function receiveContact(array $input, string $ip): array
     {
+        $lang = ($input['lang'] ?? 'it') === 'en' ? 'en' : 'it';
+
+        // Compilato in pochi secondi: un bot (risposta «ok», come la trappola).
+        if ((float) ($input['elapsed'] ?? 0) < self::MIN_SECONDS_CONTACT) {
+            return self::ok();
+        }
+
+        $errore = fn (string $it, string $en): array => [
+            'ok' => false,
+            'status' => 422,
+            'message' => $lang === 'en' ? $en : $it,
+        ];
+        if (trim((string) ($input['name'] ?? '')) === '') {
+            return $errore('Manca il nome.', 'Your name is missing.');
+        }
+        if (filter_var(trim((string) ($input['email'] ?? '')), FILTER_VALIDATE_EMAIL) === false) {
+            return $errore('Indirizzo email non valido.', 'Invalid email address.');
+        }
+        if (trim((string) ($input['message'] ?? '')) === '') {
+            return $errore('Manca il messaggio.', 'Your message is missing.');
+        }
+        if (($input['privacy'] ?? false) !== true && ($input['privacy'] ?? '') !== '1') {
+            return $errore('Serve il consenso alla privacy.', 'Privacy consent is required.');
+        }
+
         $rules = [
             'name' => 'required|max:160',
             'email' => 'required|email|max:190',
@@ -275,7 +303,13 @@ final class Inquiry
         }
 
         if (self::tooMany($ip, 'contact')) {
-            return ['ok' => false, 'status' => 429, 'message' => 'Troppe richieste dallo stesso indirizzo. Riprova più tardi.'];
+            return [
+                'ok' => false,
+                'status' => 429,
+                'message' => $lang === 'en'
+                    ? 'Too many messages from the same address. Please try again later.'
+                    : 'Troppe richieste dallo stesso indirizzo. Riprova più tardi.',
+            ];
         }
 
         $data = $validator->validated();

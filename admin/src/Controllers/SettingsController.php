@@ -34,6 +34,7 @@ final class SettingsController
             'title' => 'Impostazioni e testi',
             'groups' => $groups,
             'mediaOptions' => $this->mediaOptions(),
+            'videoOptions' => $this->videoOptions(),
         ]);
     }
 
@@ -82,6 +83,18 @@ final class SettingsController
         $value = trim($value);
 
         return $value === '' ? null : $value;
+    }
+
+    /** @return array<int, string> Video della libreria, per le impostazioni di tipo «video». */
+    private function videoOptions(): array
+    {
+        $options = [];
+
+        foreach (Db::all('SELECT id, tipo, titolo_it FROM videos ORDER BY created_at DESC') as $row) {
+            $options[(int) $row['id']] = (string) $row['titolo_it'] . ' (' . (string) $row['tipo'] . ')';
+        }
+
+        return $options;
     }
 
     /** @return array<int, string> */

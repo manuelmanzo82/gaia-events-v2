@@ -80,6 +80,16 @@ export interface Settings extends SeoFields {
     faq?: { title?: Localized };
     photos?: Record<string, Image | null>;
   };
+  /** Pagina Contatti (impostazioni del gruppo «contatti»). */
+  contatti?: {
+    video?: Video | null;
+    firma?: Localized;
+    tessera?: Record<string, { titolo?: Localized; testo?: Localized }>;
+    whatsapp?: { messaggio?: Localized };
+    form?: { titolo?: Localized; grazie?: Localized };
+    social?: { titolo?: Localized };
+    photos?: Record<string, Image | null>;
+  };
   /** Magazine (impostazioni del gruppo «magazine»). */
   magazine?: {
     autrice?: { bio?: Localized };
@@ -184,6 +194,8 @@ export interface Video {
   kind: 'clip' | 'youtube' | 'vimeo';
   mp4: string | null;
   webm: string | null;
+  /** Sottotitoli WebVTT per lingua (solo clip). */
+  tracks?: { it: string | null; en: string | null };
   providerId: string | null;
   poster: Image;
   width: number;

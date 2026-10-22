@@ -2,6 +2,7 @@
 /**
  * @var array<string, list<array<string, mixed>>> $groups
  * @var array<int, string> $mediaOptions
+ * @var array<int, string> $videoOptions
  */
 ?>
 <h1>Impostazioni e testi</h1>
@@ -33,6 +34,15 @@
               <?php foreach ($mediaOptions as $mediaId => $path): ?>
                 <option value="<?= (int) $mediaId ?>"<?= (int) $row['value_it'] === (int) $mediaId ? ' selected' : '' ?>>
                   <?= e($path) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          <?php elseif ($row['field_type'] === 'video'): ?>
+            <select name="value_it[<?= $id ?>]">
+              <option value="">— nessun video —</option>
+              <?php foreach ($videoOptions as $videoId => $nome): ?>
+                <option value="<?= (int) $videoId ?>"<?= (int) $row['value_it'] === (int) $videoId ? ' selected' : '' ?>>
+                  <?= e($nome) ?>
                 </option>
               <?php endforeach; ?>
             </select>
