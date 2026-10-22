@@ -1091,6 +1091,12 @@ Prossimi passi (fase 3, resta):
 - Pagine interne (Chi sono, Servizi, Luoghi, Storie, Partner, preventivatore)
   sono ancora segnaposto.
 - Contenuti veri da Gaia (luoghi, location, storie, testi dei partner).
+- **Prima del lancio, togliere il video di prova del Magazine**: back office
+  → Video → «Video di prova: tavola nella serra» (id 1 sullo staging, file
+  `uploads/video/clip-20261022-072647-*.mp4/.webm`, generati con ffmpeg
+  dalla foto 106) e il suo blocco nell'articolo «Matrimonio in primavera».
+  Esiste solo sullo staging; le copie in `site/public/uploads/video/` sono
+  locali (cartella ignorata da git).
 - **Prima del lancio, form del back office per i blocchi di pagina**
   (`page_sections`: percorso e valori di Chi sono; filosofia, passi del
   metodo e «Non solo matrimoni» di Servizi), con le foto per voce (chiave
