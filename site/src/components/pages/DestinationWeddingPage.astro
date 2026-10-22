@@ -65,8 +65,10 @@ const titoloApertura = text(hero?.title, lang) || titoloPagina;
 const fraseApertura = text(hero?.subtitle, lang) || text(data.intro, lang);
 const immagineApertura = hero?.images?.[0] ?? hero?.poster ?? data.hero ?? null;
 // Su mobile la foto copre i 68svh alti (come Servizi): in «cover» è larga
-// circa 1,5 × l'altezza, quindi più del viewport.
-const SIZES_APERTURA = '(max-width: 47.99rem) 102vh, 100vw';
+// circa 1,5 × l'altezza (~102vh). Qui però la foto 60 è molto più pesante
+// della 57 di Servizi (AVIF 1600: 176 KB contro 74) ed è l'LCP mobile: con
+// 80vh il browser prende la 1200 (113 KB); la metà bassa è sotto il velo.
+const SIZES_APERTURA = '(max-width: 47.99rem) 80vh, 100vw';
 const fotoApertura = picture(immagineApertura, lang, SIZES_APERTURA);
 const preload = fotoApertura?.sources[0] ?? null;
 
