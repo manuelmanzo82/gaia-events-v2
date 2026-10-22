@@ -20,10 +20,13 @@ import { POST_FIELDS, existsIn } from '../../lib/availability';
 import { availableLangs, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { blogPosting, breadcrumbs, faqDaBlocchi, videoObject } from '../../lib/jsonld';
+import { url } from '../../i18n/routes';
 import { titoliH2, videoDi } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import type { Post } from '../../lib/types';
 import ArticoloApertura from '../magazine/ArticoloApertura.astro';
+import Autrice from '../magazine/Autrice.astro';
+import Video from '../magazine/Video.astro';
 import BarraLettura from '../magazine/BarraLettura.astro';
 import Corpo from '../magazine/Corpo.astro';
 import IndiceArticolo from '../magazine/IndiceArticolo.astro';
@@ -69,6 +72,7 @@ const jsonLd = [
 ];
 
 const titoli = titoliH2(blocks, lang);
+const fotoAutrice = picture(settings.magazine?.photos?.autrice ?? null, lang, '11rem');
 const conIndice = titoli.length >= 3;
 const ritratto = picture(settings.magazine?.photos?.autrice ?? null, lang, '7rem');
 const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
@@ -78,7 +82,15 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
   {rss && <link slot="head" rel="alternate" type="application/rss+xml" title={`${t('nav.blog')} — Gaia Events`} href={rss} />}
 
   <article class="mg-articolo">
-    <ArticoloApertura lang={lang} post={post} ritratto={ritratto} />
+    <ArticoloApertura lang={lang} post={post} ritratto={ritratto}>
+      {
+        post.coverVideo && (
+          <div slot="copertina-video" class="mg-copertina-video">
+            <Video lang={lang} video={post.coverVideo} larga eager />
+          </div>
+        )
+      }
+    </ArticoloApertura>
 
     <BarraLettura />
     <div class:list={['mg-articolo-corpo', { 'mg-articolo-corpo--indice': conIndice }]}>
@@ -86,6 +98,13 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
       <div class="mg-lettura" data-lettura>
         <InBreve lang={lang} punti={post.summary?.[lang] ?? []} />
         <Corpo lang={lang} post={post} />
+        <Autrice
+          lang={lang}
+          foto={fotoAutrice}
+          bio={text(settings.magazine?.autrice?.bio, lang)}
+          titolo={title}
+          indirizzo={url('blog', lang, slug)}
+        />
       </div>
     </div>
   </article>
@@ -105,6 +124,12 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
       grid-template-columns: 13rem minmax(0, 1fr) 13rem;
       gap: 2rem;
     }
+  }
+
+  .mg-copertina-video {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 75rem;
+    margin: clamp(2rem, 6vh, 3.5rem) auto 0;
   }
 
   .mg-lettura > :global(.mg-breve) {

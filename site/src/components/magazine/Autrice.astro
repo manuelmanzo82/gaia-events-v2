@@ -1,0 +1,223 @@
+---
+/**
+ * Articolo — 6 e 7. Box autrice (foto di Gaia, due righe dal back office,
+ * link a Chi sono) e Condividi: solo «copia link» e WhatsApp, senza
+ * script esterni. «Copia link» usa la Clipboard API e annuncia l'esito
+ * (aria-live); senza JS resta il link WhatsApp, che è un link normale.
+ */
+import { BUSINESS, type Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
+import type { PictureData } from '../../lib/images';
+import Icona from '../Icona.astro';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  foto: PictureData | null;
+  bio: string;
+  titolo: string;
+  indirizzo: string;
+}
+
+const { lang, foto, bio, titolo, indirizzo } = Astro.props;
+const t = useTranslations(lang);
+const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${titolo} ${indirizzo}`)}`;
+---
+
+<footer class="mg-fine">
+  <div class="mg-condividi">
+    <p class="mg-condividi-titolo">{t('magazine.condividi')}</p>
+    <div class="mg-condividi-bottoni">
+      <button
+        type="button"
+        class="mg-condividi-btn"
+        data-copia={indirizzo}
+        data-copiato={t('magazine.linkCopiato')}
+        data-etichetta={t('magazine.copiaLink')}
+        hidden
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1" /><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
+        </svg>
+        <span>{t('magazine.copiaLink')}</span>
+      </button>
+      <a class="mg-condividi-btn" href={whatsapp} rel="noopener" target="_blank">
+        <Icona nome="whatsapp" dimensione={18} />
+        <span>WhatsApp</span>
+      </a>
+      <span class="sr-only" aria-live="polite" data-esito></span>
+    </div>
+  </div>
+
+  <section class="mg-autrice" aria-labelledby="titolo-autrice">
+    {
+      foto && (
+        <span class="mg-autrice-foto" aria-hidden="true">
+          <Picture data={foto} cap={false} class="mg-autrice-img" />
+        </span>
+      )
+    }
+    <div>
+      <h2 id="titolo-autrice" class="mg-autrice-etichetta">{t('magazine.autrice')}</h2>
+      <p class="font-display mg-autrice-nome">{BUSINESS.legalName}</p>
+      {bio && <p class="mg-autrice-bio">{bio}</p>}
+      {
+        existsIn('about', lang) && (
+          <a class="link-filo" href={path('about', lang)}>
+            {t('magazine.chiSono')}
+          </a>
+        )
+      }
+    </div>
+  </section>
+</footer>
+
+<script>
+  for (const bottone of document.querySelectorAll<HTMLButtonElement>('[data-copia]')) {
+    if (!navigator.clipboard) continue;
+    bottone.hidden = false;
+    const esito = bottone.parentElement?.querySelector<HTMLElement>('[data-esito]');
+    const testo = bottone.querySelector('span');
+    bottone.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(bottone.dataset.copia ?? window.location.href);
+        const copiato = bottone.dataset.copiato ?? '';
+        if (testo) testo.textContent = copiato;
+        if (esito) esito.textContent = copiato;
+        window.setTimeout(() => {
+          if (testo) testo.textContent = bottone.dataset.etichetta ?? '';
+        }, 2500);
+      } catch {
+        /* permesso negato: resta il link WhatsApp */
+      }
+    });
+  }
+</script>
+
+<style>
+  .mg-fine {
+    width: min(42rem, 100%);
+    margin: clamp(3rem, 8vh, 4.5rem) auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+  }
+
+  .mg-condividi {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: center;
+  }
+
+  .mg-condividi-titolo,
+  .mg-autrice-etichetta {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .mg-condividi-bottoni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .mg-condividi-btn {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 35%, transparent);
+    background: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-inchiostro);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.3s var(--ease-gaia), color 0.3s var(--ease-gaia);
+  }
+
+  .mg-condividi-btn:hover,
+  .mg-condividi-btn:focus-visible {
+    border-color: var(--color-bordeaux);
+    color: var(--color-bordeaux);
+  }
+
+  .mg-condividi-btn[hidden] {
+    display: none;
+  }
+
+  .mg-autrice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border-radius: 16px;
+    background: var(--color-bianco-caldo);
+  }
+
+  .mg-autrice-foto {
+    display: block;
+    width: 5.5rem;
+    height: 5.5rem;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+
+  .mg-autrice-foto :global(picture),
+  .mg-autrice-foto :global(.mg-autrice-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .mg-autrice-foto :global(.mg-autrice-img) {
+    object-position: 50% 0 !important;
+    transform: scale(2.4);
+    transform-origin: 73% 24%;
+  }
+
+  .mg-autrice-nome {
+    margin: 0.35rem 0 0;
+    font-size: 1.625rem;
+    line-height: 1.1;
+  }
+
+  .mg-autrice-bio {
+    margin: 0.5rem 0 0.6rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* Telefono: foto sopra il testo, il testo prende tutta la riga. */
+  @media (max-width: 30rem) {
+    .mg-autrice {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    .mg-autrice-foto {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-condividi-btn {
+      transition: none;
+    }
+  }
+</style>
