@@ -1118,6 +1118,43 @@ Fatto:
     (NOME|fuso, una per riga), `contain: inline-size` perché le liste
     che scorrono su mobile non allarghino la pagina.
 
+- **FAQ, privacy e cookie, 404, Dicono di me** (22/10/2026).
+  - **FAQ**: gruppi nella tabella `faq_groups` (chiave fissa `generali`,
+    `servizi`, `costi`, `destination`; back office «FAQ: gruppi»),
+    `faqs.group_id` e ancore stabili `slug_it/en` (create dalla domanda al
+    primo salvataggio, poi non cambiano). Export `gruppi-faq.json`; nel
+    JSON delle FAQ `group` è la chiave del gruppo. Pagina: ricerca
+    istantanea senza accenti né maiuscole (`<mark>`, conteggio
+    aria-live, «Nessuna risposta per…»), indice fisso dei gruppi su
+    desktop e select su mobile, `/faq/#ancora` apre la domanda, «Copia
+    link». Servizi mostra i gruppi `servizi` + `costi`, Destination
+    `destination`.
+  - **Privacy e cookie**: `components/pages/LegalPage.astro` (SimplePage
+    non è più usata da nessuna rotta). Colonna 65ch, indice dagli H2 del
+    body (id aggiunti in pagina), «Ultimo aggiornamento» da
+    `pages.revised_on` (data a mano nel back office, solo per privacy e
+    cookie). Testi in bozza: revisione legale in DA-CHIEDERE n. 18.
+  - **Conservazione**: `Inquiry::pulizia()` senza cron, chiamata a ogni
+    nuova richiesta e all'apertura di pannello e Richieste: IP e browser
+    a NULL dopo 30 giorni, richieste cancellate dopo 24 mesi. Il
+    salvataggio del tool (`gaia-preventivo-v1`) scade dopo 30 giorni
+    dall'inizio. Se cambiano i tempi vanno cambiati anche i testi della
+    privacy e della cookie policy.
+  - **Video YouTube/Vimeo**: sotto la facciata la riga «Avviando il video
+    si caricano contenuti da …» con il link alla cookie policy.
+  - **404**: `NotFoundPage` con testi e foto nelle impostazioni del gruppo
+    `errore` (foto 5). In `.htaccess` un `<If>` serve `/en/404/index.html`
+    sotto `/en/`, status 404 vero; noindex, fuori dalla sitemap.
+  - **Dicono di me**: `reviews.consenso` (senza, il back office rifiuta
+    «Attiva» e il sito non la mostra: `getReviews()` filtra),
+    `reviews.story_id`, `press.tipo` (articolo, tv, podcast, altro),
+    `dicono.photos.cta` = foto 1. Citazioni in `components/dicono/
+    Citazioni.astro`: classe `is-scena` solo su desktop con il movimento
+    (palco sticky sotto `--sotto-header`, citazione dallo scroll, parole
+    in span); altrimenti impilate. Prova in locale con
+    `dicono-finti.py` nello scratchpad (scrive dati finti solo se i JSON
+    sono vuoti; `ripristina` li rimette vuoti). Online resta nascosta.
+
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
   Instagram Login (account professionale di Gaia, niente pagina Facebook

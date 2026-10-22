@@ -341,9 +341,54 @@ testi sono una bozza nostra (IT ed EN), salvati nel database.
   scrivo?»).
 - **Lingue** per i contatti (JSON-LD: oggi italiano e inglese), vedi anche
   la voce 15.
-- **Privacy policy**: cita ancora Web3Forms, che non usiamo più (i form
-  vanno al nostro server). Il testo legale va aggiornato da chi l'ha
-  scritto.
+- **Privacy policy**: riscritta il 22/10, vedi la voce 18.
+
+### 18. FAQ, privacy e cookie, 404, Dicono di me (22/10/2026)
+
+- **Revisione legale di privacy e cookie policy.** I testi nuovi (IT/EN,
+  bozza nel database dello staging) descrivono ciò che il sito fa davvero,
+  ma **non sono un parere legale**: vanno fatti leggere a chi segue Gaia
+  (commercialista o consulente privacy), compresa la scelta di **non
+  mostrare il banner sui cookie** (nessun cookie sul sito pubblico, solo
+  il salvataggio tecnico del tool e due indicatori di sessione; YouTube e
+  Vimeo solo dopo il clic).
+- **Titolare, P.IVA e indirizzo.** In privacy c'è «Gaia Crognale, che
+  lavora con il nome Gaia Events, Viale Vaticano 53, 00165 Roma». Manca la
+  **P.IVA** (anche nel footer) e va confermato che il titolare sia lei come
+  persona e che l'indirizzo sia quello giusto.
+- **Conservazione delle richieste: 24 mesi** (bozza scritta in privacy).
+  Allo scadere si cancellano da sole, senza cron: la pulizia gira a ogni
+  nuova richiesta e quando si apre il back office. IP e browser si
+  cancellano dopo 30 giorni. Gaia conferma i 24 mesi o sceglie un altro
+  periodo?
+- **Email di notifica «leggera» (opzione, non implementata).** Oggi
+  l'avviso di ogni richiesta arriva su Gmail con tutti i dati, quindi i
+  dati passano anche da Google (scritto in privacy). In alternativa
+  l'email potrebbe contenere solo il nome e il link al back office, senza
+  i dati della richiesta: meno dati fuori dall'UE, ma per leggerla serve
+  entrare nel pannello. Gaia preferisce così?
+- **FAQ da confermare** (oggi pubblicate in forma prudente, tranne dove
+  scritto):
+  - il primo incontro è **gratuito**?
+  - conviene partire con **almeno un anno** di anticipo?
+  - **matrimoni all'estero**: la FAQ è **non pubblicata** finché Gaia non
+    conferma di farli;
+  - **visita delle location** per conto delle coppie (FAQ «Puoi
+    consigliarci la location?» e destination);
+  - **modalità di pagamento**: oggi «scritte nella proposta, prima di
+    cominciare»;
+  - si possono citare **Calzedonia, BNL e Zurich**? Tolti dalla FAQ finché
+    non c'è il permesso.
+- **Dicono di me** (la pagina è pronta ma resta nascosta finché non ci
+  sono contenuti veri):
+  - **recensioni vere con consenso scritto** di chi le ha scritte, con il
+    nome come deve comparire; il back office non lascia pubblicare senza
+    la casella «Consenso scritto ricevuto». Meglio se con l'evento
+    collegato e una foto;
+  - **stampa**: articoli, podcast e il **link alla puntata TV** (solo il
+    link: niente clip caricate sul sito), con testata, titolo e data;
+  - **loghi dei clienti** solo con l'autorizzazione scritta di ogni
+    azienda (vedi anche la voce 11).
 
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
