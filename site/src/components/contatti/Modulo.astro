@@ -201,8 +201,12 @@ const t = useTranslations(lang);
     accent-color: var(--color-bordeaux);
   }
 
+  /* Link nel testo: sottolineato, non solo di colore diverso. */
   .ct-privacy a {
     color: var(--color-bordeaux);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
   }
 
   .ct-errore {

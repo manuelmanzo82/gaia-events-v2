@@ -9,7 +9,9 @@
  *  - Al cambio di minuto le cifre che cambiano girano (split-flap); con
  *    reduced-motion cambiano e basta.
  *  - Se il fuso del visitatore non coincide con nessuna città, si aggiunge
- *    «Da voi» con la sua ora.
+ *    «Da voi» con la sua ora: su desktop in fondo alla riga di testo (la
+ *    fila delle città non va a capo, niente spostamenti), su mobile nella
+ *    fascia che scorre.
  *  - Mobile: la fascia scorre lenta in orizzontale all'infinito (una copia
  *    nascosta ai lettori di schermo); in pausa con reduced-motion e al
  *    tocco (un altro tocco la riprende).
@@ -38,7 +40,12 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
 {
   elenco.length > 0 && (
     <div class="dw-orologi" data-orologi data-davoi={davoi}>
-      {riga && <p class="dw-orologi-riga">{riga}</p>}
+      <p class="dw-orologi-riga">
+        {riga && <span>{riga}</span>}
+        {/* «Da voi» su desktop: in fondo alla riga, dove c'è spazio (la fila
+            delle città non cambia mai altezza). Riempito dallo script. */}
+        <span class="dw-citta-voce dw-citta-voce--voi dw-voi-riga" data-voi-riga hidden />
+      </p>
       <div class="dw-tabellone" role="group" aria-label={etichetta} data-tabellone>
         <ul class="dw-citta" role="list" data-originale>
           {elenco.map((c) => (
@@ -86,7 +93,15 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
       voce.dataset.fuso = mio;
       const nome = voce.querySelector('.dw-citta-nome');
       if (nome) nome.textContent = box.dataset.davoi ?? '';
+      // Mobile: nella fascia che scorre (nascosta da 64rem in su, CSS).
       originale.append(voce);
+      // Desktop: in fondo alla riga di testo, con le stesse cifre.
+      const riga = box.querySelector<HTMLElement>('[data-voi-riga]');
+      if (riga) {
+        riga.dataset.fuso = mio;
+        riga.innerHTML = voce.innerHTML;
+        riga.hidden = false;
+      }
     }
 
     // Scorrimento su mobile: una copia identica, nascosta ai lettori.
@@ -148,6 +163,10 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
   }
 
   .dw-orologi-riga {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    align-items: baseline;
     margin: 0 0 0.75rem;
     font-family: var(--font-display);
     font-size: 1.125rem;
@@ -188,7 +207,8 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
 
   /* Desktop: niente punto dopo l'ultima città. */
   @media (min-width: 64rem) {
-    .dw-citta-voce:last-child::after {
+    .dw-citta-voce:last-child::after,
+    .dw-citta-voce:has(+ .dw-citta-voce--voi)::after {
       content: none;
     }
   }
@@ -276,8 +296,28 @@ const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale ne
     }
   }
 
-  /* Desktop: la fila va a capo se non ci sta (es. con «Da voi»). */
+  /* «Da voi»: su mobile nella fascia, su desktop in fondo alla riga. */
+  .dw-voi-riga {
+    font-family: var(--font-sans);
+    font-style: normal;
+  }
+
+  .dw-voi-riga::after {
+    content: none;
+  }
+
+  @media (max-width: 63.98rem) {
+    .dw-voi-riga {
+      display: none !important;
+    }
+  }
+
+  /* Desktop: la fila va a capo solo se proprio non ci sta. */
   @media (min-width: 64rem) {
+    .dw-tabellone .dw-citta-voce--voi {
+      display: none;
+    }
+
     .dw-tabellone {
       display: block;
     }
