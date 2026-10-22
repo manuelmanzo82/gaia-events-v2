@@ -24,10 +24,11 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
-import { getDestinationWedding, getHero, getServices, isPublishable, text } from '../../lib/content';
+import { getDestinationRegions, getDestinationWedding, getHero, getServices, isPublishable, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import Dove from '../destination/Dove.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
 import Apertura from '../servizi/Apertura.astro';
 
@@ -59,6 +60,8 @@ const perche = blocco('values');
 const colonne = (perche?.items ?? [])
   .map((i) => ({ titolo: text(i.title, lang), testo: text(i.text, lang), icona: i.icon }))
   .filter((c) => c.titolo);
+
+const dove = blocco('destinations');
 
 const meta = buildMeta({
   lang,
@@ -99,6 +102,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   <Apertura eyebrow={t('nav.destinationWedding')} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={[]} />
 
   <PercheConMe titolo={text(perche?.title, lang)} colonne={colonne} />
+
+  <Dove lang={lang} titolo={text(dove?.title, lang)} intro={text(dove?.text, lang)} regioni={getDestinationRegions()} />
 </BaseLayout>
 
 <script>

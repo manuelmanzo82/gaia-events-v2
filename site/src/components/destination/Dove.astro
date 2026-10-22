@@ -1,0 +1,597 @@
+---
+/**
+ * Destination — 3. Dove: le regioni in cui Gaia lavora (destination_regioni,
+ * solo pubblicate) con il titolo e la frase del blocco «destinations».
+ *
+ * Accessibilità: le regioni sono un <ol> testuale vero (nome, testo, link a
+ * Luoghi se la pagina esiste in questa lingua), leggibile da screen reader
+ * e AI; la mappa SVG è solo decorazione (aria-hidden).
+ *
+ * Effetto nuovo, desktop (≥64rem, motion attivo): la sezione resta ferma
+ * sotto il header (sticky) mentre una «corsa» alta scorre; a ogni tratto si
+ * accende una regione (riempimento oro, contorno che si disegna) e accanto
+ * cambiano foto, nome e due righe. Un link che riceve il focus da tastiera
+ * accende la sua regione.
+ * Mobile: mappa piccola sopra, card con scorrimento laterale e snap, con
+ * l'indicatore di posizione; la regione della card visibile si accende.
+ * Senza JS o con reduced-motion: mappa con tutte le regioni accese, elenco
+ * normale (desktop) o card scorrevoli (mobile), niente animazioni.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { LUOGO_FIELDS } from '../../lib/availability';
+import { getLuogoById, isPublishable, slugLuogo, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { REGIONI, VIEWBOX, proietta } from '../../lib/mappa-italia';
+import type { DestinationRegion } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  intro: string;
+  regioni: DestinationRegion[];
+}
+
+const { lang, titolo, intro, regioni: tutte } = Astro.props;
+const t = useTranslations(lang);
+
+const regioni = tutte
+  .filter((r) => text(r.name, lang) && REGIONI[r.map])
+  .map((r, i) => {
+    const luogo = getLuogoById(r.luogoId);
+    const slug = luogo && isPublishable(luogo, lang, LUOGO_FIELDS) ? slugLuogo(luogo, lang) : null;
+    return {
+      indice: i,
+      codice: r.map,
+      nome: text(r.name, lang),
+      testo: text(r.text, lang),
+      foto: picture(r.image, lang, '(min-width: 64rem) min(30vw, 420px), 78vw'),
+      punto: r.point ? proietta(r.point.lat, r.point.lng) : null,
+      link: slug ? path('places', lang, slug) : null,
+    };
+  });
+const codiciSuoi = new Set(regioni.map((r) => r.codice));
+const totale = regioni.length;
+---
+
+{
+  totale > 0 && (
+    <section
+      class="dw-dove"
+      data-theme="light"
+      aria-labelledby="titolo-dove"
+      data-dove
+      style={`--dw-regioni: ${totale}`}
+    >
+      <div class="dw-dove-corsa" data-corsa>
+        <div class="dw-dove-palco" data-palco>
+          <header class="dw-dove-testa container-gaia">
+            <h2 id="titolo-dove" class="font-display dw-dove-titolo">
+              {titolo || t('destination.dove')}
+            </h2>
+            {intro && <p class="text-lead dw-dove-intro">{intro}</p>}
+          </header>
+
+          <div class="dw-dove-griglia">
+            <div class="dw-mappa-box" aria-hidden="true">
+              <svg class="dw-mappa" viewBox={VIEWBOX} focusable="false">
+                {Object.entries(REGIONI).map(([codice, d]) => (
+                  <path
+                    d={d}
+                    class:list={['dw-reg', { 'dw-reg--sua': codiciSuoi.has(codice) }]}
+                    data-reg={codice}
+                    pathLength="1"
+                  />
+                ))}
+                {regioni.map(
+                  (r) =>
+                    r.punto && (
+                      <g class="dw-punto" data-punto={r.indice} transform={`translate(${r.punto.x.toFixed(1)} ${r.punto.y.toFixed(1)})`}>
+                        <circle class="dw-punto-alone" r="7" />
+                        <circle class="dw-punto-centro" r="2.6" />
+                      </g>
+                    ),
+                )}
+              </svg>
+            </div>
+
+            <ol class="dw-regioni" role="list" data-regioni>
+              {regioni.map((r) => (
+                <li
+                  class:list={['dw-regione', { 'dw-regione--senza-foto': !r.foto }]}
+                  data-indice={r.indice}
+                  data-reg={r.codice}
+                  data-attiva={r.indice === 0 ? '' : undefined}
+                >
+                  {r.foto && (
+                    <figure class="dw-regione-foto">
+                      <Picture data={r.foto} cap={false} class="dw-regione-img" />
+                    </figure>
+                  )}
+                  <div class="dw-regione-testo">
+                    <p class="dw-regione-num" aria-hidden="true">
+                      {String(r.indice + 1).padStart(2, '0')} / {String(totale).padStart(2, '0')}
+                    </p>
+                    <h3 class="font-display dw-regione-nome">{r.nome}</h3>
+                    {r.testo && <p class="dw-regione-frase">{r.testo}</p>}
+                    {r.link && (
+                      <a class="link-filo dw-regione-link" href={r.link}>
+                        {t('destination.luoghi')}
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            {totale > 1 && (
+              <p class="dw-dove-indicatore" aria-hidden="true" data-indicatore hidden>
+                <span data-posizione>1</span> / {totale}
+                <span class="dw-dove-punti">
+                  {regioni.map((r) => (
+                    <span class="dw-dove-pallino" data-pallino={r.indice} />
+                  ))}
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const sezione = document.querySelector<HTMLElement>('[data-dove]');
+  if (sezione) {
+    const corsa = sezione.querySelector<HTMLElement>('[data-corsa]')!;
+    const palco = sezione.querySelector<HTMLElement>('[data-palco]')!;
+    const lista = sezione.querySelector<HTMLElement>('[data-regioni]')!;
+    const voci = [...sezione.querySelectorAll<HTMLElement>('.dw-regione')];
+    const regioniMappa = [...sezione.querySelectorAll<SVGPathElement>('.dw-reg--sua')];
+    const punti = [...sezione.querySelectorAll<SVGGElement>('[data-punto]')];
+    const indicatore = sezione.querySelector<HTMLElement>('[data-indicatore]');
+    const posizione = sezione.querySelector<HTMLElement>('[data-posizione]');
+    const pallini = [...sezione.querySelectorAll<HTMLElement>('[data-pallino]')];
+    const desktop = window.matchMedia('(min-width: 64rem)');
+    let attiva = -1;
+
+    // Accende la regione n: voce dell'elenco, tracciato, punto, indicatore.
+    const accendi = (n: number): void => {
+      if (n === attiva) return;
+      attiva = n;
+      const codice = voci[n]?.dataset.reg;
+      voci.forEach((v, i) => v.toggleAttribute('data-attiva', i === n));
+      regioniMappa.forEach((p) => p.classList.toggle('is-accesa', p.dataset.reg === codice));
+      punti.forEach((p) => p.classList.toggle('is-acceso', Number(p.dataset.punto) === n));
+      if (posizione) posizione.textContent = String(n + 1);
+      pallini.forEach((p, i) => p.classList.toggle('is-acceso', i === n));
+    };
+
+    // Desktop con motion: scena ferma, la regione segue lo scroll.
+    const altezzaHeader = (): number =>
+      parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header'), 10) || 0;
+    let inAscolto = false;
+    const suScroll = (): void => {
+      if (!sezione.classList.contains('is-scena')) return;
+      const corsaR = corsa.getBoundingClientRect();
+      const percorribile = corsa.offsetHeight - palco.offsetHeight;
+      const fatto = Math.min(Math.max(altezzaHeader() - corsaR.top, 0), percorribile);
+      const quota = percorribile > 0 ? fatto / percorribile : 0;
+      accendi(Math.min(voci.length - 1, Math.floor(quota * voci.length)));
+    };
+    const scena = (): void => {
+      const attivabile = desktop.matches && !riduciMotion();
+      sezione.classList.toggle('is-scena', attivabile);
+      if (attivabile && !inAscolto) {
+        window.addEventListener('scroll', suScroll, { passive: true });
+        inAscolto = true;
+      }
+      if (attivabile) suScroll();
+    };
+    scena();
+    desktop.addEventListener('change', scena);
+
+    // Tastiera: il link di una regione accende la sua regione.
+    lista.addEventListener('focusin', (e) => {
+      const voce = (e.target as HTMLElement).closest<HTMLElement>('.dw-regione');
+      if (voce) accendi(Number(voce.dataset.indice));
+    });
+
+    // Mobile: la card più visibile nello scorrimento laterale.
+    if (indicatore) indicatore.hidden = false;
+    lista.addEventListener(
+      'scroll',
+      () => {
+        if (desktop.matches) return;
+        const larghezza = voci[0]?.offsetWidth ?? 1;
+        accendi(Math.min(voci.length - 1, Math.round(lista.scrollLeft / (larghezza + 16))));
+      },
+      { passive: true },
+    );
+    accendi(0);
+  }
+</script>
+
+<style>
+  .dw-dove {
+    padding-block: var(--spacing-section-sm) var(--spacing-section);
+  }
+
+  .dw-dove-testa {
+    margin-bottom: clamp(1.5rem, 4vh, 3rem);
+  }
+
+  .dw-dove-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .dw-dove-intro {
+    max-width: 36rem;
+    margin: 1rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* — Mappa — */
+  .dw-mappa-box {
+    width: min(58vw, 15rem);
+    margin: 0 auto 1.5rem;
+  }
+
+  .dw-mappa {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .dw-reg {
+    fill: transparent;
+    stroke: color-mix(in srgb, var(--color-oro) 55%, transparent);
+    stroke-width: 0.7;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Le regioni di Gaia: accese di default (senza JS, reduced-motion). */
+  .dw-reg--sua {
+    fill: color-mix(in srgb, var(--color-oro) 34%, transparent);
+    stroke: var(--color-oro);
+    stroke-width: 1.2;
+  }
+
+  .dw-punto-centro {
+    fill: var(--color-bordeaux);
+  }
+
+  .dw-punto-alone {
+    fill: none;
+    stroke: var(--color-bordeaux);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.5;
+  }
+
+  /* — Elenco: card scorrevoli su mobile — */
+  .dw-regioni {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(78vw, 22rem);
+    gap: 1rem;
+    margin: 0;
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem) 0.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+    scrollbar-width: none;
+    list-style: none;
+  }
+
+  .dw-regioni::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dw-regione {
+    scroll-snap-align: start;
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: var(--color-bianco-caldo);
+  }
+
+  .dw-regione-foto {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    aspect-ratio: 4 / 3;
+  }
+
+  .dw-regione-foto :global(picture),
+  .dw-regione-foto :global(.dw-regione-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .dw-regione-num {
+    margin: 0 0 0.5rem;
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.2em;
+    color: var(--color-oro-testo);
+  }
+
+  .dw-regione-nome {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    line-height: 1.1;
+    font-weight: 400;
+  }
+
+  .dw-regione-frase {
+    margin: 0.6rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .dw-regione-link {
+    display: inline-block;
+    margin-top: 1rem;
+  }
+
+  .dw-dove-indicatore {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    color: var(--color-grigio-caldo);
+  }
+
+  .dw-dove-punti {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+
+  .dw-dove-pallino {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-oro) 35%, transparent);
+    transition: background-color 0.3s var(--ease-gaia);
+  }
+
+  .dw-dove-pallino.is-acceso {
+    background: var(--color-oro-testo);
+  }
+
+  /* Mobile con JS: solo la regione della card visibile resta piena. */
+  .dw-dove:has([data-indicatore]:not([hidden])) .dw-reg--sua:not(.is-accesa) {
+    fill: transparent;
+  }
+
+  .dw-reg--sua {
+    transition: fill 0.5s var(--ease-gaia);
+  }
+
+  /* — Desktop: mappa a sinistra, elenco a destra — */
+  @media (min-width: 64rem) {
+    .dw-dove-griglia {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: clamp(2rem, 5vw, 6rem);
+      align-items: center;
+      width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+      max-width: 76rem;
+      margin: 0 auto;
+    }
+
+    .dw-mappa-box {
+      width: auto;
+      height: min(62vh, 34rem);
+      margin: 0;
+    }
+
+    .dw-mappa {
+      width: auto;
+      height: 100%;
+      margin: 0 auto;
+    }
+
+    .dw-dove-indicatore {
+      display: none;
+    }
+
+    /* Senza scena: elenco verticale, foto piccola accanto al testo. */
+    .dw-regioni {
+      grid-auto-flow: row;
+      grid-auto-columns: auto;
+      gap: 1.25rem;
+      padding: 0;
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+
+    .dw-regione {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .dw-regione--senza-foto {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dw-dove:has([data-indicatore]:not([hidden])) .dw-reg--sua:not(.is-accesa) {
+      fill: color-mix(in srgb, var(--color-oro) 34%, transparent);
+    }
+
+    /* — Scena (JS + motion): palco fermo, corsa alta, una regione per volta — */
+    .dw-dove.is-scena {
+      padding-block: 0;
+    }
+
+    .dw-dove.is-scena .dw-dove-corsa {
+      height: calc(var(--dw-regioni) * 60vh + 100vh - var(--altezza-header, 146px));
+    }
+
+    /* Palco su due colonne: titolo e mappa a sinistra, regione a destra,
+       tutto dentro l'altezza dello schermo sotto il header. */
+    .dw-dove.is-scena .dw-dove-palco {
+      position: sticky;
+      top: var(--altezza-header, 146px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      grid-template-rows: auto auto;
+      align-content: center;
+      column-gap: clamp(2rem, 5vw, 6rem);
+      width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+      max-width: 76rem;
+      height: calc(100vh - var(--altezza-header, 146px));
+      margin: 0 auto;
+      padding-block: 1.5rem;
+    }
+
+    .dw-dove.is-scena .dw-dove-testa {
+      grid-column: 1;
+      grid-row: 1;
+      width: auto;
+      max-width: none;
+      margin: 0 0 1.25rem;
+      padding: 0;
+    }
+
+    .dw-dove.is-scena .dw-dove-griglia {
+      display: contents;
+    }
+
+    .dw-dove.is-scena .dw-mappa-box {
+      grid-column: 1;
+      grid-row: 2;
+      height: min(50vh, 30rem);
+    }
+
+    .dw-dove.is-scena .dw-mappa {
+      margin: 0;
+    }
+
+    .dw-dove.is-scena .dw-regioni {
+      display: grid;
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      grid-template-areas: 'pila';
+      align-items: center;
+      align-self: center;
+    }
+
+    .dw-dove.is-scena .dw-regione {
+      grid-area: pila;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+      padding: 0;
+      background: none;
+      opacity: 0;
+      transform: translateY(1.25rem);
+      transition:
+        opacity 0.6s var(--ease-gaia),
+        transform 0.6s var(--ease-gaia);
+    }
+
+    .dw-dove.is-scena .dw-regione[data-attiva],
+    .dw-dove.is-scena .dw-regione:focus-within {
+      opacity: 1;
+      transform: none;
+    }
+
+    .dw-dove.is-scena .dw-regione:not([data-attiva]) {
+      pointer-events: none;
+    }
+
+    .dw-dove.is-scena .dw-regione-foto {
+      width: min(28vw, 24rem);
+      aspect-ratio: 4 / 5;
+      max-height: 46vh;
+    }
+
+    .dw-dove.is-scena .dw-regione-frase {
+      max-width: 30rem;
+      font-size: var(--text-lead);
+      line-height: var(--text-lead--line-height);
+    }
+
+    .dw-dove.is-scena .dw-regione--senza-foto .dw-regione-nome {
+      font-size: clamp(2.5rem, 1.5rem + 2.5vw, 3.75rem);
+    }
+
+    /* Mappa in scena: le regioni di Gaia restano disegnate, l'accesa si
+       riempie e il suo contorno si ridisegna. */
+    .dw-dove.is-scena .dw-reg--sua {
+      fill: color-mix(in srgb, var(--color-oro) 10%, transparent);
+    }
+
+    /* Il contorno che si disegna usa pathLength="1": qui il tratto è in
+       unità della mappa (niente non-scaling-stroke, che sfalsa i dash). */
+    .dw-dove.is-scena .dw-reg--sua.is-accesa {
+      fill: color-mix(in srgb, var(--color-oro) 48%, transparent);
+      stroke: var(--color-oro-testo);
+      stroke-width: 1.3;
+      vector-effect: none;
+      stroke-dasharray: 1;
+      animation: dw-traccia 1.1s var(--ease-gaia) both;
+    }
+
+    .dw-dove.is-scena .dw-punto {
+      opacity: 0.35;
+      transition: opacity 0.4s var(--ease-gaia);
+    }
+
+    .dw-dove.is-scena .dw-punto.is-acceso {
+      opacity: 1;
+    }
+
+    .dw-dove.is-scena .dw-punto.is-acceso .dw-punto-alone {
+      animation: dw-alone 1.8s var(--ease-gaia) infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+  }
+
+  @keyframes dw-traccia {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes dw-alone {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dw-reg--sua,
+    .dw-dove-pallino {
+      transition: none;
+    }
+  }
+</style>

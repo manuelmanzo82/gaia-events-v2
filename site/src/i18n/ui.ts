@@ -101,6 +101,9 @@ export const UI = {
   'servizi.tuttiPartner': { it: 'Tutti i partner', en: 'All partners' },
   'servizi.tutteFaq': { it: 'Tutte le domande', en: 'All questions' },
   'servizi.leggiDicono': { it: 'Leggi cosa dicono di me', en: 'Read what they say' },
+  // Pagina Destination wedding.
+  'destination.dove': { it: 'Dove', en: 'Where in Italy' },
+  'destination.luoghi': { it: 'Scopri i luoghi', en: 'Explore the venues' },
   'servizi.vediFeste': { it: 'Guarda le feste', en: 'See the parties' },
   'servizi.vediAziendali': { it: 'Guarda gli eventi aziendali', en: 'See the corporate events' },
   'partner.cat.location': { it: 'Location', en: 'Venues' },
