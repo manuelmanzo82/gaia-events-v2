@@ -100,11 +100,12 @@ const linkOltre = inMenu('stories', lang) && tipiPubblicati.has('festa')
       ? { href: path('quote', lang), etichetta: t('cta.quote') }
       : null;
 
-// Domande frequenti: gruppo «servizi», attive, con domanda e risposta in
-// questa lingua (le EN mancano ancora: in inglese la sezione non c'è).
+// Domande frequenti: gruppi «servizi» e «costi» (in quest'ordine), attive,
+// con domanda e risposta in questa lingua.
+const GRUPPI_SERVIZI = ['servizi', 'costi'];
 const domande = getFaqs()
-  .filter((f) => f.active && f.group === 'servizi' && text(f.question, lang) && text(f.answer, lang))
-  .sort((a, b) => a.order - b.order);
+  .filter((f) => f.active && GRUPPI_SERVIZI.includes(f.group ?? '') && text(f.question, lang) && text(f.answer, lang))
+  .sort((a, b) => GRUPPI_SERVIZI.indexOf(a.group ?? '') - GRUPPI_SERVIZI.indexOf(b.group ?? '') || a.order - b.order);
 
 const meta = buildMeta({
   lang,

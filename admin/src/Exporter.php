@@ -32,6 +32,7 @@ final class Exporter
             'posts' => self::posts(),
             'categorie-magazine' => self::postCategories(),
             'faq' => self::faqs(),
+            'gruppi-faq' => self::faqGroups(),
             'destination-wedding' => self::destinationWedding(),
             'instagram' => self::instagram(),
             'luoghi' => self::luoghi(),
@@ -644,16 +645,34 @@ final class Exporter
     /** @return list<array<string, mixed>> */
     public static function faqs(): array
     {
-        $rows = Db::all('SELECT * FROM faqs ORDER BY sort_order, id');
+        $rows = Db::all(
+            'SELECT f.*, g.chiave AS gruppo_chiave FROM faqs f
+             LEFT JOIN faq_groups g ON g.id = f.group_id
+             ORDER BY g.sort_order, f.sort_order, f.id',
+        );
 
         return array_map(static fn (array $row): array => [
             'id' => (int) $row['id'],
             'question' => self::text($row['question_it'], $row['question_en']),
             'answer' => self::text($row['answer_it'], $row['answer_en']),
-            'group' => $row['group_name'],
+            // Chiave del gruppo (generali, servizi, costi, destination).
+            'group' => $row['gruppo_chiave'] ?? $row['group_name'],
+            'slug' => self::text($row['slug_it'] ?? null, $row['slug_en'] ?? null),
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], $rows);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function faqGroups(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'key' => (string) $row['chiave'],
+            'name' => self::text($row['nome_it'], $row['nome_en']),
+            'slug' => self::text($row['slug_it'], $row['slug_en']),
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM faq_groups ORDER BY sort_order, id'));
     }
 
     // -----------------------------------------------------------------

@@ -227,8 +227,20 @@ export interface Faq {
   id: number;
   question: Localized;
   answer: Localized;
+  /** Chiave del gruppo (generali, servizi, costi, destination). */
   group?: string;
+  /** Ancora stabile per i link condivisibili (/faq/#ancora). */
+  slug?: Localized;
   active: boolean;
+  order: number;
+}
+
+/** Gruppo di FAQ: la pagina FAQ li mostra in quest'ordine. */
+export interface FaqGroup {
+  id: number;
+  key: string;
+  name: Localized;
+  slug: Localized;
   order: number;
 }
 

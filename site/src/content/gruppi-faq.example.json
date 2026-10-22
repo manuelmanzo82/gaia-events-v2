@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "key": "generali",
+    "name": { "it": "Generali", "en": "General" },
+    "slug": { "it": "generali", "en": "general" },
+    "order": 1
+  },
+  {
+    "id": 2,
+    "key": "servizi",
+    "name": { "it": "Servizi", "en": "Services" },
+    "slug": { "it": "servizi", "en": "services" },
+    "order": 2
+  },
+  {
+    "id": 3,
+    "key": "costi",
+    "name": { "it": "Costi e pagamenti", "en": "Costs and payments" },
+    "slug": { "it": "costi-e-pagamenti", "en": "costs-and-payments" },
+    "order": 3
+  },
+  {
+    "id": 4,
+    "key": "destination",
+    "name": { "it": "Destination wedding", "en": "Destination weddings" },
+    "slug": { "it": "destination-wedding", "en": "destination-weddings" },
+    "order": 4
+  }
+]

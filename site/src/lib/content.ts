@@ -5,6 +5,7 @@ import type {
   DestinationRegion,
   DestinationWedding,
   Faq,
+  FaqGroup,
   Highlight,
   HighlightSection,
   InstagramFeed,
@@ -203,6 +204,11 @@ export function getPostCategories(): PostCategory[] {
 
 export function getFaqs(): Faq[] {
   return load<Faq[]>('faq', []).filter(isActive).sort(byOrder);
+}
+
+/** Gruppi delle FAQ, nell'ordine del back office. */
+export function getFaqGroups(): FaqGroup[] {
+  return load<FaqGroup[]>('gruppi-faq', []).sort(byOrder);
 }
 
 export function getDestinationWedding(): DestinationWedding {

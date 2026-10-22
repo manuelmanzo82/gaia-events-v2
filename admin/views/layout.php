@@ -89,6 +89,7 @@
   <a href="<?= e(admin_url('categorie-magazine')) ?>">Magazine: categorie</a>
   <a href="<?= e(admin_url('video')) ?>">Video</a>
   <a href="<?= e(admin_url('faq')) ?>">FAQ</a>
+  <a href="<?= e(admin_url('gruppi-faq')) ?>">FAQ: gruppi</a>
   <a href="<?= e(admin_url('immagini')) ?>">Immagini</a>
   <a href="<?= e(admin_url('richieste')) ?>">Richieste</a>
 </nav>

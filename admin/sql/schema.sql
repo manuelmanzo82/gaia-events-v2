@@ -287,6 +287,10 @@ CREATE TABLE IF NOT EXISTS `faqs` (
   `answer_it`   TEXT DEFAULT NULL,
   `answer_en`   TEXT DEFAULT NULL,
   `group_name`  VARCHAR(80) NOT NULL DEFAULT 'generale',
+  `group_id`    INT UNSIGNED DEFAULT NULL,
+  -- Ancore stabili per i link condivisibili (/faq/#ancora).
+  `slug_it`     VARCHAR(120) DEFAULT NULL,
+  `slug_en`     VARCHAR(120) DEFAULT NULL,
   `active`      TINYINT(1) NOT NULL DEFAULT 1,
   `sort_order`  SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
@@ -750,4 +754,19 @@ CREATE TABLE IF NOT EXISTS `videos` (
   PRIMARY KEY (`id`),
   KEY `fk_videos_poster` (`poster_media_id`),
   CONSTRAINT `fk_videos_poster` FOREIGN KEY (`poster_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FAQ: gruppi (25/10/2026)
+
+CREATE TABLE IF NOT EXISTS `faq_groups` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  -- Chiave stabile usata dal sito (Servizi e Destination filtrano così).
+  `chiave`     VARCHAR(40) NOT NULL,
+  `nome_it`    VARCHAR(120) DEFAULT NULL,
+  `nome_en`    VARCHAR(120) DEFAULT NULL,
+  `slug_it`    VARCHAR(120) DEFAULT NULL,
+  `slug_en`    VARCHAR(120) DEFAULT NULL,
+  `sort_order` SMALLINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_faq_groups_chiave` (`chiave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

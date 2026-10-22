@@ -1,12 +1,33 @@
 ---
+/**
+ * Domande frequenti (/faq/ ↔ /en/faq/).
+ *
+ *  1. Apertura tipografica: titolo grande e una riga (pagina faq).
+ *  2. Ricerca istantanea: campo con etichetta, corrispondenze evidenziate
+ *     (senza accenti né maiuscole), conteggio in un'area aria-live e, se
+ *     non c'è niente, «Nessuna risposta per "…": scrivetemi». Senza JS
+ *     il campo non compare e tutte le domande restano visibili.
+ *  3. Gruppi del back office (FAQ: gruppi), nel loro ordine. Desktop:
+ *     indice fisso a sinistra con la voce corrente (scripts/indice-fisso,
+ *     come Servizi e Magazine). Mobile: una select «Argomenti».
+ *  4. Ogni domanda è un <details> con l'id dell'ancora stabile: aprire
+ *     /faq/#ancora apre la domanda e la porta sotto l'header; nella
+ *     risposta aperta «Copia link».
+ *  5. In fondo «Non trovate la risposta? Scrivetemi», niente CTA finale.
+ *
+ * JSON-LD: BreadcrumbList e FAQPage solo con le domande pubblicate in
+ * questa lingua (domanda e risposta tradotte).
+ */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { isPublishable, getFaqs, getPage, text } from '../../lib/content';
 import { FAQ_FIELDS, existsIn, langsFor } from '../../lib/availability';
+import { getFaqGroups, getFaqs, getPage, isPublishable, text } from '../../lib/content';
 import { breadcrumbs, faqPage } from '../../lib/jsonld';
+import { ancora } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
+import type { Faq } from '../../lib/types';
 
 interface Props {
   lang: Lang;
@@ -17,16 +38,48 @@ const t = useTranslations(lang);
 
 const page = getPage('faq');
 const langs = langsFor('faq');
+const title = text(page?.title, lang) || t('nav.faq');
+const riga = text(page?.intro, lang);
 
 const faqs = getFaqs().filter((faq) => isPublishable(faq, lang, FAQ_FIELDS));
 
-const title = text(page?.title, lang) || t('nav.faq');
+// Ancore uniche nella pagina: prima i gruppi, poi le domande (l'ancora del
+// back office se c'è, altrimenti dalla domanda).
+const usate = new Set<string>();
+const idDi = (testo: string, preferito?: string | null): string => {
+  const id = ancora(preferito || testo, usate);
+  usate.add(id);
+  return id;
+};
+
+const gruppiNoti = getFaqGroups();
+const chiavi = new Set(gruppiNoti.map((g) => g.key));
+// Una FAQ con un gruppo sconosciuto finisce nel primo (di solito Generali).
+const chiaveDi = (f: Faq): string => (f.group && chiavi.has(f.group) ? f.group : (gruppiNoti[0]?.key ?? ''));
+
+const gruppi = (gruppiNoti.length ? gruppiNoti : [{ id: 0, key: '', name: {}, slug: {}, order: 0 }])
+  .map((g) => ({
+    id: idDi(text(g.name, lang) || g.key || 'faq', text(g.slug, lang)),
+    nome: text(g.name, lang),
+    domande: faqs
+      .filter((f) => chiaveDi(f) === g.key)
+      .map((f) => ({
+        id: idDi(text(f.question, lang), text(f.slug, lang)),
+        domanda: text(f.question, lang),
+        risposta: text(f.answer, lang),
+      })),
+  }))
+  .filter((g) => g.domande.length > 0);
+
+const conIndice = gruppi.length > 1;
+const contatti = existsIn('contact', lang) ? path('contact', lang) : null;
+const [aperta, chiusa] = lang === 'it' ? ['«', '»'] : ['“', '”'];
 
 const meta = buildMeta({
   lang,
   routeKey: 'faq',
   title,
-  description: text(page?.intro, lang),
+  description: riga,
   seo: page ?? undefined,
   availableLangs: langs,
 });
@@ -39,27 +92,725 @@ const crumbs = [
 const jsonLd = [breadcrumbs(crumbs), faqPage(faqs, lang)];
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="faq"
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={jsonLd}
-  crumbs={crumbs}
->
-  <h1>{title}</h1>
-  {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
+<BaseLayout lang={lang} routeKey="faq" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
+  <section class="fq-apertura" data-theme="light" aria-labelledby="titolo-faq">
+    <h1 id="titolo-faq" class="font-display fq-titolo">{title}</h1>
+    {riga && <p class="text-lead fq-riga">{riga}</p>}
 
-  {faqs.length === 0 && <p>{t('common.empty')}</p>}
+    {
+      faqs.length > 0 && (
+        <div class="fq-cerca" hidden data-cerca>
+          <label class="fq-cerca-etichetta" for="fq-campo">
+            {t('faq.cerca')}
+          </label>
+          <div class="fq-cerca-campo">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="m15.5 15.5 5 5" />
+            </svg>
+            <input
+              id="fq-campo"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder={t('faq.cercaSegnaposto')}
+              data-campo
+            />
+          </div>
+          <p class="fq-esito" aria-live="polite" data-esito data-uno={t('faq.risultati1')} data-molti={t('faq.risultatiN')} />
+          <p class="fq-nessuna" hidden data-nessuna>
+            {t('faq.nessuna1')} {aperta}<span data-cercato />{chiusa}{contatti && <>: <a href={contatti}>{t('faq.nessuna2')}</a></>}
+          </p>
+        </div>
+      )
+    }
+  </section>
+
+  {faqs.length === 0 && <p class="fq-vuota">{t('common.empty')}</p>}
 
   {
-    faqs.map((faq) => (
-      <details>
-        <summary>{text(faq.question, lang)}</summary>
-        <p>{text(faq.answer, lang)}</p>
-      </details>
-    ))
+    gruppi.length > 0 && (
+      <div class:list={['fq-corpo', { 'fq-corpo--indice': conIndice }]}>
+        {conIndice && (
+          <>
+            <nav class="fq-indice" aria-label={t('faq.gruppi')} data-indice>
+              <p class="fq-indice-titolo">{t('faq.gruppi')}</p>
+              <ol role="list">
+                {gruppi.map((g) => (
+                  <li data-voce-gruppo={g.id}>
+                    <a href={`#${g.id}`} data-voce={g.id}>
+                      {g.nome}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+
+            <div class="fq-scegli" hidden data-scegli>
+              <label for="fq-argomento">{t('faq.vaiA')}</label>
+              <select id="fq-argomento" data-argomento>
+                {gruppi.map((g) => (
+                  <option value={g.id}>{g.nome}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
+        <div class="fq-gruppi">
+          {gruppi.map((g) => (
+            <section class="fq-gruppo" id={g.id} aria-labelledby={`${g.id}-titolo`} data-capitolo={g.id} data-gruppo>
+              <h2 id={`${g.id}-titolo`} class="font-display fq-gruppo-titolo">
+                {g.nome}
+              </h2>
+              <div class="fq-elenco">
+                {g.domande.map((d) => (
+                  <details class="fq-domanda" id={d.id} data-domanda>
+                    <summary>
+                      <span class="fq-domanda-testo" data-testo>
+                        {d.domanda}
+                      </span>
+                      <span class="fq-segno" aria-hidden="true" />
+                    </summary>
+                    <div class="fq-risposta">
+                      <p data-testo>{d.risposta}</p>
+                      <button type="button" class="fq-copia" hidden data-copia={d.id} data-fatto={t('faq.linkCopiato')}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6" />
+                          <path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" />
+                        </svg>
+                        <span>{t('faq.copiaLink')}</span>
+                      </button>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    )
   }
 
-  {existsIn('contact', lang) && <p><a href={path('contact', lang)}>{t('cta.contact')}</a></p>}
+  {
+    contatti && (
+      <section class="fq-fondo" data-theme="light" aria-label={t('faq.nonTrovate')}>
+        <p class="font-display fq-fondo-testo">
+          {t('faq.nonTrovate')} <a href={contatti}>{t('faq.scrivetemi')}</a>
+        </p>
+      </section>
+    )
+  }
+
+  <p class="sr-only" aria-live="polite" data-copia-esito></p>
 </BaseLayout>
+
+<script>
+  import { indiceFisso } from '../../scripts/indice-fisso';
+
+  // ---- Indice (desktop) e select (mobile) -------------------------------
+  const indice = document.querySelector<HTMLElement>('.fq-indice[data-indice]');
+  const gruppi = [...document.querySelectorAll<HTMLElement>('[data-gruppo]')];
+  if (indice) indiceFisso(indice, gruppi, 0.35);
+
+  const scegli = document.querySelector<HTMLElement>('[data-scegli]');
+  const argomento = document.querySelector<HTMLSelectElement>('[data-argomento]');
+  if (scegli && argomento) {
+    scegli.hidden = false;
+    argomento.addEventListener('change', () => {
+      const g = document.getElementById(argomento.value);
+      if (!g) return;
+      g.scrollIntoView({ block: 'start' });
+      history.replaceState(null, '', `#${g.id}`);
+    });
+  }
+
+  // ---- Ancora: /faq/#domanda apre la domanda sotto l'header -------------
+  const apriDaHash = (): void => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el instanceof HTMLDetailsElement) {
+      el.open = true;
+      requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }));
+    }
+  };
+  apriDaHash();
+  window.addEventListener('hashchange', apriDaHash);
+
+  // ---- Copia link della domanda aperta ------------------------------------
+  const esitoCopia = document.querySelector<HTMLElement>('[data-copia-esito]');
+  if (navigator.clipboard) {
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-copia]')) {
+      b.hidden = false;
+      const etichetta = b.querySelector('span');
+      const iniziale = etichetta?.textContent ?? '';
+      b.addEventListener('click', async () => {
+        const link = `${location.origin}${location.pathname}#${b.dataset.copia}`;
+        try {
+          await navigator.clipboard.writeText(link);
+          if (etichetta) etichetta.textContent = b.dataset.fatto ?? '';
+          if (esitoCopia) esitoCopia.textContent = b.dataset.fatto ?? '';
+          window.setTimeout(() => {
+            if (etichetta) etichetta.textContent = iniziale;
+          }, 2500);
+        } catch {
+          /* permesso negato: resta l'ancora nell'indirizzo */
+        }
+      });
+    }
+  }
+
+  // ---- Ricerca istantanea -------------------------------------------------
+  const cerca = document.querySelector<HTMLElement>('[data-cerca]');
+  const campo = document.querySelector<HTMLInputElement>('[data-campo]');
+  const esito = document.querySelector<HTMLElement>('[data-esito]');
+  const nessuna = document.querySelector<HTMLElement>('[data-nessuna]');
+  const cercato = document.querySelector<HTMLElement>('[data-cercato]');
+  const domande = [...document.querySelectorAll<HTMLDetailsElement>('[data-domanda]')];
+
+  if (cerca && campo && esito && nessuna && cercato && domande.length) {
+    cerca.hidden = false;
+
+    // Testo senza accenti e minuscolo, con la posizione di ogni carattere
+    // nel testo originale (per evidenziare il punto giusto).
+    const piega = (s: string): { testo: string; mappa: number[] } => {
+      let testo = '';
+      const mappa: number[] = [];
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i].normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        for (const _ of c) mappa.push(i);
+        testo += c;
+      }
+      return { testo, mappa };
+    };
+
+    const voci = domande.map((d) => {
+      const nodi = [...d.querySelectorAll<HTMLElement>('[data-testo]')].map((el) => {
+        const originale = el.textContent?.trim() ?? '';
+        return { el, originale, ...piega(originale) };
+      });
+      return { d, nodi, gruppo: d.closest<HTMLElement>('[data-gruppo]'), apertaPrima: d.open };
+    });
+
+    const escape = (s: string): string =>
+      s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c);
+
+    // Evidenzia tutte le parole cercate in un testo.
+    const evidenzia = (n: (typeof voci)[number]['nodi'][number], parole: string[]): void => {
+      const segni = new Array<boolean>(n.originale.length).fill(false);
+      for (const p of parole) {
+        let da = n.testo.indexOf(p);
+        while (da !== -1) {
+          for (let k = da; k < da + p.length; k++) segni[n.mappa[k]] = true;
+          da = n.testo.indexOf(p, da + p.length);
+        }
+      }
+      let html = '';
+      let aperto = false;
+      for (let i = 0; i < n.originale.length; i++) {
+        if (segni[i] && !aperto) {
+          html += '<mark>';
+          aperto = true;
+        } else if (!segni[i] && aperto) {
+          html += '</mark>';
+          aperto = false;
+        }
+        html += escape(n.originale[i]);
+      }
+      if (aperto) html += '</mark>';
+      n.el.innerHTML = html;
+    };
+
+    let attiva = false;
+    const filtra = (): void => {
+      const grezzo = campo.value.trim();
+      const parole = piega(grezzo).testo.split(/\s+/).filter((p) => p.length > 1);
+
+      if (!parole.length) {
+        // Ricerca vuota: tutto com'era prima di cercare.
+        if (attiva) {
+          for (const v of voci) {
+            v.d.hidden = false;
+            v.d.open = v.apertaPrima;
+            for (const n of v.nodi) n.el.textContent = n.originale;
+          }
+          for (const g of gruppi) g.hidden = false;
+          indice?.querySelectorAll<HTMLElement>('[data-voce-gruppo]').forEach((li) => (li.hidden = false));
+          esito.textContent = '';
+          nessuna.hidden = true;
+          attiva = false;
+        }
+        return;
+      }
+
+      if (!attiva) for (const v of voci) v.apertaPrima = v.d.open;
+      attiva = true;
+
+      let trovate = 0;
+      for (const v of voci) {
+        const tutto = v.nodi.map((n) => n.testo).join(' ');
+        const ok = parole.every((p) => tutto.includes(p));
+        v.d.hidden = !ok;
+        if (ok) {
+          trovate++;
+          // Aperta se la parola sta nella risposta.
+          v.d.open = parole.some((p) => v.nodi.slice(1).some((n) => n.testo.includes(p)));
+          for (const n of v.nodi) evidenzia(n, parole);
+        }
+      }
+      for (const g of gruppi) {
+        const vuoto = !g.querySelector('[data-domanda]:not([hidden])');
+        g.hidden = vuoto;
+        indice
+          ?.querySelector<HTMLElement>(`[data-voce-gruppo="${g.id}"]`)
+          ?.toggleAttribute('hidden', vuoto);
+      }
+
+      esito.textContent = trovate ? `${trovate} ${trovate === 1 ? esito.dataset.uno : esito.dataset.molti}` : '';
+      cercato.textContent = grezzo;
+      nessuna.hidden = trovate > 0;
+    };
+
+    let attesa = 0;
+    campo.addEventListener('input', () => {
+      window.clearTimeout(attesa);
+      attesa = window.setTimeout(filtra, 120);
+    });
+    // Invio: alla prima domanda trovata.
+    campo.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      filtra();
+      const prima = domande.find((d) => !d.hidden);
+      if (prima) {
+        prima.scrollIntoView({ block: 'start' });
+        prima.querySelector('summary')?.focus({ preventScroll: true });
+      }
+    });
+  }
+
+</script>
+
+<style>
+  /* ---- 1. Apertura ------------------------------------------------------ */
+  .fq-apertura {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-top: calc(var(--altezza-header, 96px) + clamp(1rem, 4vh, 2.5rem));
+    padding-bottom: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .fq-titolo {
+    max-width: 14ch;
+    margin: 0 0 0 -0.04em;
+    font-size: clamp(3.25rem, 1rem + 7.5vw, 8.5rem);
+    line-height: 0.92;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    padding-bottom: 0.08em;
+  }
+
+  .fq-riga {
+    max-width: 34rem;
+    margin: clamp(1rem, 3vh, 1.5rem) 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* ---- 2. Ricerca --------------------------------------------------------- */
+  .fq-cerca {
+    max-width: 40rem;
+    margin-top: clamp(2rem, 5vh, 3rem);
+  }
+
+  .fq-cerca[hidden] {
+    display: none;
+  }
+
+  .fq-cerca-etichetta {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .fq-cerca-campo {
+    position: relative;
+    color: var(--color-grigio-caldo);
+  }
+
+  .fq-cerca-campo svg {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+
+  .fq-cerca-campo input {
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0.5rem 0 0.5rem 2.25rem;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-inchiostro) 35%, transparent);
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    font-size: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);
+    color: var(--color-inchiostro);
+    transition: border-color 0.3s var(--ease-gaia);
+  }
+
+  .fq-cerca-campo input::placeholder {
+    color: var(--color-grigio-caldo);
+    opacity: 1;
+  }
+
+  /* La × del campo: bordeaux invece del blu di sistema. */
+  .fq-cerca-campo input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23722f37' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6 6 18'/%3E%3C/svg%3E") center / 16px no-repeat;
+  }
+
+  .fq-cerca-campo input:focus {
+    outline: none;
+    border-bottom-color: var(--color-bordeaux);
+  }
+
+  .fq-cerca-campo input:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .fq-esito {
+    min-height: 1.5rem;
+    margin: 0.75rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .fq-nessuna {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
+    line-height: 1.25;
+  }
+
+  .fq-nessuna a,
+  .fq-fondo-testo a {
+    color: var(--color-bordeaux);
+  }
+
+  .fq-nessuna a,
+  .fq-fondo-testo a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .fq-vuota {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: 0 auto var(--spacing-section-sm);
+  }
+
+  /* ---- 3. Gruppi ------------------------------------------------------- */
+  .fq-corpo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .fq-indice {
+    display: none;
+  }
+
+  .fq-scegli {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .fq-scegli[hidden] {
+    display: none;
+  }
+
+  .fq-scegli select {
+    min-height: 3rem;
+    padding: 0.5rem 2.5rem 0.5rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 25%, transparent);
+    border-radius: 2px;
+    background:
+      var(--color-bianco-caldo)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23722f37' stroke-width='1.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      no-repeat right 0.75rem center / 18px;
+    appearance: none;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--color-inchiostro);
+  }
+
+  .fq-scegli select:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  .fq-gruppo + .fq-gruppo {
+    margin-top: clamp(3rem, 8vh, 5rem);
+  }
+
+  .fq-gruppo,
+  .fq-domanda {
+    scroll-margin-top: calc(var(--sotto-header, 96px) + 1.5rem);
+  }
+
+  .fq-gruppo[hidden],
+  .fq-domanda[hidden] {
+    display: none;
+  }
+
+  .fq-gruppo-titolo {
+    margin: 0 0 1.25rem;
+    font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+    line-height: 1.05;
+    font-weight: 400;
+  }
+
+  .fq-elenco {
+    border-top: 1px solid var(--color-beige);
+  }
+
+  .fq-domanda {
+    border-bottom: 1px solid var(--color-beige);
+  }
+
+  .fq-domanda summary {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding-block: 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    line-height: 1.3;
+  }
+
+  .fq-domanda summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .fq-domanda summary:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .fq-domanda summary:hover .fq-domanda-testo {
+    color: var(--color-bordeaux);
+  }
+
+  .fq-domanda-testo {
+    transition: color 0.3s var(--ease-gaia);
+  }
+
+  /* Più che diventa meno, come le FAQ di Servizi. */
+  .fq-segno {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .fq-segno::before,
+  .fq-segno::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-bordeaux);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .fq-segno::after {
+    transform: rotate(90deg);
+  }
+
+  .fq-domanda[open] .fq-segno::after {
+    transform: rotate(0deg);
+  }
+
+  .fq-risposta {
+    padding: 0 2.5rem 1.5rem 0;
+  }
+
+  .fq-risposta p {
+    max-width: 42rem;
+    margin: 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .fq-domanda :global(mark) {
+    padding: 0 0.08em;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--color-oro) 32%, transparent);
+    color: inherit;
+  }
+
+  .fq-copia {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-bordeaux);
+    cursor: pointer;
+  }
+
+  .fq-copia[hidden] {
+    display: none;
+  }
+
+  .fq-copia:hover span,
+  .fq-copia:focus-visible span {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .fq-copia:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  /* ---- 5. In fondo ---------------------------------------------------- */
+  .fq-fondo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 72rem;
+    margin: clamp(4rem, 10vh, 6.5rem) auto var(--spacing-section-sm);
+    padding-top: clamp(2rem, 5vh, 3rem);
+    border-top: 2px solid var(--color-oro);
+  }
+
+  .fq-fondo-testo {
+    max-width: 22ch;
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.75rem);
+    line-height: 1.1;
+    font-weight: 300;
+  }
+
+  /* ---- Desktop: indice fisso a sinistra, niente select -------------------- */
+  @media (min-width: 64rem) {
+    .fq-corpo--indice {
+      display: grid;
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: start;
+    }
+
+    .fq-indice {
+      position: sticky;
+      top: calc(var(--sotto-header, 96px) + 2rem);
+      display: block;
+    }
+
+    .fq-scegli,
+    .fq-scegli:not([hidden]) {
+      display: none;
+    }
+
+    .fq-gruppi {
+      max-width: 50rem;
+    }
+  }
+
+  .fq-indice-titolo {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .fq-indice ol {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0 0 0 1rem;
+    list-style: none;
+    border-left: 1px solid color-mix(in srgb, var(--color-inchiostro) 15%, transparent);
+  }
+
+  .fq-indice li[hidden] {
+    display: none;
+  }
+
+  .fq-indice a {
+    position: relative;
+    display: block;
+    padding-block: 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--color-grigio-caldo);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-gaia);
+  }
+
+  .fq-indice a::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: calc(-1rem - 1px);
+    width: 2px;
+    background: var(--color-bordeaux);
+    transform: scaleY(0);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .fq-indice a:hover,
+  .fq-indice a[aria-current='true'] {
+    color: var(--color-inchiostro);
+  }
+
+  .fq-indice a[aria-current='true']::before {
+    transform: scaleY(1);
+  }
+
+  .fq-indice a:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fq-segno::before,
+    .fq-segno::after,
+    .fq-indice a,
+    .fq-indice a::before,
+    .fq-domanda-testo,
+    .fq-cerca-campo input {
+      transition: none;
+    }
+  }
+</style>
