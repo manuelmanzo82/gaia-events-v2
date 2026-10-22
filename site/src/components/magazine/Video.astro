@@ -10,12 +10,15 @@
  *     libreria media, mai miniature esterne) e il bottone play; l'iframe
  *     (youtube-nocookie.com, player.vimeo.com con dnt=1) si crea solo al
  *     clic. Nessuna richiesta a terzi prima. CSP: frame-src limitato a
- *     quei due domini (.htaccess).
+ *     quei due domini (.htaccess). Sotto, una riga avvisa che il video
+ *     carica contenuti del servizio, con il link alla cookie policy.
  *
  * Larghezza e altezza dal poster: niente salti di layout.
  */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { existsIn } from '../../lib/availability';
 import { text } from '../../lib/content';
 import { picture, uploadUrl } from '../../lib/images';
 import type { Video } from '../../lib/types';
@@ -40,6 +43,8 @@ const src =
     : video.kind === 'vimeo'
       ? `https://player.vimeo.com/video/${video.providerId}?autoplay=1&dnt=1&title=0&byline=0&portrait=0`
       : null;
+const servizio = video.kind === 'youtube' ? 'YouTube' : video.kind === 'vimeo' ? 'Vimeo' : null;
+const cookie = existsIn('cookie', lang) ? path('cookie', lang) : null;
 ---
 
 <figure
@@ -75,6 +80,19 @@ const src =
   }
   {titolo && <figcaption class="mg-video-titolo">{titolo}</figcaption>}
 </figure>
+{
+  servizio && (
+    <p class="mg-video-nota">
+      {t('video.nota').replace('{servizio}', servizio)}
+      {cookie && (
+        <>
+          {' '}
+          <a href={cookie}>{t('video.notaLink')}</a>
+        </>
+      )}
+    </p>
+  )
+}
 
 <script>
   import { riduciMotion } from '../../scripts/motion-leggero';
@@ -185,6 +203,20 @@ const src =
   .mg-video-facciata:focus-visible {
     outline: 2px solid var(--color-bordeaux);
     outline-offset: 4px;
+  }
+
+  .mg-video-nota {
+    margin: 0.6rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-video-nota a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
   }
 
   .mg-video-titolo {

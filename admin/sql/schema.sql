@@ -133,6 +133,8 @@ CREATE TABLE IF NOT EXISTS `pages` (
   `meta_description_en`  VARCHAR(400) DEFAULT NULL,
   `hero_media_id`        INT UNSIGNED DEFAULT NULL,
   `og_media_id`          INT UNSIGNED DEFAULT NULL,
+  -- «Ultimo aggiornamento» di privacy e cookie, messo a mano.
+  `revised_on`           DATE DEFAULT NULL,
   `updated_at`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_pages_key` (`page_key`),

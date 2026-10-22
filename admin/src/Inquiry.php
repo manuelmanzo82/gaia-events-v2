@@ -39,6 +39,35 @@ final class Inquiry
     private const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio',
         'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 
+    /** IP e browser servono solo contro gli abusi: si cancellano dopo 30 giorni. */
+    private const GIORNI_IP = 30;
+
+    /** Le richieste si cancellano dopo 24 mesi (bozza in privacy, DA-CHIEDERE n. 18). */
+    private const MESI_CONSERVAZIONE = 24;
+
+    /**
+     * Pulizia «pigra», senza cron: gira a ogni nuova richiesta e
+     * all'accesso al back office (pannello, elenco richieste). Toglie IP e
+     * browser più vecchi di 30 giorni e cancella le richieste più vecchie
+     * di 24 mesi. Non deve mai bloccare chi la chiama.
+     */
+    public static function pulizia(): void
+    {
+        try {
+            Db::run(
+                'UPDATE inquiries SET ip = NULL, user_agent = NULL
+                 WHERE created_at < ? AND (ip IS NOT NULL OR user_agent IS NOT NULL)',
+                [date('Y-m-d H:i:s', strtotime('-' . self::GIORNI_IP . ' days'))],
+            );
+            Db::run(
+                'DELETE FROM inquiries WHERE created_at < ?',
+                [date('Y-m-d H:i:s', strtotime('-' . self::MESI_CONSERVAZIONE . ' months'))],
+            );
+        } catch (\Throwable $e) {
+            error_log('Pulizia richieste non riuscita: ' . $e->getMessage());
+        }
+    }
+
     /**
      * @param 'quote'|'contact' $type
      * @return array{ok: bool, status: int, message: string}
@@ -53,6 +82,8 @@ final class Inquiry
         }
 
         $ip = substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+
+        self::pulizia();
 
         return $type === 'quote' ? self::receiveQuote($input, $ip) : self::receiveContact($input, $ip);
     }

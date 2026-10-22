@@ -12,7 +12,8 @@
  * Invio prosegue (è un vero <form>); al cambio di passaggio il focus va
  * sul titolo della domanda; errori in linea con aria-invalid e un'area
  * aria-live; salvataggio automatico in localStorage (try/catch) con
- * «Ricomincia» sempre disponibile, cancellato dopo l'invio; transizioni
+ * «Ricomincia» sempre disponibile, cancellato dopo l'invio e scaduto dopo
+ * 30 giorni dall'inizio (come scritto nella privacy); transizioni
  * morbide spente con prefers-reduced-motion (CSS).
  *
  * Foto: su desktop una colonna a sinistra con la foto del passaggio, in
@@ -104,11 +105,15 @@ interface Props {
 }
 
 const CHIAVE = 'gaia-preventivo-v1';
+/** Dopo 30 giorni le risposte salvate si cancellano (vedi privacy policy). */
+const SCADENZA_MS = 30 * 24 * 60 * 60 * 1000;
 
 interface Salvato {
   step: Passaggio;
   r: Risposte;
   inizio: number | null;
+  /** Ultimo salvataggio: conta se il tool non è ancora iniziato. */
+  salvatoIl?: number;
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -206,7 +211,10 @@ export default function Preventivatore(props: Props): ReactNode {
       const grezzo = window.localStorage.getItem(CHIAVE);
       if (grezzo) {
         const s = JSON.parse(grezzo) as Salvato;
-        if (s && s.r && s.step && s.step !== 'grazie') {
+        const da = s?.inizio ?? s?.salvatoIl ?? 0;
+        if (!da || Date.now() - da > SCADENZA_MS) {
+          window.localStorage.removeItem(CHIAVE);
+        } else if (s && s.r && s.step && s.step !== 'grazie') {
           const passo = (PASSAGGI as readonly string[]).includes(s.step) ? s.step : 'riepilogo';
           setR({ ...RISPOSTE_VUOTE, ...s.r, zoneMode: modoLuogo(s.r.zoneMode ?? '') });
           setStep(passo);
@@ -244,7 +252,7 @@ export default function Preventivatore(props: Props): ReactNode {
   useEffect(() => {
     if (!caricato || step === 'grazie') return;
     try {
-      const s: Salvato = { step, r, inizio: inizio.current };
+      const s: Salvato = { step, r, inizio: inizio.current, salvatoIl: Date.now() };
       window.localStorage.setItem(CHIAVE, JSON.stringify(s));
     } catch {
       /* niente storage, pazienza */

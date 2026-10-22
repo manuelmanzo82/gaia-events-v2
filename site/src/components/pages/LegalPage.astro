@@ -1,0 +1,386 @@
+---
+/**
+ * Privacy e cookie policy: pagine da leggere.
+ *
+ *  - Apertura sobria: titolo, una riga (intro) e «Ultimo aggiornamento»
+ *    dalla data messa a mano nel back office (pages.revised_on), non da
+ *    quella dell'ultimo salvataggio.
+ *  - Colonna di lettura di circa 65 caratteri, come gli articoli.
+ *  - Indice dei paragrafi dai titoli H2 del testo: su desktop fisso a
+ *    lato con la voce corrente (scripts/indice-fisso), su mobile un
+ *    elenco richiudibile sopra il testo.
+ *
+ * Il body è HTML del back office: qui si aggiungono solo gli id ai titoli.
+ */
+import type { Lang } from '../../config/site';
+import { HTML_LANG, useTranslations } from '../../i18n';
+import { path, type RouteKey } from '../../i18n/routes';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { langsFor } from '../../lib/availability';
+import { getPage, text } from '../../lib/content';
+import { breadcrumbs } from '../../lib/jsonld';
+import { ancora } from '../../lib/magazine';
+import { buildMeta } from '../../lib/seo';
+import PlaceholderSection from '../PlaceholderSection.astro';
+
+interface Props {
+  lang: Lang;
+  routeKey: RouteKey;
+}
+
+const { lang, routeKey } = Astro.props;
+const t = useTranslations(lang);
+
+const page = getPage(routeKey);
+const langs = langsFor(routeKey);
+const title = text(page?.title, lang);
+const riga = text(page?.intro, lang);
+
+// Titoli H2 con un id stabile: servono all'indice e ai link diretti.
+const usate = new Set<string>();
+const titoli: Array<{ id: string; testo: string }> = [];
+const body = text(page?.body, lang).replace(/<h2>([\s\S]*?)<\/h2>/g, (_, interno: string) => {
+  const testo = interno.replace(/<[^>]+>/g, '').trim();
+  const id = ancora(testo, usate);
+  usate.add(id);
+  titoli.push({ id, testo });
+  return `<h2 id="${id}" data-capitolo="${id}">${interno}</h2>`;
+});
+const conIndice = titoli.length >= 3;
+
+const revisione = page?.revisedOn ?? null;
+const dataLeggibile = revisione
+  ? new Intl.DateTimeFormat(HTML_LANG[lang], { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+      new Date(`${revisione}T00:00:00Z`),
+    )
+  : null;
+
+const meta = buildMeta({
+  lang,
+  routeKey,
+  title,
+  description: riga,
+  seo: page ?? undefined,
+  availableLangs: langs,
+});
+
+const crumbs = [
+  { name: t('nav.home'), href: path('home', lang) },
+  { name: title, href: path(routeKey, lang) },
+];
+---
+
+<BaseLayout lang={lang} routeKey={routeKey} meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} largo>
+  <header class="lg-apertura" data-theme="light">
+    <h1 class="font-display lg-titolo">{title}</h1>
+    {riga && <p class="text-lead lg-riga">{riga}</p>}
+    {
+      dataLeggibile && (
+        <p class="lg-data">
+          {t('legale.aggiornato')}: <time datetime={revisione}>{dataLeggibile}</time>
+        </p>
+      )
+    }
+  </header>
+
+  <div class:list={['lg-corpo', { 'lg-corpo--indice': conIndice }]}>
+    {
+      conIndice && (
+        <>
+          <nav class="lg-indice" aria-label={t('legale.indice')} data-indice>
+            <p class="lg-indice-titolo">{t('legale.indice')}</p>
+            <ol role="list">
+              {titoli.map((h) => (
+                <li>
+                  <a href={`#${h.id}`} data-voce={h.id}>
+                    {h.testo}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
+          <details class="lg-indice-mobile">
+            <summary>{t('legale.indice')}</summary>
+            <ol>
+              {titoli.map((h) => (
+                <li>
+                  <a href={`#${h.id}`}>{h.testo}</a>
+                </li>
+              ))}
+            </ol>
+          </details>
+        </>
+      )
+    }
+
+    {body ? <div class="lg-testo" set:html={body} /> : <PlaceholderSection lang={lang} id={routeKey} />}
+  </div>
+</BaseLayout>
+
+<script>
+  import { indiceFisso } from '../../scripts/indice-fisso';
+
+  const indice = document.querySelector<HTMLElement>('.lg-indice[data-indice]');
+  if (indice) indiceFisso(indice, [...document.querySelectorAll<HTMLElement>('.lg-testo [data-capitolo]')], 0.3);
+
+  // Mobile: scelto un paragrafo, l'indice si richiude.
+  const mobile = document.querySelector<HTMLDetailsElement>('.lg-indice-mobile');
+  mobile?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) mobile.open = false;
+  });
+</script>
+
+<style>
+  .lg-apertura,
+  .lg-corpo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 68rem;
+    margin: 0 auto;
+  }
+
+  .lg-apertura {
+    padding-top: calc(var(--altezza-header, 96px) + clamp(1rem, 4vh, 2.5rem));
+    padding-bottom: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .lg-titolo {
+    margin: 0 0 0 -0.03em;
+    font-size: clamp(3rem, 1.2rem + 6vw, 6.5rem);
+    line-height: 0.95;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    padding-bottom: 0.08em;
+  }
+
+  .lg-riga {
+    max-width: 36rem;
+    margin: clamp(1rem, 3vh, 1.5rem) 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .lg-data {
+    margin: 1.25rem 0 0;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .lg-corpo {
+    margin-bottom: var(--spacing-section-sm);
+    padding-top: clamp(2rem, 5vh, 3rem);
+    border-top: 1px solid var(--color-beige);
+  }
+
+  /* ---- Testo: colonna da lettura ------------------------------------ */
+  .lg-testo {
+    max-width: 65ch;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  .lg-testo :global(h2) {
+    margin: 2.75rem 0 0.9rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 1.3rem + 1.1vw, 2.125rem);
+    line-height: 1.15;
+    font-weight: 400;
+    scroll-margin-top: calc(var(--sotto-header, 96px) + 1.5rem);
+  }
+
+  .lg-testo :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .lg-testo :global(p) {
+    margin: 0 0 1.1em;
+  }
+
+  .lg-testo :global(ul) {
+    display: grid;
+    list-style: disc;
+    gap: 0.6em;
+    margin: 0 0 1.25em;
+    padding-left: 1.25rem;
+  }
+
+  .lg-testo :global(li::marker) {
+    color: var(--color-oro-testo);
+  }
+
+  .lg-testo :global(strong) {
+    font-weight: 600;
+  }
+
+  .lg-testo :global(a) {
+    color: var(--color-bordeaux);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    overflow-wrap: anywhere;
+  }
+
+  .lg-testo :global(a:focus-visible) {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  .lg-testo :global(code) {
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    background: var(--color-beige);
+    font-size: 0.875em;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---- Indice: mobile richiudibile --------------------------------- */
+  /* Sotto i 64rem il filetto dell'indice sostituisce quello del corpo. */
+  @media (max-width: 63.99rem) {
+    .lg-corpo--indice {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+
+  .lg-indice {
+    display: none;
+  }
+
+  .lg-indice-mobile {
+    margin-bottom: 2.25rem;
+    border-block: 1px solid var(--color-beige);
+  }
+
+  .lg-indice-mobile summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .lg-indice-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lg-indice-mobile summary::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.25rem;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: translateY(-25%) rotate(45deg);
+  }
+
+  .lg-indice-mobile[open] summary::after {
+    transform: translateY(25%) rotate(-135deg);
+  }
+
+  .lg-indice-mobile summary:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  .lg-indice-mobile ol {
+    margin: 0;
+    padding: 0 0 1rem 1.25rem;
+  }
+
+  .lg-indice-mobile a {
+    display: block;
+    padding-block: 0.55rem;
+    color: var(--color-inchiostro);
+    text-decoration: none;
+  }
+
+  /* ---- Desktop: indice fisso a lato ---------------------------------- */
+  @media (min-width: 64rem) {
+    .lg-corpo--indice {
+      display: grid;
+      grid-template-columns: 14rem minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: start;
+    }
+
+    .lg-indice-mobile {
+      display: none;
+    }
+
+    .lg-indice {
+      position: sticky;
+      top: calc(var(--sotto-header, 96px) + 2rem);
+      display: block;
+    }
+  }
+
+  .lg-indice-titolo {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .lg-indice ol {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0 0 0 1rem;
+    list-style: none;
+    border-left: 1px solid color-mix(in srgb, var(--color-inchiostro) 15%, transparent);
+  }
+
+  .lg-indice a {
+    position: relative;
+    display: block;
+    padding-block: 0.45rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--color-grigio-caldo);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-gaia);
+  }
+
+  .lg-indice a::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    bottom: 0.45rem;
+    left: calc(-1rem - 1px);
+    width: 2px;
+    background: var(--color-bordeaux);
+    transform: scaleY(0);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .lg-indice a:hover,
+  .lg-indice a[aria-current='true'] {
+    color: var(--color-inchiostro);
+  }
+
+  .lg-indice a[aria-current='true']::before {
+    transform: scaleY(1);
+  }
+
+  .lg-indice a:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lg-indice a,
+    .lg-indice a::before {
+      transition: none;
+    }
+  }
+</style>

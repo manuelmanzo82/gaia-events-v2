@@ -109,6 +109,8 @@ final class PagesController
             'meta_description_en' => self::clean($_POST['meta_description_en'] ?? null),
             'hero_media_id' => (int) ($_POST['hero_media_id'] ?? 0) ?: null,
             'og_media_id' => (int) ($_POST['og_media_id'] ?? 0) ?: null,
+            // «Ultimo aggiornamento» di privacy e cookie: a mano, non a ogni salvataggio.
+            'revised_on' => self::data($_POST['revised_on'] ?? null),
         ];
 
         $existing = Db::one('SELECT id FROM pages WHERE page_key = ?', [$key]);
@@ -132,6 +134,13 @@ final class PagesController
         $value = trim($value);
 
         return $value === '' ? null : $value;
+    }
+
+    private static function data(mixed $value): ?string
+    {
+        $value = self::clean($value);
+
+        return $value !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1 ? $value : null;
     }
 
     /** @return array<int, string> */

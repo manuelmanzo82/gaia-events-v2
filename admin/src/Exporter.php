@@ -324,6 +324,7 @@ final class Exporter
             'ogImage' => self::image(self::mediaById((int) ($row['og_media_id'] ?? 0))),
             'blocks' => self::blocks((int) $row['id']),
             'updatedAt' => self::date($row['updated_at']),
+            'revisedOn' => self::date($row['revised_on'] ?? null),
         ], $rows);
     }
 

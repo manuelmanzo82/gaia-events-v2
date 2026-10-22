@@ -42,6 +42,12 @@ $pair = static function (string $column, string $label, string $type = 'text') u
   <?php $pair('meta_title', 'Meta title'); ?>
   <?php $pair('meta_description', 'Meta description', 'textarea'); ?>
 
+  <?php if (in_array($pageKey, ['privacy', 'cookie'], true)): ?>
+    <label for="revised_on">Ultimo aggiornamento (mostrato nella pagina)</label>
+    <input id="revised_on" type="date" name="revised_on" value="<?= e(substr((string) ($row['revised_on'] ?? ''), 0, 10)) ?>">
+    <p class="help">Cambiala solo quando cambia la sostanza del testo, non per una virgola.</p>
+  <?php endif; ?>
+
   <label for="hero_media_id">Immagine principale</label>
   <select id="hero_media_id" name="hero_media_id">
     <option value="">— nessuna —</option>

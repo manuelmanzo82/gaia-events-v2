@@ -142,6 +142,14 @@ export const UI = {
   'faq.linkCopiato': { it: 'Link copiato', en: 'Link copied' },
   'faq.nonTrovate': { it: 'Non trovate la risposta?', en: 'Can’t find your answer?' },
   'faq.scrivetemi': { it: 'Scrivetemi', en: 'Write to me' },
+  // Facciata dei video YouTube/Vimeo e pagine legali.
+  'video.nota': {
+    it: 'Avviando il video si caricano contenuti da {servizio}.',
+    en: 'Playing the video loads content from {servizio}.',
+  },
+  'video.notaLink': { it: 'Cookie policy', en: 'Cookie policy' },
+  'legale.aggiornato': { it: 'Ultimo aggiornamento', en: 'Last updated' },
+  'legale.indice': { it: 'In questa pagina', en: 'On this page' },
   'magazine.indice': { it: 'In questo articolo', en: 'In this article' },
   'magazine.condividi': { it: 'Condividi', en: 'Share' },
   'magazine.copiaLink': { it: 'Copia link', en: 'Copy link' },

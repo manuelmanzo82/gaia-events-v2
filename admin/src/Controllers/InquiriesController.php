@@ -7,6 +7,7 @@ namespace Gaia\Admin\Controllers;
 use Gaia\Admin\Auth;
 use Gaia\Admin\Csrf;
 use Gaia\Admin\Db;
+use Gaia\Admin\Inquiry;
 use Gaia\Admin\Session;
 use Gaia\Admin\View;
 
@@ -25,6 +26,8 @@ final class InquiriesController
     public function index(array $params = []): void
     {
         Auth::requireLogin();
+        // Conservazione: IP dopo 30 giorni, richieste dopo 24 mesi.
+        Inquiry::pulizia();
 
         $status = (string) ($_GET['stato'] ?? '');
 

@@ -256,6 +256,8 @@ export interface Page extends SeoFields {
   /** Blocchi ripetibili, es. percorso e valori in «chi sono». */
   blocks: Block[];
   updatedAt?: string;
+  /** «Ultimo aggiornamento» messo a mano (privacy e cookie). */
+  revisedOn?: string | null;
 }
 
 /**
