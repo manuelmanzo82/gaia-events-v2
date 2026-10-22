@@ -1,27 +1,33 @@
 ---
 /**
- * Dicono di me (/dicono-di-me/ ↔ /en/kind-words/), giro 11: una pagina
- * sola, tre blocchi, ognuno visibile solo se ha contenuti.
+ * Dicono di me (/dicono-di-me/ ↔ /en/kind-words/). Ogni blocco compare
+ * solo se ha contenuti; la pagina (e menu, ponti, sitemap) non esiste
+ * finché sono tutti vuoti: la regola sta in availability.ts.
  *
- *  1. Recensioni: solo quelle vere e attive, con nome, evento e data.
- *  2. Stampa: articoli e interviste (testata, titolo, data, link, logo
- *     opzionale, estratto nella lingua se c'è).
- *  3. Hanno scelto Gaia: la fila dei loghi delle aziende clienti.
+ *  1. Apertura tipografica: titolo e intro (pagina reviews).
+ *  2. Citazioni grandi che cambiano allo scroll (dicono/Citazioni).
+ *  3. Altre parole: le recensioni non in evidenza, come card.
+ *  4. Stampa: testata (logo o nome), titolo, data, link esterno, con
+ *     «Servizio TV» o «Podcast» quando serve. Mai clip caricate.
+ *  5. Hanno scelto Gaia: fila di loghi in tinta unita, a colori al
+ *     passaggio.
+ *  6. Chiusura: CtaFinale con la foto dicono.photos.cta.
  *
- * La pagina (e la voce di menu) non esiste finché tutti e tre i blocchi
- * sono vuoti: la regola sta in availability.ts, non qui. JSON-LD: solo il
- * breadcrumb — niente Review/AggregateRating autoreferenziali sul
- * LocalBusiness, le recensioni restano testo.
+ * Solo recensioni con il consenso scritto (getReviews). JSON-LD:
+ * BreadcrumbList e WebPage, niente Review/AggregateRating.
  */
 import type { Lang } from '../../config/site';
 import { formatDate, useTranslations } from '../../i18n';
-import { path } from '../../i18n/routes';
+import { path, url } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { REVIEW_FIELDS, existsIn, langsFor } from '../../lib/availability';
-import { getClients, getPage, getPress, getReviews, isPublishable, text } from '../../lib/content';
+import { REVIEW_FIELDS, langsFor } from '../../lib/availability';
+import { getClients, getPage, getPress, getReviews, getSettings, isPublishable, text } from '../../lib/content';
 import { picture } from '../../lib/images';
-import { breadcrumbs } from '../../lib/jsonld';
+import { breadcrumbs, webPage } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import Citazioni from '../dicono/Citazioni.astro';
+import CtaFinale from '../home/CtaFinale.astro';
+import Icona from '../Icona.astro';
 import Picture from '../Picture.astro';
 
 interface Props {
@@ -30,11 +36,15 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const settings = getSettings();
 
 const page = getPage('reviews');
 const langs = langsFor('reviews');
 
 const recensioni = getReviews().filter((r) => isPublishable(r, lang, REVIEW_FIELDS));
+// In evidenza le citazioni grandi; se nessuna lo è, le prime quattro.
+const evidenza = recensioni.some((r) => r.featured) ? recensioni.filter((r) => r.featured) : recensioni.slice(0, 4);
+const altre = recensioni.filter((r) => !evidenza.includes(r));
 const stampa = getPress();
 const clienti = getClients();
 
@@ -55,81 +65,85 @@ const crumbs = [
   { name: title, href: path('reviews', lang) },
 ];
 
-const preventivo = existsIn('quote', lang);
+const jsonLd = [breadcrumbs(crumbs), webPage({ lang, title, description: intro, url: url('reviews', lang) })];
+
+const etichettaTipo = (k?: string): string =>
+  k === 'tv' ? t('reviews.tv') : k === 'podcast' ? t('reviews.podcast') : '';
+const azione = (k?: string): string =>
+  k === 'tv' ? t('reviews.guarda') : k === 'podcast' ? t('reviews.ascolta') : k === 'altro' ? t('reviews.apri') : t('cta.readMore');
 ---
 
-{/* Breadcrumb solo nel JSON-LD: a video, sotto il header, lascerebbe un buco (come sul preventivo). */}
-<BaseLayout lang={lang} routeKey="reviews" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]}>
-  <section class="dm-testa container-gaia" data-theme="light">
-    <p class="eyebrow">{t('nav.reviews')}</p>
-    <h1 class="text-display dm-titolo">{title}</h1>
-    {intro && <p class="dm-intro">{intro}</p>}
+<BaseLayout lang={lang} routeKey="reviews" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
+  <section class="dm-apertura" data-theme="light" aria-labelledby="dm-titolo">
+    <h1 id="dm-titolo" class="font-display dm-titolo">{title}</h1>
+    {intro && <p class="text-lead dm-intro">{intro}</p>}
   </section>
 
+  <Citazioni lang={lang} recensioni={evidenza} />
+
   {
-    recensioni.length > 0 && (
-      <section class="dm-recensioni" data-theme="dark" aria-labelledby="dm-recensioni-titolo">
-        <div class="container-gaia">
-          <h2 id="dm-recensioni-titolo" class="eyebrow" data-reveal="alto">
-            {t('reviews.coppie')}
-          </h2>
-          <ul class="dm-lista-recensioni" role="list">
-            {recensioni.map((r) => (
+    altre.length > 0 && (
+      <section class="dm-altre" data-theme="light" aria-labelledby="dm-altre-titolo">
+        <h2 id="dm-altre-titolo" class="font-display dm-sezione-titolo" data-reveal="righe">
+          {t('reviews.altre')}
+        </h2>
+        <ul class="dm-card" role="list">
+          {altre.map((r) => {
+            const foto = picture(r.image, lang, '4rem');
+            return (
               <li data-reveal="alto">
-                <blockquote class="dm-recensione">
-                  <p class="font-display dm-citazione">«{text(r.text, lang)}»</p>
-                  <footer class="didascalia">
-                    <strong>{r.author}</strong>
-                    {text(r.eventName, lang) && <span> · {text(r.eventName, lang)}</span>}
-                    {r.date && (
-                      <span>
-                        {' '}
-                        · <time datetime={r.date}>{formatDate(r.date, lang)}</time>
+                <figure class="dm-recensione">
+                  <blockquote>
+                    <p>«{text(r.text, lang)}»</p>
+                  </blockquote>
+                  <figcaption>
+                    {foto && <Picture data={foto} cap={false} class="dm-recensione-foto" />}
+                    <span>
+                      <strong>{r.author}</strong>
+                      <span class="dm-recensione-meta">
+                        {[text(r.eventName, lang), r.date ? formatDate(r.date, lang) : ''].filter(Boolean).join(' · ')}
                       </span>
-                    )}
-                  </footer>
-                </blockquote>
+                    </span>
+                  </figcaption>
+                </figure>
               </li>
-            ))}
-          </ul>
-        </div>
+            );
+          })}
+        </ul>
       </section>
     )
   }
 
   {
     stampa.length > 0 && (
-      <section class="dm-stampa container-gaia" data-theme="light" aria-labelledby="dm-stampa-titolo">
-        <h2 id="dm-stampa-titolo" class="eyebrow" data-reveal="alto">
+      <section class="dm-stampa" data-theme="light" aria-labelledby="dm-stampa-titolo">
+        <h2 id="dm-stampa-titolo" class="font-display dm-sezione-titolo" data-reveal="righe">
           {t('reviews.stampa')}
         </h2>
-        <ul class="dm-lista-stampa" role="list">
+        <ul class="dm-stampa-lista" role="list">
           {stampa.map((a) => {
-            const logo = picture(a.logo, lang, '160px');
+            const logo = picture(a.logo, lang, '10rem');
+            if (logo) logo.alt = logo.alt || a.outlet;
             const estratto = text(a.excerpt, lang);
+            const tipo = etichettaTipo(a.kind);
             return (
               <li class="dm-articolo" data-reveal="alto">
-                <p class="dm-testata">
-                  {logo ? <Picture data={logo} class="dm-testata-logo" /> : a.outlet}
-                  {a.date && (
-                    <time class="didascalia" datetime={a.date}>
-                      {formatDate(a.date, lang)}
-                    </time>
-                  )}
-                </p>
-                <h3 class="font-display dm-articolo-titolo">
-                  {a.url ? (
-                    <a href={a.url} rel="noopener" target="_blank">
-                      {a.title}
-                    </a>
-                  ) : (
-                    a.title
-                  )}
-                </h3>
-                {estratto && <p class="dm-estratto">{estratto}</p>}
+                <div class="dm-testata">
+                  {logo ? <Picture data={logo} cap={false} class="dm-testata-logo" /> : <span class="dm-testata-nome">{a.outlet}</span>}
+                </div>
+                <div class="dm-articolo-testo">
+                  <p class="dm-articolo-meta">
+                    {tipo && <span class="dm-tipo">{tipo}</span>}
+                    {a.date && <time datetime={a.date}>{formatDate(a.date, lang)}</time>}
+                  </p>
+                  <h3 class="font-display dm-articolo-titolo">{a.title}</h3>
+                  {estratto && <p class="dm-estratto">{estratto}</p>}
+                </div>
                 {a.url && (
-                  <a class="link-filo dm-leggi" href={a.url} rel="noopener" target="_blank">
-                    {t('cta.readMore')}
+                  <a class="dm-articolo-link" href={a.url} rel="noopener" target="_blank">
+                    <span>{azione(a.kind)}</span>
+                    <span class="sr-only">: {a.title}, {t('reviews.nuovaScheda')}</span>
+                    <Icona nome="freccia" dimensione={20} />
                   </a>
                 )}
               </li>
@@ -143,220 +157,305 @@ const preventivo = existsIn('quote', lang);
   {
     clienti.length > 0 && (
       <section class="dm-clienti" data-theme="light" aria-labelledby="dm-clienti-titolo">
-        <div class="container-gaia">
-          <h2 id="dm-clienti-titolo" class="eyebrow" data-reveal="alto">
-            {t('reviews.clienti')}
-          </h2>
-          <ul class="dm-loghi" role="list" data-reveal="alto">
-            {clienti.map((c) => {
-              const logo = picture(c.logo, lang, '160px');
-              return (
-                <li>
-                  {logo ? (
-                    <Picture data={logo} class="dm-logo" />
-                  ) : (
-                    <span class="dm-logo-nome">{c.name}</span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <h2 id="dm-clienti-titolo" class="dm-clienti-titolo">
+          {t('reviews.clienti')}
+        </h2>
+        <ul class="dm-loghi" role="list" data-reveal="alto">
+          {clienti.map((c) => {
+            const logo = picture(c.logo, lang, '10rem');
+            if (logo) logo.alt = logo.alt || c.name;
+            return <li>{logo ? <Picture data={logo} cap={false} class="dm-logo" /> : <span class="dm-logo-nome">{c.name}</span>}</li>;
+          })}
+        </ul>
       </section>
     )
   }
 
-  {
-    preventivo && (
-      <p class="dm-chiusura container-gaia">
-        <a class="btn" href={path('quote', lang)}>
-          {t('cta.quote')}
-        </a>
-      </p>
-    )
-  }
+  <CtaFinale lang={lang} settings={settings} foto={settings.dicono?.photos?.cta ?? null} lato="destra" />
 </BaseLayout>
 
 <style>
-  .dm-testa {
-    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 5vh, 3.5rem));
-    padding-bottom: clamp(2.5rem, 6vh, 4.5rem);
+  .dm-apertura,
+  .dm-altre,
+  .dm-stampa,
+  .dm-clienti {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 76rem;
+    margin: 0 auto;
   }
 
-  .dm-testa .eyebrow {
-    margin: 0 0 0.9rem;
+  /* ---- 1. Apertura ---------------------------------------------------- */
+  .dm-apertura {
+    padding-top: calc(var(--altezza-header, 96px) + clamp(1rem, 4vh, 2.5rem));
+    padding-bottom: clamp(3rem, 8vh, 5rem);
   }
 
   .dm-titolo {
-    max-width: 16ch;
-    margin: 0;
+    margin: 0 0 0 -0.04em;
+    font-size: clamp(3.5rem, 1rem + 9vw, 10rem);
+    line-height: 0.9;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    padding-bottom: 0.1em;
   }
 
   .dm-intro {
-    max-width: 40rem;
-    margin: 1.25rem 0 0;
-    font-size: var(--text-lead);
-    line-height: var(--text-lead--line-height);
+    max-width: 36rem;
+    margin: clamp(1rem, 3vh, 1.5rem) 0 0;
     color: var(--color-grigio-caldo);
   }
 
-  /* — Recensioni: fondo notte, citazioni grandi come in home — */
-  .dm-recensioni {
-    padding-block: var(--spacing-section);
-  }
-
-  .dm-lista-recensioni {
-    display: grid;
-    gap: clamp(2.5rem, 5vh, 4rem) 4rem;
-    margin: clamp(2rem, 4vh, 3rem) 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  @media (min-width: 64rem) {
-    .dm-lista-recensioni {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    /* Una sola recensione: al centro, larga. */
-    .dm-lista-recensioni:has(li:only-child) {
-      grid-template-columns: minmax(0, 56rem);
-      justify-content: center;
-      text-align: center;
-    }
-  }
-
-  .dm-recensione {
-    margin: 0;
-  }
-
-  .dm-citazione {
-    margin: 0 0 1rem;
-    font-size: var(--text-title);
-    line-height: 1.3;
+  .dm-sezione-titolo {
+    margin: 0 0 clamp(1.75rem, 4vh, 2.5rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
     font-weight: 400;
   }
 
-  .dm-recensione footer strong {
-    font-weight: 500;
+  /* ---- 3. Altre parole --------------------------------------------------- */
+  .dm-altre {
+    padding-top: var(--spacing-section);
   }
 
-  /* — Stampa: elenco in due colonne — */
-  .dm-stampa {
-    padding-block: var(--spacing-section-sm) var(--spacing-section);
-  }
-
-  .dm-lista-stampa {
+  .dm-card {
     display: grid;
-    gap: 2.5rem 3rem;
-    margin: clamp(1.5rem, 3vh, 2.5rem) 0 0;
+    gap: 1rem;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  @media (min-width: 48rem) {
-    .dm-lista-stampa {
-      grid-template-columns: 1fr 1fr;
-    }
+  .dm-recensione {
+    display: grid;
+    gap: 1.5rem;
+    align-content: space-between;
+    height: 100%;
+    margin: 0;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 2px solid var(--color-oro);
+    border-radius: 0 0 16px 16px;
+    background: var(--color-bianco-caldo);
+  }
+
+  .dm-recensione blockquote {
+    margin: 0;
+  }
+
+  .dm-recensione blockquote p {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+    line-height: 1.35;
+  }
+
+  .dm-recensione figcaption {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    font-size: 0.9375rem;
+  }
+
+  .dm-recensione figcaption > span {
+    display: grid;
+  }
+
+  .dm-recensione strong {
+    font-weight: 500;
+  }
+
+  .dm-recensione-meta {
+    color: var(--color-grigio-caldo);
+  }
+
+  .dm-recensione :global(.dm-recensione-foto) {
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+    max-width: none;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  /* ---- 4. Stampa -------------------------------------------------------- */
+  .dm-stampa {
+    padding-top: var(--spacing-section);
+  }
+
+  .dm-stampa-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-beige);
   }
 
   .dm-articolo {
-    padding-top: 1.25rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+    display: grid;
+    gap: 1rem;
+    padding-block: clamp(1.5rem, 4vh, 2.25rem);
+    border-bottom: 1px solid var(--color-beige);
   }
 
   .dm-testata {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 1rem;
-    margin: 0 0 0.75rem;
-    font-size: var(--text-caption);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    min-height: 2.5rem;
   }
 
   .dm-testata :global(.dm-testata-logo) {
-    height: 28px;
     width: auto;
+    max-width: 9rem;
+    max-height: 2.5rem;
+    object-fit: contain;
   }
 
-  .dm-testata time {
-    text-transform: none;
-    letter-spacing: 0;
+  .dm-testata-nome {
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
 
-  .dm-articolo-titolo {
-    margin: 0;
-    font-size: var(--text-title);
-    line-height: var(--text-title--line-height);
-    font-weight: 400;
+  .dm-articolo-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-grigio-caldo);
   }
 
-  .dm-articolo-titolo a {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .dm-articolo-titolo a:hover {
+  .dm-tipo {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--color-bordeaux);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--color-bordeaux);
   }
 
+  .dm-articolo-titolo {
+    max-width: 36ch;
+    margin: 0;
+    font-size: clamp(1.375rem, 1.15rem + 0.8vw, 1.875rem);
+    line-height: 1.2;
+    font-weight: 400;
+  }
+
   .dm-estratto {
-    max-width: 34rem;
+    max-width: 42rem;
     margin: 0.75rem 0 0;
     color: var(--color-grigio-caldo);
   }
 
-  .dm-leggi {
-    display: inline-block;
-    margin-top: 0.9rem;
+  .dm-articolo-link {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: center;
+    justify-self: start;
+    min-height: 44px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-bordeaux);
+    text-decoration: none;
   }
 
-  /* — Hanno scelto Gaia: una fila di loghi, muta — */
+  .dm-articolo-link :global(svg) {
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .dm-articolo-link:hover :global(svg),
+  .dm-articolo-link:focus-visible :global(svg) {
+    transform: translateX(4px);
+  }
+
+  .dm-articolo-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  /* ---- 5. Clienti ------------------------------------------------------ */
   .dm-clienti {
-    padding-block: var(--spacing-section-sm);
-    background: var(--color-beige);
-    text-align: center;
+    padding-block: var(--spacing-section);
   }
 
-  .dm-clienti .eyebrow {
-    justify-content: center;
+  .dm-clienti-titolo {
+    margin: 0 0 2rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+    text-align: center;
   }
 
   .dm-loghi {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4.5rem);
     align-items: center;
-    gap: 2rem clamp(2rem, 5vw, 4.5rem);
-    margin: 2rem 0 0;
+    justify-content: center;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
   .dm-loghi :global(.dm-logo) {
-    height: clamp(28px, 4vw, 44px);
     width: auto;
-    max-width: 160px;
+    max-width: 8.5rem;
+    max-height: 3rem;
     object-fit: contain;
-    opacity: 0.8;
+    filter: grayscale(1);
+    opacity: 0.7;
+    transition:
+      filter 0.5s var(--ease-gaia),
+      opacity 0.5s var(--ease-gaia);
+  }
+
+  .dm-loghi li:hover :global(.dm-logo) {
+    filter: none;
+    opacity: 1;
   }
 
   .dm-logo-nome {
     font-family: var(--font-display);
-    font-size: 1.5rem;
-    letter-spacing: 0.02em;
+    font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem);
+    color: var(--color-grigio-caldo);
+    transition: color 0.5s var(--ease-gaia);
   }
 
-  .dm-chiusura {
-    padding-block: var(--spacing-section-sm) var(--spacing-section);
-    text-align: center;
+  .dm-loghi li:hover .dm-logo-nome {
+    color: var(--color-inchiostro);
   }
 
-  @media (max-width: 63.98rem) {
-    .dm-testa {
-      padding-top: calc(var(--altezza-header, 96px) + 1rem);
+  @media (min-width: 48rem) {
+    .dm-card {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .dm-card {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dm-articolo {
+      grid-template-columns: 11rem minmax(0, 1fr) auto;
+      gap: clamp(2rem, 4vw, 4rem);
+      align-items: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dm-articolo-link :global(svg),
+    .dm-loghi :global(.dm-logo),
+    .dm-logo-nome {
+      transition: none;
     }
   }
 </style>

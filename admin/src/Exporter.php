@@ -382,6 +382,9 @@ final class Exporter
             'rating' => (int) $row['rating'],
             'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
             'featured' => (bool) $row['featured'],
+            // Senza consenso scritto il sito non la mostra.
+            'consent' => (bool) ($row['consenso'] ?? false),
+            'storyId' => isset($row['story_id']) ? (int) $row['story_id'] : null,
             'active' => (bool) $row['active'],
             'order' => (int) $row['sort_order'],
         ], $rows);
@@ -397,6 +400,7 @@ final class Exporter
         return array_map(static fn (array $row): array => [
             'id' => (int) $row['id'],
             'outlet' => (string) $row['outlet'],
+            'kind' => (string) ($row['tipo'] ?? 'articolo'),
             'title' => (string) $row['title'],
             'date' => self::date($row['published_on']),
             'url' => $row['url'] !== null && $row['url'] !== '' ? (string) $row['url'] : null,

@@ -45,6 +45,12 @@ final class PressController extends ResourceController
     {
         return [
             'outlet' => ['label' => 'Testata', 'type' => 'text', 'rules' => 'required|max:190'],
+            'tipo' => [
+                'label' => 'Tipo',
+                'type' => 'select',
+                'options' => ['articolo' => 'Articolo', 'tv' => 'Servizio TV', 'podcast' => 'Podcast', 'altro' => 'Altro'],
+                'help' => 'Per la TV basta il link alla puntata: niente clip caricate sul sito.',
+            ],
             'title' => ['label' => 'Titolo dell\'articolo', 'type' => 'text', 'rules' => 'required|max:255'],
             'published_on' => ['label' => 'Data', 'type' => 'date'],
             'url' => ['label' => 'Link all\'articolo', 'type' => 'text', 'rules' => 'max:500'],

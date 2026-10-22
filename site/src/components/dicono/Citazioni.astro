@@ -1,0 +1,361 @@
+---
+/**
+ * Dicono di me — le citazioni grandi (recensioni «in evidenza»; se
+ * nessuna lo è, le prime quattro).
+ *
+ * Desktop con il movimento attivo: una scena fissa sotto l'header e la
+ * citazione che cambia mentre si scorre, con le parole che salgono; a
+ * lato la foto se c'è, sotto nome, evento, data e il link all'evento
+ * collegato. Un tasto o un link che prende il focus porta la pagina alla
+ * sua citazione.
+ * Mobile, reduced-motion e senza JS: citazioni impilate e ferme, tutte
+ * leggibili (è lo stato di partenza: il JS aggiunge la scena).
+ */
+import type { Lang } from '../../config/site';
+import { formatDate, useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { STORY_FIELDS } from '../../lib/availability';
+import { getStories, isPublishable, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import type { Review } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  recensioni: Review[];
+}
+
+const { lang, recensioni } = Astro.props;
+const t = useTranslations(lang);
+
+const storie = getStories().filter((s) => isPublishable(s, lang, STORY_FIELDS));
+const voci = recensioni.map((r) => {
+  const storia = r.storyId ? storie.find((s) => s.id === r.storyId) : undefined;
+  return {
+    id: r.id,
+    testo: text(r.text, lang),
+    autore: r.author,
+    evento: text(r.eventName, lang),
+    data: r.date,
+    foto: picture(r.image, lang, '(min-width: 64rem) 30vw, 80vw'),
+    storia: storia ? path('stories', lang, text(storia.slug, lang)) : null,
+  };
+});
+---
+
+{
+  voci.length > 0 && (
+    <section class="dm-cit" data-theme="dark" aria-labelledby="dm-cit-titolo" data-citazioni style={`--n: ${voci.length}`}>
+      <div class="dm-cit-palco" data-palco>
+        <h2 id="dm-cit-titolo" class="dm-cit-eyebrow">
+          {t('reviews.coppie')}
+        </h2>
+        <ol class="dm-cit-lista" role="list">
+          {voci.map((v, i) => (
+            <li class:list={['dm-cit-voce', { 'dm-cit-voce--foto': v.foto }]} data-voce-cit={i}>
+              {v.foto && (
+                <figure class="dm-cit-foto">
+                  <Picture data={v.foto} cap={false} class="dm-cit-img" />
+                </figure>
+              )}
+              <figure class="dm-cit-corpo">
+                <blockquote>
+                  <p class="font-display dm-cit-testo" data-parole>
+                    «{v.testo}»
+                  </p>
+                </blockquote>
+                <figcaption class="dm-cit-firma">
+                  <strong>{v.autore}</strong>
+                  {v.evento && <span>{v.evento}</span>}
+                  {v.data && <time datetime={v.data}>{formatDate(v.data, lang)}</time>}
+                  {v.storia && (
+                    <a class="dm-cit-evento" href={v.storia}>
+                      {t('reviews.evento')}
+                    </a>
+                  )}
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ol>
+        {voci.length > 1 && (
+          <ol class="dm-cit-punti" aria-hidden="true">
+            {voci.map((_, i) => (
+              <li data-punto={i} />
+            ))}
+          </ol>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const sezione = document.querySelector<HTMLElement>('[data-citazioni]');
+  const palco = sezione?.querySelector<HTMLElement>('[data-palco]');
+  const voci = sezione ? [...sezione.querySelectorAll<HTMLElement>('[data-voce-cit]')] : [];
+  const punti = sezione ? [...sezione.querySelectorAll<HTMLElement>('[data-punto]')] : [];
+  const desktop = window.matchMedia('(min-width: 64rem)');
+
+  if (sezione && palco && voci.length > 1 && !riduciMotion()) {
+    // Parole in span, per farle salire una dopo l'altra.
+    for (const p of sezione.querySelectorAll<HTMLElement>('[data-parole]')) {
+      const parole = (p.textContent ?? '').trim().split(/\s+/);
+      p.setAttribute('aria-label', parole.join(' '));
+      p.innerHTML = parole
+        .map((w, i) => `<span class="dm-parola" aria-hidden="true" style="--i:${Math.min(i, 30)}"><span>${w.replace(/</g, '&lt;')}</span></span>`)
+        .join(' ');
+    }
+
+    let corrente = -1;
+    let inAttesa = false;
+    const accendi = (i: number): void => {
+      if (i === corrente) return;
+      corrente = i;
+      voci.forEach((v, k) => v.classList.toggle('is-attiva', k === i));
+      punti.forEach((p, k) => p.classList.toggle('is-attivo', k === i));
+    };
+    const aggiorna = (): void => {
+      inAttesa = false;
+      if (!sezione.classList.contains('is-scena')) return;
+      const r = sezione.getBoundingClientRect();
+      const corsa = Math.max(r.height - palco.offsetHeight, 1);
+      const progresso = Math.min(Math.max(-r.top / corsa, 0), 0.9999);
+      accendi(Math.floor(progresso * voci.length));
+    };
+    const chiedi = (): void => {
+      if (!inAttesa) {
+        inAttesa = true;
+        requestAnimationFrame(aggiorna);
+      }
+    };
+    const imposta = (): void => {
+      sezione.classList.toggle('is-scena', desktop.matches);
+      corrente = -1;
+      if (desktop.matches) aggiorna();
+      else voci.forEach((v) => v.classList.remove('is-attiva'));
+    };
+
+    // Focus su un link di una citazione nascosta: la pagina va lì.
+    sezione.addEventListener('focusin', (e) => {
+      if (!sezione.classList.contains('is-scena')) return;
+      const voce = (e.target as HTMLElement).closest<HTMLElement>('[data-voce-cit]');
+      if (!voce) return;
+      const i = Number(voce.dataset.voceCit);
+      const corsa = sezione.offsetHeight - palco.offsetHeight;
+      const cima = sezione.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: cima + ((i + 0.5) / voci.length) * corsa, behavior: 'instant' as ScrollBehavior });
+    });
+
+    window.addEventListener('scroll', chiedi, { passive: true });
+    window.addEventListener('resize', chiedi);
+    desktop.addEventListener('change', imposta);
+    imposta();
+  }
+</script>
+
+<style>
+  .dm-cit {
+    padding-block: var(--spacing-section);
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .dm-cit-eyebrow {
+    margin: 0 0 clamp(2rem, 5vh, 3rem);
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro);
+  }
+
+  .dm-cit-palco {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 76rem;
+    margin: 0 auto;
+  }
+
+  .dm-cit-lista {
+    display: grid;
+    gap: clamp(3.5rem, 9vh, 5.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dm-cit-voce {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .dm-cit-foto {
+    width: min(70%, 18rem);
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .dm-cit-foto :global(picture),
+  .dm-cit-foto :global(.dm-cit-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .dm-cit-corpo,
+  .dm-cit-corpo blockquote {
+    margin: 0;
+  }
+
+  .dm-cit-testo {
+    max-width: 30ch;
+    margin: 0;
+    font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.5rem);
+    line-height: 1.15;
+    font-weight: 300;
+  }
+
+  .dm-cit-firma {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    align-items: baseline;
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+    color: color-mix(in srgb, var(--color-avorio-su-notte) 78%, transparent);
+  }
+
+  .dm-cit-firma strong {
+    font-weight: 500;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .dm-cit-evento {
+    color: var(--color-oro);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .dm-cit-evento:focus-visible {
+    outline: 2px solid var(--color-oro);
+    outline-offset: 3px;
+  }
+
+  .dm-cit-punti {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .dm-cit-voce--foto {
+      grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: center;
+    }
+
+    .dm-cit-foto {
+      width: 100%;
+    }
+
+    /* ---- Scena: fissa sotto l'header, una citazione alla volta ---- */
+    .dm-cit.is-scena {
+      /* Un tratto di scroll per citazione. */
+      height: calc(var(--n) * 75svh + 100svh);
+      padding-block: 0;
+    }
+
+    .dm-cit.is-scena .dm-cit-eyebrow {
+      position: absolute;
+      top: clamp(1.5rem, 5vh, 3rem);
+      left: 0;
+      margin: 0;
+    }
+
+    .dm-cit.is-scena .dm-cit-palco {
+      position: sticky;
+      top: var(--sotto-header, 96px);
+      height: calc(100svh - var(--sotto-header, 96px));
+    }
+
+    .dm-cit.is-scena .dm-cit-lista {
+      position: relative;
+      display: block;
+      height: 100%;
+    }
+
+    .dm-cit.is-scena .dm-cit-voce {
+      position: absolute;
+      inset: 0;
+      align-content: center;
+      /* Trasparenti ma raggiungibili da tastiera: il focus porta la
+         pagina alla citazione giusta (vedi lo script). */
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s var(--ease-gaia);
+    }
+
+    .dm-cit.is-scena .dm-cit-voce.is-attiva {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Parole che salgono, una dopo l'altra. */
+    .dm-cit.is-scena :global(.dm-parola) {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: top;
+      padding-bottom: 0.08em;
+    }
+
+    .dm-cit.is-scena :global(.dm-parola > span) {
+      display: inline-block;
+      transform: translateY(105%);
+      transition: transform 0.7s var(--ease-gaia);
+      transition-delay: calc(var(--i) * 22ms);
+    }
+
+    .dm-cit.is-scena .is-attiva :global(.dm-parola > span) {
+      transform: none;
+    }
+
+    .dm-cit.is-scena .dm-cit-foto {
+      transform: scale(1.04);
+      transition: transform 1.2s var(--ease-gaia);
+    }
+
+    .dm-cit.is-scena .is-attiva .dm-cit-foto {
+      transform: none;
+    }
+
+    .dm-cit.is-scena .dm-cit-punti {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      display: grid;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      transform: translateY(-50%);
+    }
+
+    .dm-cit-punti li {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--color-avorio-su-notte) 30%, transparent);
+      transition: background-color 0.4s var(--ease-gaia);
+    }
+
+    .dm-cit-punti li.is-attivo {
+      background: var(--color-oro);
+    }
+  }
+</style>

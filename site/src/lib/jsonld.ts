@@ -106,6 +106,19 @@ export function aboutPage(opts: { lang: Lang; title: string; description?: strin
   };
 }
 
+/** Una pagina qualsiasi come WebPage del sito (es. Dicono di me). */
+export function webPage(opts: { lang: Lang; title: string; description?: string; url: string }): Thing {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: opts.title,
+    description: opts.description || undefined,
+    url: opts.url,
+    inLanguage: HTML_LANG[opts.lang],
+    isPartOf: { '@id': SITE_ID },
+  };
+}
+
 /** Gaia Crognale come Person: lavora per il LocalBusiness, stessi profili. */
 export function person(opts: { lang: Lang; image?: string | null; description?: string }): Thing {
   return {

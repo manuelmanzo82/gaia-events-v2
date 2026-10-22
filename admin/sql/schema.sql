@@ -219,8 +219,12 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `text_en`       TEXT DEFAULT NULL,
   `rating`        TINYINT UNSIGNED NOT NULL DEFAULT 5,
   `media_id`      INT UNSIGNED DEFAULT NULL,
+  -- Evento collegato (I miei eventi), facoltativo.
+  `story_id`      INT UNSIGNED DEFAULT NULL,
   `featured`      TINYINT(1) NOT NULL DEFAULT 0,
   `active`        TINYINT(1) NOT NULL DEFAULT 1,
+  -- Consenso scritto di chi l'ha scritta: senza non si pubblica.
+  `consenso`      TINYINT(1) NOT NULL DEFAULT 0,
   `sort_order`    SMALLINT NOT NULL DEFAULT 0,
   `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -640,6 +644,7 @@ CREATE TABLE IF NOT EXISTS `instagram_posts` (
 CREATE TABLE IF NOT EXISTS `press` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `outlet`        VARCHAR(190) NOT NULL,
+  `tipo`          ENUM('articolo','tv','podcast','altro') NOT NULL DEFAULT 'articolo',
   `title`         VARCHAR(255) NOT NULL,
   `published_on`  DATE DEFAULT NULL,
   `url`           VARCHAR(500) DEFAULT NULL,

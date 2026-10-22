@@ -90,6 +90,10 @@ export interface Settings extends SeoFields {
     social?: { titolo?: Localized };
     photos?: Record<string, Image | null>;
   };
+  /** Dicono di me (impostazioni del gruppo «dicono»). */
+  dicono?: {
+    photos?: Record<string, Image | null>;
+  };
   /** Pagina non trovata (impostazioni del gruppo «errore»). */
   errore?: {
     titolo?: Localized;
@@ -165,7 +169,12 @@ export interface Review {
   text: Localized;
   rating: number;
   image: Image | null;
+  /** In evidenza: citazione grande che cambia allo scroll. */
   featured: boolean;
+  /** Consenso scritto di chi l'ha scritta: senza, il sito non la mostra. */
+  consent?: boolean;
+  /** Evento collegato in I miei eventi, facoltativo. */
+  storyId?: number | null;
   active: boolean;
   order: number;
 }
@@ -434,6 +443,8 @@ export interface Press {
   id: number;
   /** Testata, non tradotta. */
   outlet: string;
+  /** articolo, tv (servizio TV), podcast, altro. */
+  kind?: 'articolo' | 'tv' | 'podcast' | 'altro';
   title: string;
   date: string | null;
   url: string | null;

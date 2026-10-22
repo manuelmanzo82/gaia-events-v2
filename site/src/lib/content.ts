@@ -160,8 +160,11 @@ export function getServiceBySlug(slug: string): Service | null {
   return getServices().find((service) => service.slug === slug) ?? null;
 }
 
+/** Recensioni attive e con il consenso scritto di chi le ha scritte. */
 export function getReviews(): Review[] {
-  return load<Review[]>('reviews', []).filter(isActive).sort(byOrder);
+  return load<Review[]>('reviews', [])
+    .filter((r) => isActive(r) && r.consent === true)
+    .sort(byOrder);
 }
 
 export function getFeaturedReviews(limit?: number): Review[] {
