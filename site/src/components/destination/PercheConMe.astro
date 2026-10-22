@@ -1,0 +1,116 @@
+---
+/**
+ * Destination — 2. Perché con me: il blocco «values» della pagina, tre
+ * colonne con un'icona fine (Icona.astro: posto, lingua, rete), titolo e
+ * due righe. Senza foto. Le colonne salgono a cascata (data-reveal di
+ * motion.ts); con reduced-motion sono ferme.
+ */
+import Icona from '../Icona.astro';
+
+type NomeIcona = 'posto' | 'lingua' | 'rete';
+
+interface Props {
+  titolo: string;
+  colonne: Array<{ titolo: string; testo: string; icona?: string }>;
+}
+
+const { titolo, colonne } = Astro.props;
+const ICONE: NomeIcona[] = ['posto', 'lingua', 'rete'];
+const iconaDi = (nome?: string): NomeIcona | null =>
+  ICONE.includes(nome as NomeIcona) ? (nome as NomeIcona) : null;
+---
+
+{
+  colonne.length > 0 && (
+    <section class="dw-perche container-gaia" data-theme="light" aria-labelledby="titolo-perche">
+      {titolo && (
+        <h2 id="titolo-perche" class="font-display dw-perche-titolo" data-reveal="righe">
+          {titolo}
+        </h2>
+      )}
+      <ul class="dw-perche-colonne" role="list" data-reveal-gruppo>
+        {colonne.map((c) => (
+          <li class="dw-perche-colonna" data-reveal="alto">
+            {iconaDi(c.icona) && (
+              <span class="dw-perche-icona">
+                <Icona nome={iconaDi(c.icona)!} dimensione={40} />
+              </span>
+            )}
+            <h3 class="font-display dw-perche-nome">{c.titolo}</h3>
+            {c.testo && <p class="dw-perche-testo">{c.testo}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .dw-perche {
+    padding-block: var(--spacing-section);
+  }
+
+  .dw-perche-titolo {
+    margin: 0 0 clamp(2.5rem, 6vh, 4rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    text-align: center;
+  }
+
+  .dw-perche-colonne {
+    display: grid;
+    gap: 2.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dw-perche-colonna {
+    max-width: 24rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .dw-perche-icona {
+    display: inline-grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-oro) 55%, transparent);
+    border-radius: 50%;
+    color: var(--color-oro-testo);
+  }
+
+  /* Tratto sottile anche a 40 px: non scala con l'icona. */
+  .dw-perche-icona :global(svg *) {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .dw-perche-icona :global(svg) {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .dw-perche-nome {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.15;
+    font-weight: 400;
+  }
+
+  .dw-perche-testo {
+    margin: 0.75rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  @media (min-width: 64rem) {
+    .dw-perche-colonne {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(2rem, 5vw, 5rem);
+      max-width: 72rem;
+      margin-inline: auto;
+    }
+  }
+</style>

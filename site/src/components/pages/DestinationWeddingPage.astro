@@ -28,6 +28,7 @@ import { getDestinationWedding, getHero, getServices, isPublishable, text } from
 import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import PercheConMe from '../destination/PercheConMe.astro';
 import Apertura from '../servizi/Apertura.astro';
 
 interface Props {
@@ -50,6 +51,14 @@ const immagineApertura = hero?.images?.[0] ?? hero?.poster ?? data.hero ?? null;
 const SIZES_APERTURA = '(max-width: 47.99rem) 102vh, 100vw';
 const fotoApertura = picture(immagineApertura, lang, SIZES_APERTURA);
 const preload = fotoApertura?.sources[0] ?? null;
+
+// Blocchi della pagina (page_sections): values, destinations, timeline,
+// riti, ospiti.
+const blocco = (kind: string) => data.blocks.find((b) => b.kind === kind) ?? null;
+const perche = blocco('values');
+const colonne = (perche?.items ?? [])
+  .map((i) => ({ titolo: text(i.title, lang), testo: text(i.text, lang), icona: i.icon }))
+  .filter((c) => c.titolo);
 
 const meta = buildMeta({
   lang,
@@ -88,6 +97,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   }
 
   <Apertura eyebrow={t('nav.destinationWedding')} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={[]} />
+
+  <PercheConMe titolo={text(perche?.title, lang)} colonne={colonne} />
 </BaseLayout>
 
 <script>
