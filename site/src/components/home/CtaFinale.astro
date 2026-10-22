@@ -15,6 +15,10 @@
  * Props `foto` e `lato` (fase 4.2): un'altra pagina può passare la sua
  * foto e mettere la foto a destra (testo a sinistra). La home resta
  * com'è: foto dell'highlight «cta», a sinistra.
+ *
+ * Props `riga` e `contattiPari` (Destination wedding, 22/10): una riga in
+ * più sotto i contatti (la videochiamata) e WhatsApp ed email come due
+ * bottoni gemelli, stesso peso, stessa misura.
  */
 import { BUSINESS, type Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
@@ -33,9 +37,13 @@ interface Props {
   foto?: Image | null;
   /** Da che parte sta la foto su desktop; la home usa 'sinistra'. */
   lato?: 'sinistra' | 'destra';
+  /** Riga sotto i contatti (es. la videochiamata). */
+  riga?: string;
+  /** WhatsApp ed email con lo stesso peso: due bottoni gemelli. */
+  contattiPari?: boolean;
 }
 
-const { lang, settings, foto: fotoScelta = null, lato = 'sinistra' } = Astro.props;
+const { lang, settings, foto: fotoScelta = null, lato = 'sinistra', riga = '', contattiPari = false } = Astro.props;
 const t = useTranslations(lang);
 
 const sezione = settings.sections.cta;
@@ -83,7 +91,7 @@ const emailHref = `mailto:${BUSINESS.email}`;
               {etichetta}
             </a>
           </p>
-          <ul class="cta-contatti" role="list" data-reveal="alto">
+          <ul class:list={['cta-contatti', { 'cta-contatti--pari': contattiPari }]} role="list" data-reveal="alto">
             <li>
               <a href={whatsappHref} rel="noopener" target="_blank" aria-label={t('cta.whatsapp')}>
                 <Icona nome="whatsapp" dimensione={18} />
@@ -93,10 +101,15 @@ const emailHref = `mailto:${BUSINESS.email}`;
             <li>
               <a href={emailHref}>
                 <Icona nome="email" dimensione={18} />
-                <span>{BUSINESS.email}</span>
+                <span>{contattiPari ? t('cta.email') : BUSINESS.email}</span>
               </a>
             </li>
           </ul>
+          {riga && (
+            <p class="cta-video" data-reveal="alto">
+              {riga}
+            </p>
+          )}
         </div>
       </div>
     </section>
@@ -225,6 +238,43 @@ const emailHref = `mailto:${BUSINESS.email}`;
     flex: none;
   }
 
+  /* Destination: WhatsApp ed email come due bottoni gemelli. */
+  .cta-contatti--pari {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    max-width: 28rem;
+  }
+
+  .cta-contatti--pari a {
+    justify-content: center;
+    width: 100%;
+    min-height: 3.25rem;
+    padding-inline: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-inchiostro) 45%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition:
+      color 0.35s var(--ease-gaia),
+      border-color 0.35s var(--ease-gaia);
+  }
+
+  .cta-contatti--pari a span {
+    border-bottom: 0;
+  }
+
+  .cta-contatti--pari a:hover {
+    border-color: var(--color-bordeaux);
+  }
+
+  .cta-video {
+    max-width: 28rem;
+    margin: 1.25rem 0 0;
+    color: var(--color-inchiostro);
+  }
+
   /* — Mobile: testo con 56 px sopra e sotto; link in colonna, così la
      freccia «torna su» (in basso a destra) non copre mai niente. — */
   @media (max-width: 63.98rem) {
@@ -235,6 +285,10 @@ const emailHref = `mailto:${BUSINESS.email}`;
     .cta-contatti {
       flex-direction: column;
       gap: 0.25rem;
+    }
+
+    .cta-contatti--pari {
+      gap: 0.75rem;
     }
   }
 

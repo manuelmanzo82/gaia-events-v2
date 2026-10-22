@@ -43,6 +43,7 @@ import Dove from '../destination/Dove.astro';
 import Ospiti from '../destination/Ospiti.astro';
 import Realizzati from '../destination/Realizzati.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
+import CtaFinale from '../home/CtaFinale.astro';
 import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
 import Domande from '../servizi/Domande.astro';
@@ -157,6 +158,15 @@ const jsonLd = [
   <Domande lang={lang} titolo={text(getSettings().destination?.faq?.title, lang) || t('nav.faq')} domande={domande} />
 
   <PonteRecensioni lang={lang} />
+
+  <CtaFinale
+    lang={lang}
+    settings={getSettings()}
+    foto={getSettings().destination?.photos?.cta ?? null}
+    lato="destra"
+    riga={text(getSettings().destination?.cta?.video, lang)}
+    contattiPari
+  />
 </BaseLayout>
 
 <script>

@@ -27,6 +27,7 @@ export const UI = {
   'cta.quote': { it: 'Richiedi un preventivo', en: 'Request a quote' },
   'cta.contact': { it: 'Contattami', en: 'Get in touch' },
   'cta.whatsapp': { it: 'Scrivimi su WhatsApp', en: 'Message me on WhatsApp' },
+  'cta.email': { it: 'Email', en: 'Email' },
   'whatsapp.messaggio': {
     it: 'Ciao Gaia, vorrei informazioni per il nostro matrimonio',
     en: "Hi Gaia, I'd like some information about our wedding",
