@@ -1,0 +1,120 @@
+---
+/**
+ * Magazine — 1. Apertura editoriale, senza foto: «Magazine» enorme in
+ * Cormorant (H1), una riga di sottotitolo (pages.blog intro) e i filtri
+ * per categoria, solo se ce ne sono almeno due con articoli.
+ *
+ * I filtri sono link veri (?categoria=slug): senza JS ricaricano l'indice
+ * completo; con JS filtrano sul posto (script nella pagina) e aggiornano
+ * l'indirizzo. aria-current segna il filtro attivo.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  sottotitolo: string;
+  categorie: Array<{ slug: string; nome: string }>;
+}
+
+const { lang, titolo, sottotitolo, categorie } = Astro.props;
+const t = useTranslations(lang);
+const base = path('blog', lang);
+---
+
+<header class="mg-apertura container-gaia" data-theme="light">
+  <h1 class="font-display mg-apertura-titolo">{titolo}</h1>
+  {sottotitolo && <p class="text-lead mg-apertura-sotto">{sottotitolo}</p>}
+  {
+    categorie.length >= 2 && (
+      <nav class="mg-filtri" aria-label={t('magazine.filtri')} data-filtri>
+        <a href={base} data-filtro="" aria-current="true">
+          {t('eventi.tutti')}
+        </a>
+        {categorie.map((c) => (
+          <a href={`${base}?categoria=${encodeURIComponent(c.slug)}`} data-filtro={c.slug}>
+            {c.nome}
+          </a>
+        ))}
+      </nav>
+    )
+  }
+</header>
+
+<style>
+  .mg-apertura {
+    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 6vh, 4rem));
+    padding-bottom: clamp(2rem, 6vh, 3.5rem);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+  }
+
+  /* «Magazine» come una testata: enorme, stretto, a filo del margine. */
+  .mg-apertura-titolo {
+    margin: 0 0 0 -0.04em;
+    font-size: clamp(4.5rem, 1rem + 15vw, 15rem);
+    line-height: 0.82;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    /* Spazio per il discendente della «g»: con line-height 0.82 sborda. */
+    padding-bottom: 0.16em;
+  }
+
+  .mg-apertura-sotto {
+    max-width: 34rem;
+    margin: clamp(1rem, 3vh, 1.75rem) 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-filtri {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+    margin-top: clamp(1.75rem, 4vh, 2.5rem);
+  }
+
+  .mg-filtri a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-grigio-caldo);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-gaia);
+  }
+
+  .mg-filtri a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.55rem;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .mg-filtri a:hover,
+  .mg-filtri a[aria-current='true'] {
+    color: var(--color-inchiostro);
+  }
+
+  .mg-filtri a[aria-current='true']::after,
+  .mg-filtri a:hover::after {
+    transform: scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-filtri a,
+    .mg-filtri a::after {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,211 @@
+---
+/**
+ * Magazine: card di un articolo (griglia dell'indice e correlati).
+ *
+ *  - grande / piccola: la taglia cambia proporzioni e corpo del titolo;
+ *  - foto con la maschera condivisa ([data-apri-foto], maschere-foto.ts);
+ *    senza copertina nitida la card è tipografica (niente foto morbide);
+ *  - hover: zoom leggero della foto e sottolineatura del titolo che si
+ *    disegna (solo con puntatore e senza reduced-motion);
+ *  - ▶ se l'articolo ha un video (copertina o blocco).
+ * data-categoria serve al filtro dell'indice.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { pick, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { categoriaSlug, haVideo } from '../../lib/magazine';
+import type { Post } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  post: Post;
+  taglia?: 'grande' | 'piccola';
+  livello?: 'h2' | 'h3';
+}
+
+const { lang, post, taglia = 'piccola', livello = 'h3' } = Astro.props;
+const t = useTranslations(lang);
+const href = path('blog', lang, pick(post.slug, lang)!);
+const immagine = post.cover ?? post.coverVideo?.poster ?? null;
+const foto = picture(
+  immagine,
+  lang,
+  taglia === 'grande' ? '(min-width: 64rem) 52vw, 92vw' : '(min-width: 64rem) 34vw, 92vw',
+);
+const Titolo = livello;
+const video = haVideo(post);
+---
+
+<article
+  class:list={['mg-card', `mg-card--${taglia}`, { 'mg-card--testo': !foto }]}
+  data-categoria={categoriaSlug(post, lang)}
+>
+  <a class="mg-card-link" href={href}>
+    {
+      foto && (
+        <figure class="mg-card-foto" data-apri-foto>
+          <Picture data={foto} cap={false} class="mg-card-img" />
+          {video && (
+            <span class="mg-card-video" aria-hidden="true">
+              ▶
+            </span>
+          )}
+        </figure>
+      )
+    }
+    <span class="mg-card-testo">
+      <span class="mg-card-meta">
+        {text(post.category, lang) && <span class="mg-card-categoria">{text(post.category, lang)}</span>}
+        {!foto && video && <span class="mg-card-video-testo" aria-hidden="true">▶</span>}
+      </span>
+      <Titolo class="font-display mg-card-titolo"><span class="mg-sottolinea">{text(post.title, lang)}</span></Titolo>
+      {(taglia === 'grande' || !foto) && text(post.excerpt, lang) && (
+        <span class="mg-card-estratto">{text(post.excerpt, lang)}</span>
+      )}
+      <span class="mg-card-tempo">
+        {post.readingTime} {t('common.readingTime')}
+        {video && <span class="sr-only">, {t('magazine.conVideo')}</span>}
+      </span>
+    </span>
+  </a>
+</article>
+
+<style>
+  .mg-card-link {
+    display: grid;
+    gap: 1.1rem;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .mg-card-foto {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4 / 5;
+    background: var(--color-beige);
+  }
+
+  .mg-card--grande .mg-card-foto {
+    aspect-ratio: 4 / 3;
+  }
+
+  .mg-card-foto :global(picture),
+  .mg-card-foto :global(.mg-card-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .mg-card-video {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding-left: 0.15rem;
+    border-radius: 50%;
+    background: rgb(27 22 17 / 0.62);
+    color: var(--color-avorio-su-notte);
+    font-size: 0.8rem;
+  }
+
+  .mg-card-testo {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  .mg-card-meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .mg-card-categoria {
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .mg-card-video-testo {
+    font-size: 0.75rem;
+    color: var(--color-bordeaux);
+  }
+
+  .mg-card-titolo {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+    line-height: 1.15;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .mg-card--grande .mg-card-titolo {
+    font-size: clamp(1.875rem, 1.4rem + 1.6vw, 2.75rem);
+    line-height: 1.08;
+  }
+
+  /* Sottolineatura che si disegna (background-size, nessun reflow). */
+  .mg-sottolinea {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.6s var(--ease-gaia);
+  }
+
+  .mg-card-estratto {
+    max-width: 36rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-card-tempo {
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* Card senza foto: tipografica, su bianco caldo con filetto oro. */
+  .mg-card--testo .mg-card-link {
+    align-content: end;
+    min-height: 18rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-top: 2px solid var(--color-oro);
+    border-radius: 0 0 16px 16px;
+    background: var(--color-bianco-caldo);
+  }
+
+  .mg-card--testo .mg-card-titolo {
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  }
+
+  .mg-card-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 6px;
+    border-radius: 16px;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .mg-card-foto :global(.mg-card-img) {
+      transition: scale 0.9s var(--ease-gaia);
+    }
+
+    .mg-card-link:hover :global(.mg-card-img) {
+      scale: 1.04;
+    }
+
+    .mg-card-link:hover .mg-sottolinea,
+    .mg-card-link:focus-visible .mg-sottolinea {
+      background-size: 100% 1px;
+    }
+  }
+</style>

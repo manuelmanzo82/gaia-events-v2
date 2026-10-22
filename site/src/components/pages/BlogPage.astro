@@ -1,12 +1,25 @@
 ---
+/**
+ * Magazine, indice (/magazine/ ↔ /en/magazine/). Taglio da rivista:
+ *
+ *  1. Apertura — «Magazine» enorme, sottotitolo, filtri per categoria
+ *  2. In evidenza — l'articolo marcato dal back office o l'ultimo
+ *  3. Griglia — ritmo da rivista: una grande e due piccole, poi l'inverso
+ *  4. Chiusura — CtaFinale con magazine.photos.cta
+ *
+ * Filtro ?categoria= lato client con fallback a link (vedi Apertura).
+ * Effetti in scripts/magazine-effetti.ts dopo il motion di base.
+ */
 import type { Lang } from '../../config/site';
-import { formatDate, useTranslations } from '../../i18n';
+import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getPage, getPosts, isPublishable, pick, text } from '../../lib/content';
-import { POST_FIELDS, langsFor } from '../../lib/availability';
+import { existsIn, langsFor } from '../../lib/availability';
+import { getPage, getPostCategories, text } from '../../lib/content';
 import { breadcrumbs } from '../../lib/jsonld';
+import { categoriaSlug, postsIn } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
+import Apertura from '../magazine/Apertura.astro';
 
 interface Props {
   lang: Lang;
@@ -17,20 +30,22 @@ const t = useTranslations(lang);
 
 const page = getPage('blog');
 const langs = langsFor('blog');
-
-// Nella v1 l'indice leggeva Sanity + un file locale e gli articoli solo il
-// file: un articolo nuovo restava senza pagina. Qui la fonte è una sola.
-const posts = getPosts()
-  .filter((post) => isPublishable(post, lang, POST_FIELDS))
-  .map((post) => ({ post, slug: pick(post.slug, lang)! }));
+const posts = postsIn(lang);
 
 const title = text(page?.title, lang) || t('nav.blog');
+const sottotitolo = text(page?.intro, lang);
+
+// Filtri: solo le categorie con almeno un articolo in questa lingua.
+const usate = new Set(posts.map((p) => categoriaSlug(p, lang)).filter(Boolean));
+const categorie = getPostCategories()
+  .map((c) => ({ slug: text(c.slug, lang), nome: text(c.name, lang) }))
+  .filter((c) => c.slug && c.nome && usate.has(c.slug));
 
 const meta = buildMeta({
   lang,
   routeKey: 'blog',
   title,
-  description: text(page?.intro, lang),
+  description: sottotitolo,
   seo: page ?? undefined,
   availableLangs: langs,
 });
@@ -39,32 +54,22 @@ const crumbs = [
   { name: t('nav.home'), href: path('home', lang) },
   { name: title, href: path('blog', lang) },
 ];
+const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="blog"
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={[breadcrumbs(crumbs)]}
-  crumbs={crumbs}
->
-  <h1>{title}</h1>
-  {text(page?.intro, lang) && <p>{text(page?.intro, lang)}</p>}
+<BaseLayout lang={lang} routeKey="blog" meta={meta} availableLangs={langs} jsonLd={[breadcrumbs(crumbs)]} largo>
+  {rss && <link slot="head" rel="alternate" type="application/rss+xml" title={`${title} — Gaia Events`} href={rss} />}
 
-  {posts.length === 0 && <p>{t('common.empty')}</p>}
-
-  {
-    posts.map(({ post, slug }) => (
-      <article>
-        <h2><a href={path('blog', lang, slug)}>{text(post.title, lang)}</a></h2>
-        <p>
-          <time datetime={post.date}>{formatDate(post.date, lang)}</time>
-          {post.readingTime > 0 && <span> — {post.readingTime} {t('common.readingTime')}</span>}
-        </p>
-        <p>{text(post.excerpt, lang)}</p>
-        <p><a href={path('blog', lang, slug)}>{t('cta.readMore')}</a></p>
-      </article>
-    ))
-  }
+  <Apertura lang={lang} titolo={title} sottotitolo={sottotitolo} categorie={categorie} />
 </BaseLayout>
+
+<script>
+  // Effetti della pagina dopo il motion di base (GSAP già caricato).
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/magazine-effetti').then(({ initMagazineEffetti }) => initMagazineEffetti());
+    },
+    { once: true },
+  );
+</script>
