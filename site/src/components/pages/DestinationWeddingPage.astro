@@ -46,6 +46,7 @@ import PercheConMe from '../destination/PercheConMe.astro';
 import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
 import Domande from '../servizi/Domande.astro';
+import PonteRecensioni from '../servizi/PonteRecensioni.astro';
 
 interface Props {
   lang: Lang;
@@ -154,6 +155,8 @@ const jsonLd = [
   <Realizzati lang={lang} titolo={text(getSettings().destination?.storie?.title, lang)} />
 
   <Domande lang={lang} titolo={text(getSettings().destination?.faq?.title, lang) || t('nav.faq')} domande={domande} />
+
+  <PonteRecensioni lang={lang} />
 </BaseLayout>
 
 <script>
