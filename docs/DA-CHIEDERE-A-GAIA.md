@@ -319,6 +319,32 @@ testi sono una bozza nostra (IT ed EN), salvati nel database.
 - **Ritratto per la firma e il box autrice**: oggi è la foto nella serra,
   stretta sul volto. Un ritratto vero, anche piccolo, sarebbe meglio.
 
+### 17. Conosciamoci, Contatti, orologi (24/10/2026)
+
+- **Video di saluto per la pagina Contatti** (va nella cornice verticale
+  accanto a «Scriviamoci»; senza, c'è il suo ritratto). Mini-guida:
+  - telefono in **verticale**, all'altezza degli occhi, su un appoggio;
+  - **luce di finestra davanti** (non alle spalle), niente controluce;
+  - **20–30 secondi**: un saluto, chi è, e cosa succede dopo che le
+    scrivete («vi rispondo entro…, poi ci sentiamo in videochiamata…»);
+  - va bene in italiano e in inglese (due video o uno con i sottotitoli:
+    il back office accetta i sottotitoli .vtt in IT e in EN);
+  - file mp4 fino a 8 MB.
+- **Tempi di risposta da promettere**: oggi tutto il sito dice «entro 48
+  ore nei giorni feriali» / «within 48 hours on weekdays» (prima i
+  Contatti dicevano 24 ore e il tool 48). Va bene?
+- **Testi del benvenuto del tool** (bozza): «Piacere, sono Gaia» e i tre
+  punti (domande veloci, prima chiacchierata, nessun impegno né prezzo
+  automatico).
+- **La prima chiacchierata è gratuita e senza impegno?** Ora il sito lo
+  promette in modo esplicito (benvenuto, FAQ «Cosa succede dopo che vi
+  scrivo?»).
+- **Lingue** per i contatti (JSON-LD: oggi italiano e inglese), vedi anche
+  la voce 15.
+- **Privacy policy**: cita ancora Web3Forms, che non usiamo più (i form
+  vanno al nostro server). Il testo legale va aggiornato da chi l'ha
+  scritto.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

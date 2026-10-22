@@ -1094,6 +1094,30 @@ Fatto:
   I loro titoli H2/H3 venivano dalla v1 in minuscolo: corretti a mano
   (migrazione `magazine-3-nomi-propri`), non è una domanda per Gaia.
 
+- **Conosciamoci, Contatti, orologi** (24/10/2026).
+  - «Preventivo» → **Conosciamoci**: slug `/conosciamoci/` ↔ `/en/lets-talk/`
+    (301 da `/preventivo/` e `/en/wedding-estimate/`), menu «Conosciamoci»
+    / «Let's talk», pagina «Raccontatemi di voi». Nomi interni invariati
+    (chiave `quote`, `quote.php`, `Preventivatore`, `type='quote'`, chiave
+    localStorage `gaia-preventivo-v1`). «Preventivo» resta solo dove
+    indica il documento inviato dopo.
+  - Tool: **benvenuto** (passo zero, prop `benvenuto`, impostazioni
+    `quote.welcome.*`, ritratto `quote.photos.welcome` = 107 stretta sul
+    viso); con un salvataggio «Bentornati» con Continua / Ricomincia.
+    Foto dei passi tutte pulite (38, 59, 33, 62, 30, 60 al posto di quelle
+    con watermark o nomi).
+  - **Contatti**: `components/contatti/` (Apertura con cornice 9:16 video o
+    ritratto, Tessere, Modulo → `contact.php` con tempo minimo 4 s,
+    privacy obbligatoria, errori IT/EN), Instagram della home, social.
+    Impostazioni `contatti.*`; tipo di impostazione nuovo **`video`**
+    (sceglie dalla libreria; l'export lo risolve come i video del
+    Magazine); la libreria video accetta sottotitoli VTT IT/EN.
+  - **Tempi di risposta** uniformi: «entro 48 ore nei giorni feriali».
+  - **Orologi** in Destination (`destination/Orologi.astro`, slot di
+    `servizi/Apertura`): città in `destination.orologi.citta`
+    (NOME|fuso, una per riga), `contain: inline-size` perché le liste
+    che scorrono su mobile non allarghino la pagina.
+
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
   Instagram Login (account professionale di Gaia, niente pagina Facebook
