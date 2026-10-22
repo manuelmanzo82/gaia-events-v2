@@ -298,6 +298,32 @@ testi sono una bozza nostra (IT ed EN), salvati nel database.
   l'apertura della pagina (e resta nella fascia di Servizi); nella
   timeline di Chi sono la tappa 2018 ora usa la 111.
 
+### 16. Magazine (23/10/2026)
+
+- **Budget — fasce reali**: l'articolo sul budget non ha più cifre (solo
+  le proporzioni tra le voci: location e catering 40–50%, foto e video
+  8–12%, fiori e allestimenti 8–15%). Servono le fasce di budget reali di
+  Gaia, se vuole darle, e la conferma delle proporzioni.
+- **Toscana e Costiera**: gli articoli «Destination wedding in Toscana» e
+  «Matrimonio in Costiera Amalfitana» sono **non pubblicati** finché Gaia
+  non conferma che lavora lì (e con quale esperienza: la v1 diceva
+  «organizzo destination wedding toscani da oltre otto anni» e «conosco
+  ogni angolo di questa costa»). Poi vanno riscritti.
+- **Tutti i testi e le traduzioni inglesi** dei sei articoli pubblicati
+  sono una bozza nostra, compresi i riquadri «In breve».
+- **«10 domande al wedding planner»**: le domande 6–10 le abbiamo aggiunte
+  noi (cosa è compreso, costi e pagamenti, chi c'è il giorno, come si resta
+  in contatto, piano B per il meteo).
+- **Fiori di primavera**: «collaboro con i migliori fioristi di Roma e
+  d'Italia» è stato tolto; se vale, si rimette.
+- **Video veri**: il Magazine accetta clip brevi (caricate dal back office)
+  e video YouTube/Vimeo. Gaia ne ha? Quello sullo staging è una prova.
+- **Copertine**: tre articoli non hanno una foto abbastanza nitida per la
+  copertina (fiori, tendenze, tableau) e restano tipografici. Servono foto
+  in alta risoluzione (almeno 2000 px di lato lungo) per quei temi.
+- **Ritratto per la firma e il box autrice**: oggi è la foto nella serra,
+  stretta sul volto. Un ritratto vero, anche piccolo, sarebbe meglio.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

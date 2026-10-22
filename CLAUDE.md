@@ -1066,6 +1066,30 @@ Fatto:
   Regioni: in produzione si pubblicano solo quelle confermate da Gaia
   (DA-CHIEDERE n. 15); Lago di Como c'è ma non è pubblicata.
 
+- **Magazine** (23/10/2026, `components/magazine/`, `lib/magazine.ts`,
+  `lib/rss.ts`, effetti in `scripts/magazine-effetti.ts`). Contenuto degli
+  articoli = **blocchi** (`posts.blocchi`, JSON) scritti con l'editor a
+  blocchi del back office (`views/_blocchi.php`, niente HTML a mano):
+  paragrafo (`**grassetto**`, `*corsivo*`, `[link](url)`), h2, h3,
+  citazione, immagine (formato + didascalia), video, domanda e risposta.
+  Il server (`admin/src/Magazine.php`) normalizza i blocchi e genera
+  `body_it/en` con una **lista di tag consentiti**; `pulisciHtml` filtra i
+  corpi vecchi. Lingua EN completa = tutti i blocchi di testo tradotti.
+  Categorie `post_categories` (filtro `?categoria=`), `featured`,
+  `modified_date` («Aggiornato il», dateModified), `sommario_it/en` («In
+  breve»), libreria `videos` (clip in `uploads/video/` max 8 MB, o
+  YouTube/Vimeo con facciata; poster obbligatorio). Indice: apertura
+  tipografica, in evidenza, griglia 1 grande + 2 piccole alternate, card
+  tipografiche per gli articoli senza copertina nitida. Articolo: barra di
+  lettura, indice fisso (≥3 H2, modulo condiviso `scripts/indice-fisso.ts`
+  ora a soglia di posizione), capolettera, box autrice (107 stretta sul
+  volto con transform), condividi (copia link + WhatsApp), correlati.
+  CSP `frame-src` solo youtube-nocookie e player.vimeo.com. Migrazioni
+  con prefisso numerico quando ce n'è più d'una nello stesso giorno:
+  l'ordine è alfabetico (`2026-10-23-magazine-1-schema` prima di
+  `-2-articoli`). Upload in `admin/`: script `carica-admin.sh` nello
+  scratchpad (lint in `admin/storage/lint-…/`, poi copia).
+
 Prossimi passi (fase 3, resta):
 - **Instagram via API (non ancora implementato)**: Instagram API with
   Instagram Login (account professionale di Gaia, niente pagina Facebook
