@@ -24,6 +24,7 @@ const t = useTranslations(lang);
 ---
 
 <section class="ct-modulo" data-theme="light" aria-labelledby="titolo-modulo">
+  <div class="ct-modulo-interno">
   <h2 id="titolo-modulo" class="font-display ct-modulo-titolo">{titolo}</h2>
 
   <form class="ct-form" novalidate data-modulo data-endpoint={ENDPOINTS.contact} data-lang={lang} data-errore={t('contatti.errore')} data-invio={t('contatti.invio')}>
@@ -64,6 +65,7 @@ const t = useTranslations(lang);
 
   <div class="ct-grazie" hidden data-grazie>
     <p class="font-display ct-grazie-testo" tabindex="-1">{grazie}</p>
+  </div>
   </div>
 </section>
 
@@ -123,10 +125,27 @@ const t = useTranslations(lang);
 </script>
 
 <style>
+  /* Fondo beige a tutta larghezza, contenuto alla misura del form. */
   .ct-modulo {
+    margin-top: clamp(3rem, 8vh, 5rem);
+    padding-block: clamp(3rem, 8vh, 4.5rem);
+    background: var(--color-beige);
+  }
+
+  /* Sul beige il grigio caldo non basta (4,3:1): testo secondario più scuro. */
+  .ct-modulo {
+    --grigio-su-beige: #5c554c;
+  }
+
+  .ct-modulo .ct-facoltativo,
+  .ct-modulo .ct-privacy {
+    color: var(--grigio-su-beige);
+  }
+
+  .ct-modulo-interno {
     width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
     max-width: 52rem;
-    margin: var(--spacing-section) auto 0;
+    margin: 0 auto;
   }
 
   .ct-modulo-titolo {

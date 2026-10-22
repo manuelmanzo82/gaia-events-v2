@@ -7,13 +7,13 @@
  *     di Gaia se c'è, altrimenti il suo ritratto con la firma)
  *  2. Tessere — Conosciamoci (principale), WhatsApp, Telefono, Email
  *  3. Form breve — a admin/api/contact.php, ringraziamento sul posto
- *  4. Instagram — lo stesso componente della home
- *  5. Social — Instagram e Facebook con le icone del sito
+ *  4. Instagram — lo stesso componente della home (social già nell'header,
+ *     nel footer e qui: niente sezione «Seguitemi» a parte)
  *
  * Testi: pagina «contact» e impostazioni del gruppo «contatti».
  * JSON-LD: ContactPage con LocalBusiness e contactPoint, BreadcrumbList.
  */
-import { BUSINESS, type Lang } from '../../config/site';
+import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -21,7 +21,6 @@ import { langsFor } from '../../lib/availability';
 import { getPage, getSettings, text } from '../../lib/content';
 import { breadcrumbs, contactPage } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
-import Icona from '../Icona.astro';
 import Apertura from '../contatti/Apertura.astro';
 import Modulo from '../contatti/Modulo.astro';
 import Tessere from '../contatti/Tessere.astro';
@@ -67,7 +66,6 @@ const crumbs = [
 ];
 
 const jsonLd = [breadcrumbs(crumbs), contactPage({ lang, title: meta.title, description: meta.description, image: meta.ogImage })];
-const titoloSocial = text(c?.social?.titolo, lang) || t('footer.social');
 ---
 
 <BaseLayout lang={lang} routeKey="contact" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
@@ -80,89 +78,24 @@ const titoloSocial = text(c?.social?.titolo, lang) || t('footer.social');
     firma={text(c?.firma, lang)}
   />
 
-  <Tessere lang={lang} testi={tessere} messaggioWhatsapp={text(c?.whatsapp?.messaggio, lang)} />
+  <Tessere
+    lang={lang}
+    testi={tessere}
+    messaggioWhatsapp={text(c?.whatsapp?.messaggio, lang)}
+    foto={c?.photos?.tessera ?? null}
+  />
 
   <Modulo lang={lang} titolo={text(c?.form?.titolo, lang)} grazie={text(c?.form?.grazie, lang)} />
 
   <div class="ct-instagram">
     <InstagramHome lang={lang} />
   </div>
-
-  <section class="ct-social" data-theme="light" aria-labelledby="titolo-social">
-    <h2 id="titolo-social" class="ct-social-titolo">{titoloSocial}</h2>
-    <ul role="list">
-      <li>
-        <a href={BUSINESS.instagramUrl} rel="noopener me" target="_blank">
-          <Icona nome="instagram" dimensione={22} />
-          <span>Instagram</span>
-        </a>
-      </li>
-      <li>
-        <a href={BUSINESS.facebookUrl} rel="noopener me" target="_blank">
-          <Icona nome="facebook" dimensione={22} />
-          <span>Facebook</span>
-        </a>
-      </li>
-    </ul>
-  </section>
 </BaseLayout>
 
 <style>
-  .ct-instagram {
-    margin-top: var(--spacing-section);
-  }
-
-  .ct-social {
-    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
-    max-width: 76rem;
-    margin: 0 auto;
-    padding-block: var(--spacing-section-sm) var(--spacing-section);
-    text-align: center;
-  }
-
-  .ct-social-titolo {
-    margin: 0 0 1.25rem;
-    font-family: var(--font-sans);
-    font-size: var(--text-eyebrow);
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-oro-testo);
-  }
-
-  .ct-social ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 2.5rem;
-    justify-content: center;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .ct-social a {
-    display: inline-flex;
-    gap: 0.6rem;
-    align-items: center;
-    min-height: 44px;
-    color: var(--color-inchiostro);
-    text-decoration: none;
-    font-size: 1.0625rem;
-  }
-
-  .ct-social a span {
-    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-    transition: background-size 0.5s var(--ease-gaia);
-  }
-
-  .ct-social a:hover span,
-  .ct-social a:focus-visible span {
-    background-size: 100% 1px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ct-social a span {
-      transition: none;
-    }
+  /* Instagram subito dopo il form (fondo avorio), e poco spazio prima del
+     footer: il componente della home ha margini pensati per la home. */
+  .ct-instagram :global(.ig) {
+    padding-block: clamp(2.5rem, 6vh, 3.5rem) clamp(2.5rem, 6vh, 4rem);
   }
 </style>
