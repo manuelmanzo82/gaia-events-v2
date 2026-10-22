@@ -1,0 +1,367 @@
+---
+/**
+ * Destination — 6. I vostri ospiti: il blocco «ospiti» della pagina
+ * (titolo, frase, quattro voci: cena di benvenuto, transfer, dove dormire,
+ * esperienze) e una striscia di foto (highlights della sezione «ospiti»,
+ * nell'ordine del back office).
+ *
+ * Effetto nuovo, la striscia: si trascina col mouse (con inerzia) e col
+ * dito (scorrimento nativo); su desktop con puntatore fine un cursore
+ * tondo «trascina» / «drag» segue il mouse. Da tastiera la striscia
+ * riceve il focus e si muove con frecce, Home e Fine. Una barra sottile
+ * dice quanto manca. Con reduced-motion niente inerzia né scorrimento
+ * morbido: la striscia si scorre normalmente.
+ * Le foto hanno altezza fissa e larghezza dal loro rapporto; sizes calcolato
+ * sull'orientamento.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { picture } from '../../lib/images';
+import type { Image } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  titolo: string;
+  intro: string;
+  voci: Array<{ titolo: string; testo: string }>;
+  foto: Image[];
+}
+
+const { lang, titolo, intro, voci, foto } = Astro.props;
+const t = useTranslations(lang);
+
+// Altezza della striscia: 26rem desktop, 18rem mobile. Larghezza = altezza
+// × rapporto della foto.
+const scatti = foto
+  .map((img) => {
+    const ratio = img.width && img.height ? img.width / img.height : 1.5;
+    const desktop = Math.round(416 * ratio);
+    const mobile = Math.round(288 * ratio);
+    return picture(img, lang, `(min-width: 64rem) ${desktop}px, ${mobile}px`);
+  })
+  .filter((p): p is NonNullable<typeof p> => p !== null);
+---
+
+{
+  (voci.length > 0 || scatti.length > 0) && titolo && (
+    <section class="dw-ospiti" data-theme="light" aria-labelledby="titolo-ospiti" data-ospiti>
+      <div class="dw-ospiti-testa container-gaia">
+        <h2 id="titolo-ospiti" class="font-display dw-ospiti-titolo" data-reveal="righe">
+          {titolo}
+        </h2>
+        {intro && <p class="text-lead dw-ospiti-intro">{intro}</p>}
+
+        {voci.length > 0 && (
+          <ul class="dw-ospiti-voci" role="list" data-reveal-gruppo>
+            {voci.map((v) => (
+              <li class="dw-ospiti-voce" data-reveal="alto">
+                <h3 class="font-display dw-ospiti-nome">{v.titolo}</h3>
+                {v.testo && <p class="dw-ospiti-testo">{v.testo}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {scatti.length > 0 && (
+        <>
+          <div
+            class="dw-striscia"
+            role="region"
+            aria-label={t('destination.striscia')}
+            tabindex="0"
+            data-striscia
+          >
+            <ul class="dw-striscia-elenco" role="list">
+              {scatti.map((s) => (
+                <li class="dw-striscia-voce" style={`aspect-ratio: ${s.width} / ${s.height}`}>
+                  <Picture data={s} cap={false} class="dw-striscia-img" />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="dw-striscia-barra container-gaia" aria-hidden="true">
+            <span data-barra />
+          </div>
+          <span class="dw-cursore" aria-hidden="true" data-cursore>
+            {t('destination.trascina')}
+          </span>
+        </>
+      )}
+    </section>
+  )
+}
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const striscia = document.querySelector<HTMLElement>('[data-striscia]');
+  const barra = document.querySelector<HTMLElement>('[data-barra]');
+  const cursore = document.querySelector<HTMLElement>('[data-cursore]');
+  if (striscia) {
+    const fermo = riduciMotion();
+    const passo = (): number => (striscia.querySelector<HTMLElement>('li')?.offsetWidth ?? 300) + 16;
+
+    // Barra: quanto della striscia è già passato.
+    const aggiornaBarra = (): void => {
+      if (!barra) return;
+      const max = striscia.scrollWidth - striscia.clientWidth;
+      barra.style.transform = `scaleX(${max > 0 ? Math.max(0.08, striscia.scrollLeft / max) : 1})`;
+    };
+    striscia.addEventListener('scroll', aggiornaBarra, { passive: true });
+    aggiornaBarra();
+
+    // Trascinamento col mouse, con inerzia al rilascio. Il dito usa lo
+    // scorrimento nativo del browser (che ha già la sua inerzia).
+    let trascina = false;
+    let partenzaX = 0;
+    let partenzaScroll = 0;
+    let ultimaX = 0;
+    let ultimoT = 0;
+    let velocita = 0;
+    let inerzia = 0;
+
+    const fermaInerzia = (): void => {
+      cancelAnimationFrame(inerzia);
+      inerzia = 0;
+    };
+
+    striscia.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      fermaInerzia();
+      trascina = true;
+      partenzaX = ultimaX = e.clientX;
+      partenzaScroll = striscia.scrollLeft;
+      ultimoT = performance.now();
+      velocita = 0;
+      striscia.setPointerCapture(e.pointerId);
+      striscia.classList.add('is-trascina');
+    });
+
+    striscia.addEventListener('pointermove', (e) => {
+      if (cursore && e.pointerType === 'mouse') {
+        cursore.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      }
+      if (!trascina) return;
+      e.preventDefault();
+      striscia.scrollLeft = partenzaScroll - (e.clientX - partenzaX);
+      const ora = performance.now();
+      const dt = Math.max(1, ora - ultimoT);
+      velocita = (e.clientX - ultimaX) / dt;
+      ultimaX = e.clientX;
+      ultimoT = ora;
+    });
+
+    const rilascia = (e: PointerEvent): void => {
+      if (!trascina) return;
+      trascina = false;
+      striscia.classList.remove('is-trascina');
+      if (striscia.hasPointerCapture(e.pointerId)) striscia.releasePointerCapture(e.pointerId);
+      if (fermo) return;
+      let v = velocita * 16;
+      const scorri = (): void => {
+        striscia.scrollLeft -= v;
+        v *= 0.94;
+        inerzia = Math.abs(v) > 0.3 ? requestAnimationFrame(scorri) : 0;
+      };
+      if (Math.abs(v) > 0.3) inerzia = requestAnimationFrame(scorri);
+    };
+    striscia.addEventListener('pointerup', rilascia);
+    striscia.addEventListener('pointercancel', rilascia);
+    striscia.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // Cursore «trascina»: visibile solo sopra la striscia, puntatore fine.
+    if (cursore && window.matchMedia('(pointer: fine)').matches) {
+      striscia.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse') cursore.classList.add('is-visibile');
+      });
+      striscia.addEventListener('pointerleave', () => cursore.classList.remove('is-visibile'));
+      striscia.classList.add('ha-cursore');
+    }
+
+    // Tastiera: frecce di una foto, Home e Fine agli estremi.
+    striscia.addEventListener('keydown', (e) => {
+      const comportamento: ScrollBehavior = fermo ? 'auto' : 'smooth';
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        fermaInerzia();
+        striscia.scrollBy({ left: e.key === 'ArrowRight' ? passo() : -passo(), behavior: comportamento });
+      } else if (e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        fermaInerzia();
+        striscia.scrollTo({ left: e.key === 'Home' ? 0 : striscia.scrollWidth, behavior: comportamento });
+      }
+    });
+  }
+</script>
+
+<style>
+  .dw-ospiti {
+    padding-block: var(--spacing-section);
+    background: var(--color-bianco-caldo);
+    overflow: hidden;
+  }
+
+  .dw-ospiti-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .dw-ospiti-intro {
+    max-width: 38rem;
+    margin: 1rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  .dw-ospiti-voci {
+    display: grid;
+    gap: 1.75rem 2rem;
+    margin: clamp(2.5rem, 6vh, 3.5rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dw-ospiti-voce {
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-oro) 45%, transparent);
+  }
+
+  .dw-ospiti-nome {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+    line-height: 1.15;
+    font-weight: 400;
+  }
+
+  .dw-ospiti-testo {
+    margin: 0.5rem 0 0;
+    color: var(--color-grigio-caldo);
+  }
+
+  /* — Striscia — */
+  .dw-striscia {
+    margin-top: clamp(2.5rem, 7vh, 4.5rem);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+  }
+
+  .dw-striscia::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dw-striscia:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .dw-striscia.ha-cursore {
+    cursor: none;
+  }
+
+  .dw-striscia.is-trascina {
+    user-select: none;
+  }
+
+  .dw-striscia-elenco {
+    display: flex;
+    gap: 1rem;
+    width: max-content;
+    margin: 0;
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+    list-style: none;
+  }
+
+  .dw-striscia-voce {
+    flex: none;
+    height: 18rem;
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--color-beige);
+  }
+
+  .dw-striscia-voce :global(picture),
+  .dw-striscia-voce :global(.dw-striscia-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .dw-striscia-barra {
+    height: 1px;
+    margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--color-oro) 30%, transparent);
+  }
+
+  .dw-striscia-barra span {
+    display: block;
+    height: 100%;
+    background: var(--color-oro-testo);
+    transform: scaleX(0.08);
+    transform-origin: left;
+  }
+
+  /* Cursore tondo «trascina», segue il mouse (posizione da JS). */
+  .dw-cursore {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    width: 5.5rem;
+    height: 5.5rem;
+    margin: -2.75rem 0 0 -2.75rem;
+    border-radius: 50%;
+    background: var(--color-bordeaux);
+    color: var(--color-avorio-su-notte);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.6;
+    transition:
+      opacity 0.3s var(--ease-gaia),
+      scale 0.3s var(--ease-gaia);
+  }
+
+  .dw-cursore.is-visibile {
+    opacity: 1;
+    scale: 1;
+  }
+
+  .is-trascina ~ .dw-cursore,
+  .dw-ospiti:has(.is-trascina) .dw-cursore {
+    scale: 0.85;
+  }
+
+  @media (min-width: 48rem) {
+    .dw-ospiti-voci {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .dw-ospiti-voci {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .dw-striscia-voce {
+      height: 26rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dw-cursore {
+      transition: none;
+    }
+  }
+</style>

@@ -106,6 +106,8 @@ export const UI = {
   'destination.luoghi': { it: 'Scopri i luoghi', en: 'Explore the venues' },
   'destination.cosaServe': { it: 'Cosa serve', en: 'What you need' },
   'destination.cosaCuro': { it: 'Cosa curo io', en: 'What I take care of' },
+  'destination.striscia': { it: 'Foto: trascinate o usate le frecce', en: 'Photos: drag or use the arrow keys' },
+  'destination.trascina': { it: 'Trascina', en: 'Drag' },
   'servizi.vediFeste': { it: 'Guarda le feste', en: 'See the parties' },
   'servizi.vediAziendali': { it: 'Guarda gli eventi aziendali', en: 'See the corporate events' },
   'partner.cat.location': { it: 'Location', en: 'Venues' },

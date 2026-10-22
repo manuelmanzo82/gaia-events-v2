@@ -24,12 +24,21 @@ import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
-import { getDestinationRegions, getDestinationWedding, getHero, getServices, isPublishable, text } from '../../lib/content';
+import {
+  getDestinationRegions,
+  getDestinationWedding,
+  getHero,
+  getHighlights,
+  getServices,
+  isPublishable,
+  text,
+} from '../../lib/content';
 import { picture } from '../../lib/images';
 import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
 import DaLontano from '../destination/DaLontano.astro';
 import Dove from '../destination/Dove.astro';
+import Ospiti from '../destination/Ospiti.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
 import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
@@ -72,6 +81,13 @@ const riti = blocco('riti');
 const voceRiti = (riti?.items ?? [])
   .map((i) => ({ titolo: text(i.title, lang), serve: text(i.text, lang), cura: text(i.cura, lang) }))
   .filter((r) => r.titolo);
+const ospiti = blocco('ospiti');
+const vociOspiti = (ospiti?.items ?? [])
+  .map((i) => ({ titolo: text(i.title, lang), testo: text(i.text, lang) }))
+  .filter((v) => v.titolo);
+const fotoOspiti = getHighlights('ospiti')
+  .map((h) => h.image)
+  .filter((i): i is NonNullable<typeof i> => i !== null);
 
 const meta = buildMeta({
   lang,
@@ -118,6 +134,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   <DaLontano titolo={text(conto?.title, lang)} tappe={tappe} />
 
   <Riti lang={lang} titolo={text(riti?.title, lang)} intro={text(riti?.text, lang)} riti={voceRiti} />
+
+  <Ospiti lang={lang} titolo={text(ospiti?.title, lang)} intro={text(ospiti?.text, lang)} voci={vociOspiti} foto={fotoOspiti} />
 </BaseLayout>
 
 <script>
