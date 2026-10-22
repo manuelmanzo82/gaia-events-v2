@@ -16,7 +16,7 @@ $action = admin_url($route . ($id > 0 ? "/{$id}/modifica" : '/nuovo'));
   Lasciare vuoto l'inglese significa non pubblicare la versione inglese.
 </p>
 
-<form method="post" action="<?= e($action) ?>">
+<form method="post" action="<?= e($action) ?>" enctype="multipart/form-data">
   <?= Gaia\Admin\Csrf::field() ?>
 
   <?php foreach ($fields as $name => $field): ?>

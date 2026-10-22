@@ -34,6 +34,16 @@ $columns = $bilingual ? ["{$name}_it" => 'Italiano', "{$name}_en" => 'English'] 
 <?php if ($type === 'bool'): ?>
   <input type="checkbox" name="<?= e($name) ?>" value="1"<?= !empty($row[$name]) ? ' checked' : '' ?>>
 
+<?php elseif ($type === 'file'): ?>
+  <?php if (!empty($row[$name])): ?>
+    <p class="help">Attuale: <a href="/uploads/<?= e((string) $row[$name]) ?>" target="_blank" rel="noopener"><?= e((string) $row[$name]) ?></a>
+      — <label class="inline"><input type="checkbox" name="rimuovi_<?= e($name) ?>" value="1"> rimuovi</label></p>
+  <?php endif; ?>
+  <input type="file" name="<?= e($name) ?>" accept="<?= str_ends_with($name, 'webm') ? 'video/webm' : 'video/mp4' ?>">
+
+<?php elseif ($type === 'blocchi'): ?>
+  <?php require ADMIN_ROOT . '/views/_blocchi.php'; ?>
+
 <?php elseif ($type === 'media'): ?>
   <select name="<?= e($name) ?>">
     <option value="">— nessuna immagine —</option>
