@@ -30,6 +30,7 @@ import {
   getHero,
   getHighlights,
   getServices,
+  getSettings,
   isPublishable,
   text,
 } from '../../lib/content';
@@ -39,6 +40,7 @@ import { buildMeta } from '../../lib/seo';
 import DaLontano from '../destination/DaLontano.astro';
 import Dove from '../destination/Dove.astro';
 import Ospiti from '../destination/Ospiti.astro';
+import Realizzati from '../destination/Realizzati.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
 import Riti from '../destination/Riti.astro';
 import Apertura from '../servizi/Apertura.astro';
@@ -136,6 +138,8 @@ const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'i
   <Riti lang={lang} titolo={text(riti?.title, lang)} intro={text(riti?.text, lang)} riti={voceRiti} />
 
   <Ospiti lang={lang} titolo={text(ospiti?.title, lang)} intro={text(ospiti?.text, lang)} voci={vociOspiti} foto={fotoOspiti} />
+
+  <Realizzati lang={lang} titolo={text(getSettings().destination?.storie?.title, lang)} />
 </BaseLayout>
 
 <script>
