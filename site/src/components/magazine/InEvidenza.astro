@@ -1,0 +1,187 @@
+---
+/**
+ * Magazine — 2. Articolo in evidenza: split grande, foto da una parte e
+ * categoria, titolo, estratto e tempo di lettura dall'altra. È quello
+ * marcato «in evidenza» nel back office, altrimenti l'ultimo pubblicato.
+ * La foto è probabilmente l'LCP: niente maschera, caricamento subito.
+ */
+import type { Lang } from '../../config/site';
+import { formatDate, useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { pick, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { categoriaSlug, haVideo } from '../../lib/magazine';
+import type { Post } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  post: Post | null;
+}
+
+const { lang, post } = Astro.props;
+const t = useTranslations(lang);
+const foto = post
+  ? picture(post.cover ?? post.coverVideo?.poster ?? null, lang, '(min-width: 64rem) min(56vw, 900px), 100vw')
+  : null;
+---
+
+{
+  post && (
+    <section class="mg-evidenza" data-theme="light" aria-labelledby="titolo-evidenza" data-categoria={categoriaSlug(post, lang)}>
+      <a class:list={['mg-evidenza-link', { 'mg-evidenza-link--testo': !foto }]} href={path('blog', lang, pick(post.slug, lang)!)}>
+        {foto && (
+          <figure class="mg-evidenza-foto">
+            <Picture data={foto} cap={false} loading="eager" fetchpriority="high" class="mg-evidenza-img" />
+            {haVideo(post) && (
+              <span class="mg-evidenza-video" aria-hidden="true">
+                ▶
+              </span>
+            )}
+          </figure>
+        )}
+        <span class="mg-evidenza-testo">
+          <span class="eyebrow">{t('magazine.inEvidenza')}</span>
+          {text(post.category, lang) && <span class="mg-evidenza-categoria">{text(post.category, lang)}</span>}
+          <h2 id="titolo-evidenza" class="font-display mg-evidenza-titolo">
+            <span class="mg-sottolinea">{text(post.title, lang)}</span>
+          </h2>
+          {text(post.excerpt, lang) && <span class="text-lead mg-evidenza-estratto">{text(post.excerpt, lang)}</span>}
+          <span class="mg-evidenza-meta">
+            <time datetime={post.date}>{formatDate(post.date, lang)}</time>
+            <span aria-hidden="true">·</span>
+            <span>
+              {post.readingTime} {t('common.readingTime')}
+            </span>
+          </span>
+        </span>
+      </a>
+    </section>
+  )
+}
+
+<style>
+  .mg-evidenza {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 90rem;
+    margin: clamp(2.5rem, 7vh, 4.5rem) auto 0;
+  }
+
+  .mg-evidenza-link {
+    display: grid;
+    gap: 1.75rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .mg-evidenza-foto {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4 / 3;
+    background: var(--color-beige);
+  }
+
+  .mg-evidenza-foto :global(picture),
+  .mg-evidenza-foto :global(.mg-evidenza-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .mg-evidenza-video {
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1.25rem;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding-left: 0.2rem;
+    border-radius: 50%;
+    background: rgb(27 22 17 / 0.62);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .mg-evidenza-testo {
+    display: grid;
+    gap: 0.9rem;
+    align-content: center;
+  }
+
+  .mg-evidenza-testo .eyebrow {
+    margin: 0;
+  }
+
+  .mg-evidenza-categoria {
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .mg-evidenza-titolo {
+    margin: 0;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .mg-evidenza-estratto {
+    max-width: 34rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-evidenza-meta {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-sottolinea {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.7s var(--ease-gaia);
+  }
+
+  .mg-evidenza-link:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 6px;
+    border-radius: 16px;
+  }
+
+  .mg-evidenza-link:focus-visible .mg-sottolinea {
+    background-size: 100% 1px;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .mg-evidenza-foto :global(.mg-evidenza-img) {
+      transition: scale 0.9s var(--ease-gaia);
+    }
+
+    .mg-evidenza-link:hover :global(.mg-evidenza-img) {
+      scale: 1.03;
+    }
+
+    .mg-evidenza-link:hover .mg-sottolinea {
+      background-size: 100% 1px;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .mg-evidenza-link {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 5vw, 5.5rem);
+      align-items: center;
+    }
+
+    .mg-evidenza-foto {
+      max-width: 900px;
+    }
+  }
+</style>

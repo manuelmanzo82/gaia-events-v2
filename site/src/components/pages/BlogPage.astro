@@ -17,9 +17,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { existsIn, langsFor } from '../../lib/availability';
 import { getPage, getPostCategories, text } from '../../lib/content';
 import { breadcrumbs } from '../../lib/jsonld';
-import { categoriaSlug, postsIn } from '../../lib/magazine';
+import { categoriaSlug, inEvidenza, postsIn } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import Apertura from '../magazine/Apertura.astro';
+import InEvidenza from '../magazine/InEvidenza.astro';
 
 interface Props {
   lang: Lang;
@@ -54,6 +55,8 @@ const crumbs = [
   { name: t('nav.home'), href: path('home', lang) },
   { name: title, href: path('blog', lang) },
 ];
+const evidenza = inEvidenza(posts);
+const altri = posts.filter((p) => p !== evidenza);
 const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
 ---
 
@@ -61,6 +64,8 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
   {rss && <link slot="head" rel="alternate" type="application/rss+xml" title={`${title} — Gaia Events`} href={rss} />}
 
   <Apertura lang={lang} titolo={title} sottotitolo={sottotitolo} categorie={categorie} />
+
+  <InEvidenza lang={lang} post={evidenza} />
 </BaseLayout>
 
 <script>
