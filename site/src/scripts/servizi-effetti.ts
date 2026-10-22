@@ -18,29 +18,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { maschereFoto } from './maschere-foto';
+import { parallasse } from './parallasse';
 import { riduciMotion } from './motion-leggero';
-
-function parallasse(): void {
-  for (const el of document.querySelectorAll<HTMLElement>('[data-parallasse]')) {
-    const [da, a] = (el.dataset.parallasse ?? '0 10').split(/\s+/).map(Number);
-    const sezione = el.closest<HTMLElement>('section') ?? el;
-    const inCima = sezione.getBoundingClientRect().top + window.scrollY < 1;
-    gsap.fromTo(
-      el,
-      { yPercent: da },
-      {
-        yPercent: a,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sezione,
-          start: inCima ? 'top top' : 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      },
-    );
-  }
-}
 
 function fili(): void {
   for (const filo of document.querySelectorAll<HTMLElement>('[data-filo]')) {

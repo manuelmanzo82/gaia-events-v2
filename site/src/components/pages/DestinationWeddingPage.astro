@@ -1,12 +1,34 @@
 ---
+/**
+ * Destination wedding (/destination-wedding/ ↔ /en/destination-wedding/).
+ * La prima pagina in cui l'inglese conta più dell'italiano: il pubblico
+ * sono soprattutto coppie straniere. Ogni sezione vive solo se ha i suoi
+ * contenuti nel back office, niente segnaposto visibili:
+ *
+ *  1. Apertura — page_hero «destinationWedding» (foto, H1, frase)
+ *  2. Perché con me — blocco «values», tre colonne con icona
+ *  3. Dove — regioni (destination_regioni) + blocco «destinations»
+ *  4. Come funziona da lontano — blocco «timeline», conto alla rovescia
+ *  5. Il rito — blocco «riti», tre card
+ *  6. I vostri ospiti — blocco «ospiti» + striscia (highlights «ospiti»)
+ *  7. Matrimoni arrivati da lontano — eventi con stories.destination
+ *  8. Domande frequenti — FAQ del gruppo «destination»
+ *  9. Dicono di me — ponte, solo se la pagina esiste
+ * 10. Chiusura — CtaFinale con destination.photos.cta e la videochiamata
+ *
+ * Nessun bottone «preventivo» nelle sezioni: resta nel menu e nella
+ * CtaFinale. Effetti in scripts/destination-effetti.ts, dopo il motion.
+ */
 import type { Lang } from '../../config/site';
 import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getDestinationWedding, text } from '../../lib/content';
-import { existsIn, langsFor } from '../../lib/availability';
-import { breadcrumbs, localBusiness } from '../../lib/jsonld';
+import { SERVICE_FIELDS, langsFor } from '../../lib/availability';
+import { getDestinationWedding, getHero, getServices, isPublishable, text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { breadcrumbs, service as serviceSchema } from '../../lib/jsonld';
 import { buildMeta } from '../../lib/seo';
+import Apertura from '../servizi/Apertura.astro';
 
 interface Props {
   lang: Lang;
@@ -17,62 +39,70 @@ const t = useTranslations(lang);
 
 const data = getDestinationWedding();
 const langs = langsFor('destinationWedding');
+const hero = getHero('destinationWedding');
 
-const blocks = [...data.blocks].sort((a, b) => a.order - b.order);
-const title = text(data.title, lang) || t('nav.destinationWedding');
+const titoloPagina = text(data.title, lang) || t('nav.destinationWedding');
+const titoloApertura = text(hero?.title, lang) || titoloPagina;
+const fraseApertura = text(hero?.subtitle, lang) || text(data.intro, lang);
+const immagineApertura = hero?.images?.[0] ?? hero?.poster ?? data.hero ?? null;
+// Su mobile la foto copre i 68svh alti (come Servizi): in «cover» è larga
+// circa 1,5 × l'altezza, quindi più del viewport.
+const SIZES_APERTURA = '(max-width: 47.99rem) 102vh, 100vw';
+const fotoApertura = picture(immagineApertura, lang, SIZES_APERTURA);
+const preload = fotoApertura?.sources[0] ?? null;
 
 const meta = buildMeta({
   lang,
   routeKey: 'destinationWedding',
-  title,
+  title: titoloPagina,
   description: text(data.intro, lang),
   seo: data,
-  image: data.hero,
+  image: immagineApertura,
   availableLangs: langs,
 });
 
 const crumbs = [
   { name: t('nav.home'), href: path('home', lang) },
-  { name: title, href: path('destinationWedding', lang) },
+  { name: titoloPagina, href: path('destinationWedding', lang) },
 ];
 
-const jsonLd = [
-  breadcrumbs(crumbs),
-  localBusiness({ lang, description: meta.description, image: meta.ogImage }),
-];
+// Service: il servizio «destination» del back office, se tradotto.
+const servizio = getServices().find((s) => s.slug === 'destination' && isPublishable(s, lang, SERVICE_FIELDS));
+
+const jsonLd = [breadcrumbs(crumbs), servizio ? serviceSchema(servizio, lang, 'italia') : null];
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="destinationWedding"
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={jsonLd}
-  crumbs={crumbs}
->
-  <h1>{title}</h1>
-  <p>{text(data.intro, lang)}</p>
-
+<BaseLayout lang={lang} routeKey="destinationWedding" meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
   {
-    blocks.map((block) => (
-      <section data-block={block.kind}>
-        <h2>{text(block.title, lang)}</h2>
-        {text(block.text, lang) && <p>{text(block.text, lang)}</p>}
-        {
-          block.items && block.items.length > 0 && (
-            <ul>
-              {block.items.map((item) => (
-                <li>
-                  <strong>{text(item.title, lang)}</strong>
-                  {text(item.text, lang) && <p>{text(item.text, lang)}</p>}
-                </li>
-              ))}
-            </ul>
-          )
-        }
-      </section>
-    ))
+    preload && (
+      <link
+        slot="head"
+        rel="preload"
+        as="image"
+        type={preload.type}
+        imagesrcset={preload.srcset}
+        imagesizes={SIZES_APERTURA}
+        fetchpriority="high"
+      />
+    )
   }
 
-  {existsIn('quote', lang) && <p><a href={path('quote', lang)}>{t('cta.quote')}</a></p>}
+  <Apertura eyebrow={t('nav.destinationWedding')} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={[]} />
 </BaseLayout>
+
+<script>
+  // Effetti della pagina dopo il motion di base (GSAP già caricato).
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/destination-effetti').then(({ initDestinationEffetti }) => {
+        if (document.fonts?.ready) {
+          void document.fonts.ready.then(() => initDestinationEffetti());
+        } else {
+          initDestinationEffetti();
+        }
+      });
+    },
+    { once: true },
+  );
+</script>

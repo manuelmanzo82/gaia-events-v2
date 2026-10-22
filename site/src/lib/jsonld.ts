@@ -107,7 +107,11 @@ export function webSite(lang: Lang, name: string, description?: string): Thing {
   };
 }
 
-export function service(item: Service, lang: Lang): Thing {
+/**
+ * Servizio. areaServed: Roma + Italia (pagina Servizi) o solo Italia
+ * (pagina Destination wedding, pubblico straniero).
+ */
+export function service(item: Service, lang: Lang, area: 'roma' | 'italia' = 'roma'): Thing {
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -115,11 +119,14 @@ export function service(item: Service, lang: Lang): Thing {
     description: text(item.description, lang),
     serviceType: text(item.subtitle, lang) || undefined,
     provider: businessRef,
-    areaServed: [
-      { '@type': 'City', name: 'Roma' },
-      { '@type': 'Country', name: 'Italia' },
-    ],
-    url: url('services', lang) + `#${item.slug}`,
+    areaServed:
+      area === 'italia'
+        ? { '@type': 'Country', name: 'Italia' }
+        : [
+            { '@type': 'City', name: 'Roma' },
+            { '@type': 'Country', name: 'Italia' },
+          ],
+    url: area === 'italia' ? url('destinationWedding', lang) : url('services', lang) + `#${item.slug}`,
     inLanguage: HTML_LANG[lang],
   };
 }
