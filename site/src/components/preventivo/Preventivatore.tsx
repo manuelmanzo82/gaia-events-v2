@@ -279,7 +279,7 @@ export default function Preventivatore(props: Props): ReactNode {
     const el = radice.current;
     if (el) {
       const top = el.getBoundingClientRect().top;
-      const header = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header') || '96', 10);
+      const header = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sotto-header') || '96', 10);
       // La linea di avanzamento resta sempre sotto l'header, con aria.
       if (top < header + 16 || top > window.innerHeight * 0.5) {
         const y = window.scrollY + top - header - 32;

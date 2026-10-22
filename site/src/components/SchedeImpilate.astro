@@ -255,7 +255,7 @@ const EyebrowTag = titolo ? 'p' : 'h2';
     }
 
     .impila-testa {
-      margin-bottom: calc(var(--altezza-header, 96px) + 0.5rem);
+      margin-bottom: calc(var(--sotto-header, 96px) + 0.5rem);
     }
 
     .impila-pila {
@@ -264,7 +264,7 @@ const EyebrowTag = titolo ? 'p' : 'h2';
 
     .scheda {
       position: sticky;
-      top: calc(var(--altezza-header, 96px) + 0.5rem + var(--i) * var(--gradino));
+      top: calc(var(--sotto-header, 96px) + 0.5rem + var(--i) * var(--gradino));
       margin-bottom: 1.25rem;
     }
 
@@ -289,7 +289,7 @@ const EyebrowTag = titolo ? 'p' : 'h2';
   @media (min-width: 64rem) {
     .impila {
       --gradino: 1.5rem;
-      --altezza-scheda: min(75svh, 100svh - var(--altezza-header, 146px) - 5 * var(--gradino) - 2rem);
+      --altezza-scheda: min(75svh, 100svh - var(--sotto-header, 96px) - 5 * var(--gradino) - 2rem);
     }
 
     .impila-pila {
@@ -299,7 +299,7 @@ const EyebrowTag = titolo ? 'p' : 'h2';
     /* Sticky un gradino più giù per ogni scheda, sotto il header. */
     .scheda {
       position: sticky;
-      top: calc(var(--altezza-header, 146px) + 0.5rem + var(--i) * var(--gradino));
+      top: calc(var(--sotto-header, 96px) + 0.5rem + var(--i) * var(--gradino));
       margin-bottom: 10vh;
       transform-origin: 50% 0%;
     }

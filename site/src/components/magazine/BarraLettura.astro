@@ -2,8 +2,8 @@
 /**
  * Articolo — barra di lettura: un filetto oro sottile che si riempie
  * mentre si legge il corpo (da [data-lettura]). Sta sotto l'header:
- * su mobile, quando l'header è pieno, sotto la sua barra; su desktop
- * (header trasparente) in cima allo schermo. Decorativa (aria-hidden):
+ * quando l'header è pieno (mobile e desktop) sotto la sua barra,
+ * altrimenti in cima allo schermo. Decorativa (aria-hidden):
  * l'avanzamento è già evidente dallo scroll. Con reduced-motion si
  * aggiorna senza transizioni.
  */
@@ -25,7 +25,7 @@
       const fatto = Math.min(Math.max(-r.top + window.innerHeight * 0.2, 0), Math.max(corsa, 1));
       riempi.style.transform = `scaleX(${corsa > 0 ? fatto / corsa : 0})`;
       // Sotto l'header quando ha un fondo (mobile, classe «pieno»).
-      const pieno = header?.classList.contains('pieno') && window.innerWidth < 1024;
+      const pieno = header?.classList.contains('pieno');
       barra.style.top = pieno && header ? `${Math.round(header.getBoundingClientRect().bottom)}px` : '0px';
     };
     const chiedi = (): void => {

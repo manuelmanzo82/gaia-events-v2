@@ -135,7 +135,7 @@ const capitoli = servizi.map((s, i) => ({
   .sv-capitolo {
     display: grid;
     gap: 2.5rem;
-    scroll-margin-top: calc(var(--altezza-header, 96px) + 1rem);
+    scroll-margin-top: calc(var(--sotto-header, 96px) + 1rem);
   }
 
   /* — Foto: grande + piccola sovrapposta (ritaglio color fondo) — */
@@ -266,7 +266,7 @@ const capitoli = servizi.map((s, i) => ({
       display: block;
       align-self: start;
       position: sticky;
-      top: calc(var(--altezza-header, 146px) + 2rem);
+      top: calc(var(--sotto-header, 96px) + 2rem);
     }
 
     .sv-capitoli-indice ol {

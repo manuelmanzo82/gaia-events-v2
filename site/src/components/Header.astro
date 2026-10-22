@@ -142,18 +142,17 @@ const preventivo = existsIn('quote', lang);
 
     toggle.addEventListener('click', () => imposta(!aperto));
 
-    // Mobile: il header è sempre visibile. In cima alla pagina è
-    // trasparente (colore unico della sezione, come su desktop); appena si
-    // scorre diventa una barra piena da 60 px (avorio o notte secondo la
-    // sezione) con il logo più piccolo. Isteresi 24/8 px: lo scroll
-    // elastico di iOS in cima (scrollY negativo o che rimbalza) non la fa
-    // lampeggiare. Desktop invariato.
+    // Mobile e desktop (dal 23/10): in cima alla pagina il header è
+    // trasparente (colore unico della sezione); appena si scorre diventa
+    // una barra piena (avorio o notte secondo la sezione) più bassa, con il
+    // logo più piccolo: 60 px su mobile, 96 px da 64rem. Isteresi 24/8 px:
+    // lo scroll elastico di iOS in cima non la fa lampeggiare.
     const mobile = window.matchMedia('(max-width: 63.98rem)');
     let inAttesa = false;
     const aggiornaScorrimento = (): void => {
       inAttesa = false;
       const y = window.scrollY;
-      if (!mobile.matches || aperto) {
+      if (aperto) {
         header.classList.remove('pieno');
       } else if (y > 24) {
         header.classList.add('pieno');
@@ -269,6 +268,15 @@ const preventivo = existsIn('quote', lang);
     }
   }
 
+  /* Dove partono gli sticky (indici, schede, mappa, conto alla rovescia,
+     foto del preventivatore): sotto la barra piena, che c'è sempre quando
+     si è scorso. --altezza-header resta lo spazio in cima alle pagine
+     (header trasparente e alto). 96 px ovunque: è l'altezza esatta della
+     barra piena desktop; su mobile la barra è 60 e resta margine. */
+  :global(:root) {
+    --sotto-header: 96px;
+  }
+
   .brand {
     display: inline-flex;
     line-height: 0;
@@ -276,7 +284,46 @@ const preventivo = existsIn('quote', lang);
   }
 
   :global(.site-header .logo-gaia svg) {
-    transition: filter 0.5s var(--ease-gaia);
+    transition:
+      filter 0.5s var(--ease-gaia),
+      height 0.35s var(--ease-gaia);
+  }
+
+  /* Barra piena (mobile e desktop), dopo ~24 px di scroll: fondo avorio o
+     notte secondo la sezione, niente sfumatura né ombre sul testo. */
+  .site-header {
+    transition:
+      background-color 0.35s var(--ease-gaia),
+      color 0.5s var(--ease-gaia),
+      text-shadow 0.5s var(--ease-gaia),
+      padding 0.35s var(--ease-gaia);
+  }
+
+  .site-header.pieno {
+    background: var(--color-avorio);
+    text-shadow: none;
+  }
+
+  .site-header.pieno[data-header-theme='dark'] {
+    background: var(--color-notte);
+  }
+
+  .site-header.pieno::before {
+    opacity: 0;
+  }
+
+  .site-header.pieno :global(.logo-gaia svg) {
+    filter: none;
+  }
+
+  /* Desktop: barra da 96 px, logo da 130 a 76 px (a 64 la scritta «Gaia
+     Crognale» non si leggeva più). */
+  @media (min-width: 64rem) {
+    .site-header.pieno {
+      --logo-h: 76px;
+      --logo-h-md: 76px;
+      padding-block: 10px;
+    }
   }
 
   /* — Voci del menu — */
@@ -476,37 +523,12 @@ const preventivo = existsIn('quote', lang);
   @media (max-width: 63.98rem) {
     .site-header {
       padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
-      transition:
-        background-color 0.35s var(--ease-gaia),
-        color 0.5s var(--ease-gaia),
-        text-shadow 0.5s var(--ease-gaia),
-        padding 0.35s var(--ease-gaia);
     }
 
     .site-header.pieno {
       --logo-h: 44px;
       --logo-h-md: 44px;
       padding-bottom: 0.5rem;
-      background: var(--color-avorio);
-      text-shadow: none;
-    }
-
-    .site-header.pieno[data-header-theme='dark'] {
-      background: var(--color-notte);
-    }
-
-    .site-header.pieno::before {
-      opacity: 0;
-    }
-
-    .site-header.pieno :global(.logo-gaia svg) {
-      filter: none;
-    }
-
-    :global(.site-header .logo-gaia svg) {
-      transition:
-        filter 0.5s var(--ease-gaia),
-        height 0.35s var(--ease-gaia);
     }
   }
 

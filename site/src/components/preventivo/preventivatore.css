@@ -28,8 +28,8 @@
 
 .pv-foto {
   position: sticky;
-  top: calc(var(--altezza-header, 146px) + 1rem);
-  height: min(100svh - var(--altezza-header, 146px) - 3rem, 46rem);
+  top: calc(var(--sotto-header, 96px) + 1rem);
+  height: min(100svh - var(--sotto-header, 96px) - 3rem, 46rem);
   overflow: hidden;
   border-radius: 4px;
   background: var(--color-beige);

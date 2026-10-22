@@ -174,7 +174,7 @@ const totale = regioni.length;
 
     // Desktop con motion: scena ferma, la regione segue lo scroll.
     const altezzaHeader = (): number =>
-      parseInt(getComputedStyle(document.documentElement).getPropertyValue('--altezza-header'), 10) || 0;
+      parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sotto-header'), 10) || 0;
     let inAscolto = false;
     const suScroll = (): void => {
       if (!sezione.classList.contains('is-scena')) return;
@@ -444,14 +444,14 @@ const totale = regioni.length;
     }
 
     .dw-dove.is-scena .dw-dove-corsa {
-      height: calc(var(--dw-regioni) * 60vh + 100vh - var(--altezza-header, 146px));
+      height: calc(var(--dw-regioni) * 60vh + 100vh - var(--sotto-header, 96px));
     }
 
     /* Palco su due colonne: titolo e mappa a sinistra, regione a destra,
        tutto dentro l'altezza dello schermo sotto il header. */
     .dw-dove.is-scena .dw-dove-palco {
       position: sticky;
-      top: var(--altezza-header, 146px);
+      top: var(--sotto-header, 96px);
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
       grid-template-rows: auto auto;
@@ -459,7 +459,7 @@ const totale = regioni.length;
       column-gap: clamp(2rem, 5vw, 6rem);
       width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
       max-width: 76rem;
-      height: calc(100vh - var(--altezza-header, 146px));
+      height: calc(100vh - var(--sotto-header, 96px));
       margin: 0 auto;
       padding-block: 1.5rem;
     }
