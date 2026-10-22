@@ -331,8 +331,8 @@ export const T = {
               ? `con una telefonata al ${recapito}`
               : `via email a ${recapito}`;
         return tu
-          ? `La tua richiesta è arrivata. Gaia la leggerà con calma e ti risponderà entro ${ore} ore ${via}.`
-          : `La vostra richiesta è arrivata. Gaia la leggerà con calma e vi risponderà entro ${ore} ore ${via}.`;
+          ? `La tua richiesta è arrivata. Gaia la leggerà con calma e ti risponderà entro ${ore} ore nei giorni feriali ${via}.`
+          : `La vostra richiesta è arrivata. Gaia la leggerà con calma e vi risponderà entro ${ore} ore nei giorni feriali ${via}.`;
       },
       intanto: (tu: boolean) => (tu ? 'Nel frattempo, se ti va, puoi scriverle subito.' : 'Nel frattempo, se vi va, potete scriverle subito.'),
       whatsapp: 'Scrivi a Gaia su WhatsApp',
@@ -496,7 +496,7 @@ export const T = {
             : canale === 'telefono'
               ? `with a phone call at ${recapito}`
               : `by email at ${recapito}`;
-        return `Your request has arrived. Gaia will read it carefully and get back to you within ${ore} hours ${via}.`;
+        return `Your request has arrived. Gaia will read it carefully and get back to you within ${ore} hours on weekdays ${via}.`;
       },
       intanto: (_tu: boolean) => 'In the meantime, if you like, you can message her right away.',
       whatsapp: 'Message Gaia on WhatsApp',
