@@ -38,7 +38,7 @@ final class ServicesController extends ResourceController
                 'label' => 'Include (altri servizi)',
                 'type' => 'text',
                 'rules' => 'max:255',
-                'help' => 'Slug dei servizi compresi in questo, separati da virgola (es. coordinamento,design): nel preventivatore si segnano da soli come «Incluso».',
+                'help' => 'Slug dei servizi compresi in questo, separati da virgola (es. coordinamento,design): nel tool Conosciamoci si segnano da soli come «Incluso».',
             ],
             'icon' => ['label' => 'Icona', 'type' => 'text'],
             'page_media_id' => [

@@ -54,7 +54,7 @@ $quando = static function (array $r) use ($mesi): string {
       <tr>
         <td class="muted"><?= e(substr((string) $row['created_at'], 0, 16)) ?></td>
         <td><a href="<?= e(admin_url('richieste/' . (int) $row['id'])) ?>"><?= e($chi($row)) ?></a></td>
-        <td><?= e($row['type'] === 'quote' ? ($tipi[(string) $row['event_kind']] ?? 'Preventivo') : 'Contatto') ?></td>
+        <td><?= e($row['type'] === 'quote' ? ($tipi[(string) $row['event_kind']] ?? 'Dal tool Conosciamoci') : 'Contatto') ?></td>
         <td><?= e($quando($row)) ?></td>
         <td><?= e((string) ($row['guests'] ?? str_replace(['fino-', 'oltre-', '-'], ['fino a ', 'oltre ', '–'], (string) ($row['guests_range'] ?? '')))) ?></td>
         <td><strong><?= e($stati[(string) $row['status']] ?? (string) $row['status']) ?></strong></td>

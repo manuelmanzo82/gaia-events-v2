@@ -13,7 +13,9 @@ export const ROUTES = {
   // percorsi nel .htaccess). Le chiavi restano: sono nomi interni, non URL.
   blog: { it: 'magazine', en: 'magazine' },
   faq: { it: 'faq', en: 'faq' },
-  quote: { it: 'preventivo', en: 'wedding-estimate' },
+  // Conosciamoci (giro del 24/10): era /preventivo/ ↔ /en/wedding-estimate/,
+  // 301 in .htaccess. La chiave resta «quote» (nome interno).
+  quote: { it: 'conosciamoci', en: 'lets-talk' },
   contact: { it: 'contatti', en: 'contact' },
   destinationWedding: { it: 'destination-wedding', en: 'destination-wedding' },
   privacy: { it: 'privacy', en: 'privacy' },

@@ -54,6 +54,10 @@ ErrorDocument 404 /404.html
     # Portfolio esce (giro 11): la pagina I miei eventi la sostituisce.
     RewriteRule ^portfolio(/.*)?$ /eventi/ [R=301,L]
     RewriteRule ^en/portfolio(/.*)?$ /en/events/ [R=301,L]
+    # Preventivo → Conosciamoci (24/10/2026). Il parametro ?servizio= passa
+    # da solo (mod_rewrite conserva la query string).
+    RewriteRule ^preventivo/?$ /conosciamoci/ [R=301,L]
+    RewriteRule ^en/wedding-estimate/?$ /en/lets-talk/ [R=301,L]
 </IfModule>
 
 # ---------------------------------------------------------------------

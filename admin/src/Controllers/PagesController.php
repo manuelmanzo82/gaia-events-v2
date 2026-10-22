@@ -26,7 +26,7 @@ final class PagesController
         'reviews' => 'Dicono di me (introduzione)',
         'blog' => 'Magazine (introduzione)',
         'faq' => 'FAQ (introduzione)',
-        'quote' => 'Preventivo (introduzione)',
+        'quote' => 'Conosciamoci (introduzione)',
         'contact' => 'Contatti',
         'destinationWedding' => 'Destination wedding',
         'privacy' => 'Privacy policy',

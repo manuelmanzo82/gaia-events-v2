@@ -32,7 +32,7 @@ $riepilogo = is_array($payload['summary'] ?? null) ? $payload['summary'] : [];
 ?>
 <h1><?= e($chi) ?></h1>
 <p class="muted">
-  Richiesta #<?= $id ?> · <?= e($row['type'] === 'quote' ? ($tipi[(string) $row['event_kind']] ?? 'Preventivo') : 'Messaggio dai contatti') ?>
+  Richiesta #<?= $id ?> · <?= e($row['type'] === 'quote' ? ($tipi[(string) $row['event_kind']] ?? 'Dal tool Conosciamoci') : 'Messaggio dai contatti') ?>
   · ricevuta il <?= e(substr((string) $row['created_at'], 0, 16)) ?> · lingua <?= e((string) $row['lang']) ?>
   · <a href="<?= e(admin_url('richieste')) ?>">torna all'elenco</a>
 </p>
