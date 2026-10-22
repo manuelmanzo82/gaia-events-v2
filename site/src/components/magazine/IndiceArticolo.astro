@@ -1,0 +1,115 @@
+---
+/**
+ * Articolo — indice fisso a lato, solo su desktop largo (≥80rem) e solo
+ * se l'articolo ha almeno 3 H2. La voce corrente la segna il modulo
+ * condiviso con i capitoli di Servizi (scripts/indice-fisso.ts): accesa
+ * quando il suo titolo passa nel quarto alto dello schermo.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+
+interface Props {
+  lang: Lang;
+  titoli: Array<{ id: string; testo: string }>;
+}
+
+const { lang, titoli } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  titoli.length >= 3 && (
+    <nav class="mg-indice" aria-label={t('magazine.indice')} data-indice>
+      <p class="mg-indice-titolo">{t('magazine.indice')}</p>
+      <ol role="list">
+        {titoli.map((h) => (
+          <li>
+            <a href={`#${h.id}`} data-voce={h.id}>
+              {h.testo}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<script>
+  import { indiceFisso } from '../../scripts/indice-fisso';
+
+  const indice = document.querySelector<HTMLElement>('.mg-indice[data-indice]');
+  if (indice) indiceFisso(indice, [...document.querySelectorAll<HTMLElement>('.mg-corpo [data-capitolo]')], 0.25);
+</script>
+
+<style>
+  .mg-indice {
+    display: none;
+  }
+
+  @media (min-width: 80rem) {
+    .mg-indice {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 1.5rem);
+      display: block;
+      align-self: start;
+      max-width: 13rem;
+    }
+  }
+
+  .mg-indice-titolo {
+    margin: 0 0 0.75rem;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  .mg-indice ol {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0 0 0 1rem;
+    list-style: none;
+    border-left: 1px solid color-mix(in srgb, var(--color-inchiostro) 15%, transparent);
+  }
+
+  .mg-indice a {
+    position: relative;
+    display: block;
+    padding-block: 0.45rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--color-grigio-caldo);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-gaia);
+  }
+
+  .mg-indice a::before {
+    content: '';
+    position: absolute;
+    top: 0.45rem;
+    bottom: 0.45rem;
+    left: calc(-1rem - 1px);
+    width: 2px;
+    background: var(--color-bordeaux);
+    transform: scaleY(0);
+    transition: transform 0.4s var(--ease-gaia);
+  }
+
+  .mg-indice a:hover,
+  .mg-indice a[aria-current='true'] {
+    color: var(--color-inchiostro);
+  }
+
+  .mg-indice a[aria-current='true']::before {
+    transform: scaleY(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-indice a,
+    .mg-indice a::before {
+      transition: none;
+    }
+  }
+</style>

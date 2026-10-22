@@ -1,0 +1,61 @@
+---
+/**
+ * Articolo — barra di lettura: un filetto oro sottile che si riempie
+ * mentre si legge il corpo (da [data-lettura]). Sta sotto l'header:
+ * su mobile, quando l'header è pieno, sotto la sua barra; su desktop
+ * (header trasparente) in cima allo schermo. Decorativa (aria-hidden):
+ * l'avanzamento è già evidente dallo scroll. Con reduced-motion si
+ * aggiorna senza transizioni.
+ */
+---
+
+<div class="mg-barra" aria-hidden="true" data-barra-lettura><span></span></div>
+
+<script>
+  const barra = document.querySelector<HTMLElement>('[data-barra-lettura]');
+  const corpo = document.querySelector<HTMLElement>('[data-lettura]');
+  const header = document.querySelector<HTMLElement>('.site-header');
+  if (barra && corpo) {
+    const riempi = barra.firstElementChild as HTMLElement;
+    let inAttesa = false;
+    const aggiorna = (): void => {
+      inAttesa = false;
+      const r = corpo.getBoundingClientRect();
+      const corsa = r.height - window.innerHeight * 0.6;
+      const fatto = Math.min(Math.max(-r.top + window.innerHeight * 0.2, 0), Math.max(corsa, 1));
+      riempi.style.transform = `scaleX(${corsa > 0 ? fatto / corsa : 0})`;
+      // Sotto l'header quando ha un fondo (mobile, classe «pieno»).
+      const pieno = header?.classList.contains('pieno') && window.innerWidth < 1024;
+      barra.style.top = pieno && header ? `${Math.round(header.getBoundingClientRect().bottom)}px` : '0px';
+    };
+    const chiedi = (): void => {
+      if (!inAttesa) {
+        inAttesa = true;
+        requestAnimationFrame(aggiorna);
+      }
+    };
+    window.addEventListener('scroll', chiedi, { passive: true });
+    window.addEventListener('resize', chiedi);
+    aggiorna();
+  }
+</script>
+
+<style>
+  .mg-barra {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .mg-barra span {
+    display: block;
+    height: 100%;
+    background: var(--color-oro);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+</style>

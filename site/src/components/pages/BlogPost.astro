@@ -20,11 +20,13 @@ import { POST_FIELDS, existsIn } from '../../lib/availability';
 import { availableLangs, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
 import { blogPosting, breadcrumbs, faqDaBlocchi, videoObject } from '../../lib/jsonld';
-import { videoDi } from '../../lib/magazine';
+import { titoliH2, videoDi } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import type { Post } from '../../lib/types';
 import ArticoloApertura from '../magazine/ArticoloApertura.astro';
+import BarraLettura from '../magazine/BarraLettura.astro';
 import Corpo from '../magazine/Corpo.astro';
+import IndiceArticolo from '../magazine/IndiceArticolo.astro';
 import InBreve from '../magazine/InBreve.astro';
 
 interface Props {
@@ -66,6 +68,8 @@ const jsonLd = [
   ...videoDi(post).map((v) => videoObject(v, lang)),
 ];
 
+const titoli = titoliH2(blocks, lang);
+const conIndice = titoli.length >= 3;
 const ritratto = picture(settings.magazine?.photos?.autrice ?? null, lang, '7rem');
 const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
 ---
@@ -76,8 +80,10 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
   <article class="mg-articolo">
     <ArticoloApertura lang={lang} post={post} ritratto={ritratto} />
 
-    <div class="mg-articolo-corpo">
-      <div class="mg-lettura">
+    <BarraLettura />
+    <div class:list={['mg-articolo-corpo', { 'mg-articolo-corpo--indice': conIndice }]}>
+      <IndiceArticolo lang={lang} titoli={titoli} />
+      <div class="mg-lettura" data-lettura>
         <InBreve lang={lang} punti={post.summary?.[lang] ?? []} />
         <Corpo lang={lang} post={post} />
       </div>
@@ -90,6 +96,15 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
     width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
     max-width: 75rem;
     margin: clamp(2.5rem, 7vh, 4.5rem) auto var(--spacing-section-sm);
+  }
+
+  /* Con l'indice: colonna dell'indice a sinistra, lettura al centro. */
+  @media (min-width: 80rem) {
+    .mg-articolo-corpo--indice {
+      display: grid;
+      grid-template-columns: 13rem minmax(0, 1fr) 13rem;
+      gap: 2rem;
+    }
   }
 
   .mg-lettura > :global(.mg-breve) {
