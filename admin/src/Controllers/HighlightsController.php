@@ -20,6 +20,7 @@ final class HighlightsController extends ResourceController
         'destination' => 'Destination wedding',
         'luogo' => 'Pagina del luogo collegato',
         'cta' => 'CTA finale della home (foto accanto al testo)',
+        'ospiti' => 'Destination wedding: striscia «I vostri ospiti»',
     ];
 
     protected function table(): string

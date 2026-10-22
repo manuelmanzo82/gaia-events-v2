@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `pages` (
 CREATE TABLE IF NOT EXISTS `page_sections` (
   `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `page_id`    INT UNSIGNED NOT NULL,
-  `kind`       ENUM('intro','services','destinations','process','faq','testimonial','cta','timeline','values') NOT NULL,
+  `kind`       ENUM('intro','services','destinations','process','faq','testimonial','cta','timeline','values','riti','ospiti') NOT NULL,
   `title_it`   VARCHAR(255) DEFAULT NULL,
   `title_en`   VARCHAR(255) DEFAULT NULL,
   `text_it`    TEXT DEFAULT NULL,
@@ -458,7 +458,7 @@ CREATE TABLE IF NOT EXISTS `highlights` (
 CREATE TABLE IF NOT EXISTS `highlight_sections` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `highlight_id` INT UNSIGNED NOT NULL,
-  `section`      ENUM('home','chi-sono','servizi','destination','luogo','cta') NOT NULL,
+  `section`      ENUM('home','chi-sono','servizi','destination','luogo','cta','ospiti') NOT NULL,
   `sort_order`   SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_highlight_sections` (`highlight_id`, `section`),
@@ -501,6 +501,8 @@ CREATE TABLE IF NOT EXISTS `stories` (
   `title_en`                VARCHAR(255) DEFAULT NULL,
   `couple`                  VARCHAR(190) DEFAULT NULL,
   `event_type`              ENUM('matrimonio','unione_civile','festa','aziendale') NOT NULL DEFAULT 'matrimonio',
+  -- Coppia arrivata da lontano: l'evento compare nella pagina Destination.
+  `destination`             TINYINT(1) NOT NULL DEFAULT 0,
   `location_name`           VARCHAR(255) DEFAULT NULL,
   `luogo_id`                INT UNSIGNED DEFAULT NULL,
   `story_date`              DATE DEFAULT NULL,
@@ -666,4 +668,33 @@ CREATE TABLE IF NOT EXISTS `service_compare` (
   `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_service_compare_active` (`active`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Destination wedding: regioni della sezione «Dove» (22/10/2026)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `destination_regioni` (
+  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nome_it`       VARCHAR(190) DEFAULT NULL,
+  `nome_en`       VARCHAR(190) DEFAULT NULL,
+  `testo_it`      VARCHAR(500) DEFAULT NULL,
+  `testo_en`      VARCHAR(500) DEFAULT NULL,
+  `media_id`      INT UNSIGNED DEFAULT NULL,
+  -- Regione da accendere sulla mappa (codice minuscolo, es. «lazio»).
+  `regione_mappa` VARCHAR(40) NOT NULL,
+  -- Punto facoltativo per una zona dentro la regione (es. la Costiera).
+  `lat`           DECIMAL(8,5) DEFAULT NULL,
+  `lng`           DECIMAL(8,5) DEFAULT NULL,
+  -- Pagina della regione in Luoghi: il link compare solo se esiste.
+  `luogo_id`      INT UNSIGNED DEFAULT NULL,
+  `active`        TINYINT(1) NOT NULL DEFAULT 1,
+  `sort_order`    SMALLINT NOT NULL DEFAULT 0,
+  `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_destination_regioni` (`active`, `sort_order`),
+  KEY `fk_destination_regioni_media` (`media_id`),
+  KEY `fk_destination_regioni_luogo` (`luogo_id`),
+  CONSTRAINT `fk_destination_regioni_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_destination_regioni_luogo` FOREIGN KEY (`luogo_id`) REFERENCES `luoghi` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

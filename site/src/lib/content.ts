@@ -2,6 +2,7 @@ import { DEFAULT_LANG, LANGS, type Lang } from '../config/site';
 import type {
   Client,
   CompareItem,
+  DestinationRegion,
   DestinationWedding,
   Faq,
   Highlight,
@@ -172,6 +173,11 @@ export function getCompare(): CompareItem[] {
 }
 
 /** Stampa e clienti (giro 11), solo quelli pubblicati, in ordine. */
+/** Regioni della sezione «Dove» (Destination wedding), solo pubblicate. */
+export function getDestinationRegions(): DestinationRegion[] {
+  return load<DestinationRegion[]>('regioni-destination', []).filter(isActive).sort(byOrder);
+}
+
 export function getPress(): Press[] {
   return load<Press[]>('stampa', []).filter(isActive).sort(byOrder);
 }

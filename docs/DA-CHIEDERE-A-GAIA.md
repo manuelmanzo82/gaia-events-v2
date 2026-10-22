@@ -259,6 +259,45 @@ nascoste:
 - **Foto del Coordinamento del giorno**: quella del servizio
   (`planner-controlla-tavolo`) ha il watermark VD IMAGE.
 
+### 15. Pagina «Destination wedding» (22/10/2026)
+
+Pubblico soprattutto straniero: l'inglese conta più dell'italiano. Tutti i
+testi sono una bozza nostra (IT ed EN), salvati nel database.
+
+- **Lingue parlate — DA CONFERMARE**: oggi la pagina dice «in italiano e
+  in inglese» / «in English and Italian» (colonna «La vostra lingua» e
+  FAQ «In che lingua organizziamo tutto?»). Servono le lingue vere.
+- **Regioni in cui lavora — DA CONFERMARE**: sullo staging ci sono Roma e
+  Lazio, Toscana, Costiera Amalfitana e Puglia (pubblicate) e Lago di Como
+  (non pubblicata: era nella vecchia bozza). **In produzione si pubblicano
+  solo le regioni confermate da Gaia.** Servono anche:
+  - le foto di Costiera Amalfitana e Puglia (oggi senza foto: mostrano
+    solo il testo);
+  - la conferma che la foto della Toscana (`tavolo-terrazza-colline`) sia
+    stata scattata in Toscana;
+  - i testi brevi delle regioni (back office → «Destination: regioni»).
+- **Riti — DA VERIFICARE (informazioni legali)**: quali riti segue (civile,
+  simbolico, religioso, altre confessioni) e **se cura lei le pratiche**
+  (la vecchia bozza diceva «Vi guido fra i documenti»). I testi delle tre
+  card e della FAQ «Possiamo sposarci legalmente in Italia?» sono volutamente
+  generici: niente numeri di giorni, niente elenchi di documenti. Vanno
+  fatti verificare prima del lancio.
+- **Paesi di provenienza delle coppie**: da dove arrivano più spesso (serve
+  per i testi e per capire quali lingue mettere).
+- **Servizi per gli ospiti**: cosa cura direttamente tra cena di
+  benvenuto, transfer, camere e esperienze, e cosa invece consiglia
+  soltanto.
+- **Anticipo minimo**: la FAQ oggi dice «almeno un anno prima».
+- **Il conto alla rovescia** (12 mesi, 6, 3, la settimana, il giorno) e
+  cosa succede a ogni tappa: bozza nostra.
+- **Matrimoni arrivati da lontano**: quali eventi di «I miei eventi» sono
+  destination wedding (casella nel back office). Senza, la sezione resta
+  nascosta.
+- **FAQ destination**: le sei domande e risposte, IT ed EN.
+- **Foto**: nessuna persona riconoscibile nelle foto scelte. La 60 è
+  l'apertura della pagina (e resta nella fascia di Servizi); nella
+  timeline di Chi sono la tappa 2018 ora usa la 111.
+
 ## Traduzioni in bozza da far rivedere a Gaia prima del lancio (16/10/2026)
 
 Scritte da noi per non lasciare buchi nella home EN, **solo nel database

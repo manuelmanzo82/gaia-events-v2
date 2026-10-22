@@ -80,6 +80,13 @@ export interface Settings extends SeoFields {
     faq?: { title?: Localized };
     photos?: Record<string, Image | null>;
   };
+  /** Pagina Destination wedding (impostazioni del gruppo «destination»). */
+  destination?: {
+    faq?: { title?: Localized };
+    storie?: { title?: Localized };
+    cta?: { video?: Localized };
+    photos?: Record<string, Image | null>;
+  };
   /** Pagina Preventivo (impostazioni del gruppo «preventivo»). */
   quote?: {
     eyebrow?: Localized;
@@ -181,7 +188,9 @@ export interface Block {
     | 'testimonial'
     | 'cta'
     | 'timeline'
-    | 'values';
+    | 'values'
+    | 'riti'
+    | 'ospiti';
   title: Localized;
   text: Localized;
   items?: BlockItem[];
@@ -195,6 +204,28 @@ export interface BlockItem {
   title: Localized;
   text: Localized;
   image?: Image | null;
+  /** Destination: unità del conto alla rovescia («mesi prima»). */
+  unit?: Localized;
+  /** Destination, riti: «cosa curo io». */
+  cura?: Localized;
+  /** Destination, Perché con me: nome dell'icona (posto, lingua, rete). */
+  icon?: string;
+}
+
+/** Regione della sezione «Dove» della pagina Destination wedding. */
+export interface DestinationRegion {
+  id: number;
+  name: Localized;
+  text: Localized;
+  image: Image | null;
+  /** Codice della regione sulla mappa, es. «lazio». */
+  map: string;
+  /** Punto facoltativo per una zona dentro la regione. */
+  point: { lat: number; lng: number } | null;
+  /** Pagina della regione in Luoghi, se collegata. */
+  luogoId: number | null;
+  active: boolean;
+  order: number;
 }
 
 export interface DestinationWedding extends SeoFields {
@@ -268,7 +299,7 @@ export interface LocationVenue {
   order: number;
 }
 
-export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' | 'luogo' | 'cta';
+export type HighlightSection = 'home' | 'chi-sono' | 'servizi' | 'destination' | 'luogo' | 'cta' | 'ospiti';
 
 /** Foto singola scelta da Gaia. L'alt vive sull'immagine (media). */
 export interface Highlight {
@@ -342,6 +373,8 @@ export interface Story extends SeoFields {
   title: Localized;
   couple?: string | null;
   type: EventType;
+  /** Destination wedding: coppia arrivata da lontano. */
+  destination?: boolean;
   locationName?: string | null;
   luogoId: number | null;
   date?: string | null;

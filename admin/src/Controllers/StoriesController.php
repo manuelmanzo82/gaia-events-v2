@@ -71,6 +71,11 @@ final class StoriesController extends ResourceController
                     'aziendale' => 'Evento aziendale',
                 ],
             ],
+            'destination' => [
+                'label' => 'Destination wedding',
+                'type' => 'bool',
+                'help' => 'Coppia arrivata da lontano: l’evento compare nella pagina Destination wedding.',
+            ],
             'couple' => ['label' => 'Coppia / nomi', 'type' => 'text', 'help' => 'Es. «Andrea & Federica».'],
             'location_name' => ['label' => 'Location (testo)', 'type' => 'text'],
             'luogo_id' => ['label' => 'Luogo collegato (opzionale)', 'type' => 'select', 'options' => $luoghi],

@@ -27,6 +27,7 @@ final class Exporter
             'reviews' => self::reviews(),
             'stampa' => self::press(),
             'confronto' => self::serviceCompare(),
+            'regioni-destination' => self::destinationRegions(),
             'clienti' => self::clients(),
             'posts' => self::posts(),
             'faq' => self::faqs(),
@@ -184,6 +185,7 @@ final class Exporter
             'title' => self::text($row['title_it'], $row['title_en']),
             'couple' => $row['couple'],
             'type' => (string) ($row['event_type'] ?? 'matrimonio'),
+            'destination' => (bool) ($row['destination'] ?? false),
             'locationName' => $row['location_name'],
             'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
             'date' => self::date($row['story_date']),
@@ -421,6 +423,29 @@ final class Exporter
     }
 
     /**
+     * Destination wedding, sezione «Dove»: regioni con testo breve, foto,
+     * codice della regione sulla mappa, punto facoltativo e luogo collegato.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function destinationRegions(): array
+    {
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'name' => self::text($row['nome_it'], $row['nome_en']),
+            'text' => self::text($row['testo_it'], $row['testo_en']),
+            'image' => self::image(self::mediaById((int) ($row['media_id'] ?? 0))),
+            'map' => (string) $row['regione_mappa'],
+            'point' => $row['lat'] !== null && $row['lng'] !== null
+                ? ['lat' => (float) $row['lat'], 'lng' => (float) $row['lng']]
+                : null,
+            'luogoId' => $row['luogo_id'] !== null ? (int) $row['luogo_id'] : null,
+            'active' => (bool) $row['active'],
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM destination_regioni ORDER BY sort_order, id'));
+    }
+
+    /**
      * Hanno scelto Gaia (giro 11): aziende clienti per la fila di loghi.
      *
      * @return list<array<string, mixed>>
@@ -558,6 +583,22 @@ final class Exporter
                 $label = $itemsIt[$index]['label'] ?? null;
                 if (is_string($label) && $label !== '') {
                     $item['label'] = $label;
+                }
+
+                // Destination wedding: unità del conto alla rovescia («mesi
+                // prima»), «cosa curo io» dei riti (tradotti), icona delle
+                // colonne Perché con me (chiave non tradotta).
+                foreach (['unit', 'cura'] as $chiave) {
+                    if (isset($itemsIt[$index][$chiave]) || isset($itemsEn[$index][$chiave])) {
+                        $item[$chiave] = self::text(
+                            $itemsIt[$index][$chiave] ?? null,
+                            $itemsEn[$index][$chiave] ?? null,
+                        );
+                    }
+                }
+                $icona = $itemsIt[$index]['icon'] ?? null;
+                if (is_string($icona) && $icona !== '') {
+                    $item['icon'] = $icona;
                 }
 
                 // Foto della voce (id in media, chiave `media` di items_it):
