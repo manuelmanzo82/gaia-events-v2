@@ -80,6 +80,11 @@ export interface Settings extends SeoFields {
     faq?: { title?: Localized };
     photos?: Record<string, Image | null>;
   };
+  /** Magazine (impostazioni del gruppo «magazine»). */
+  magazine?: {
+    autrice?: { bio?: Localized };
+    photos?: Record<string, Image | null>;
+  };
   /** Pagina Destination wedding (impostazioni del gruppo «destination»). */
   destination?: {
     faq?: { title?: Localized };
@@ -143,12 +148,55 @@ export interface Post extends SeoFields {
   title: Localized;
   excerpt: Localized;
   category: Localized;
+  /** Slug della categoria per il filtro ?categoria= (vuoto se senza). */
+  categorySlug?: Localized;
   date: string;
+  /** «Aggiornato il …» e dateModified (null se mai rivisto). */
+  modified?: string | null;
   readingTime: number;
+  featured?: boolean;
   cover: Image | null;
-  /** HTML già sanificato dal back office. */
+  /** Video di copertina facoltativo: prende il posto della foto. */
+  coverVideo?: Video | null;
+  /** «In breve»: 3–4 punti per lingua. */
+  summary?: { it: string[]; en: string[] };
+  /** Blocchi dell'editor, testi già in HTML consentito. */
+  blocks?: PostBlock[];
+  /** HTML con i soli tag consentiti (dai blocchi): RSS e articoli vecchi. */
   body: Localized;
   active: boolean;
+}
+
+/** Video della libreria (clip caricata, YouTube o Vimeo). */
+export interface Video {
+  id: number;
+  kind: 'clip' | 'youtube' | 'vimeo';
+  mp4: string | null;
+  webm: string | null;
+  providerId: string | null;
+  poster: Image;
+  width: number;
+  height: number;
+  duration: number | null;
+  title: Localized;
+  description: Localized;
+  uploadDate: string | null;
+}
+
+/** Un blocco del corpo di un articolo del Magazine. */
+export type PostBlock =
+  | { type: 'p'; html: Localized }
+  | { type: 'h2' | 'h3'; text: Localized }
+  | { type: 'quote'; html: Localized; cite: string }
+  | { type: 'image'; image: Image; format: 'orizzontale' | 'verticale' | 'quadrata' | 'larga'; caption: Localized }
+  | { type: 'video'; video: Video }
+  | { type: 'qa'; question: Localized; answer: Localized };
+
+export interface PostCategory {
+  id: number;
+  name: Localized;
+  slug: Localized;
+  order: number;
 }
 
 export interface Faq {

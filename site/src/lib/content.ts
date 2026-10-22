@@ -15,6 +15,7 @@ import type {
   PageHero,
   Partner,
   Post,
+  PostCategory,
   Press,
   Review,
   Service,
@@ -193,6 +194,11 @@ export function getPosts(): Post[] {
 /** Lo slug degli articoli è bilingue: /magazine/titolo-it ↔ /en/magazine/title-en */
 export function getPostBySlug(slug: string, lang: Lang): Post | null {
   return getPosts().find((post) => pick(post.slug, lang) === slug) ?? null;
+}
+
+/** Categorie del Magazine, nell'ordine del back office. */
+export function getPostCategories(): PostCategory[] {
+  return load<PostCategory[]>('categorie-magazine', []).sort(byOrder);
 }
 
 export function getFaqs(): Faq[] {

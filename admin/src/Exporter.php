@@ -30,6 +30,7 @@ final class Exporter
             'regioni-destination' => self::destinationRegions(),
             'clienti' => self::clients(),
             'posts' => self::posts(),
+            'categorie-magazine' => self::postCategories(),
             'faq' => self::faqs(),
             'destination-wedding' => self::destinationWedding(),
             'instagram' => self::instagram(),
@@ -471,21 +472,162 @@ final class Exporter
     public static function posts(): array
     {
         $rows = Db::all('SELECT * FROM posts ORDER BY post_date DESC, id DESC');
+        $categorie = [];
+        foreach (Db::all('SELECT * FROM post_categories') as $c) {
+            $categorie[(int) $c['id']] = $c;
+        }
 
+        return array_map(static function (array $row) use ($categorie): array {
+            $blocchi = Magazine::normalizza((string) ($row['blocchi'] ?? ''));
+            $categoria = $categorie[(int) ($row['category_id'] ?? 0)] ?? null;
+
+            // Corpo: dai blocchi (HTML generato con i soli tag consentiti);
+            // gli articoli senza blocchi passano dal filtro dei tag.
+            $body = $blocchi !== []
+                ? self::text(Magazine::html($blocchi, 'it'), Magazine::html($blocchi, 'en'))
+                : self::text(
+                    Magazine::pulisciHtml((string) ($row['body_it'] ?? '')),
+                    Magazine::pulisciHtml((string) ($row['body_en'] ?? '')),
+                );
+
+            return [
+                'id' => (int) $row['id'],
+                'slug' => self::text($row['slug_it'], $row['slug_en']),
+                'title' => self::text($row['title_it'], $row['title_en']),
+                'excerpt' => self::text($row['excerpt_it'], $row['excerpt_en']),
+                'category' => $categoria !== null
+                    ? self::text($categoria['nome_it'], $categoria['nome_en'])
+                    : self::text($row['category_it'], $row['category_en']),
+                'categorySlug' => $categoria !== null
+                    ? self::text($categoria['slug_it'], $categoria['slug_en'])
+                    : self::emptyText(),
+                'date' => self::date($row['post_date']) ?? '',
+                'modified' => self::date($row['modified_date'] ?? null),
+                'readingTime' => $blocchi !== []
+                    ? Magazine::minutiLettura($blocchi, 'it')
+                    : (int) $row['reading_time'],
+                'featured' => (bool) ($row['featured'] ?? false),
+                'cover' => self::image(self::mediaById((int) ($row['cover_media_id'] ?? 0))),
+                'coverVideo' => self::video((int) ($row['cover_video_id'] ?? 0)),
+                'summary' => [
+                    'it' => self::righe($row['sommario_it'] ?? null),
+                    'en' => self::righe($row['sommario_en'] ?? null),
+                ],
+                'blocks' => array_values(array_filter(array_map(
+                    static fn (array $b): ?array => self::bloccoPerSito($b),
+                    $blocchi,
+                ))),
+                'body' => $body,
+                'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
+                'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
+                'active' => (bool) $row['active'],
+            ];
+        }, $rows);
+    }
+
+    /**
+     * Un blocco dell'editor nella forma del sito: testi già convertiti in
+     * HTML consentito, immagini e video risolti. Le ancore dei titoli le
+     * calcola il sito (servono per lingua e per articolo).
+     *
+     * @param array<string, mixed> $b
+     * @return array<string, mixed>|null
+     */
+    private static function bloccoPerSito(array $b): ?array
+    {
+        switch ($b['tipo']) {
+            case 'paragrafo':
+                return ['type' => 'p', 'html' => self::text(Magazine::inline($b['it']), Magazine::inline($b['en']))];
+            case 'h2':
+            case 'h3':
+                return ['type' => $b['tipo'], 'text' => self::text($b['it'], $b['en'])];
+            case 'citazione':
+                return [
+                    'type' => 'quote',
+                    'html' => self::text(Magazine::inline($b['it']), Magazine::inline($b['en'])),
+                    'cite' => (string) ($b['firma'] ?? ''),
+                ];
+            case 'immagine':
+                $immagine = self::image(self::mediaById((int) $b['media']));
+
+                return $immagine === null ? null : [
+                    'type' => 'image',
+                    'image' => $immagine,
+                    'format' => $b['formato'],
+                    'caption' => self::text($b['didascalia_it'] ?? '', $b['didascalia_en'] ?? ''),
+                ];
+            case 'video':
+                $video = self::video((int) $b['video']);
+
+                return $video === null ? null : ['type' => 'video', 'video' => $video];
+            case 'domanda':
+                return [
+                    'type' => 'qa',
+                    'question' => self::text($b['domanda_it'], $b['domanda_en']),
+                    'answer' => self::text(Magazine::inline($b['risposta_it']), Magazine::inline($b['risposta_en'])),
+                ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Un video della libreria, con il poster risolto; null se manca il
+     * poster, il file (clip) o l'id del provider (YouTube/Vimeo).
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function video(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+        $row = Db::one('SELECT * FROM videos WHERE id = ?', [$id]);
+        if ($row === null) {
+            return null;
+        }
+        $poster = self::image(self::mediaById((int) ($row['poster_media_id'] ?? 0)));
+        $tipo = (string) $row['tipo'];
+        if ($poster === null
+            || ($tipo === 'clip' && empty($row['file_mp4']))
+            || ($tipo !== 'clip' && empty($row['provider_id']))) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'kind' => $tipo,
+            'mp4' => $tipo === 'clip' ? (string) $row['file_mp4'] : null,
+            'webm' => $tipo === 'clip' && !empty($row['file_webm']) ? (string) $row['file_webm'] : null,
+            'providerId' => $tipo !== 'clip' ? (string) $row['provider_id'] : null,
+            'poster' => $poster,
+            'width' => (int) $poster['width'],
+            'height' => (int) $poster['height'],
+            'duration' => $row['durata_sec'] !== null ? (int) $row['durata_sec'] : null,
+            'title' => self::text($row['titolo_it'], $row['titolo_en']),
+            'description' => self::text($row['descrizione_it'], $row['descrizione_en']),
+            'uploadDate' => self::date(substr((string) $row['created_at'], 0, 10)),
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function postCategories(): array
+    {
         return array_map(static fn (array $row): array => [
             'id' => (int) $row['id'],
+            'name' => self::text($row['nome_it'], $row['nome_en']),
             'slug' => self::text($row['slug_it'], $row['slug_en']),
-            'title' => self::text($row['title_it'], $row['title_en']),
-            'excerpt' => self::text($row['excerpt_it'], $row['excerpt_en']),
-            'category' => self::text($row['category_it'], $row['category_en']),
-            'date' => self::date($row['post_date']) ?? '',
-            'readingTime' => (int) $row['reading_time'],
-            'cover' => self::image(self::mediaById((int) ($row['cover_media_id'] ?? 0))),
-            'body' => self::text($row['body_it'], $row['body_en']),
-            'metaTitle' => self::text($row['meta_title_it'], $row['meta_title_en']),
-            'metaDescription' => self::text($row['meta_description_it'], $row['meta_description_en']),
-            'active' => (bool) $row['active'],
-        ], $rows);
+            'order' => (int) $row['sort_order'],
+        ], Db::all('SELECT * FROM post_categories ORDER BY sort_order, id'));
+    }
+
+    /** Testo con un punto per riga → elenco di stringhe non vuote. */
+    private static function righe(?string $testo): array
+    {
+        return array_values(array_filter(array_map(
+            'trim',
+            preg_split('/\r\n|\r|\n/', (string) $testo) ?: [],
+        ), static fn (string $r): bool => $r !== ''));
     }
 
     // -----------------------------------------------------------------

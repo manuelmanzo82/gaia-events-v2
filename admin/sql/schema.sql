@@ -243,18 +243,29 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `title_en`            VARCHAR(255) DEFAULT NULL,
   `excerpt_it`          TEXT DEFAULT NULL,
   `excerpt_en`          TEXT DEFAULT NULL,
+  -- «In breve»: un punto per riga.
+  `sommario_it`         TEXT DEFAULT NULL,
+  `sommario_en`         TEXT DEFAULT NULL,
   `category_it`         VARCHAR(120) DEFAULT NULL,
   `category_en`         VARCHAR(120) DEFAULT NULL,
+  `category_id`         INT UNSIGNED DEFAULT NULL,
   `post_date`           DATE NOT NULL,
+  -- «Aggiornato il …» e dateModified.
+  `modified_date`       DATE DEFAULT NULL,
   `reading_time`        TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `cover_media_id`      INT UNSIGNED DEFAULT NULL,
+  `cover_video_id`      INT UNSIGNED DEFAULT NULL,
+  -- HTML generato dai blocchi con i soli tag consentiti (Magazine::html).
   `body_it`             MEDIUMTEXT DEFAULT NULL,
   `body_en`             MEDIUMTEXT DEFAULT NULL,
+  -- Blocchi dell'editor (JSON): la fonte del contenuto.
+  `blocchi`             MEDIUMTEXT DEFAULT NULL,
   `meta_title_it`       VARCHAR(255) DEFAULT NULL,
   `meta_title_en`       VARCHAR(255) DEFAULT NULL,
   `meta_description_it` VARCHAR(400) DEFAULT NULL,
   `meta_description_en` VARCHAR(400) DEFAULT NULL,
   `active`              TINYINT(1) NOT NULL DEFAULT 1,
+  `featured`            TINYINT(1) NOT NULL DEFAULT 0,
   `created_at`          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -697,4 +708,43 @@ CREATE TABLE IF NOT EXISTS `destination_regioni` (
   KEY `fk_destination_regioni_luogo` (`luogo_id`),
   CONSTRAINT `fk_destination_regioni_media` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_destination_regioni_luogo` FOREIGN KEY (`luogo_id`) REFERENCES `luoghi` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Magazine: categorie e libreria video (23/10/2026)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `post_categories` (
+  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nome_it`    VARCHAR(120) DEFAULT NULL,
+  `nome_en`    VARCHAR(120) DEFAULT NULL,
+  `slug_it`    VARCHAR(120) DEFAULT NULL,
+  `slug_en`    VARCHAR(120) DEFAULT NULL,
+  `sort_order` SMALLINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_post_categories_slug_it` (`slug_it`),
+  UNIQUE KEY `uq_post_categories_slug_en` (`slug_en`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `videos` (
+  `id`              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tipo`            ENUM('clip','youtube','vimeo') NOT NULL DEFAULT 'clip',
+  `titolo_it`       VARCHAR(255) DEFAULT NULL,
+  `titolo_en`       VARCHAR(255) DEFAULT NULL,
+  `descrizione_it`  VARCHAR(500) DEFAULT NULL,
+  `descrizione_en`  VARCHAR(500) DEFAULT NULL,
+  -- Clip: file in uploads/video/ (mp4 H.264 obbligatorio, webm facoltativo).
+  `file_mp4`        VARCHAR(400) DEFAULT NULL,
+  `file_webm`       VARCHAR(400) DEFAULT NULL,
+  -- YouTube/Vimeo: link incollato e id estratto dal back office.
+  `url`             VARCHAR(500) DEFAULT NULL,
+  `provider_id`     VARCHAR(64) DEFAULT NULL,
+  -- Poster dalla libreria media: obbligatorio (niente miniature esterne).
+  -- Larghezza e altezza del video sono quelle del poster.
+  `poster_media_id` INT UNSIGNED DEFAULT NULL,
+  `durata_sec`      INT UNSIGNED DEFAULT NULL,
+  `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_videos_poster` (`poster_media_id`),
+  CONSTRAINT `fk_videos_poster` FOREIGN KEY (`poster_media_id`) REFERENCES `media` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
