@@ -24,6 +24,8 @@ import { videoDi } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import type { Post } from '../../lib/types';
 import ArticoloApertura from '../magazine/ArticoloApertura.astro';
+import Corpo from '../magazine/Corpo.astro';
+import InBreve from '../magazine/InBreve.astro';
 
 interface Props {
   lang: Lang;
@@ -73,8 +75,28 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
 
   <article class="mg-articolo">
     <ArticoloApertura lang={lang} post={post} ritratto={ritratto} />
+
+    <div class="mg-articolo-corpo">
+      <div class="mg-lettura">
+        <InBreve lang={lang} punti={post.summary?.[lang] ?? []} />
+        <Corpo lang={lang} post={post} />
+      </div>
+    </div>
   </article>
 </BaseLayout>
+
+<style>
+  .mg-articolo-corpo {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 75rem;
+    margin: clamp(2.5rem, 7vh, 4.5rem) auto var(--spacing-section-sm);
+  }
+
+  .mg-lettura > :global(.mg-breve) {
+    width: min(42rem, 100%);
+    margin-inline: auto;
+  }
+</style>
 
 <script>
   document.addEventListener(

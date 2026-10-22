@@ -1,0 +1,309 @@
+---
+/**
+ * Articolo — 3. Il corpo, dai blocchi del back office, con la tipografia
+ * da lettura: colonna di circa 65 caratteri, capolettera sul primo
+ * paragrafo, citazioni in evidenza in Cormorant grande, immagini inline
+ * (orizzontale, verticale, quadrata) o a tutta larghezza con didascalia,
+ * video, domande e risposte, titoli H2/H3 con l'ancora (il simbolo «#»
+ * compare al passaggio e porta al titolo).
+ *
+ * I testi arrivano già convertiti dal server (Magazine::inline: solo
+ * strong, em, a, br). Gli articoli vecchi senza blocchi usano body, già
+ * filtrato lato server con la lista dei tag consentiti.
+ */
+import type { Lang } from '../../config/site';
+import { text } from '../../lib/content';
+import { picture } from '../../lib/images';
+import { ancora } from '../../lib/magazine';
+import type { Post } from '../../lib/types';
+import Picture from '../Picture.astro';
+import Video from './Video.astro';
+
+interface Props {
+  lang: Lang;
+  post: Post;
+}
+
+const { lang, post } = Astro.props;
+const blocks = post.blocks ?? [];
+const usate = new Set<string>();
+let primoParagrafo = true;
+
+const SIZES: Record<string, string> = {
+  orizzontale: '(min-width: 48rem) 42rem, 92vw',
+  verticale: '(min-width: 48rem) 28rem, 92vw',
+  quadrata: '(min-width: 48rem) 32rem, 92vw',
+  larga: '(min-width: 80rem) 1200px, 100vw',
+};
+
+const voci = blocks.map((b) => {
+  if (b.type === 'h2' || b.type === 'h3') {
+    const testo = text(b.text, lang);
+    return { ...b, testo, id: ancora(testo, usate) };
+  }
+  if (b.type === 'p') {
+    const capolettera = primoParagrafo;
+    primoParagrafo = false;
+    return { ...b, capolettera };
+  }
+  if (b.type === 'image') return { ...b, foto: picture(b.image, lang, SIZES[b.format] ?? SIZES.orizzontale) };
+  return b;
+});
+---
+
+<div class="mg-corpo">
+  {
+    blocks.length === 0 && <div class="mg-corpo-html" set:html={text(post.body, lang)} />
+  }
+  {
+    voci.map((b) => {
+      switch (b.type) {
+        case 'p':
+          return <p class:list={{ 'mg-capolettera': 'capolettera' in b && b.capolettera }} set:html={text(b.html, lang)} />;
+        case 'h2':
+          return (
+            <h2 id={'id' in b ? b.id : undefined} class="font-display mg-corpo-h2" data-capitolo={'id' in b ? b.id : undefined}>
+              {'testo' in b ? b.testo : ''}
+              <a class="mg-ancora" href={`#${'id' in b ? b.id : ''}`} aria-hidden="true" tabindex="-1">#</a>
+            </h2>
+          );
+        case 'h3':
+          return (
+            <h3 id={'id' in b ? b.id : undefined} class="font-display mg-corpo-h3">
+              {'testo' in b ? b.testo : ''}
+              <a class="mg-ancora" href={`#${'id' in b ? b.id : ''}`} aria-hidden="true" tabindex="-1">#</a>
+            </h3>
+          );
+        case 'quote':
+          return (
+            <figure class="mg-citazione">
+              <blockquote class="font-display">
+                <p set:html={text(b.html, lang)} />
+              </blockquote>
+              {b.cite && <figcaption>{b.cite}</figcaption>}
+            </figure>
+          );
+        case 'image':
+          return (
+            'foto' in b &&
+            b.foto && (
+              <figure class={`mg-figura mg-figura--${b.format}`}>
+                <span class="mg-figura-cornice" data-apri-foto>
+                  <Picture data={b.foto} cap={b.format !== 'larga'} class="mg-figura-img" />
+                </span>
+                {text(b.caption, lang) && <figcaption>{text(b.caption, lang)}</figcaption>}
+              </figure>
+            )
+          );
+        case 'video':
+          return (
+            <div class="mg-corpo-video">
+              <Video lang={lang} video={b.video} />
+            </div>
+          );
+        case 'qa':
+          return (
+            <section class="mg-qa">
+              <h3 class="font-display mg-qa-domanda">{text(b.question, lang)}</h3>
+              <p set:html={text(b.answer, lang)} />
+            </section>
+          );
+      }
+      return null;
+    })
+  }
+</div>
+
+<style>
+  /* Colonna da lettura: ~65 caratteri. Le figure larghe escono. */
+  .mg-corpo {
+    --colonna: min(42rem, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-inchiostro);
+  }
+
+  .mg-corpo > :global(*) {
+    width: var(--colonna);
+    margin-inline: auto;
+  }
+
+  /* Solo margini verticali: quelli orizzontali centrano la colonna. */
+  .mg-corpo :global(p) {
+    margin-block: 0 1.4em;
+  }
+
+  .mg-corpo > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .mg-corpo :global(a) {
+    color: var(--color-bordeaux);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .mg-corpo :global(strong) {
+    font-weight: 600;
+  }
+
+  /* Capolettera sul primo paragrafo. */
+  .mg-capolettera::first-letter {
+    float: left;
+    margin: 0.1em 0.1em 0 -0.02em;
+    font-family: var(--font-display);
+    font-size: 4.6em;
+    line-height: 0.8;
+    font-weight: 400;
+    color: var(--color-bordeaux);
+  }
+
+  .mg-corpo-h2,
+  .mg-corpo-h3,
+  .mg-corpo-html :global(h2),
+  .mg-corpo-html :global(h3) {
+    position: relative;
+    font-weight: 400;
+    scroll-margin-top: calc(var(--altezza-header, 96px) + 1.5rem);
+    text-wrap: balance;
+  }
+
+  .mg-corpo-h2,
+  .mg-corpo-html :global(h2) {
+    margin-block: 2.2em 0.7em;
+    font-size: clamp(1.875rem, 1.5rem + 1.2vw, 2.5rem);
+    line-height: 1.12;
+  }
+
+  .mg-corpo-h3,
+  .mg-corpo-html :global(h3) {
+    margin-block: 1.8em 0.5em;
+    font-size: clamp(1.4rem, 1.2rem + 0.6vw, 1.75rem);
+    line-height: 1.2;
+  }
+
+  .mg-ancora {
+    margin-left: 0.4em;
+    color: var(--color-oro-testo) !important;
+    text-decoration: none !important;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-gaia);
+  }
+
+  .mg-corpo-h2:hover .mg-ancora,
+  .mg-corpo-h3:hover .mg-ancora {
+    opacity: 1;
+  }
+
+  /* Citazione in evidenza. */
+  .mg-citazione {
+    margin-block: 2.4em;
+    padding: 0.4em 0 0.4em 1.5rem;
+    border-left: 2px solid var(--color-oro);
+  }
+
+  .mg-citazione blockquote {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+    line-height: 1.25;
+    font-style: italic;
+    color: var(--color-inchiostro);
+  }
+
+  .mg-citazione blockquote :global(p) {
+    margin: 0;
+  }
+
+  .mg-citazione figcaption {
+    margin-top: 0.9rem;
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+  }
+
+  /* Immagini. */
+  .mg-figura {
+    margin-block: 2.2em;
+  }
+
+  .mg-figura-cornice {
+    display: block;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .mg-figura :global(picture),
+  .mg-figura :global(.mg-figura-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mg-figura--orizzontale .mg-figura-cornice {
+    aspect-ratio: 3 / 2;
+  }
+
+  .mg-figura--verticale {
+    width: min(28rem, 100%) !important;
+  }
+
+  .mg-figura--verticale .mg-figura-cornice {
+    aspect-ratio: 4 / 5;
+  }
+
+  .mg-figura--quadrata {
+    width: min(32rem, 100%) !important;
+  }
+
+  .mg-figura--quadrata .mg-figura-cornice {
+    aspect-ratio: 1;
+  }
+
+  .mg-figura--larga {
+    width: min(75rem, 100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) !important;
+  }
+
+  .mg-figura--larga .mg-figura-cornice {
+    aspect-ratio: 21 / 9;
+  }
+
+  .mg-figura figcaption {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-grigio-caldo);
+    text-align: center;
+  }
+
+  .mg-corpo-video {
+    margin-block: 2.2em;
+  }
+
+  /* Domande e risposte. */
+  .mg-qa {
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-oro) 40%, transparent);
+  }
+
+  .mg-qa + .mg-qa {
+    margin-top: 0.5rem;
+  }
+
+  .mg-qa-domanda {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.4rem, 1.2rem + 0.6vw, 1.75rem);
+    line-height: 1.2;
+    font-weight: 400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-ancora {
+      transition: none;
+    }
+  }
+</style>

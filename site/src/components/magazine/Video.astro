@@ -1,0 +1,204 @@
+---
+/**
+ * Magazine: un video della libreria, in due modi.
+ *
+ *  a) clip caricata: <video> muto, in loop, playsinline, preload="none",
+ *     poster sempre visibile; parte solo quando è a schermo e si ferma
+ *     quando esce (IntersectionObserver). Con reduced-motion non parte da
+ *     solo: restano il poster e i controlli.
+ *  b) YouTube / Vimeo: «facciata». All'inizio solo il poster (dalla
+ *     libreria media, mai miniature esterne) e il bottone play; l'iframe
+ *     (youtube-nocookie.com, player.vimeo.com con dnt=1) si crea solo al
+ *     clic. Nessuna richiesta a terzi prima. CSP: frame-src limitato a
+ *     quei due domini (.htaccess).
+ *
+ * Larghezza e altezza dal poster: niente salti di layout.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { text } from '../../lib/content';
+import { picture, uploadUrl } from '../../lib/images';
+import type { Video } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  video: Video;
+  larga?: boolean;
+  eager?: boolean;
+}
+
+const { lang, video, larga = false, eager = false } = Astro.props;
+const t = useTranslations(lang);
+const titolo = text(video.title, lang);
+const sizes = larga ? '(min-width: 80rem) 1200px, 100vw' : '(min-width: 48rem) 42rem, 92vw';
+const poster = picture(video.poster, lang, sizes);
+const posterSrc = poster?.sources.find((s) => s.type === 'image/webp')?.srcset.split(',').at(-1)?.trim().split(' ')[0] ?? poster?.src;
+const src =
+  video.kind === 'youtube'
+    ? `https://www.youtube-nocookie.com/embed/${video.providerId}?autoplay=1&rel=0&modestbranding=1`
+    : video.kind === 'vimeo'
+      ? `https://player.vimeo.com/video/${video.providerId}?autoplay=1&dnt=1&title=0&byline=0&portrait=0`
+      : null;
+---
+
+<figure
+  class:list={['mg-video', { 'mg-video--larga': larga }]}
+  style={`aspect-ratio: ${video.width} / ${video.height}`}
+  data-mg-video={video.kind}
+>
+  {
+    video.kind === 'clip' && video.mp4 ? (
+      <video
+        class="mg-video-clip"
+        muted
+        loop
+        playsinline
+        preload="none"
+        poster={posterSrc}
+        width={video.width}
+        height={video.height}
+        aria-label={titolo}
+        data-clip
+      >
+        {video.webm && <source src={uploadUrl(video.webm)} type="video/webm" />}
+        <source src={uploadUrl(video.mp4)} type="video/mp4" />
+      </video>
+    ) : (
+      <button type="button" class="mg-video-facciata" data-src={src} data-titolo={titolo} aria-label={`${t('magazine.riproduci')}: ${titolo}`}>
+        <Picture data={poster} cap={false} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} class="mg-video-poster" />
+        <span class="mg-video-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" /></svg>
+        </span>
+      </button>
+    )
+  }
+  {titolo && <figcaption class="mg-video-titolo">{titolo}</figcaption>}
+</figure>
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  // Facciata YouTube/Vimeo: l'iframe nasce solo al clic.
+  for (const bottone of document.querySelectorAll<HTMLButtonElement>('.mg-video-facciata')) {
+    bottone.addEventListener(
+      'click',
+      () => {
+        const src = bottone.dataset.src;
+        if (!src) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = bottone.dataset.titolo ?? '';
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+        iframe.allowFullscreen = true;
+        iframe.className = 'mg-video-iframe';
+        bottone.replaceWith(iframe);
+        iframe.focus();
+      },
+      { once: true },
+    );
+  }
+
+  // Clip: autoplay solo a schermo, mai con reduced-motion.
+  const clip = [...document.querySelectorAll<HTMLVideoElement>('[data-clip]')];
+  if (clip.length) {
+    if (riduciMotion() || !('IntersectionObserver' in window)) {
+      for (const v of clip) v.controls = true;
+    } else {
+      const io = new IntersectionObserver(
+        (righe) => {
+          for (const r of righe) {
+            const v = r.target as HTMLVideoElement;
+            if (r.isIntersecting) void v.play().catch(() => (v.controls = true));
+            else v.pause();
+          }
+        },
+        { threshold: 0.35 },
+      );
+      for (const v of clip) io.observe(v);
+    }
+  }
+</script>
+
+<style>
+  .mg-video {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--color-notte);
+  }
+
+  .mg-video-clip,
+  .mg-video :global(.mg-video-iframe),
+  .mg-video-facciata {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .mg-video-clip {
+    object-fit: cover;
+  }
+
+  .mg-video-facciata {
+    position: relative;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .mg-video-facciata :global(picture),
+  .mg-video-facciata :global(.mg-video-poster) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .mg-video-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    padding-left: 0.2rem;
+    border-radius: 50%;
+    background: rgb(27 22 17 / 0.62);
+    color: var(--color-avorio-su-notte);
+    transform: translate(-50%, -50%);
+    transition:
+      background-color 0.3s var(--ease-gaia),
+      transform 0.3s var(--ease-gaia);
+  }
+
+  .mg-video-facciata:hover .mg-video-play,
+  .mg-video-facciata:focus-visible .mg-video-play {
+    background: var(--color-bordeaux);
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  .mg-video-facciata:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 4px;
+  }
+
+  .mg-video-titolo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-video-play {
+      transition: none;
+    }
+  }
+</style>
