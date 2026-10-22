@@ -97,6 +97,7 @@ export interface Settings extends SeoFields {
   };
   /** Pagina Destination wedding (impostazioni del gruppo «destination»). */
   destination?: {
+    orologi?: { citta?: Localized; riga?: Localized; davoi?: Localized };
     faq?: { title?: Localized };
     storie?: { title?: Localized };
     cta?: { video?: Localized };

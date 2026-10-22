@@ -40,6 +40,7 @@ import { breadcrumbs, faqPage, service as serviceSchema } from '../../lib/jsonld
 import { buildMeta } from '../../lib/seo';
 import DaLontano from '../destination/DaLontano.astro';
 import Dove from '../destination/Dove.astro';
+import Orologi from '../destination/Orologi.astro';
 import Ospiti from '../destination/Ospiti.astro';
 import Realizzati from '../destination/Realizzati.astro';
 import PercheConMe from '../destination/PercheConMe.astro';
@@ -143,7 +144,14 @@ const jsonLd = [
     )
   }
 
-  <Apertura eyebrow={t('nav.destinationWedding')} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={[]} />
+  <Apertura eyebrow={t('nav.destinationWedding')} titolo={titoloApertura} frase={fraseApertura} foto={fotoApertura} indice={[]}>
+    <Orologi
+      lang={lang}
+      citta={text(getSettings().destination?.orologi?.citta, lang)}
+      riga={text(getSettings().destination?.orologi?.riga, lang)}
+      davoi={text(getSettings().destination?.orologi?.davoi, lang)}
+    />
+  </Apertura>
 
   <PercheConMe titolo={text(perche?.title, lang)} colonne={colonne} />
 

@@ -1,0 +1,310 @@
+---
+/**
+ * Destination — orologi in fondo alla foto d'apertura, stile tabellone
+ * partenze: ROMA · LONDON · NEW YORK · … con l'ora locale viva. Sopra una
+ * riga positiva («Ovunque siate, lavoro sul vostro fuso orario.»).
+ *
+ *  - Città e ordine dalle impostazioni (destination.orologi.citta: una per
+ *    riga, NOME|fuso IANA); la prima (Roma) è in oro.
+ *  - Al cambio di minuto le cifre che cambiano girano (split-flap); con
+ *    reduced-motion cambiano e basta.
+ *  - Se il fuso del visitatore non coincide con nessuna città, si aggiunge
+ *    «Da voi» con la sua ora.
+ *  - Mobile: la fascia scorre lenta in orizzontale all'infinito (una copia
+ *    nascosta ai lettori di schermo); in pausa con reduced-motion e al
+ *    tocco (un altro tocco la riprende).
+ *  - Cifre a larghezza fissa e spazio riservato da subito: niente salti.
+ *    Lo script parte dopo il «load» (non tocca l'LCP); senza JS la fascia
+ *    resta invisibile, così non mostra mai un'ora sbagliata.
+ */
+import type { Lang } from '../../config/site';
+
+interface Props {
+  lang: Lang;
+  citta: string;
+  riga: string;
+  davoi: string;
+}
+
+const { lang, citta, riga, davoi } = Astro.props;
+const elenco = citta
+  .split(/\r?\n/)
+  .map((r) => r.split('|').map((x) => x.trim()))
+  .filter(([nome, fuso]) => nome && fuso)
+  .map(([nome, fuso], i) => ({ nome, fuso, casa: i === 0 }));
+const etichetta = lang === 'en' ? 'Local time around the world' : 'Ora locale nel mondo';
+---
+
+{
+  elenco.length > 0 && (
+    <div class="dw-orologi" data-orologi data-davoi={davoi}>
+      {riga && <p class="dw-orologi-riga">{riga}</p>}
+      <div class="dw-tabellone" role="group" aria-label={etichetta} data-tabellone>
+        <ul class="dw-citta" role="list" data-originale>
+          {elenco.map((c) => (
+            <li class:list={['dw-citta-voce', { 'dw-citta-voce--casa': c.casa }]} data-fuso={c.fuso}>
+              <span class="dw-citta-nome">{c.nome}</span>
+              <span class="dw-ora" data-ora>
+                <span class="dw-cifra">0</span><span class="dw-cifra">0</span><span class="dw-due">:</span><span class="dw-cifra">0</span><span class="dw-cifra">0</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const avvia = (): void => {
+    const box = document.querySelector<HTMLElement>('[data-orologi]');
+    const tabellone = box?.querySelector<HTMLElement>('[data-tabellone]');
+    const originale = box?.querySelector<HTMLUListElement>('[data-originale]');
+    if (!box || !tabellone || !originale) return;
+    const fermo = riduciMotion();
+
+    const formato = (fuso: string): string => {
+      try {
+        return new Intl.DateTimeFormat('en-GB', { timeZone: fuso, hour: '2-digit', minute: '2-digit', hour12: false })
+          .format(new Date())
+          .replace(/\D/g, '');
+      } catch {
+        return '';
+      }
+    };
+
+    // «Da voi»: solo se l'ora del visitatore non è già tra le città.
+    const mio = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const voci = [...originale.querySelectorAll<HTMLElement>('[data-fuso]')];
+    const ore = voci.map((v) => formato(v.dataset.fuso ?? ''));
+    if (mio && !ore.includes(formato(mio))) {
+      const voce = voci[voci.length - 1].cloneNode(true) as HTMLElement;
+      voce.classList.remove('dw-citta-voce--casa');
+      voce.classList.add('dw-citta-voce--voi');
+      voce.dataset.fuso = mio;
+      const nome = voce.querySelector('.dw-citta-nome');
+      if (nome) nome.textContent = box.dataset.davoi ?? '';
+      originale.append(voce);
+    }
+
+    // Scorrimento su mobile: una copia identica, nascosta ai lettori.
+    const copia = originale.cloneNode(true) as HTMLUListElement;
+    copia.setAttribute('aria-hidden', 'true');
+    copia.removeAttribute('data-originale');
+    copia.classList.add('dw-citta--copia');
+    tabellone.append(copia);
+
+    const aggiorna = (anima: boolean): void => {
+      for (const voce of box.querySelectorAll<HTMLElement>('[data-fuso]')) {
+        const ora = formato(voce.dataset.fuso ?? '');
+        const cifre = voce.querySelectorAll<HTMLElement>('.dw-cifra');
+        [...ora].forEach((n, i) => {
+          const el = cifre[i];
+          if (!el || el.textContent === n) return;
+          el.textContent = n;
+          if (anima && !fermo) {
+            el.classList.remove('is-gira');
+            void el.offsetWidth;
+            el.classList.add('is-gira');
+          }
+        });
+        const leggibile = voce.querySelector('.dw-ora');
+        if (leggibile) leggibile.setAttribute('aria-label', `${ora.slice(0, 2)}:${ora.slice(2)}`);
+      }
+    };
+
+    aggiorna(false);
+    box.classList.add('is-pronto');
+    // Al cambio di minuto, poi ogni minuto.
+    const ms = 60000 - (Date.now() % 60000) + 50;
+    window.setTimeout(() => {
+      aggiorna(true);
+      window.setInterval(() => aggiorna(true), 60000);
+    }, ms);
+
+    // Pausa al tocco (e di nuovo in moto al tocco successivo).
+    tabellone.addEventListener('click', () => box.classList.toggle('is-pausa'));
+  };
+
+  if (document.readyState === 'complete') avvia();
+  else window.addEventListener('load', avvia, { once: true });
+</script>
+
+<style>
+  /* contain: le liste che scorrono non allargano la colonna (né la pagina). */
+  .dw-orologi {
+    contain: inline-size;
+    min-width: 0;
+    margin-top: clamp(1.75rem, 5vh, 2.75rem);
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-avorio-su-notte) 25%, transparent);
+    visibility: hidden;
+  }
+
+  .dw-orologi.is-pronto {
+    visibility: visible;
+  }
+
+  .dw-orologi-riga {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-style: italic;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .dw-tabellone {
+    display: flex;
+    overflow: hidden;
+  }
+
+  .dw-citta {
+    display: flex;
+    flex: none;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dw-citta-voce {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    padding-right: 0.9rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--color-avorio-su-notte);
+    white-space: nowrap;
+  }
+
+  .dw-citta-voce::after {
+    content: '·';
+    margin-left: 0.75rem;
+    opacity: 0.5;
+  }
+
+  /* Desktop: niente punto dopo l'ultima città. */
+  @media (min-width: 64rem) {
+    .dw-citta-voce:last-child::after {
+      content: none;
+    }
+  }
+
+  .dw-citta-voce--casa,
+  .dw-citta-voce--casa .dw-cifra {
+    color: var(--color-oro);
+  }
+
+  .dw-citta-voce--voi .dw-citta-nome {
+    font-style: italic;
+  }
+
+  .dw-ora {
+    display: inline-flex;
+    gap: 1px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  /* Ogni cifra in una tessera da tabellone, larghezza fissa. */
+  .dw-cifra {
+    display: inline-block;
+    width: 1.05em;
+    padding: 0.18em 0;
+    border-radius: 2px;
+    background: rgb(27 22 17 / 0.55);
+    font-size: 0.9375rem;
+    line-height: 1;
+    text-align: center;
+    transform-origin: 50% 50%;
+  }
+
+  .dw-due {
+    padding: 0 0.1em;
+    font-size: 0.9375rem;
+  }
+
+  .dw-cifra.is-gira {
+    animation: dw-flap 0.55s var(--ease-gaia);
+  }
+
+  @keyframes dw-flap {
+    0% {
+      transform: perspective(200px) rotateX(-90deg);
+      opacity: 0.2;
+    }
+    60% {
+      transform: perspective(200px) rotateX(12deg);
+      opacity: 1;
+    }
+    100% {
+      transform: perspective(200px) rotateX(0);
+    }
+  }
+
+  /* Desktop: tutte in fila, ferme; la copia non serve. */
+  .dw-citta--copia {
+    display: none;
+  }
+
+  /* Mobile: scorrimento lento e infinito (originale + copia). */
+  @media (max-width: 63.98rem) {
+    .dw-citta--copia {
+      display: flex;
+    }
+
+    .dw-citta,
+    .dw-citta--copia {
+      animation: dw-scorri 38s linear infinite;
+    }
+
+    .is-pausa .dw-citta,
+    .is-pausa .dw-citta--copia {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes dw-scorri {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Desktop: la fila va a capo se non ci sta (es. con «Da voi»). */
+  @media (min-width: 64rem) {
+    .dw-tabellone {
+      display: block;
+    }
+
+    .dw-citta {
+      flex-wrap: wrap;
+      row-gap: 0.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dw-citta,
+    .dw-citta--copia {
+      animation: none !important;
+    }
+
+    .dw-cifra.is-gira {
+      animation: none;
+    }
+
+    /* Senza scorrimento, su mobile la fascia si scorre col dito. */
+    .dw-tabellone {
+      overflow-x: auto;
+    }
+
+    .dw-citta--copia {
+      display: none !important;
+    }
+  }
+</style>
