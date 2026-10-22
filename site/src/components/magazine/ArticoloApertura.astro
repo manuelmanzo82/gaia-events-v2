@@ -1,0 +1,180 @@
+---
+/**
+ * Articolo — 1. Apertura: categoria (link all'indice filtrato), titolo
+ * (H1), data, «Aggiornato il …», tempo di lettura, firma «Gaia» con il
+ * ritratto piccolo, poi la copertina larga (foto o video). La copertina
+ * non supera mai la sua risoluzione (cap di Picture); senza copertina
+ * nitida l'apertura resta tipografica.
+ */
+import type { Lang } from '../../config/site';
+import { formatDate, useTranslations } from '../../i18n';
+import { path } from '../../i18n/routes';
+import { text } from '../../lib/content';
+import { picture, type PictureData } from '../../lib/images';
+import { categoriaSlug } from '../../lib/magazine';
+import type { Post } from '../../lib/types';
+import Picture from '../Picture.astro';
+
+interface Props {
+  lang: Lang;
+  post: Post;
+  ritratto: PictureData | null;
+}
+
+const { lang, post, ritratto } = Astro.props;
+const t = useTranslations(lang);
+const categoria = text(post.category, lang);
+const slugCategoria = categoriaSlug(post, lang);
+const copertina = post.coverVideo ? null : picture(post.cover, lang, '(min-width: 80rem) 1200px, 100vw');
+---
+
+<header class="mg-art-apertura" data-theme="light">
+  <div class="mg-art-testa">
+    {
+      categoria && (
+        <a
+          class="mg-art-categoria"
+          href={slugCategoria ? `${path('blog', lang)}?categoria=${encodeURIComponent(slugCategoria)}` : path('blog', lang)}
+        >
+          {categoria}
+        </a>
+      )
+    }
+    <h1 class="font-display mg-art-titolo">{text(post.title, lang)}</h1>
+    <p class="mg-art-meta">
+      <span class="mg-art-firma">
+        {ritratto && (
+          <span class="mg-art-ritratto-box" aria-hidden="true">
+            <Picture data={ritratto} cap={false} class="mg-art-ritratto" />
+          </span>
+        )}
+        <span>{t('magazine.di')} <span class="font-display mg-art-nome">Gaia</span></span>
+      </span>
+      <span aria-hidden="true">·</span>
+      <time datetime={post.date}>{formatDate(post.date, lang)}</time>
+      {
+        post.modified && post.modified !== post.date && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>
+              {t('magazine.aggiornato')} <time datetime={post.modified}>{formatDate(post.modified, lang)}</time>
+            </span>
+          </>
+        )
+      }
+      <span aria-hidden="true">·</span>
+      <span>
+        {post.readingTime} {t('common.readingTime')}
+      </span>
+    </p>
+  </div>
+  <slot name="copertina-video" />
+  {
+    copertina && (
+      <figure class="mg-art-copertina">
+        <Picture data={copertina} loading="eager" fetchpriority="high" class="mg-art-copertina-img" />
+      </figure>
+    )
+  }
+</header>
+
+<style>
+  .mg-art-apertura {
+    padding-top: calc(var(--altezza-header, 146px) + clamp(1.5rem, 6vh, 3.5rem));
+  }
+
+  .mg-art-testa {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 56rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .mg-art-categoria {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro-testo);
+    text-decoration: none;
+  }
+
+  .mg-art-categoria:hover {
+    color: var(--color-bordeaux);
+  }
+
+  .mg-art-titolo {
+    margin: 0.5rem 0 0;
+    font-size: clamp(2.5rem, 1.6rem + 3.6vw, 5rem);
+    line-height: 1.04;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  .mg-art-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+    justify-content: center;
+    margin: 1.75rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-grigio-caldo);
+  }
+
+  .mg-art-firma {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  /* Ritratto piccolo: la foto è di Gaia tra i tavoli, si stringe sul
+     volto (in alto, poco a destra del centro). */
+  .mg-art-ritratto-box {
+    display: block;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+
+  .mg-art-ritratto-box :global(picture),
+  .mg-art-ritratto-box :global(.mg-art-ritratto) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .mg-art-ritratto-box :global(.mg-art-ritratto) {
+    object-position: 50% 0 !important;
+    transform: scale(2.6);
+    transform-origin: 73% 24%;
+  }
+
+  .mg-art-nome {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--color-bordeaux);
+  }
+
+  .mg-art-copertina {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 75rem;
+    margin: clamp(2rem, 6vh, 3.5rem) auto 0;
+    text-align: center;
+  }
+
+  .mg-art-copertina :global(.mg-art-copertina-img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+</style>

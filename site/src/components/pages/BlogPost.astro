@@ -1,15 +1,29 @@
 ---
+/**
+ * Magazine, articolo (/magazine/<slug>/ ↔ /en/magazine/<slug-en>/).
+ *
+ *  1. Apertura — categoria, H1, data e «Aggiornato il», firma, copertina
+ *  2. In breve — 3–4 punti (sommario_it/en)
+ *  3. Corpo — i blocchi: colonna da lettura, capolettera, citazioni,
+ *     immagini, video, domande e risposte, titoli con le ancore
+ *  4. Barra di lettura e, su desktop con almeno 3 H2, indice fisso
+ *  5. Box autrice, condividi, tre correlati, CtaFinale
+ *
+ * JSON-LD: BlogPosting (autrice Person), BreadcrumbList, FAQPage se ci
+ * sono domande e risposte, VideoObject per i video.
+ */
 import type { Lang } from '../../config/site';
-import { formatDate, useTranslations } from '../../i18n';
+import { useTranslations } from '../../i18n';
 import { path } from '../../i18n/routes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { availableLangs, text } from '../../lib/content';
-import { POST_FIELDS } from '../../lib/availability';
+import { POST_FIELDS, existsIn } from '../../lib/availability';
+import { availableLangs, getSettings, text } from '../../lib/content';
 import { picture } from '../../lib/images';
-import { article as articleSchema, breadcrumbs } from '../../lib/jsonld';
+import { blogPosting, breadcrumbs, faqDaBlocchi, videoObject } from '../../lib/jsonld';
+import { videoDi } from '../../lib/magazine';
 import { buildMeta } from '../../lib/seo';
 import type { Post } from '../../lib/types';
-import Picture from '../Picture.astro';
+import ArticoloApertura from '../magazine/ArticoloApertura.astro';
 
 interface Props {
   lang: Lang;
@@ -19,9 +33,11 @@ interface Props {
 
 const { lang, post, slug } = Astro.props;
 const t = useTranslations(lang);
+const settings = getSettings();
 
 const langs = availableLangs(post, POST_FIELDS);
 const title = text(post.title, lang);
+const blocks = post.blocks ?? [];
 
 const meta = buildMeta({
   lang,
@@ -30,7 +46,7 @@ const meta = buildMeta({
   title,
   description: text(post.excerpt, lang),
   seo: post,
-  image: post.cover,
+  image: post.cover ?? post.coverVideo?.poster ?? null,
   ogType: 'article',
   availableLangs: langs,
 });
@@ -41,30 +57,31 @@ const crumbs = [
   { name: title, href: path('blog', lang, slug) },
 ];
 
-const jsonLd = [breadcrumbs(crumbs), articleSchema(post, lang, slug)];
+const jsonLd = [
+  breadcrumbs(crumbs),
+  blogPosting(post, lang, slug),
+  faqDaBlocchi(blocks, lang),
+  ...videoDi(post).map((v) => videoObject(v, lang)),
+];
+
+const ritratto = picture(settings.magazine?.photos?.autrice ?? null, lang, '7rem');
+const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
 ---
 
-<BaseLayout
-  lang={lang}
-  routeKey="blog"
-  slug={slug}
-  meta={meta}
-  availableLangs={langs}
-  jsonLd={jsonLd}
-  crumbs={crumbs}
->
-  <article>
-    <h1>{title}</h1>
-    <p>
-      <time datetime={post.date}>{formatDate(post.date, lang)}</time>
-      {post.readingTime > 0 && <span> — {post.readingTime} {t('common.readingTime')}</span>}
-      {text(post.category, lang) && <span> — {text(post.category, lang)}</span>}
-    </p>
+<BaseLayout lang={lang} routeKey="blog" slug={slug} meta={meta} availableLangs={langs} jsonLd={jsonLd} largo>
+  {rss && <link slot="head" rel="alternate" type="application/rss+xml" title={`${t('nav.blog')} — Gaia Events`} href={rss} />}
 
-    <Picture data={picture(post.cover, lang, '100vw')} loading="eager" fetchpriority="high" />
-
-    <div set:html={text(post.body, lang)} />
-
-    <p><a href={path('blog', lang)}>{t('nav.blog')}</a></p>
+  <article class="mg-articolo">
+    <ArticoloApertura lang={lang} post={post} ritratto={ritratto} />
   </article>
 </BaseLayout>
+
+<script>
+  document.addEventListener(
+    'gaia:motion-pronta',
+    () => {
+      void import('../../scripts/magazine-effetti').then(({ initMagazineEffetti }) => initMagazineEffetti());
+    },
+    { once: true },
+  );
+</script>

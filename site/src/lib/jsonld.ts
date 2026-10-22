@@ -10,8 +10,10 @@ import type {
   Luogo,
   Partner,
   Post,
+  PostBlock,
   Service,
   Story,
+  Video,
 } from './types';
 
 /**
@@ -131,22 +133,73 @@ export function service(item: Service, lang: Lang, area: 'roma' | 'italia' = 'ro
   };
 }
 
-export function article(item: Post, lang: Lang, slug: string): Thing {
+/**
+ * Articolo del Magazine: BlogPosting con l'autrice (Person, url Chi sono),
+ * immagine, date di pubblicazione e di modifica («Aggiornato il …»).
+ */
+export function blogPosting(item: Post, lang: Lang, slug: string): Thing {
   const pageUrl = url('blog', lang, slug);
+  const immagine = item.cover ?? item.coverVideo?.poster ?? null;
   return {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: text(item.title, lang),
-    description: text(item.excerpt, lang),
+    description: text(item.excerpt, lang) || undefined,
     datePublished: item.date,
-    dateModified: item.date,
-    author: { '@type': 'Person', name: BUSINESS.legalName },
+    dateModified: item.modified || item.date,
+    author: { '@type': 'Person', name: BUSINESS.legalName, url: url('about', lang) },
     publisher: businessRef,
-    image: imageAbsoluteUrl(item.cover, SITE_URL) ?? undefined,
+    image: imageAbsoluteUrl(immagine, SITE_URL) ?? undefined,
     articleSection: text(item.category, lang) || undefined,
     mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
     url: pageUrl,
     inLanguage: HTML_LANG[lang],
+  };
+}
+
+/** Video del Magazine: clip (contentUrl) o YouTube/Vimeo (embedUrl). */
+export function videoObject(video: Video, lang: Lang): Thing {
+  const embed =
+    video.kind === 'youtube'
+      ? `https://www.youtube-nocookie.com/embed/${video.providerId}`
+      : video.kind === 'vimeo'
+        ? `https://player.vimeo.com/video/${video.providerId}`
+        : undefined;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: text(video.title, lang),
+    description: text(video.description, lang) || text(video.title, lang),
+    thumbnailUrl: imageAbsoluteUrl(video.poster, SITE_URL) ?? undefined,
+    uploadDate: video.uploadDate ?? undefined,
+    duration: video.duration ? `PT${video.duration}S` : undefined,
+    contentUrl: video.kind === 'clip' && video.mp4 ? SITE_URL + '/uploads/' + video.mp4 : undefined,
+    embedUrl: embed,
+    width: video.width,
+    height: video.height,
+    inLanguage: HTML_LANG[lang],
+  };
+}
+
+/** FAQPage dai blocchi «domanda e risposta» di un articolo (testo senza tag). */
+export function faqDaBlocchi(blocks: PostBlock[], lang: Lang): Thing | null {
+  const voci = blocks
+    .filter((b): b is Extract<PostBlock, { type: 'qa' }> => b.type === 'qa')
+    .map((b) => ({
+      question: text(b.question, lang),
+      answer: text(b.answer, lang).replace(/<[^>]+>/g, '').trim(),
+    }))
+    .filter((v) => v.question && v.answer);
+  if (voci.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: HTML_LANG[lang],
+    mainEntity: voci.map((v) => ({
+      '@type': 'Question',
+      name: v.question,
+      acceptedAnswer: { '@type': 'Answer', text: v.answer },
+    })),
   };
 }
 

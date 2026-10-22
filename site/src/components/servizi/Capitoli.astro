@@ -107,28 +107,11 @@ const capitoli = servizi.map((s, i) => ({
 }
 
 <script>
+  import { indiceFisso } from '../../scripts/indice-fisso';
+
   // Indice fisso: evidenzia il capitolo che occupa il centro dello schermo.
   const indice = document.querySelector<HTMLElement>('[data-indice]');
-  const capitoli = [...document.querySelectorAll<HTMLElement>('[data-capitolo]')];
-  if (indice && capitoli.length && 'IntersectionObserver' in window) {
-    const voci = new Map(
-      [...indice.querySelectorAll<HTMLAnchorElement>('[data-voce]')].map((a) => [a.dataset.voce ?? '', a]),
-    );
-    const io = new IntersectionObserver(
-      (righe) => {
-        for (const r of righe) {
-          if (!r.isIntersecting) continue;
-          const slug = (r.target as HTMLElement).dataset.capitolo ?? '';
-          voci.forEach((a, k) => {
-            if (k === slug) a.setAttribute('aria-current', 'true');
-            else a.removeAttribute('aria-current');
-          });
-        }
-      },
-      { rootMargin: '-45% 0px -50% 0px', threshold: 0 },
-    );
-    for (const c of capitoli) io.observe(c);
-  }
+  if (indice) indiceFisso(indice, [...document.querySelectorAll<HTMLElement>('[data-capitolo]')]);
 </script>
 
 <style>
