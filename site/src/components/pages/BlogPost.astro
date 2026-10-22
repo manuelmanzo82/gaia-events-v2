@@ -26,6 +26,8 @@ import { buildMeta } from '../../lib/seo';
 import type { Post } from '../../lib/types';
 import ArticoloApertura from '../magazine/ArticoloApertura.astro';
 import Autrice from '../magazine/Autrice.astro';
+import Correlati from '../magazine/Correlati.astro';
+import CtaFinale from '../home/CtaFinale.astro';
 import Video from '../magazine/Video.astro';
 import BarraLettura from '../magazine/BarraLettura.astro';
 import Corpo from '../magazine/Corpo.astro';
@@ -108,6 +110,10 @@ const rss = existsIn('blog', lang) ? `${path('blog', lang)}rss.xml` : null;
       </div>
     </div>
   </article>
+
+  <Correlati lang={lang} post={post} />
+
+  <CtaFinale lang={lang} settings={settings} foto={settings.magazine?.photos?.cta ?? null} lato="destra" />
 </BaseLayout>
 
 <style>

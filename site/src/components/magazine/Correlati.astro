@@ -1,0 +1,63 @@
+---
+/**
+ * Articolo — 8. Tre articoli correlati: stessa categoria, altrimenti i più
+ * recenti (lib/magazine.ts). Stesse card dell'indice.
+ */
+import type { Lang } from '../../config/site';
+import { useTranslations } from '../../i18n';
+import { correlati } from '../../lib/magazine';
+import type { Post } from '../../lib/types';
+import Card from './Card.astro';
+
+interface Props {
+  lang: Lang;
+  post: Post;
+}
+
+const { lang, post } = Astro.props;
+const t = useTranslations(lang);
+const altri = correlati(post, lang);
+---
+
+{
+  altri.length > 0 && (
+    <section class="mg-correlati" data-theme="light" aria-labelledby="titolo-correlati">
+      <h2 id="titolo-correlati" class="font-display mg-correlati-titolo">
+        {t('magazine.correlati')}
+      </h2>
+      <div class="mg-correlati-griglia">
+        {altri.map((p) => (
+          <Card lang={lang} post={p} taglia="piccola" livello="h3" />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .mg-correlati {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 90rem;
+    margin: 0 auto;
+    padding-block: var(--spacing-section-sm) var(--spacing-section);
+    border-top: 1px solid color-mix(in srgb, var(--color-inchiostro) 14%, transparent);
+  }
+
+  .mg-correlati-titolo {
+    margin: 0 0 clamp(2rem, 5vh, 3rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+  }
+
+  .mg-correlati-griglia {
+    display: grid;
+    gap: 2.5rem 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .mg-correlati-griglia {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
