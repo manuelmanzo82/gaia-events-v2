@@ -1,0 +1,293 @@
+---
+/**
+ * Destination — 4. Come funziona da lontano: il blocco «timeline» della
+ * pagina, un conto alla rovescia (12 mesi, 6, 3, 7 giorni, il giorno).
+ * Ogni voce: label = il numero, unit = l'unità («mesi prima»), titolo,
+ * testo. Fondo notte.
+ *
+ * Effetto nuovo, desktop (≥64rem, JS e motion attivi, classe is-conto):
+ * un numero enorme resta fermo a sinistra (sticky sotto il header) e
+ * cambia con lo scroll come un contachilometri (il rullo delle cifre e
+ * quello delle unità scorrono in verticale), mentre a destra scorrono le
+ * tappe. La tappa attiva la sceglie un IntersectionObserver.
+ * Mobile, senza JS o con reduced-motion: tappe impilate, ognuna col suo
+ * numero grande. Il numero di ogni tappa resta nel testo anche su desktop
+ * (nascosto solo alla vista), così screen reader e AI lo leggono.
+ */
+interface Props {
+  titolo: string;
+  tappe: Array<{ numero: string; unita: string; titolo: string; testo: string }>;
+}
+
+const { titolo, tappe } = Astro.props;
+---
+
+{
+  tappe.length > 0 && (
+    <section
+      class="dw-conto"
+      data-theme="dark"
+      aria-labelledby="titolo-conto"
+      data-conto
+      style={`--tappe: ${tappe.length}`}
+    >
+      <div class="dw-conto-griglia">
+        <div class="dw-conto-sx">
+          <h2 id="titolo-conto" class="font-display dw-conto-titolo" data-reveal="righe">
+            {titolo}
+          </h2>
+          <div class="dw-conto-quadrante" aria-hidden="true">
+            <span class="dw-conto-finestra font-display">
+              <span class="dw-conto-rullo" data-rullo>
+                {tappe.map((t) => (
+                  <span class="dw-conto-cifra">{t.numero}</span>
+                ))}
+              </span>
+            </span>
+            <span class="dw-conto-finestra-unita">
+              <span class="dw-conto-rullo" data-rullo>
+                {tappe.map((t) => (
+                  <span class="dw-conto-unita">{t.unita}</span>
+                ))}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <ol class="dw-tappe" role="list">
+          {tappe.map((t, i) => (
+            <li class="dw-tappa" data-tappa={i}>
+              <p class="dw-tappa-quando">
+                <span class="font-display dw-tappa-numero">{t.numero}</span>
+                {t.unita && <span class="dw-tappa-unita">{t.unita}</span>}
+              </p>
+              <h3 class="font-display dw-tappa-titolo">{t.titolo}</h3>
+              {t.testo && <p class="dw-tappa-testo">{t.testo}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import { riduciMotion } from '../../scripts/motion-leggero';
+
+  const sezione = document.querySelector<HTMLElement>('[data-conto]');
+  if (sezione && 'IntersectionObserver' in window) {
+    const tappe = [...sezione.querySelectorAll<HTMLElement>('[data-tappa]')];
+    const desktop = window.matchMedia('(min-width: 64rem)');
+    const accendi = (n: number): void => {
+      sezione.style.setProperty('--passo', String(n));
+      tappe.forEach((t, i) => t.toggleAttribute('data-attiva', i === n));
+    };
+    const modo = (): void => {
+      sezione.classList.toggle('is-conto', desktop.matches && !riduciMotion());
+    };
+    modo();
+    desktop.addEventListener('change', modo);
+    accendi(0);
+    const io = new IntersectionObserver(
+      (righe) => {
+        for (const r of righe) if (r.isIntersecting) accendi(Number((r.target as HTMLElement).dataset.tappa));
+      },
+      { rootMargin: '-40% 0px -55% 0px', threshold: 0 },
+    );
+    for (const t of tappe) io.observe(t);
+  }
+</script>
+
+<style>
+  .dw-conto {
+    --passo: 0;
+    padding-block: var(--spacing-section);
+    background: var(--color-notte);
+    color: var(--color-avorio-su-notte);
+  }
+
+  .dw-conto-griglia {
+    width: calc(100% - 2 * clamp(1.25rem, 4vw, 3.5rem));
+    max-width: 76rem;
+    margin: 0 auto;
+  }
+
+  .dw-conto-titolo {
+    margin: 0 0 clamp(2.5rem, 6vh, 4rem);
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: 400;
+    color: var(--color-avorio-su-notte);
+  }
+
+  /* Il quadrante esiste solo nella modalità a numero fisso. */
+  .dw-conto-quadrante {
+    display: none;
+  }
+
+  .dw-tappe {
+    display: grid;
+    gap: clamp(3rem, 8vh, 4.5rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dw-tappa {
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-oro) 35%, transparent);
+  }
+
+  .dw-tappa-quando {
+    display: flex;
+    gap: 0.9rem;
+    align-items: baseline;
+    margin: 0 0 0.75rem;
+  }
+
+  .dw-tappa-numero {
+    font-size: clamp(4.5rem, 3rem + 6vw, 6.5rem);
+    line-height: 0.9;
+    font-weight: 300;
+    color: var(--color-oro);
+    font-variant-numeric: lining-nums;
+  }
+
+  .dw-tappa-unita {
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-oro);
+  }
+
+  .dw-tappa-titolo {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+    line-height: 1.1;
+    font-weight: 400;
+    color: var(--color-avorio-su-notte);
+  }
+
+  .dw-tappa-testo {
+    max-width: 32rem;
+    margin: 0.75rem 0 0;
+    color: var(--color-velato-su-notte);
+  }
+
+  /* — Desktop con JS e motion: numero fisso a sinistra — */
+  @media (min-width: 64rem) {
+    .dw-conto.is-conto .dw-conto-griglia {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(3rem, 7vw, 8rem);
+    }
+
+    .dw-conto.is-conto .dw-conto-sx {
+      align-self: stretch;
+    }
+
+    .dw-conto.is-conto .dw-conto-quadrante {
+      position: sticky;
+      top: calc(var(--altezza-header, 146px) + 2rem);
+      display: grid;
+      gap: 1rem;
+    }
+
+    /* Finestra alta una riga: dentro, il rullo con tutte le cifre. */
+    .dw-conto-finestra {
+      display: block;
+      height: 1em;
+      overflow: hidden;
+      font-size: clamp(11rem, 6rem + 12vw, 19rem);
+      line-height: 1;
+      font-weight: 300;
+      color: var(--color-oro);
+      font-variant-numeric: lining-nums;
+    }
+
+    .dw-conto-finestra-unita {
+      display: block;
+      height: 1.6em;
+      overflow: hidden;
+      font-size: var(--text-eyebrow);
+      line-height: 1.6;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--color-oro);
+    }
+
+    .dw-conto-rullo {
+      display: flex;
+      flex-direction: column;
+      transform: translateY(calc(var(--passo) * -100% / var(--tappe, 5)));
+      transition: transform 0.9s var(--ease-gaia);
+    }
+
+    .dw-conto-cifra,
+    .dw-conto-unita {
+      display: block;
+      height: 1em;
+      line-height: 1;
+    }
+
+    .dw-conto-unita {
+      height: 1.6em;
+      line-height: 1.6;
+    }
+
+    /* Le tappe scorrono a destra: ognuna occupa buona parte dello schermo. */
+    .dw-conto.is-conto .dw-tappe {
+      gap: 0;
+      padding-top: clamp(4rem, 18vh, 10rem);
+    }
+
+    .dw-conto.is-conto .dw-tappa {
+      min-height: 60vh;
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .dw-conto.is-conto .dw-tappa:last-child {
+      min-height: 0;
+      padding-bottom: 6rem;
+    }
+
+    /* Il numero di ogni tappa resta per screen reader e AI. */
+    .dw-conto.is-conto .dw-tappa-quando {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .dw-conto.is-conto .dw-tappa-titolo {
+      position: relative;
+      padding-left: 1.75rem;
+    }
+
+    .dw-conto.is-conto .dw-tappa-titolo::before {
+      content: '';
+      position: absolute;
+      top: 0.55em;
+      left: 0;
+      width: 0.9rem;
+      height: 1px;
+      background: color-mix(in srgb, var(--color-oro) 45%, transparent);
+      transition:
+        width 0.5s var(--ease-gaia),
+        background-color 0.5s var(--ease-gaia);
+    }
+
+    .dw-conto.is-conto .dw-tappa[data-attiva] .dw-tappa-titolo::before {
+      width: 1.25rem;
+      background: var(--color-oro);
+    }
+
+    .dw-conto.is-conto .dw-tappa-testo {
+      padding-left: 1.75rem;
+    }
+  }
+</style>
